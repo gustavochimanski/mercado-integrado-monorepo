@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    // React 17+ com JSX moderno (sem precisar de "import React from 'react'")
+    "jsx": "react-jsx",
+
+    // Caminho base e aliases globais
+    "baseUrl": ".",
+    "paths": {
+      "@packs/ui": ["packages/ui/src"],
+      "@packs/auth": ["packages/cardapio/src"],
+    },
+
+    // Compatibilidade e boas práticas
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler", // ótimo para Next.js + ESM
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+    // Importações e interoperabilidade
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+
+    // Segurança e desempenho
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+
+    // Tipagens globais e plugins
+    "typeRoots": ["./node_modules/@types"],
+    "plugins": [
+      { "name": "next" }
+    ]
+  },
+  "exclude": ["node_modules", "dist", ".turbo"],
+  "include": ["packages", "apps"]
+}

@@ -18,7 +18,6 @@ import {
   CardContent,
 } from "@supervisor/components/ui/card";
 
-import { getCookie } from "cookies-next";
 import ComponentProdutos from "./components/produtos/ComponentProdutosCardapio";
 import CategoriaComponent from "./components/categorias/ComponentCategoria";
 import ComponentSecoes from "./components/secoes/ComponentSecoes";
@@ -27,14 +26,8 @@ export default function PageAdminCardapio() {
   // "produtos" | "promocoes" | "categorias" | "secoes" | null
   const [openSheet, setOpenSheet] = useState<"produtos" | "promocoes" | "categorias" | "secoes" | null>(null);
   
-  // 2) estado para o token
-  const [supervisorToken, setSupervisorToken] = useState<string>("");
 
-  useEffect(() => {
-    // aqui lemos o cookie que o TokenHandler gravou
-    const t = getCookie("access_token");
-    if (typeof t === "string") setSupervisorToken(t);
-  }, []);
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -83,7 +76,7 @@ export default function PageAdminCardapio() {
                 Preview do cardápio
               </div>
               <iframe
-                src={`https://mensura-monorepo-cardapio.vercel.app`}
+                 src={`https://mercado-integrado-monorepo-cardapio.vercel.app/?via=supervisor`}
                 className="w-full flex-1"
               />
             </div>
