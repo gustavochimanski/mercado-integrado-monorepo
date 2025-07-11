@@ -1,5 +1,6 @@
 // src/hooks/useMutateCategoria.ts
-import { api } from "@cardapio/app/api/api";
+import apiAdmin from "@cardapio/app/api/apiMensura";
+import { slugify } from "@cardapio/lib/slugfy";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface NovoBody {
@@ -13,16 +14,20 @@ export function useMutateCategoria(parentSlug: string | null) {
 
   function buildFormData({ descricao, slug, imagem }: NovoBody) {
     const fd = new FormData();
+    const finalSlug = slug ?? slugify(descricao); // 👈 aqui
+
     fd.append("descricao", descricao.trim());
-    if (slug) fd.append("slug", slug);
+    fd.append("slug", finalSlug); // sempre envia
     fd.append("slug_pai", parentSlug ?? "");
     if (imagem) fd.append("imagem", imagem);
+
     return fd;
   }
 
+
   const createSub = useMutation({
     mutationFn: (body: NovoBody) =>
-      api.post("/mensura/categorias/delivery", buildFormData(body)),
+      apiAdmin.post("/mensura/categorias/delivery", buildFormData(body)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
@@ -31,7 +36,7 @@ export function useMutateCategoria(parentSlug: string | null) {
 
   const remove = useMutation({
     mutationFn: (id: number) =>
-      api.delete(`/mensura/categorias/delivery/${id}`),
+      apiAdmin.delete(`/mensura/categorias/delivery/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });

@@ -1,37 +1,19 @@
-// CardAddCategoria.tsx
 "use client";
 
 import { CirclePlus } from "lucide-react";
 import { Card } from "../../ui/card";
 import { useUserContext } from "@packs/auth";
 import { useState } from "react";
-import { Input } from "../../ui/input";
-import { Button } from "../../ui/button";
+import { ModalAddCategoria } from "../modals/ModalAddCategoria";
 import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@packs/ui/src/dialog";
 
-const CardAddCategoria = ({ parentSlug = null }: { parentSlug?: string | null }) => {
+const CardAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) => {
   const { isAdmin } = useUserContext();
-  const { createSub } = useMutateCategoria(parentSlug ?? null);
-
   const [open, setOpen] = useState(false);
-  const [descricao, setDescricao] = useState("");
+
+  const { createSub } = useMutateCategoria(parentSlug);
 
   if (!isAdmin) return null;
-
-  function handleSubmit() {
-    if (!descricao.trim()) return;
-
-    createSub.mutate(
-      { descricao },
-      {
-        onSuccess: () => {
-          setDescricao("");
-          setOpen(false);
-        },
-      }
-    );
-  }
 
   return (
     <>
@@ -47,23 +29,12 @@ const CardAddCategoria = ({ parentSlug = null }: { parentSlug?: string | null })
         </span>
       </Card>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar Categoria</DialogTitle>
-          </DialogHeader>
+      <ModalAddCategoria
+        open={open}
+        onOpenChange={setOpen}
+        parentSlug={parentSlug}
+      />
 
-          <Input
-            placeholder="Descrição da nova categoria"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-          />
-
-          <Button onClick={handleSubmit} disabled={createSub.isPending}>
-            Criar
-          </Button>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

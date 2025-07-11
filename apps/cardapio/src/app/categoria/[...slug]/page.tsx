@@ -77,8 +77,10 @@ export default function CategoriaPage() {
         {categoriaAtual && (
           <CategoryScrollSection
             categorias={subcategorias}
-            titulo={categoriaAtual.descricao}
+            titulo={categoriaAtual?.descricao}
+            parentSlug={categoriaAtual?.slug}
           />
+
         )}
 
 

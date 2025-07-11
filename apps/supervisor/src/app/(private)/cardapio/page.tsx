@@ -42,7 +42,7 @@ export default function PageAdminCardapio() {
     const sendToken = () => {
       iframe.contentWindow?.postMessage(
         { type: "auth_token", token },
-        linkProd // 👈 importante: precisa ser o domínio exato
+        linkDev // 👈 importante: precisa ser o domínio exato
       );
     };
 
@@ -103,7 +103,7 @@ export default function PageAdminCardapio() {
               </div>
               <iframe
                 ref={iframeRef}
-                src={linkProd}
+                src={linkDev}
                 className="w-full flex-1"
               />
             </div>
