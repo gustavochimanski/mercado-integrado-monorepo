@@ -23,7 +23,6 @@ interface Props {
 export const ModalNovoProduto = ({
   open,
   onOpenChange,
-  empresaId,
   codCategoria,
   subcategoriaId,
 }: Props) => {

@@ -5,13 +5,11 @@ import { Card } from "../../ui/card";
 import { useUserContext } from "@packs/auth";
 import { useState } from "react";
 import { ModalAddCategoria } from "../modals/ModalAddCategoria";
-import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
 
 const CardAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
 
-  const { createSub } = useMutateCategoria(parentSlug);
 
   if (!isAdmin) return null;
 
