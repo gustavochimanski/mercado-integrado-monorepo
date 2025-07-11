@@ -1,0 +1,27 @@
+{
+  "name": "mensura-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4"
+  },
+  "resolutions": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@types/react": "18.2.34",
+    "@types/react-dom": "18.2.14"
+  },
+  "packageManager": "npm@11.3.0",
+  "dependencies": {
+    "@tanstack/react-query": "^5.82.0",
+    "@tanstack/react-query-devtools": "^5.82.0"
+  }
+}

@@ -1,0 +1,22 @@
+--chart-1:  #3730a3;   /* Azul elegante */
+--chart-2:  #ff7f0e;   /* Laranja vibrante */
+--chart-3:  #8537ce;   /* Roxo vibrante */
+--chart-4:  #2ca02c;   /* Verde vivo */
+--chart-5:  #d62728;   /* Vermelho alerta */
+--chart-6:  #17becf;   /* Ciano leve */
+--chart-7:  #fa1690;   /* Rosa claro */
+--chart-8:  #bcbd22;   /* Amarelo esverdeado */
+--chart-9:  #984ea3;   /* Roxo escuro */
+--chart-10: #fca651;   /* Laranja queimado */
+
+--chart-11: #66c2a5;   /* Verde água suave */
+--chart-12: #991818;   /* Vermelho forte */
+--chart-13: #002747;   /* Azul profundo (quase preto) */
+--chart-14: #a65628;   /* Marrom escuro */
+--chart-15: #8c564b;   /* Marrom médio */
+--chart-16: #e377c2;   /* Rosa vibrante */
+--chart-17: #166810;   /* Verde escuro (confiança) */
+--chart-18: #ffff33;   /* Amarelo limão (alerta) */
+--chart-19: #7f7f7f;   /* Cinza médio (neutro) */
+--chart-20: #999999;   /* Cinza claro (background ou barras desativadas) */
+

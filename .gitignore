@@ -1,0 +1,15 @@
+# Ignorar node_modules
+node_modules/
+apps/**/node_modules/
+packages/**/node_modules/
+
+# Outros arquivos ignoráveis
+.env
+.next
+dist
+coverage
+.DS_Store
+*.log
+
+# TurboRepo
+.turbo/

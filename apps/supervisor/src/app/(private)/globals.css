@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&family=Karla:ital,wght@0,200..800;1,200..800&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Scrollbar personalizada (WebKit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}
+/* Firefox */
+* {
+  scrollbar-color: #e7e5e4bb transparent;
+}
+
+/* ======== LIGHT MODE ======== */
+:root {
+  --primary-blue: #3730a3;
+  --inputValue: 0 0% 32.2%;
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 243.7 54.5% 41.4%;
+  /* --primary: 244.5 57.9% 50.6%; */
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 73.7% 41.8%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
+
+  --chart-1:  #6366f1;   /* Azul suave */
+  --chart-2:  #81c784;   /* Verde claro */
+  --chart-4:  #f9a825;   /* Laranja queimado */
+  --chart-3:  #ab7df6;   /* Roxo lavanda */
+  --chart-5:  #ef5350;   /* Vermelho suave */
+  --chart-6:  #4dd0e1;   /* Ciano pastel */
+  --chart-7:  #f48fb1;   /* Rosa bebê */
+  --chart-8:  #dce775;   /* Verde-limão claro */
+  --chart-9:  #b39ddb;   /* Roxo acinzentado */
+  --chart-10: #ffcc80;   /* Laranja claro */
+
+  --chart-11: #a5d6a7;   /* Verde-menta */
+  --chart-12: #e57373;   /* Vermelho moderado */
+  --chart-13: #37474f;   /* Azul petróleo escuro */
+  --chart-14: #a1887f;   /* Marrom claro */
+  --chart-15: #bcaaa4;   /* Bege acinzentado */
+  --chart-16: #f8bbd0;   /* Rosa pastel */
+  --chart-17: #81c784;   /* Verde reconfortante */
+  --chart-18: #fff176;   /* Amarelo suave */
+  --chart-19: #cfd8dc;   /* Cinza azulado claro */
+  --chart-20: #e0e0e0;   /* Cinza neutro claro */
+}
+
+/* ======== DARK MODE ======== */
+.dark {
+  --inputValue: 0 0% 83.1%;
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 243.7 54.5% 41.4%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 73.7% 41.8%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+}
+
+
+
+strong {
+  color: var(--primary-blue);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--muted-foreground) inset !important;
+  box-shadow: 0 0 0 1000px var(--muted-foreground) inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
