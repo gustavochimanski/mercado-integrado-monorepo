@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Apple, Tag, List, Grid } from "lucide-react";
 
 import {
@@ -21,6 +21,7 @@ import {
 import ComponentProdutos from "./components/produtos/ComponentProdutosCardapio";
 import CategoriaComponent from "./components/categorias/ComponentCategoria";
 import ComponentSecoes from "./components/secoes/ComponentSecoes";
+import { getCookie } from "cookies-next";
 
 export default function PageAdminCardapio() {
   // "produtos" | "promocoes" | "categorias" | "secoes" | null
@@ -28,6 +29,29 @@ export default function PageAdminCardapio() {
   
   const linkProd = "https://mercado-integrado-monorepo-cardapio.vercel.app/?via=supervisor"
   const linkDev = "http://localhost:3000/?via=supervisor"
+
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const token = getCookie("access_token");
+
+    if (!token || !iframeRef.current) return;
+
+    // Aguarda o iframe carregar e envia o token
+    const iframe = iframeRef.current;
+    const sendToken = () => {
+      iframe.contentWindow?.postMessage(
+        { type: "auth_token", token },
+        linkProd // 👈 importante: precisa ser o domínio exato
+      );
+    };
+
+    iframe.addEventListener("load", sendToken);
+
+    return () => {
+      iframe.removeEventListener("load", sendToken);
+    };
+  }, []);
   
 
   return (
@@ -78,7 +102,8 @@ export default function PageAdminCardapio() {
                 Preview do cardápio
               </div>
               <iframe
-                 src={linkProd}
+                ref={iframeRef}
+                src={linkProd}
                 className="w-full flex-1"
               />
             </div>
