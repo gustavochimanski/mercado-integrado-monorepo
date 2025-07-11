@@ -11,7 +11,7 @@ import {
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import axios from "axios";
 import { loginService } from "./authenticate";
-import { useReceiveTokenFromParent } from "apps/cardapio/src/components/auth/UseReceiveTokenFromParent";
+import { useReceiveTokenFromParent } from "./UseReceiveTokenFromParent";
 
 export interface User {
   id: string;
