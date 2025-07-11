@@ -1,12 +1,15 @@
+// app/page.tsx
 "use client";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store"; 
 
 import { useState } from "react";
-
 import { ProdutoEmpMini } from "../types/Produtos";
 import CategoryScrollSection from "../components/Shared/Category/categoryScrollSection";
 import HeaderComponent from "../components/Shared/Header";
 import { SheetAdicionarProduto } from "../components/Shared/Sheet/SheetAddProduto";
 import { useCategoriasDelivery } from "../hooks/useCategoriasDelivery";
+import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -14,8 +17,6 @@ export default function HomePage() {
 
   const empresaId = 1;
   const { data: categorias = [] } = useCategoriasDelivery(empresaId);
-
-  // 🔍 Filtra apenas as categorias raiz (sem pai)
   const categoriasRaiz = categorias.filter((cat) => cat.slug_pai === null);
 
   function handleAdd(produto: ProdutoEmpMini, quantity: number) {
@@ -26,13 +27,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col gap-4">
-      
+      <LoginWrapper />
+
       <HeaderComponent />
       <main className="flex-1 p-2">
-        <CategoryScrollSection
-          categorias={categoriasRaiz}
-          titulo="Categorias"
-        />
+        <CategoryScrollSection categorias={categoriasRaiz} titulo="Categorias" />
       </main>
 
       {produtoSelecionado && (

@@ -1,9 +1,9 @@
 import { CirclePlus } from "lucide-react";
 import { Card } from "../../ui/card";
-import { useAuthStatus } from "../../../hooks/useAuthStatus";
+import { useUserContext } from "@packs/auth";
 
 const CardAddCategoria = () => {
-  const { isAdmin } = useAuthStatus();
+  const { isAdmin } = useUserContext(); // 👈 o correto
 
   if (!isAdmin) return null;
 

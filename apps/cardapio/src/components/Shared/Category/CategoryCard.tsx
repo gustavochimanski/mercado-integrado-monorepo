@@ -1,4 +1,6 @@
-import { useAuthStatus } from "../../../hooks/useAuthStatus";
+import { useUserContext } from "@packs/auth";
+
+
 
 import Image from "next/image";
 import Link from "next/link";
@@ -21,7 +23,7 @@ interface CategoryCardProps {
 
 export function CategoryCard({ label, image, href }: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
-  const { isAdmin } = useAuthStatus();
+  const { isAdmin } = useUserContext();
 
   return (
     <div className="relative">

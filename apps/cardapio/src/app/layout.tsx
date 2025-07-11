@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import FooterComponent from "../components/Shared/Footer";
 import { ReactQueryProvider } from "../providers/ReactQueryClientProvider";
-import { UserProvider } from "../context/UserContext";
-import ClientTokenHandler from "../components/auth/ClientTokenHandler";
+import { UserProvider } from "@packs/auth/src/UserContext";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -33,7 +32,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense>
-          <ClientTokenHandler />
         </Suspense>
         <ReactQueryProvider>
           <UserProvider>

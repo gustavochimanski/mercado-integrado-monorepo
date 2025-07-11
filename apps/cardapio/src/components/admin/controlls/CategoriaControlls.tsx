@@ -1,4 +1,5 @@
-import { useAuthStatus } from "../../../hooks/useAuthStatus";
+import { useUserContext } from "@packs/auth";
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { Pencil, Plus, Settings } from "lucide-react";
 import { Button } from "../../ui/button";
@@ -7,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 const AdminCategoryControls = () => {
 
-  const { isAdmin} = useAuthStatus();
+  const { isAdmin} = useUserContext();
 
 
     return(

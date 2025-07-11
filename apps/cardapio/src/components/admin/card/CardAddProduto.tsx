@@ -1,10 +1,10 @@
 import { PlusCircle } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Card, CardFooter } from "../../ui/card";
-import { useAuthStatus } from "../../../hooks/useAuthStatus";
+import { useUserContext } from "@packs/auth";
 
 const CardAddProduto = () => {
-  const { isAdmin } = useAuthStatus();
+  const { isAdmin } = useUserContext();
 
   if (!isAdmin) return null;
 

@@ -1,9 +1,10 @@
 import {  PlusCircle } from "lucide-react";
 import { Card } from "../../ui/card";
-import { useAuthStatus } from "../../../hooks/useAuthStatus";
+import { useUserContext } from "@packs/auth";
+
 
 const CardAddSecaoSubCateg = () => {
-  const { isAdmin } = useAuthStatus();
+  const { isAdmin } = useUserContext();
 
   if (!isAdmin) return null;
 
