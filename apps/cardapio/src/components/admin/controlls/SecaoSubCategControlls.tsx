@@ -14,7 +14,6 @@ const AdminSecaoSubCategControlls = () => {
         <div>
             {isAdmin && (
             <div className="flex items-center gap-2">
-                {/* Botão Adicionar Categoria */}
                 <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -22,11 +21,10 @@ const AdminSecaoSubCategControlls = () => {
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    Adicionar Categoria
+                    Adicionar Produto
                 </TooltipContent>
                 </Tooltip>
 
-                {/* Botão Editar Categoria */}
                 <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -34,7 +32,7 @@ const AdminSecaoSubCategControlls = () => {
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    Editar Categoria
+                    Editar Seção
                 </TooltipContent>
                 </Tooltip>
 

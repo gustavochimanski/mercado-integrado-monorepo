@@ -14,7 +14,7 @@ export function ProductCard({ produto, onAdd }: Props) {
 
   return (
     <Card className="w-[120px] h-[220px] flex flex-col justify-between overflow-hidden p-0">
-      <div className="flex flex-col items-start gap-1 px-3 pt-3 flex-grow">
+      <div className="flex flex-col items-start gap-1 flex-grow">
         {/* Imagem */}
         <div className="relative w-full aspect-square">
           <Image
@@ -27,13 +27,15 @@ export function ProductCard({ produto, onAdd }: Props) {
         </div>
 
         {/* Descrição (1 linha) */}
-        <div className="text-sm font-medium text-center line-clamp-1 w-full">
-          {produtoBase.descricao || "Sem nome"}
-        </div>
+        <div className="mx-1">
+          <div className="text-sm font-medium text-start line-clamp-1 w-full">
+            {produtoBase.descricao || "Sem nome"}
+          </div>
 
-        {/* Preço */}
-        <div className="text-sm text-muted-foreground">
-          R$ {Number(preco_venda).toFixed(2)}
+          {/* Preço */}
+          <div className="text-sm text-muted-foreground">
+            R$ {Number(preco_venda).toFixed(2)}
+          </div>
         </div>
       </div>
 

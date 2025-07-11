@@ -1,5 +1,5 @@
 // src/hooks/useMutateCategoria.ts
-import apiAdmin from "@cardapio/app/api/apiMensura";
+import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { slugify } from "@cardapio/lib/slugfy";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

@@ -39,16 +39,19 @@ export default function CategoriaPage() {
       const mesmaSubcategoria = produto.subcategoria_id === vitrine.id;
       return mesmaCategoria && mesmaSubcategoria;
     });
-    
+
     return (
       <CategorySection
         key={vitrine.id}
         categoriaLabel={vitrine.titulo}
         produtos={produtosFiltrados}
         onAdd={handleOpenSheet}
-        />
+        subcategoriaId={vitrine.id} 
+        codCategoria={vitrine.cod_categoria}      
+      />
     );
-  }).filter(Boolean);
+  });
+
 
   function handleOpenSheet(produto: ProdutoEmpMini) {
     setProdutoSelecionado(produto);
@@ -85,7 +88,13 @@ export default function CategoriaPage() {
 
 
         {blocosVitrine}
-        <CardAddSecaoSubCateg/>
+        {categoriaAtual && (
+          <CardAddSecaoSubCateg
+            empresaId={empresaId}
+            codCategoria={categoriaAtual.id}
+          />
+        )}
+
         
       </main>
 

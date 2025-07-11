@@ -2,18 +2,22 @@ import React from "react";
 import { ProdutoEmpMini } from "../../../types/Produtos";
 import { ProductCard } from "../ProductCard";
 import AdminSecaoSubCategControlls from "../../../components/admin/controlls/SecaoSubCategControlls";
-import CardAddProduto from "../../../components/admin/card/CardAddProduto";
+import { CardAddProduto } from "@cardapio/components/admin/card/CardAddProduto";
 
 interface Props {
   categoriaLabel?: string;
   produtos: ProdutoEmpMini[];
   onAdd?: (p: ProdutoEmpMini) => void;
+  subcategoriaId: number;
+  codCategoria: number; // ✅ NOVO
 }
 
 export default React.memo(function CategorySection({
   categoriaLabel,
   produtos,
   onAdd,
+  subcategoriaId,
+  codCategoria, // ✅
 }: Props) {
   return (
     <section className="mb-6">
@@ -31,7 +35,11 @@ export default React.memo(function CategorySection({
           </div>
         ))}
 
-        <CardAddProduto />
+        <CardAddProduto
+          empresaId={1}
+          codCategoria={codCategoria}   // ✅ Agora vai!
+          subcategoriaId={subcategoriaId}
+        />
       </div>
     </section>
   );
