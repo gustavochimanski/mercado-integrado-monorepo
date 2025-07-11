@@ -11,6 +11,7 @@ import {
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import axios from "axios";
 import { loginService } from "./authenticate";
+import { useReceiveTokenFromParent } from "apps/cardapio/src/components/auth/UseReceiveTokenFromParent";
 
 export interface User {
   id: string;
@@ -31,6 +32,7 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
+  useReceiveTokenFromParent();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
