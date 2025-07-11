@@ -26,7 +26,9 @@ export default function PageAdminCardapio() {
   // "produtos" | "promocoes" | "categorias" | "secoes" | null
   const [openSheet, setOpenSheet] = useState<"produtos" | "promocoes" | "categorias" | "secoes" | null>(null);
   
-
+  const linkProd = "https://mercado-integrado-monorepo-cardapio.vercel.app/?via=supervisor"
+  const linkDev = "http://localhost:3000/?via=supervisor"
+  
 
   return (
     <div className="flex h-screen">
@@ -76,7 +78,7 @@ export default function PageAdminCardapio() {
                 Preview do cardápio
               </div>
               <iframe
-                 src={`https://mercado-integrado-monorepo-cardapio.vercel.app/?via=supervisor`}
+                 src={linkProd}
                 className="w-full flex-1"
               />
             </div>

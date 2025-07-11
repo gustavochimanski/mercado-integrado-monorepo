@@ -12,7 +12,7 @@ export default function LoginComponent() {
     try {
       await login(username, password); 
     } catch {
-      alert("Credenciais inválidas");
+      window.alert("Credenciais inválidas");
     }
   }
 

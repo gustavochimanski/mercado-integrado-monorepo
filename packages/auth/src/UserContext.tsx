@@ -14,7 +14,8 @@ import { loginService } from "./authenticate";
 
 export interface User {
   id: string;
-  role: string;
+  username: string
+  type_user: string;
 }
 
 interface UserContextValue {
@@ -81,8 +82,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
-        isAdmin: user?.role === "admin",
-        isUser: user?.role === "user",
+        isAdmin: user?.type_user === "admin",
+        isUser: user?.type_user === "user",
         login,
         logout,
       }}
