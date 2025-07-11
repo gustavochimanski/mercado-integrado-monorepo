@@ -43,7 +43,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await axios.get<User>(
-        "https://mensuraapi.com.br/mensura/auth/me",
+        "https://gerente.mensuraapi.com.br/mensura/auth/me",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUser(res.data);

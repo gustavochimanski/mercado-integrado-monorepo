@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
+const cliente = "gerente"
+
 const nextConfig: NextConfig = {
+
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "mensuraapi.com.br",
+        hostname: `${cliente}.mensuraapi.com.br`,
         pathname: "/**",
       },
       {

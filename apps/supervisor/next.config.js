@@ -15,7 +15,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "mensuraapi.com.br",
+        hostname: "gerente.mensuraapi.com.br",
         pathname: "/**",
       },
       {
