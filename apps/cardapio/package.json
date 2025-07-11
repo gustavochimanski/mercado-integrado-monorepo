@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@packs/ui": "*",
-    "@packs/auth": "*",
     "@hookform/resolvers": "^5.1.1",
+    "@packs/auth": "*",
+    "@packs/ui": "*",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-label": "^2.1.7",
@@ -36,8 +36,8 @@
     "@tailwindcss/postcss": "^4",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
-  "@types/react": "^18.2.34",
-  "@types/react-dom": "^18.2.14",
+    "@types/react": "^18.2.34",
+    "@types/react-dom": "^18.2.14",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4",

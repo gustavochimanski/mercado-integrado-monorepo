@@ -24,6 +24,6 @@
       "@cardapio/*": ["./*"]
     },
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../../packages/auth/src/UserContext.tsx", "../../packages/auth/src/UseReceiveTokenFromParent.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../../packages/auth/src/UserContext.tsx", "../../packages/auth/src/UseReceiveTokenFromParent.tsx", "../../packages/ui/src/dialog.tsx"],
   "exclude": ["node_modules"]
 }
