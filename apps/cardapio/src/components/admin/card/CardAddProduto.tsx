@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { PlusCircle } from "lucide-react";
-import { Button } from "../../ui/button";
-import { Card, CardFooter } from "../../ui/card";
+import { Button } from "../../Shared/ui/button";
+import { Card, CardFooter } from "../../Shared/ui/card";
 import { useUserContext } from "@packs/auth";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 

@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@cardapio/components/ui/button";
-import { Input } from "@cardapio/components/ui/input";
+import { Button } from "@cardapio/components/Shared/ui/button";
+import { Input } from "@cardapio/components/Shared/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@cardapio/components/ui/dialog";
+} from "@cardapio/components/Shared/ui/dialog";
 import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
 
 interface ModalCategoriaProps {

@@ -4,8 +4,8 @@
 import { useEffect, useState } from "react";
 import { getCookie } from "cookies-next";
 import { useMutation } from "@tanstack/react-query";
+import { loginService } from "./authenticate";
 
-import { loginService } from "@packs/auth"
 
 interface Credentials {
   username: string;

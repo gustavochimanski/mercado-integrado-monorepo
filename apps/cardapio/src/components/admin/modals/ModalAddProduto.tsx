@@ -6,11 +6,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@cardapio/components/ui/dialog";
-import { Input } from "@cardapio/components/ui/input";
-import { Button } from "@cardapio/components/ui/button";
+} from "@cardapio/components/Shared/ui/dialog";
+import { Input } from "@cardapio/components/Shared/ui/input";
+import { Button } from "@cardapio/components/Shared/ui/button";
 import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
-import { Label } from "@cardapio/components/ui/label";
+import { Label } from "@cardapio/components/Shared/ui/label";
 
 interface Props {
   open: boolean;

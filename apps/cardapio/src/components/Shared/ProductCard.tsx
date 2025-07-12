@@ -1,8 +1,8 @@
 // ProductCard.tsx
 import Image from "next/image";
 import { ProdutoEmpMini } from "../../types/Produtos";
-import { Button } from "../../components/ui/button";
-import { Card, CardFooter } from "../../components/ui/card";
+import { Button } from "./ui/button";
+import { Card, CardFooter } from "./ui/card";
 
 type Props = {
   produto: ProdutoEmpMini;

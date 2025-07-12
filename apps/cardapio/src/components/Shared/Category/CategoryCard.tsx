@@ -9,10 +9,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "../../../components/ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
 
 
 interface CategoryCardProps {

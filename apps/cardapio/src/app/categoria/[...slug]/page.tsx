@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { useCategoriasDelivery } from "@cardapio/hooks/useCategoriasDelivery";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import { Button } from "@cardapio/components/ui/button";
+import { Button } from "@cardapio/components/Shared/ui/button";
 import CategorySection from "@cardapio/components/Shared/Category/categorySection";
 import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/Category/categoryScrollSection";

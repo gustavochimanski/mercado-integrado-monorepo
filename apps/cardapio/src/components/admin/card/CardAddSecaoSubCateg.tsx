@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { PlusCircle } from "lucide-react";
-import { Card } from "../../ui/card";
+import { Card } from "../../Shared/ui/card";
 import { useUserContext } from "@packs/auth";
 import { ModalAddSecao } from "../modals/ModalAddSecao";
 

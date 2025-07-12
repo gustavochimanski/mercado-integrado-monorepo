@@ -1,4 +1,4 @@
-// @packs/auth/src/UserContext.tsx
+// src/context/UserContext.tsx
 "use client";
 
 import {
@@ -8,14 +8,16 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import axios from "axios";
-import { loginService } from "./authenticate";
-import { useReceiveTokenFromParent } from "./UseReceiveTokenFromParent";
+import { getCookie,  deleteCookie } from "cookies-next";
+import { getToken, setToken } from "../token/tokenStore";
+import { loginService, logoutService } from "./authenticate";
+import { useReceiveTokenFromParent } from "../token/UseReceiveTokenFromParent";
+
 
 export interface User {
   id: string;
-  username: string
+  username: string;
   type_user: string;
 }
 
@@ -32,13 +34,19 @@ interface UserContextValue {
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  useReceiveTokenFromParent();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🔐 Usado no login e no carregamento inicial
   async function fetchUser() {
-    const token = getCookie("access_token");
+    // ✅ tenta pegar da memória
+    let token = getToken();
+
+    // fallback: tenta pegar do cookie (ex: login por form)
+    if (!token) {
+      token = getCookie("access_token") as string;
+      if (token) setToken(token); // atualiza memória também
+    }
+
     if (!token) return;
 
     try {
@@ -53,25 +61,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // ⏬ Aqui é onde usamos o `loginService` mesmo
+  // Escuta tokens recebidos por postMessage e revalida
+  useReceiveTokenFromParent(fetchUser);
+
   async function login(username: string, password: string) {
     const res = await loginService(username, password);
-
-    // ⛳️ AQUI sim salvamos o token no cookie:
-    setCookie("access_token", res.access_token, {
-      path: "/",
-      maxAge: 60 * 25,
-      sameSite: "lax",
-      secure: false,
-    });
-
-    await fetchUser(); // pega os dados e atualiza o context
+    await fetchUser();
   }
 
   function logout() {
-    deleteCookie("access_token", { path: "/" });
+    logoutService(true);
     setUser(null);
-    window.location.href = "/login";
   }
 
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useUserContext } from "@packs/auth";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../Shared/ui/tooltip";
 import { Pencil, Plus, Settings } from "lucide-react";
-import { Button } from "../../ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../ui/dropdown-menu";
+import { Button } from "../../Shared/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../Shared/ui/dropdown-menu";
 
 
 const AdminSecaoSubCategControlls = () => {
