@@ -35,23 +35,20 @@ export default function PageAdminCardapio() {
   useEffect(() => {
     const token = getCookie("access_token");
 
-    if (!token || !iframeRef.current) return;
-
-    // Aguarda o iframe carregar e envia o token
-    const iframe = iframeRef.current;
-    const sendToken = () => {
-      iframe.contentWindow?.postMessage(
-        { type: "auth_token", token },
-        linkProd // 👈 importante: precisa ser o domínio exato
-      );
+    const listener = (event: MessageEvent) => {
+      if (event.data?.type === "ready_for_token" && iframeRef.current && token) {
+        console.log("🤝 Iframe pronto. Enviando token...");
+        iframeRef.current.contentWindow?.postMessage(
+          { type: "auth_token", token },
+          "*"
+        );
+      }
     };
 
-    iframe.addEventListener("load", sendToken);
-
-    return () => {
-      iframe.removeEventListener("load", sendToken);
-    };
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
   }, []);
+
   
 
   return (

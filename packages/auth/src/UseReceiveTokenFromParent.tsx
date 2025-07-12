@@ -7,13 +7,24 @@ export function useReceiveTokenFromParent() {
   const linkProd = "https://mercado-integrado-monorep-git-b5640c-gustavochimanskis-projects.vercel.app";
   const linkDev = "http://localhost:3001";
 
+
+  const allowedOrigins = [linkProd, linkDev];
+
   useEffect(() => {
-    const allowedOrigins = [linkProd, linkDev];
+    // Avisar o pai que o iframe está pronto pra receber o token
+    console.log("📣 Enviando sinal de pronto para o pai");
+    window.parent.postMessage({ type: "ready_for_token" }, "*");
 
     const listener = (event: MessageEvent) => {
-      if (!allowedOrigins.includes(event.origin)) return;
+      console.log("🔍 Evento recebido de:", event.origin);
+
+      if (!allowedOrigins.includes(event.origin)) {
+        console.warn("🚫 Origem não permitida:", event.origin);
+        return;
+      }
 
       const { type, token } = event.data || {};
+
       if (type === "auth_token" && token) {
         const existing = getCookie("access_token");
 
