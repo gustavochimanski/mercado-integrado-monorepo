@@ -27,7 +27,7 @@ import {
 import Image from 'next/image';
 import Link from "next/link";
 import { ThemeToggle } from "../themeToggle";
-import { logoutService } from "@packs/auth";
+import { logoutService } from "@supervisor/services/Auth/authenticate";
 
 
   // Menu items.
