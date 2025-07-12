@@ -94,7 +94,7 @@ export default function PageAdminCardapio() {
         <Card className="h-full flex flex-col">
 
           <CardContent className="flex-1 flex justify-start items-start min-h-0">
-            <div className="flex flex-col w-[360px] h-full min-h-0 border rounded-xl overflow-hidden shadow-md bg-white">
+            <div className="flex flex-col w-[390px] h-full min-h-0 border rounded-xl overflow-hidden shadow-md bg-white">
               <div className="bg-gray-100 p-2 text-sm font-medium text-center">
                 Preview do cardápio
               </div>
