@@ -1,6 +1,5 @@
 // src/services/auth/authenticate.ts
 import axios from "axios";
-import { deleteCookie, setCookie } from "cookies-next";
 import { setToken } from "../token/tokenStore";
 
 export type LoginResponse = {
@@ -22,22 +21,12 @@ export async function loginService(
     { username, password }
   );
 
-  // Salva token no cookie (fallback) + memória (realtime)
-  setCookie("access_token", data.access_token, {
-    path: "/",
-    maxAge: 60 * 25,
-    sameSite: "lax",
-    secure: false, // deixe true em prod com HTTPS
-  });
-
-  setToken(data.access_token); // ✅ Salva também em memória
+  setToken(data.access_token); // ✅ 100% em memória
 
   return data;
 }
 
 export function logoutService(redirectToLogin = true) {
-  deleteCookie("access_token", { path: "/" });
-
   if (redirectToLogin) {
     window.location.href = "/login";
   }

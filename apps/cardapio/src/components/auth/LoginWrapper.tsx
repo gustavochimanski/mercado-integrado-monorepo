@@ -3,7 +3,7 @@
 
 import { useModoSupervisor } from "@cardapio/hooks/useModoSupervisor";
 import LoginComponent from "@cardapio/components/auth/SupervisorLoginModal";
-import { useUserContext } from "@packs/auth";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 export function LoginWrapper() {
   const isSupervisor = useModoSupervisor();
