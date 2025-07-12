@@ -1,7 +1,7 @@
 "use client";
 
-import { setToken } from "apps/cardapio/src/lib/tokenStore";
 import { useEffect } from "react";
+import { setToken } from "./tokenStore";
 
 export function useReceiveTokenFromParent() {
   useEffect(() => {

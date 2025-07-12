@@ -1,7 +1,7 @@
 // src/lib/api/apiMensura.ts
 "use client";
 
-import { getToken } from "@cardapio/lib/tokenStore";
+import { getToken } from "@packs/auth/src/tokenStore";
 import axios from "axios";
 
 const apiAdmin = axios.create({
