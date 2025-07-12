@@ -4,7 +4,8 @@ import { useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { Button } from "../../Shared/ui/button";
 import { Card, CardFooter } from "../../Shared/ui/card";
-import { useUserContext } from "@packs/auth";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
+
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 
 interface Props {

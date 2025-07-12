@@ -2,9 +2,9 @@
 
 import { CirclePlus } from "lucide-react";
 import { Card } from "../../Shared/ui/card";
-import { useUserContext } from "@packs/auth";
 import { useState } from "react";
 import { ModalAddCategoria } from "../modals/ModalAddCategoria";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 const CardAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) => {
   const { isAdmin } = useUserContext();

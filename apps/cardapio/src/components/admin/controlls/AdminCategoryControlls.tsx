@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useUserContext } from "@packs/auth";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
+
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../Shared/ui/tooltip";
 import { Pencil, Plus, Settings } from "lucide-react";

@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import FooterComponent from "../components/Shared/Footer";
 import { ReactQueryProvider } from "../providers/ReactQueryClientProvider";
-import { UserProvider } from "@packs/auth/src/UserContext";
 import { Suspense } from "react";
+import { UserProvider } from "@cardapio/hooks/auth/userContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
