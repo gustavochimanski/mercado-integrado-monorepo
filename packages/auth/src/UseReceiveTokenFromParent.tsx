@@ -11,7 +11,7 @@ export function useReceiveTokenFromParent() {
       const { type, token } = event.data || {};
       if (type === "auth_token" && token) {
         console.log("🔐 Token recebido:", token);
-        setToken(token); // ✅ salva em memória
+        setToken(token); 
       }
     };
 
