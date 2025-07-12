@@ -16,4 +16,4 @@ apiAdmin.interceptors.request.use((config) => {
   return config;
 });
 
-export default apiAdmin;"use client";
+export default apiAdmin;
