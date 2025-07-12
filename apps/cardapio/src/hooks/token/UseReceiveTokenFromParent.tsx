@@ -13,13 +13,11 @@ export function useReceiveTokenFromParent(onTokenReceived?: () => void) {
       if (type === "auth_token" && token) {
         console.log("🔐 Token recebido:", token);
         setToken(token);
-
-        // chama callback (tipo um reload do usuário)
         onTokenReceived?.();
       }
     };
 
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
-  }, []);
+  }, [onTokenReceived]); // ✅ adiciona a dependência corretamente
 }

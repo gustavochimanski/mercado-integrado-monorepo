@@ -7,6 +7,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import axios from "axios";
 import { getToken, setToken, clearToken } from "../token/tokenStore";
@@ -35,8 +36,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function fetchUser() {
-    const token = getToken(); // ✅ apenas da memória
+  // ✅ Memoiza a função pra não recriar em cada render
+  const fetchUser = useCallback(async () => {
+    const token = getToken();
 
     if (!token) {
       console.warn("⚠️ Nenhum token encontrado");
@@ -51,29 +53,29 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setUser(res.data);
     } catch (err) {
       console.warn("❌ Erro ao buscar usuário:", err);
-      clearToken(); // limpa da memória
+      clearToken();
       setUser(null);
     }
-  }
+  }, []);
 
-  // Reage a tokens via postMessage
+  // ✅ Hook escutando token via postMessage
   useReceiveTokenFromParent(fetchUser);
 
   async function login(username: string, password: string) {
     const res = await loginService(username, password);
-    setToken(res.access_token); // ✅ em memória
+    setToken(res.access_token);
     await fetchUser();
   }
 
   function logout() {
-    clearToken(); // ✅ limpa da memória
-    logoutService(true); // redireciona
+    clearToken();
+    logoutService(true);
     setUser(null);
   }
 
   useEffect(() => {
     fetchUser().finally(() => setIsLoading(false));
-  }, []);
+  }, [fetchUser]);
 
   return (
     <UserContext.Provider

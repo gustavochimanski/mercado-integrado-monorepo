@@ -12,7 +12,7 @@ import {
 import { useMediaQuery, useTheme } from "@mui/material";
 import Image from "next/image";
 import { ThemeToggle } from "./themeToggle";
-import { logoutService } from "@packs/auth";
+import { logoutService } from "@supervisor/services/Auth/authenticate";
 
 const TopBarComponent = () => {
   const theme = useTheme();
