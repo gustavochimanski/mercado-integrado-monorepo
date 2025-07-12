@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { setToken } from "./tokenStore";
+import { setToken } from "@packs/auth/src/tokenStore";
+
+
 
 export function useReceiveTokenFromParent() {
   useEffect(() => {
