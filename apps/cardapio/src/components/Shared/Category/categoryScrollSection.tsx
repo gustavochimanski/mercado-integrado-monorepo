@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import type { CategoriaComProdutos } from "../../../types/CardapioTypes";
 
 import CardAddCategoria from "../../admin/card/CardAddCategoria";
-import { ModalEditCategoria } from "@cardapio/components/admin/modals/ModalEditCategoria";
 import { CategoryCard } from "../card/CategoryCard";
 
 interface Props {
@@ -20,14 +19,6 @@ export default function CategoryScrollSection({
   parentSlug = null,
   empresaId,
 }: Props) {
-  const [editOpen, setEditOpen] = useState(false);
-  const [categoriaIdSelecionada, setCategoriaIdSelecionada] = useState<number | null>(null);
-
-  function openEditModal(id: number) {
-    setCategoriaIdSelecionada(id);
-    setEditOpen(true);
-  }
-
   return (
     <section className="mb-4">
       {titulo && (
@@ -47,20 +38,11 @@ export default function CategoryScrollSection({
                 ? `/categoria/${cat.slug_pai}/${cat.slug}`
                 : `/categoria/${cat.slug}`
             }
+            empresaId={empresaId}
           />
         ))}
-
         <CardAddCategoria parentSlug={parentSlug} />
       </div>
-
-      {categoriaIdSelecionada !== null && (
-        <ModalEditCategoria
-          open={editOpen}
-          onOpenChange={setEditOpen}
-          empresaId={empresaId}
-          categoriaId={categoriaIdSelecionada}
-        />
-      )}
     </section>
   );
 }

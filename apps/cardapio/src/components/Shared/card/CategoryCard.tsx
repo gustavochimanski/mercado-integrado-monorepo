@@ -1,13 +1,18 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "../ui/card";
 import CategoryOptions from "@cardapio/components/admin/options/CategoryOptions";
+import { ModalEditCategoria } from "@cardapio/components/admin/modals/ModalEditCategoria";
 
 interface CategoryCardProps {
   id: number;
   label: string;
   image: string | null;
   href: string;
+  empresaId: number;
 }
 
 export function CategoryCard({
@@ -15,8 +20,11 @@ export function CategoryCard({
   label,
   image,
   href,
+  empresaId,
 }: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
+
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
     <div className="relative">
@@ -37,7 +45,14 @@ export function CategoryCard({
         </Card>
       </Link>
 
-      <CategoryOptions categoryId={id} />
+      <CategoryOptions categoryId={id} onEdit={() => setEditOpen(true)} />
+
+      <ModalEditCategoria
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        empresaId={empresaId}
+        categoriaId={id}
+      />
     </div>
   );
 }
