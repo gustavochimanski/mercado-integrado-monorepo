@@ -3,19 +3,29 @@ import Link from "next/link";
 import { Card } from "../ui/card";
 import CategoryOptions from "@cardapio/components/admin/options/CategoryOptions";
 
-
 interface CategoryCardProps {
+  id: number;
   label: string;
   image: string | null;
   href: string;
+  onEdit: (id: number) => void;
+  onMoveLeft: (id: number) => void;
+  onMoveRight: (id: number) => void;
 }
 
-export function CategoryCard({ label, image, href }: CategoryCardProps) {
+export function CategoryCard({
+  id,
+  label,
+  image,
+  href,
+  onEdit,
+  onMoveLeft,
+  onMoveRight,
+}: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
 
   return (
     <div className="relative">
-      {/* Link com Card interno */}
       <Link href={href} className="block group">
         <Card className="bg-muted flex flex-col items-center min-w-[120px] w-[120px] gap-1 p-2">
           <div className="relative w-20 h-20 rounded-full overflow-hidden bg-background flex items-center justify-center">
@@ -33,12 +43,12 @@ export function CategoryCard({ label, image, href }: CategoryCardProps) {
         </Card>
       </Link>
 
-      {/* Ícone de admin (apenas se for admin) */}
-      <CategoryOptions/>
-
+      <CategoryOptions
+        categoryId={id}
+        onEdit={onEdit}
+        onMoveLeft={onMoveLeft}
+        onMoveRight={onMoveRight}
+      />
     </div>
   );
 }
-
-
-

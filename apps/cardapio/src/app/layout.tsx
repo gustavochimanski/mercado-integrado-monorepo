@@ -1,3 +1,4 @@
+// app/layout.tsx (ou pages/_app.tsx)
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -5,6 +6,7 @@ import FooterComponent from "../components/Shared/Footer";
 import { ReactQueryProvider } from "../providers/ReactQueryClientProvider";
 import { Suspense } from "react";
 import { UserProvider } from "@cardapio/hooks/auth/userContext";
+import { Toaster } from "@cardapio/components/Shared/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,14 +33,28 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Suspense>
-        </Suspense>
+        <Suspense />
         <ReactQueryProvider>
           <UserProvider>
+            <Toaster
+              position="top-right"
+              richColors
+              style={{
+                /* sucesso (toast.success) */
+                "--success-bg": "#22c55e",
+                "--success-text": "#ffffff",
+                "--success-border": "#16a34a",
+
+                /* erro (toast.error → variante 'destructive') */
+                "--destructive-bg": "#ef4444",
+                "--destructive-text": "#ffffff",
+                "--destructive-border": "#dc2626",
+              } as React.CSSProperties}
+            />
             {children}
           </UserProvider>
         </ReactQueryProvider>
-      <FooterComponent />
+        <FooterComponent />
       </body>
     </html>
   );

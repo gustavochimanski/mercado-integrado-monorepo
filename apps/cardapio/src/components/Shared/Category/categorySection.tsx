@@ -1,8 +1,8 @@
 import React from "react";
 import { ProdutoEmpMini } from "../../../types/Produtos";
-import { ProductCard } from "../ProductCard";
 import { CardAddProduto } from "@cardapio/components/admin/card/CardAddProduto";
 import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/SecaoSubCategOptions";
+import { ProductCard } from "../card/ProductCard";
 
 interface Props {
   categoriaLabel?: string;

@@ -1,12 +1,15 @@
-// src/hooks/useCategoriasDelivery.ts
-import { fetchCategoriasDelivery } from "../services/categoriasDeliveryService";
-import { CategoriaComProdutos } from "../types/Categorias";
 import { useQuery } from "@tanstack/react-query";
+import { CategoriaComProdutos } from "../types/CardapioTypes";
+import { api } from "../app/api/api";
 
 export function useCategoriasDelivery(empresaId: number) {
   return useQuery<CategoriaComProdutos[], Error>({
     queryKey: ["categorias-delivery", empresaId],
-    queryFn: () => fetchCategoriasDelivery(empresaId),
-    staleTime: 1000 * 60,
+    queryFn: async () => {
+      const { data } = await api.get("/mensura/cardapio", {
+        params: { empresaId },
+      });
+      return data;
+    },
   });
 }

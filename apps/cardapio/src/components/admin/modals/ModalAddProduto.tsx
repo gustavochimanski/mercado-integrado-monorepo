@@ -9,8 +9,9 @@ import {
 } from "@cardapio/components/Shared/ui/dialog";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
 import { Label } from "@cardapio/components/Shared/ui/label";
+
+import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
 
 interface Props {
   open: boolean;
@@ -34,7 +35,9 @@ export const ModalNovoProduto = ({
     imagem: undefined as File | undefined,
   });
 
-  const { mutate, isPending } = useMutateProduto();
+  // 1) Puxa create/update/remove do hook, mas aqui só usamos create
+  const { create } = useMutateProduto();
+  const { mutate: createMutate } = create;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value } = e.target;
@@ -59,24 +62,26 @@ export const ModalNovoProduto = ({
     formData.append("subcategoria_id", String(subcategoriaId));
     formData.append("preco_venda", String(form.preco_venda));
     formData.append("custo", String(form.custo));
-    if (form.imagem) {
-      formData.append("imagem", form.imagem);
-    }
+    if (form.imagem) formData.append("imagem", form.imagem);
 
-    mutate(formData, {
-      onSuccess: () => {
-        onOpenChange(false);
-        setForm({
-          cod_barras: "",
-          descricao: "",
-          preco_venda: 0,
-          custo: 0,
-          imagem: undefined,
-        });
-      },
-    });
+    createMutate(
+      { formData },   // caso seu hook espere um objeto, adapte aqui
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          setForm({
+            cod_barras: "",
+            descricao: "",
+            preco_venda: 0,
+            custo: 0,
+            imagem: undefined,
+          });
+        },
+      }
+    );
   };
 
+  // limpa o form quando fecha
   useEffect(() => {
     if (!open) {
       setForm({
@@ -99,17 +104,30 @@ export const ModalNovoProduto = ({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <Label htmlFor="cod_barras">Código de barras</Label>
-            <Input name="cod_barras" value={form.cod_barras} onChange={handleChange} required />
+            <Input
+              id="cod_barras"
+              name="cod_barras"
+              value={form.cod_barras}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div>
             <Label htmlFor="descricao">Descrição</Label>
-            <Input name="descricao" value={form.descricao} onChange={handleChange} required />
+            <Input
+              id="descricao"
+              name="descricao"
+              value={form.descricao}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div>
             <Label htmlFor="preco_venda">Preço</Label>
             <Input
+              id="preco_venda"
               name="preco_venda"
               type="number"
               value={form.preco_venda}
@@ -121,6 +139,7 @@ export const ModalNovoProduto = ({
           <div>
             <Label htmlFor="custo">Custo</Label>
             <Input
+              id="custo"
               name="custo"
               type="number"
               value={form.custo}
@@ -130,11 +149,17 @@ export const ModalNovoProduto = ({
 
           <div>
             <Label htmlFor="imagem">Imagem</Label>
-            <Input name="imagem" type="file" accept="image/*" onChange={handleFile} />
+            <Input
+              id="imagem"
+              name="imagem"
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+            />
           </div>
 
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Salvando..." : "Salvar Produto"}
+          <Button type="submit">
+            Salvar Produto
           </Button>
         </form>
       </DialogContent>

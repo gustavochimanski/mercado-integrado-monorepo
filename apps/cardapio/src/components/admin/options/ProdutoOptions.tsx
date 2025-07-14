@@ -1,45 +1,32 @@
+// src/components/Shared/Product/ProductOptions.tsx
 "use client";
 
 import { useState } from "react";
-import { Button } from "@cardapio/components/Shared/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@cardapio/components/Shared/ui/dropdown-menu";
+
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
-import {
-  CircleArrowLeft,
-  CircleArrowRight,
-  MoreVertical,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
+import { Pencil, Trash2, MoreVertical } from "lucide-react";
+import { Button } from "@cardapio/components/Shared/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@cardapio/components/Shared/ui/dropdown-menu";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
 
-interface CategoryOptionsProps {
-  categoryId: number;
-  onEdit: (id: number) => void;
-  onMoveLeft: (id: number) => void;
-  onMoveRight: (id: number) => void;
+interface ProductOptionsProps {
+  codBarras: string;
+  onEdit: () => void;
 }
 
-const CategoryOptions = ({
-  categoryId,
+export function ProductOptions({
+  codBarras,
   onEdit,
-  onMoveLeft,
-  onMoveRight,
-}: CategoryOptionsProps) => {
+}: ProductOptionsProps) {
   const { isAdmin } = useUserContext();
-  const { remove } = useMutateCategoria();
+  const { remove } = useMutateProduto();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (!isAdmin) return null;
 
   function handleConfirmRemove() {
-    remove.mutate(categoryId);
+    remove.mutate(codBarras);
   }
 
   return (
@@ -56,31 +43,21 @@ const CategoryOptions = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="text-sm">
-            <DropdownMenuItem onClick={() => onEdit(categoryId)}>
+            <DropdownMenuItem onClick={onEdit}>
               <Pencil className="mr-2 w-4 h-4" /> Editar
             </DropdownMenuItem>
-
             <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
               <Trash2 className="mr-2 w-4 h-4" /> Remover
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={() => onMoveRight(categoryId)}>
-              <CircleArrowRight className="mr-2 w-4 h-4" /> Mover para Direita
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={() => onMoveLeft(categoryId)}>
-              <CircleArrowLeft className="mr-2 w-4 h-4" /> Mover para Esquerda
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Modal de confirmação */}
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Confirmar remoção"
-        description="Tem certeza que deseja remover esta categoria? Esta ação é irreversível."
+        description="Tem certeza que deseja remover este produto? Esta ação é irreversível."
         confirmText="Sim, remover"
         cancelText="Cancelar"
         onConfirm={handleConfirmRemove}
@@ -88,6 +65,4 @@ const CategoryOptions = ({
       />
     </>
   );
-};
-
-export default CategoryOptions;
+}

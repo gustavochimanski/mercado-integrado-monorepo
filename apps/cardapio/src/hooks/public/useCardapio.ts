@@ -1,5 +1,5 @@
 import apiAdmin from "@cardapio/app/api/apiAdmin";
-import { CategoryApi } from "../types/categoriasDeliveryType";
+import { CategoryApi } from "../../types/categoriasDeliveryType";
 import { useQuery } from "@tanstack/react-query";
 
 
