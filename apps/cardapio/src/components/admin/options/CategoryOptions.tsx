@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
 } from "@cardapio/components/Shared/ui/dropdown-menu";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { CircleArrowLeft, CircleArrowRight, MoreVertical, Pencil, Trash2 } from "lucide-react";
 
 const CategoryOptions = () => {
   const { isAdmin } = useUserContext();
@@ -33,6 +33,12 @@ const CategoryOptions = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => alert("Remover categoria")}>
                         <Trash2/> Remover
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => alert("Remover categoria")}>
+                        <CircleArrowRight/> Mover para Direita
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => alert("Remover categoria")}>
+                        <CircleArrowLeft/> Mover para Esquerda
                     </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
