@@ -14,7 +14,7 @@ import { Label } from "../ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { ProdutoEmpMini } from "../../../types/Produtos"; // ✅ tipo correto
+import type { ProdutoEmpMini } from "../../../types/Produtos";
 import { Badge } from "../ui/badge";
 
 const schema = z.object({
@@ -33,6 +33,7 @@ interface SheetAdicionarProdutoProps {
   onAdd?: (produto: ProdutoEmpMini, quantity: number) => void;
   isOpen: boolean;
   onClose: () => void;
+  quickAddQuantity?: number; // ✅ Apenas 1 valor de atalho
 }
 
 export function SheetAdicionarProduto({
@@ -40,6 +41,7 @@ export function SheetAdicionarProduto({
   onAdd,
   isOpen,
   onClose,
+  quickAddQuantity = 6, // ✅ valor padrão
 }: SheetAdicionarProdutoProps) {
   const {
     register,
@@ -62,6 +64,11 @@ export function SheetAdicionarProduto({
     if (quantity > 1) setValue("quantity", quantity - 1);
   }
 
+  function addQuickQuantity() {
+    const novaQuantidade = Math.min(quantity + quickAddQuantity, 99);
+    setValue("quantity", novaQuantidade);
+  }
+
   function onSubmit(data: FormData) {
     onAdd?.(produto, data.quantity);
     onClose();
@@ -69,8 +76,6 @@ export function SheetAdicionarProduto({
 
   const imagem = produto.produto.imagem || "/placeholder.jpg";
   const descricao = produto.produto.descricao || "Sem nome";
-
-  console.log("aaadasdasdasdas", imagem)
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -87,43 +92,54 @@ export function SheetAdicionarProduto({
                   className="object-contain rounded-md"
                 />
               </div>
-              <span className="flex flex-col max-w-[60%]">
+              <span className="flex flex-col max-w-[60%] gap-2">
                 <span className="font-semibold leading-tight">{descricao}</span>
                 <Badge
                   className="w-fit text-xs max-w-full whitespace-nowrap overflow-hidden text-ellipsis"
-                  title={descricao}
-                  variant={"secondary"}
+                  variant="secondary"
                 >
-                  {descricao}
+                  A partir de 5 Un pague 19,90
                 </Badge>
               </span>
             </SheetTitle>
           </SheetHeader>
 
-          <div className="flex items-center gap-4">
-            <Label htmlFor="quantity" className="text-lg">
-              Quantidade
-            </Label>
-            <div className="flex items-center gap-2">
-              <Button type="button" size="icon" onClick={decrement}>
-                -
-              </Button>
-              <Input
-                type="number"
-                id="quantity"
-                {...register("quantity", { valueAsNumber: true })}
-                className="w-14 text-center"
-              />
-              <Button type="button" size="icon" onClick={increment}>
-                +
-              </Button>
+          {/* Quantidade + Botão extra */}
+          <div className="flex flex-col gap-2 p-2">
+              <Label htmlFor="quantity" className="text-lg">
+                Quantidade
+              </Label>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 ">
+                  <Button type="button" className="w-16" onClick={decrement}>
+                    -
+                  </Button>
+                  <Input
+                    type="number"
+                    id="quantity"
+                    {...register("quantity", { valueAsNumber: true })}
+                    className="text-center w-full"
+                    />
+                  <Button type="button" size="icon" className="w-16" onClick={increment}>
+                    +
+                  </Button>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-xs px-3 py-1"
+                  onClick={addQuickQuantity}
+                >
+                  +{quickAddQuantity} unidades
+                </Button>
+
+              {errors.quantity && (
+                <p className="text-destructive text-sm">{errors.quantity.message}</p>
+              )}
+              </div>
             </div>
-            {errors.quantity && (
-              <p className="text-destructive text-sm">
-                {errors.quantity.message}
-              </p>
-            )}
-          </div>
+
 
           <SheetFooter>
             <Button type="submit" className="w-full bg-primary text-background">
