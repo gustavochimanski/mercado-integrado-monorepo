@@ -28,9 +28,11 @@ export function ProductCard({ produto, onAdd }: Props) {
 
         {/* Descrição (1 linha) */}
         <div className="mx-1">
-          <div className="text-sm font-medium text-start line-clamp-1 w-full">
+          <div className="text-sm font-medium text-start line-clamp-1 w-full break-all">
             {produtoBase.descricao || "Sem nome"}
           </div>
+
+
 
           {/* Preço */}
           <div className="text-sm text-muted-foreground">
