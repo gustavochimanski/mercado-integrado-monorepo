@@ -5,10 +5,7 @@
 
     // Caminho base e aliases globais
     "baseUrl": ".",
-    "paths": {
-      "@packs/ui": ["packages/ui/src"],
-      "@packs/auth": ["packages/cardapio/src"],
-    },
+    "paths": {},
 
     // Compatibilidade e boas práticas
     "target": "ES2020",

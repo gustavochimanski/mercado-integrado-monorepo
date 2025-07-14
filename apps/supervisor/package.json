@@ -9,8 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@packs/ui": "*",
-    "@packs/auth": "*",
     "@babel/runtime": "^7.26.10",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
