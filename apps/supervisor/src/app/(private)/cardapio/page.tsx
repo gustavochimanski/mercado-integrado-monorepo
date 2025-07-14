@@ -100,7 +100,7 @@ export default function PageAdminCardapio() {
               </div>
               <iframe
                 ref={iframeRef}
-                src={linkDev}
+                src={linkProd}
                 className="w-full flex-1"
               />
             </div>
