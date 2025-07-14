@@ -10,7 +10,7 @@ import { Button } from "../../Shared/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../Shared/ui/dropdown-menu";
 import { ModalAddCategoria } from "../modals/ModalAddCategoria";
 
-const AdminCategoryControls = ({ parentSlug = null }: { parentSlug?: string | null }) => {
+const AdminCategoryOptions = ({ parentSlug = null }: { parentSlug?: string | null }) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
 
@@ -67,4 +67,4 @@ const AdminCategoryControls = ({ parentSlug = null }: { parentSlug?: string | nu
   );
 };
 
-export default AdminCategoryControls;
+export default AdminCategoryOptions;

@@ -1,8 +1,8 @@
 import React from "react";
 import { ProdutoEmpMini } from "../../../types/Produtos";
 import { ProductCard } from "../ProductCard";
-import AdminSecaoSubCategControlls from "../../../components/admin/controlls/SecaoSubCategControlls";
 import { CardAddProduto } from "@cardapio/components/admin/card/CardAddProduto";
+import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/SecaoSubCategOptions";
 
 interface Props {
   categoriaLabel?: string;
@@ -24,7 +24,7 @@ export default React.memo(function CategorySection({
       {categoriaLabel && (
         <div className="flex justify-between">
           <h2 className="text-xl font-bold mb-2 px-2">{categoriaLabel}</h2>
-          <AdminSecaoSubCategControlls />
+          <AdminSecaoSubCategOptions />
         </div>
       )}
 

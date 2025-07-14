@@ -6,7 +6,7 @@ import { Button } from "../../Shared/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../Shared/ui/dropdown-menu";
 
 
-const AdminSecaoSubCategControlls = () => {
+const AdminSecaoSubCategOptions = () => {
 
   const { isAdmin} = useUserContext();
 
@@ -65,4 +65,4 @@ const AdminSecaoSubCategControlls = () => {
 }
 
 
-export default AdminSecaoSubCategControlls
+export default AdminSecaoSubCategOptions
