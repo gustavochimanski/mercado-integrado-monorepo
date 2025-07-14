@@ -4,7 +4,6 @@ import React from "react";
 import type { CategoriaComProdutos } from "../../../types/Categorias";
 import { CategoryCard } from "./CategoryCard";
 import CardAddCategoria from "../../admin/card/CardAddCategoria"; // corrigido o path
-import AdminCategoryOptions from "../../admin/options/AdminCategoryOptions";
 
 interface Props {
   categorias: CategoriaComProdutos[];
@@ -21,7 +20,6 @@ export default function CategoryScrollSection({
     <section className="mb-4">
       <div className="flex justify-between items-center px-2">
         {titulo && <h2 className="text-xl font-bold mb-2">{titulo}</h2>}
-        <AdminCategoryOptions parentSlug={parentSlug} />
       </div>
 
       <div className="flex overflow-x-auto gap-4 pb-2 hide-scrollbar px-2">

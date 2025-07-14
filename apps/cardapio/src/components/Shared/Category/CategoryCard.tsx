@@ -1,19 +1,7 @@
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
-
-
-
-
 import Image from "next/image";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "../ui/dropdown-menu";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
-import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import CategoryOptions from "@cardapio/components/admin/options/CategoryOptions";
 
 
 interface CategoryCardProps {
@@ -24,7 +12,6 @@ interface CategoryCardProps {
 
 export function CategoryCard({ label, image, href }: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
-  const { isAdmin } = useUserContext();
 
   return (
     <div className="relative">
@@ -47,29 +34,11 @@ export function CategoryCard({ label, image, href }: CategoryCardProps) {
       </Link>
 
       {/* Ícone de admin (apenas se for admin) */}
-      {isAdmin && (
-        <div className="absolute top-1 right-1 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-6 h-6 p-0 text-muted-foreground hover:text-foreground"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="text-sm">
-              <DropdownMenuItem onClick={() => alert("Editar categoria")}>
-                <Pencil/> Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => alert("Remover categoria")}>
-                <Trash2/> Remover
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
+      <CategoryOptions/>
+
     </div>
   );
 }
+
+
+
