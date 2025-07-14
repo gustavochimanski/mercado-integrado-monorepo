@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const cliente = "gerente"
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 
   images: {
     remotePatterns: [

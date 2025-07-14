@@ -12,14 +12,12 @@ type Props = {
   produto: ProdutoEmpMini;
   onAdd?: () => void;
   onEdit?: (codBarras: string) => void;
-  onDelete?: (codBarras: string) => void;
 };
 
 export function ProductCard({
   produto,
   onAdd,
   onEdit,
-  onDelete,
 }: Props) {
   const { produto: produtoBase, preco_venda } = produto;
   const codBarras = produto.cod_barras;

@@ -21,25 +21,28 @@ import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
 
 interface CategoryOptionsProps {
   categoryId: number;
-  onEdit: (id: number) => void;
-  onMoveLeft: (id: number) => void;
-  onMoveRight: (id: number) => void;
+  onEdit?: (id: number) => void;
 }
 
-const CategoryOptions = ({
-  categoryId,
-  onEdit,
-  onMoveLeft,
-  onMoveRight,
-}: CategoryOptionsProps) => {
+const CategoryOptions = ({ categoryId, onEdit }: CategoryOptionsProps) => {
   const { isAdmin } = useUserContext();
-  const { remove } = useMutateCategoria();
+  const { remove, moveRight, moveLeft } = useMutateCategoria();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (!isAdmin) return null;
 
   function handleConfirmRemove() {
-    remove.mutate(categoryId);
+    remove.mutate(categoryId, {
+      onSettled: () => setConfirmOpen(false),
+    });
+  }
+
+  function handleMoveRight() {
+    moveRight.mutate(categoryId);
+  }
+
+  function handleMoveLeft() {
+    moveLeft.mutate(categoryId);
   }
 
   return (
@@ -56,7 +59,7 @@ const CategoryOptions = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="text-sm">
-            <DropdownMenuItem onClick={() => onEdit(categoryId)}>
+            <DropdownMenuItem onClick={() => onEdit?.(categoryId)}>
               <Pencil className="mr-2 w-4 h-4" /> Editar
             </DropdownMenuItem>
 
@@ -64,11 +67,11 @@ const CategoryOptions = ({
               <Trash2 className="mr-2 w-4 h-4" /> Remover
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={() => onMoveRight(categoryId)}>
+            <DropdownMenuItem onClick={handleMoveRight}>
               <CircleArrowRight className="mr-2 w-4 h-4" /> Mover para Direita
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={() => onMoveLeft(categoryId)}>
+            <DropdownMenuItem onClick={handleMoveLeft}>
               <CircleArrowLeft className="mr-2 w-4 h-4" /> Mover para Esquerda
             </DropdownMenuItem>
           </DropdownMenuContent>

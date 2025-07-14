@@ -8,9 +8,6 @@ interface CategoryCardProps {
   label: string;
   image: string | null;
   href: string;
-  onEdit: (id: number) => void;
-  onMoveLeft: (id: number) => void;
-  onMoveRight: (id: number) => void;
 }
 
 export function CategoryCard({
@@ -18,9 +15,6 @@ export function CategoryCard({
   label,
   image,
   href,
-  onEdit,
-  onMoveLeft,
-  onMoveRight,
 }: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
 
@@ -43,12 +37,7 @@ export function CategoryCard({
         </Card>
       </Link>
 
-      <CategoryOptions
-        categoryId={id}
-        onEdit={onEdit}
-        onMoveLeft={onMoveLeft}
-        onMoveRight={onMoveRight}
-      />
+      <CategoryOptions categoryId={id} />
     </div>
   );
 }

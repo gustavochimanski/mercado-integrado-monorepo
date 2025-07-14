@@ -28,10 +28,6 @@ export default function CategoryScrollSection({
     setEditOpen(true);
   }
 
-  // stub move functions
-  function moveLeft(id: number) { /* seu handler */ }
-  function moveRight(id: number) { /* seu handler */ }
-
   return (
     <section className="mb-4">
       {titulo && (
@@ -51,9 +47,6 @@ export default function CategoryScrollSection({
                 ? `/categoria/${cat.slug_pai}/${cat.slug}`
                 : `/categoria/${cat.slug}`
             }
-            onEdit={openEditModal}
-            onMoveLeft={moveLeft}
-            onMoveRight={moveRight}
           />
         ))}
 

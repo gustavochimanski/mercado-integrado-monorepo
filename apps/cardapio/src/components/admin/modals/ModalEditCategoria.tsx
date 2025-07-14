@@ -13,7 +13,6 @@ import {
 import { useCategoriasDelivery } from "@cardapio/hooks/useCategoriasDelivery";
 import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
 import Image from "next/image";
-import type { CategoriaComProdutos } from "@cardapio/types/CardapioTypes";
 
 interface ModalEditCategoriaProps {
   open: boolean;
