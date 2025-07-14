@@ -31,7 +31,7 @@ export default function HomePage() {
 
       <HeaderComponent />
       <main className="flex-1 p-2">
-        <CategoryScrollSection categorias={categoriasRaiz} titulo="Categorias" />
+        <CategoryScrollSection categorias={categoriasRaiz} titulo="Categorias" empresaId={1} />
       </main>
 
       {produtoSelecionado && (
