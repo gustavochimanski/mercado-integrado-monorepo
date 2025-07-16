@@ -21,9 +21,9 @@ export default function CategoryScrollSection({
 }: Props) {
   return (
     <section className="mb-4">
-      {titulo && (
+      {categorias.length > 1 && (
         <div className="flex justify-between items-center px-2">
-          <h2 className="text-xl font-bold mb-2">{titulo}</h2>
+          <h2 className="text-xl font-bold mb-2">Categorias</h2>
         </div>
       )}
       <div className="flex overflow-x-auto gap-4 pb-2 hide-scrollbar px-2">

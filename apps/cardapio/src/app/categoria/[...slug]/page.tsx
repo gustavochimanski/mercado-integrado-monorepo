@@ -5,21 +5,23 @@ import { useParams, useRouter } from "next/navigation";
 
 import { useCategoriasDelivery } from "@cardapio/hooks/useCategoriasDelivery";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
+
+import { Accordion } from "@cardapio/components/Shared/ui/accordion";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import CategorySection from "@cardapio/components/Shared/Category/categorySection";
 import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/Category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/Sheet/SheetAddProduto";
 import { CircleArrowLeft } from "lucide-react";
 import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddSecaoSubCateg";
+import ProductsSection from "@cardapio/components/Shared/Category/ProductsSection";
 
 export default function CategoriaPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
 
-  const router = useRouter()
-
+  const router = useRouter();
   const empresaId = 1;
+
   const params = useParams<{ slug?: string | string[] }>();
   const slugAtual = Array.isArray(params.slug)
     ? params.slug[params.slug.length - 1]
@@ -32,26 +34,6 @@ export default function CategoriaPage() {
   const vitrines = categoriaAtual?.vitrines ?? [];
 
   const produtosDeTodasCategorias = categorias.flatMap((cat) => cat.produtos);
-
-  const blocosVitrine = vitrines.map((vitrine) => {
-    const produtosFiltrados = produtosDeTodasCategorias.filter((produto) => {
-      const mesmaCategoria = produto.produto.cod_categoria === vitrine.cod_categoria;
-      const mesmaSubcategoria = produto.subcategoria_id === vitrine.id;
-      return mesmaCategoria && mesmaSubcategoria;
-    });
-
-    return (
-      <CategorySection
-        key={vitrine.id}
-        categoriaLabel={vitrine.titulo}
-        produtos={produtosFiltrados}
-        onAdd={handleOpenSheet}
-        subcategoriaId={vitrine.id} 
-        codCategoria={vitrine.cod_categoria}      
-      />
-    );
-  });
-
 
   function handleOpenSheet(produto: ProdutoEmpMini) {
     setProdutoSelecionado(produto);
@@ -75,28 +57,48 @@ export default function CategoriaPage() {
     <div className="min-h-screen flex flex-col gap-4">
       <HeaderComponent />
 
-      <Button onClick={router.back} variant={"link"} className="mr-auto"> <CircleArrowLeft/>Voltar</Button>
-      <main className="flex-1 p-2">
+      <Button onClick={router.back} variant="link" className="mr-auto">
+        <CircleArrowLeft /> Voltar
+      </Button>
+
+      <main className="flex-1 p-0">
         {categoriaAtual && (
           <CategoryScrollSection
             categorias={subcategorias}
-            titulo={categoriaAtual?.descricao}
-            parentSlug={categoriaAtual?.slug} 
-            empresaId={1}
-          />
-
-        )}
-
-
-        {blocosVitrine}
-        {categoriaAtual && (
-          <CardAddSecaoSubCateg
+            titulo={categoriaAtual.descricao}
+            parentSlug={categoriaAtual.slug}
             empresaId={empresaId}
-            codCategoria={categoriaAtual.id}
           />
         )}
 
-        
+        <Accordion type="single" collapsible className="w-full">
+          {vitrines.map((vitrine, index) => {
+            const produtosFiltrados = produtosDeTodasCategorias.filter((produto) => {
+              const mesmaCategoria = produto.produto.cod_categoria === vitrine.cod_categoria;
+              const mesmaSubcategoria = produto.subcategoria_id === vitrine.id;
+              return mesmaCategoria && mesmaSubcategoria;
+            });
+
+            const bgClass = index % 2 === 0 ? "bg-muted-foreground/20" : "bg-muted";
+
+            return (
+              <ProductsSection
+                key={vitrine.id}
+                categoriaLabel={vitrine.titulo}
+                produtos={produtosFiltrados}
+                onAdd={handleOpenSheet}
+                subcategoriaId={vitrine.id}
+                codCategoria={vitrine.cod_categoria}
+                value={vitrine.id.toString()}
+                bgClass={bgClass}
+              />
+            );
+          })}
+        </Accordion>
+
+        {categoriaAtual && (
+          <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={categoriaAtual.id} />
+        )}
       </main>
 
       {produtoSelecionado && (

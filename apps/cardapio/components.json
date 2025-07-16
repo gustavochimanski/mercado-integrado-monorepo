@@ -13,7 +13,7 @@
   "aliases": {
     "components": "@cardapio/components",
     "utils": "@cardapio/lib/utils",
-    "ui": "@cardapio/components/ui",
+    "ui": "@cardapio/components/shared/ui",
     "lib": "@cardapio/lib",
     "hooks": "@cardapio/hooks"
   },

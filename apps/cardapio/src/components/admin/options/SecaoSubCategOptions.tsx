@@ -12,7 +12,7 @@ const AdminSecaoSubCategOptions = () => {
 
 
     return(
-        <div>
+        <div className="ml-auto">
             {isAdmin && (
             <div className="flex items-center gap-2">
                 <Tooltip>
