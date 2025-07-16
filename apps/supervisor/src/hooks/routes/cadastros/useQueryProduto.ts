@@ -1,6 +1,6 @@
 // src/services/useQueryProduto.ts
-import apiAdmin from "@cardapio/app/api/apiAdmin";
-import { TypeCadProdDeliveryResponse } from "@cardapio/types/cadProdDeliveryType";
+import { TypeCadProdDeliveryResponse } from "@supervisor/app/(private)/cardapio/types/cadProdDeliveryType";
+import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ export function useFetchCadProdDelivery(
   return useQuery<TypeCadProdDeliveryResponse>({
     queryKey: ["produtos", cod_empresa, page, limit],
     queryFn: async () => {
-      const res = await apiAdmin.get(
+      const res = await apiMensura.get(
         `/mensura/produtos/delivery?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
       );
       return res.data;
@@ -35,7 +35,7 @@ export function useMutateProduto() {
   const create = useMutation({
     mutationFn: async ({ formData }: CreateProdutoBody) => {
       try {
-        const { data } = await apiAdmin.post(
+        const { data } = await apiMensura.post(
           "/mensura/produtos/delivery",
           formData
         );
@@ -58,7 +58,7 @@ export function useMutateProduto() {
   const update = useMutation({
     mutationFn: async ({ cod_barras, formData }: UpdateProdutoBody) => {
       try {
-        const { data } = await apiAdmin.put(
+        const { data } = await apiMensura.put(
           `/mensura/produtos/delivery/${cod_barras}`,
           formData
         );
@@ -81,7 +81,7 @@ export function useMutateProduto() {
   const remove = useMutation({
     mutationFn: async (cod_barras: string) => {
       try {
-        await apiAdmin.delete(`/mensura/produtos/delivery/${cod_barras}`);
+        await apiMensura.delete(`/mensura/produtos/delivery/${cod_barras}`);
         toast.success("Produto removido com sucesso!");
       } catch (err: any) {
         const msg =

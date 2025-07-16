@@ -1,6 +1,5 @@
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../Shared/ui/tooltip";
 import { Pencil, Plus, Settings } from "lucide-react";
 import {
   DropdownMenu,
@@ -8,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../Shared/ui/dropdown-menu";
-import { ModalAddSecao } from "../modals/ModalAddSecao";
 import { useState } from "react";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 

@@ -24,6 +24,6 @@
       "@cardapio/*": ["./*"]
     },
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../supervisor/src/components/modals/cadastros/ModalAddProduto.tsx"],
   "exclude": ["node_modules"]
 }

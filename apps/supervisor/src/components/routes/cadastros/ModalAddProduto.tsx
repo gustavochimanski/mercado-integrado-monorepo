@@ -1,33 +1,28 @@
 // src/components/modals/ModalNovoProduto.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@cardapio/components/Shared/ui/button";
+import { useMutateProduto } from "@supervisor/app/(private)/cardapio/hooks/useQueryProduto";
+import { Button } from "@supervisor/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@cardapio/components/Shared/ui/dialog";
-import { Input } from "@cardapio/components/Shared/ui/input";
-import { Label } from "@cardapio/components/Shared/ui/label";
-import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
-
+} from "@supervisor/components/ui/dialog";
+import { Input } from "@supervisor/components/ui/input";
+import { Label } from "@supervisor/components/ui/label";
+import { useEffect, useState } from "react";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   empresaId: number;
-  codCategoria: number;
-  subcategoriaId: number;
 }
 
 export const ModalNovoProduto = ({
   open,
   onOpenChange,
-  empresaId,
-  codCategoria,
-  subcategoriaId,
+  empresaId,          // 👈 não esqueça disso
 }: Props) => {
   const [form, setForm] = useState({
     cod_barras: "",
@@ -37,8 +32,8 @@ export const ModalNovoProduto = ({
     imagem: undefined as File | undefined,
   });
 
-  // Importa o create/update/remove já configurado para apiAdmin
-  const { create: createProduct } = useMutateProduto();
+  // diretamente do hook, pois ele retorna UseMutationResult do create
+  const { mutate: createMutate, isPending: isCreating } = useMutateProduto();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value } = e.target;
@@ -60,13 +55,11 @@ export const ModalNovoProduto = ({
     formData.append("cod_barras", form.cod_barras);
     formData.append("descricao", form.descricao);
     formData.append("cod_empresa", String(empresaId));
-    formData.append("cod_categoria", String(codCategoria));
-    formData.append("subcategoria_id", String(subcategoriaId));
     formData.append("preco_venda", String(form.preco_venda));
     formData.append("custo", String(form.custo));
     if (form.imagem) formData.append("imagem", form.imagem);
 
-    createProduct.mutate({ formData }, {
+    createMutate(formData, {
       onSuccess: () => {
         onOpenChange(false);
         setForm({
@@ -156,8 +149,8 @@ export const ModalNovoProduto = ({
             />
           </div>
 
-          <Button type="submit" disabled={createProduct.isPending}>
-            {createProduct.isPending ? "Salvando..." : "Salvar Produto"}
+          <Button type="submit" disabled={isCreating}>
+            {isCreating ? "Salvando..." : "Salvar Produto"}
           </Button>
         </form>
       </DialogContent>

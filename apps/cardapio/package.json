@@ -45,5 +45,8 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
-  }
+  },
+  "main": "src/index.tsx",
+  "types": "src/index.ts",
+  "license": "MIT"
 }

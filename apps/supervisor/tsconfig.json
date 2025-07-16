@@ -35,7 +35,7 @@
     "next-auth.d.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-, "src/app/(private)/cadastros/components/tabs/caixas/pdvs/ComponentConfig.tsx", "src/app/(private)/cadastros/components/tabs/produtos/columns.tss", "src/app/(private)/(dashboard)/components/participacaoEmpresas/DashCardParticipacaoEmpresas.tsx", "src/app/(private)/chatbot/hooks/useSaveChatBotConfig.xts"  ],
+, "src/app/(private)/cadastros/components/tabs/caixas/pdvs/ComponentConfig.tsx", "**/*.ts", "**/*.tsx", "src/app/(private)/cadastros/components/tabs/produtos/columns.tss", "src/app/(private)/(dashboard)/components/participacaoEmpresas/DashCardParticipacaoEmpresas.tsx", "src/app/(private)/chatbot/hooks/useSaveChatBotConfig.xts"  ],
   "exclude": [
     "node_modules"
   ]
