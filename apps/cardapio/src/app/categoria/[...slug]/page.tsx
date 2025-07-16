@@ -45,6 +45,32 @@ export default function CategoriaPage() {
     setSheetOpen(false);
   }
 
+  function renderVitrines(modoAccordion: boolean) {
+    return vitrines.map((vitrine, index) => {
+      const produtosFiltrados = produtosDeTodasCategorias.filter((produto) => {
+        const mesmaCategoria = produto.produto.cod_categoria === vitrine.cod_categoria;
+        const mesmaSubcategoria = produto.subcategoria_id === vitrine.id;
+        return mesmaCategoria && mesmaSubcategoria;
+      });
+
+      const bgClass = index % 2 === 0 ? "bg-muted-foreground/20" : "bg-muted";
+
+      return (
+        <ProductsSection
+          key={vitrine.id}
+          categoriaLabel={vitrine.titulo}
+          produtos={produtosFiltrados}
+          onAdd={handleOpenSheet}
+          subcategoriaId={vitrine.id}
+          codCategoria={vitrine.cod_categoria}
+          value={vitrine.id.toString()}
+          bgClass={bgClass}
+          modoAccordion={modoAccordion}
+        />
+      );
+    });
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -71,30 +97,13 @@ export default function CategoriaPage() {
           />
         )}
 
-        <Accordion type="single" collapsible className="w-full">
-          {vitrines.map((vitrine, index) => {
-            const produtosFiltrados = produtosDeTodasCategorias.filter((produto) => {
-              const mesmaCategoria = produto.produto.cod_categoria === vitrine.cod_categoria;
-              const mesmaSubcategoria = produto.subcategoria_id === vitrine.id;
-              return mesmaCategoria && mesmaSubcategoria;
-            });
-
-            const bgClass = index % 2 === 0 ? "bg-muted-foreground/20" : "bg-muted";
-
-            return (
-              <ProductsSection
-                key={vitrine.id}
-                categoriaLabel={vitrine.titulo}
-                produtos={produtosFiltrados}
-                onAdd={handleOpenSheet}
-                subcategoriaId={vitrine.id}
-                codCategoria={vitrine.cod_categoria}
-                value={vitrine.id.toString()}
-                bgClass={bgClass}
-              />
-            );
-          })}
-        </Accordion>
+        {vitrines.length > 5 ? (
+          <Accordion type="single" collapsible className="w-full">
+            {renderVitrines(true)}
+          </Accordion>
+        ) : (
+          renderVitrines(false)
+        )}
 
         {categoriaAtual && (
           <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={categoriaAtual.id} />
