@@ -3,7 +3,7 @@
 import React from "react";
 import type { CategoriaComProdutos } from "../../../types/CardapioTypes";
 
-import CardAddCategoria from "../../admin/card/CardAddCategoria";
+import CardAdminAddCategoria from "../../admin/card/CardAdminAddCategoria";
 import { CategoryCard } from "../card/CategoryCard";
 
 interface Props {
@@ -41,7 +41,7 @@ export default function CategoryScrollSection({
             empresaId={empresaId}
           />
         ))}
-        <CardAddCategoria parentSlug={parentSlug} />
+        <CardAdminAddCategoria parentSlug={parentSlug} />
       </div>
     </section>
   );

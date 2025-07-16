@@ -2,67 +2,59 @@ import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../Shared/ui/tooltip";
 import { Pencil, Plus, Settings } from "lucide-react";
-import { Button } from "../../Shared/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../Shared/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../Shared/ui/dropdown-menu";
+import { ModalAddSecao } from "../modals/ModalAddSecao";
+import { useState } from "react";
+import { ModalNovoProduto } from "../modals/ModalAddProduto";
 
-
-const AdminSecaoSubCategOptions = () => {
-
-  const { isAdmin} = useUserContext();
-
-
-    return(
-        <div className="ml-auto">
-            {isAdmin && (
-            <div className="flex items-center gap-2">
-                <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                    <Plus />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    Adicionar Produto
-                </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                    <Pencil />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    Editar Seção
-                </TooltipContent>
-                </Tooltip>
-
-                {/* Menu de ações */}
-                <DropdownMenu>
-                <Tooltip>
-                    <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                        <Settings />
-                    </Button>
-                    </DropdownMenuTrigger>
-                    <TooltipContent>
-                    Mais ações
-                    </TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => {/* lógica editar */}}>
-                    Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => {/* lógica excluir */}}>
-                    Excluir
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-            )}
-        </div>
-    )
+interface AdminSecaoSubCategOptionsProps {
+  empresaId: number;
+  codCategoria: number;
+  subcategoriaId: number
 }
 
+const AdminSecaoSubCategOptions = ({ empresaId, codCategoria, subcategoriaId }: AdminSecaoSubCategOptionsProps) => {
+  const { isAdmin } = useUserContext();
+  const [openModalAddProduto, setOpenModalAddProduto] = useState(false);
 
-export default AdminSecaoSubCategOptions
+  if (!isAdmin) return null;
+
+  return (
+    <div className="ml-auto">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Settings size={18} className="mx-4 mt-1 h-full cursor-pointer" />
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={() => setOpenModalAddProduto(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar Produto
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => {}}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar Seção
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => {}}>
+            Excluir
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ModalNovoProduto
+        open={openModalAddProduto}
+        onOpenChange={setOpenModalAddProduto}
+        empresaId={empresaId}
+        codCategoria={codCategoria}     // ✅ agora envia também
+        subcategoriaId={subcategoriaId}
+      />
+    </div>
+  );
+};
+
+export default AdminSecaoSubCategOptions;

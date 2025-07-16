@@ -18,7 +18,7 @@ interface ModalCategoriaProps {
   titulo?: string;
 }
 
-export const ModalAddCategoria = ({
+export const ModalAdminAddCategoria = ({
   open,
   onOpenChange,
   parentSlug = null,

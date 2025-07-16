@@ -53,7 +53,7 @@ export default function CategoriaPage() {
         return mesmaCategoria && mesmaSubcategoria;
       });
 
-      const bgClass = index % 2 === 0 ? "bg-muted-foreground/20" : "bg-muted";
+      const bgClass = index % 2 === 0 ? "bg-muted" : "bg-background";
 
       return (
         <ProductsSection

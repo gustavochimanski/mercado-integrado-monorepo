@@ -3,10 +3,10 @@
 import { CirclePlus } from "lucide-react";
 import { Card } from "../../Shared/ui/card";
 import { useState } from "react";
-import { ModalAddCategoria } from "../modals/ModalAddCategoria";
+import { ModalAdminAddCategoria } from "../modals/ModalAdminAddCategoria";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
-const CardAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) => {
+const CardAdminAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
 
@@ -27,7 +27,7 @@ const CardAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) 
         </span>
       </Card>
 
-      <ModalAddCategoria
+      <ModalAdminAddCategoria
         open={open}
         onOpenChange={setOpen}
         parentSlug={parentSlug}
@@ -37,4 +37,4 @@ const CardAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) 
   );
 };
 
-export default CardAddCategoria;
+export default CardAdminAddCategoria;

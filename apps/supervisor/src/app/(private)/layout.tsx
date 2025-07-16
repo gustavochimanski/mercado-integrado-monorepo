@@ -28,7 +28,7 @@ export function generateViewport() {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body suppressHydrationWarning>
+      <body >
         <ReactQueryProvider>
           <ProtectedRoute>
             <ClientLayout>{children}</ClientLayout>
