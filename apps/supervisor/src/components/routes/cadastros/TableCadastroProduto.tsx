@@ -11,7 +11,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { useCategorias } from "@supervisor/hooks/routes/cadastros/useCategoriasDelivery";
 import { ModalNovoProduto } from "@supervisor/components/routes/cadastros/ModalAddProduto";
 import { useFetchCadProdDelivery, useMutateProduto } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
-import { CircleCheckIcon, Trash2 } from "lucide-react";
+import { CircleCheckIcon, CirclePlus, Trash2 } from "lucide-react";
 
 interface Props {
   empresaId: number;
@@ -33,18 +33,6 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
   const columns: GridColDef[] = [
     { field: "cod_barras", headerName: "Código de Barras", flex: 1 },
     { field: "descricao", headerName: "Descrição", flex: 2 },
-    {
-      field: "imagem",
-      headerName: "Imagem",
-      flex: 1,
-      renderCell: (params) => (
-        <img
-          src={params.value as string}
-          alt={params.row.descricao}
-          style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 4 }}
-        />
-      ),
-    },
     {
       field: "preco_venda",
       headerName: "Preço",
@@ -120,10 +108,10 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
       {/* Botão fora do Card, sempre abaixo */}
       <CardFooter className="flex justify-start gap-4">
         <Button onClick={() => setModalOpen(true)}>
-          <CircleCheckIcon/> Novo Produto
+          <CirclePlus/> Novo Produto
         </Button>
-        <Button variant={"destructive"} onClick={() => setModalOpen(true)}>
-          /<Trash2/> Excluir Produto
+        <Button variant={"destructive"}>
+          <Trash2/> Excluir Produto
         </Button>
       </CardFooter>
 

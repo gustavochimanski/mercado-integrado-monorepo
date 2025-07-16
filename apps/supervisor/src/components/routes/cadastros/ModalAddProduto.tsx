@@ -1,7 +1,6 @@
 // src/components/modals/ModalNovoProduto.tsx
 "use client";
 
-import { useMutateProduto } from "@supervisor/app/(private)/cardapio/hooks/useQueryProduto";
 import { Button } from "@supervisor/components/ui/button";
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
 } from "@supervisor/components/ui/dialog";
 import { Input } from "@supervisor/components/ui/input";
 import { Label } from "@supervisor/components/ui/label";
+import { useMutateProduto } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -33,7 +33,7 @@ export const ModalNovoProduto = ({
   });
 
   // diretamente do hook, pois ele retorna UseMutationResult do create
-  const { mutate: createMutate, isPending: isCreating } = useMutateProduto();
+  const { create: createProductMutate } = useMutateProduto();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value } = e.target;
@@ -59,7 +59,7 @@ export const ModalNovoProduto = ({
     formData.append("custo", String(form.custo));
     if (form.imagem) formData.append("imagem", form.imagem);
 
-    createMutate(formData, {
+    createProductMutate.mutate({ formData }, {
       onSuccess: () => {
         onOpenChange(false);
         setForm({
@@ -149,8 +149,8 @@ export const ModalNovoProduto = ({
             />
           </div>
 
-          <Button type="submit" disabled={isCreating}>
-            {isCreating ? "Salvando..." : "Salvar Produto"}
+          <Button type="submit" disabled={createProductMutate.isPending}>
+            {createProductMutate.isPending ? "Salvando..." : "Salvar Produto"}
           </Button>
         </form>
       </DialogContent>

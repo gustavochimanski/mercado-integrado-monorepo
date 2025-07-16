@@ -1,5 +1,5 @@
 // src/services/useQueryProduto.ts
-import { TypeCadProdDeliveryResponse } from "@supervisor/app/(private)/cardapio/types/cadProdDeliveryType";
+import { TypeCadProdDeliveryResponse } from "@supervisor/types/routes/cadastros/cadProdDeliveryType";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

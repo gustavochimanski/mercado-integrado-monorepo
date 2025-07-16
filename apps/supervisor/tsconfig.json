@@ -2,11 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -30,13 +26,13 @@
     "typeRoots": ["./types", "./node_modules/@types"]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*",
     "next-auth.d.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-, "src/app/(private)/cadastros/components/tabs/caixas/pdvs/ComponentConfig.tsx", "**/*.ts", "**/*.tsx", "src/app/(private)/cadastros/components/tabs/produtos/columns.tss", "src/app/(private)/(dashboard)/components/participacaoEmpresas/DashCardParticipacaoEmpresas.tsx", "src/app/(private)/chatbot/hooks/useSaveChatBotConfig.xts"  ],
+  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/components/orizon/**",
   ]
 }

@@ -3,24 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Apple, Tag, List, Grid } from "lucide-react";
 
-import {
-  Sheet,
-  SheetOverlay,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@supervisor/components/ui/sheet";
-
-
 import { Button } from "@supervisor/components/ui/button";
 import {
   Card,
   CardContent,
 } from "@supervisor/components/ui/card";
-
-import ComponentProdutos from "./components/produtos/ComponentProdutosCardapio";
-import CategoriaComponent from "./components/categorias/ComponentCategoria";
-import ComponentSecoes from "./components/secoes/ComponentSecoes";
 import { getCookie } from "cookies-next";
 
 export default function PageAdminCardapio() {
@@ -108,77 +95,6 @@ export default function PageAdminCardapio() {
         </Card>
       </main>
 
-
-
-
-      {/* Sheet de Produtos */}
-      <Sheet
-        open={openSheet === "produtos"}
-        onOpenChange={(open) => setOpenSheet(open ? "produtos" : null)}
-        modal={false}
-      >
-        <SheetOverlay className="fixed inset-0 bg-black/30 pointer-events-none z-40" />
-        <SheetContent
-          side="right"
-        >
-          <SheetHeader className="flex items-center justify-between p-4 border-b">
-            <SheetTitle>Produtos</SheetTitle>
-          </SheetHeader>
-          <ComponentProdutos />
-        </SheetContent>
-      </Sheet>
-
-      {/* Sheet de Promoções */}
-      <Sheet
-        open={openSheet === "promocoes"}
-        onOpenChange={(open) => setOpenSheet(open ? "promocoes" : null)}
-        modal={false}
-      >
-        <SheetOverlay className="fixed inset-0 bg-black/30 pointer-events-none z-40" />
-        <SheetContent
-          side="right"
-        >
-          <SheetHeader className="flex items-center justify-between p-4 border-b">
-          </SheetHeader>
-          Promocoes
-        </SheetContent>
-      </Sheet>
-
-      {/* Sheet de Categorias */}
-      <Sheet
-        open={openSheet === "categorias"}
-        onOpenChange={(open) => setOpenSheet(open ? "categorias" : null)}
-        modal={false}
-      >
-        <SheetOverlay className="fixed inset-0 bg-black/30 pointer-events-none z-40" />
-        <SheetContent
-          side="right"
-          className="fixed top-0 right-0 h-screen w-[500px] bg-background z-50 overflow-auto"
-        >
-          <SheetHeader className="flex items-center justify-between p-4 border-b">
-            <SheetTitle>Categorias</SheetTitle>
-          </SheetHeader>
-          <CategoriaComponent />
-        </SheetContent>
-      </Sheet>
-
-      {/* Sheet de Seções */}
-      <Sheet
-        open={openSheet === "secoes"}
-        onOpenChange={(open) => setOpenSheet(open ? "secoes" : null)}
-        modal={false}
-      >
-        <SheetOverlay className="fixed inset-0 bg-black/30 pointer-events-none z-40" />
-        <SheetContent
-          side="right"
-          className="fixed top-0 right-0 h-screen w-[500px] bg-background z-50 overflow-auto"
-        >
-          <SheetHeader className="flex items-center justify-between p-4 border-b">
-            <SheetTitle>Seções</SheetTitle>
-          </SheetHeader>
-          <ComponentSecoes empresaId={1}/>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

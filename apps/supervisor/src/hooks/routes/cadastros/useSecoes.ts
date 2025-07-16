@@ -1,6 +1,6 @@
 // src/services/useSubcategorias.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateSecaoDTO, SecaoDelivery } from "../types/subCategSecoesType";
+import { CreateSecaoDTO, SecaoDelivery } from "../../../types/routes/cadastros/subCategSecoesType";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 
 // ✅ GET Subcategorias
