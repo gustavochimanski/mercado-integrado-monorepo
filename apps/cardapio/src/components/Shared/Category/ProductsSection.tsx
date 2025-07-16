@@ -8,10 +8,9 @@ import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/SecaoS
 import { ProductCard } from "../card/ProductCard";
 
 import {
-  Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "@cardapio/components/Shared/ui/accordion";
 import { Button } from "../ui/button";
 
@@ -36,12 +35,13 @@ export default function ProductsSection({
   bgClass,
   modoAccordion = true,
 }: Props) {
-  // 1) Ref e estados para controlar setas
+  // referências e estados
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const contentRef   = useRef<HTMLDivElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft]   = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // 2) Função que atualiza flags de scroll
+  // atualiza flags de scroll
   const updateScrollButtons = () => {
     const el = containerRef.current;
     if (!el) return;
@@ -49,26 +49,54 @@ export default function ProductsSection({
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth);
   };
 
+  // 1) monta listeners de scroll/resize no container
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // atualiza na montagem
+    // já calcula na montagem (ou quando produtos mudarem)
     updateScrollButtons();
-    // escuta scroll e resize
+
     el.addEventListener("scroll", updateScrollButtons);
     window.addEventListener("resize", updateScrollButtons);
     return () => {
       el.removeEventListener("scroll", updateScrollButtons);
       window.removeEventListener("resize", updateScrollButtons);
     };
-  }, [produtos]); // re-analisar se a lista mudar
+  }, [produtos]);
 
-  // Handler de scroll
+  // 2) MutationObserver para detectar quando o AccordionContent abre
+  useEffect(() => {
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (
+          m.type === "attributes" &&
+          contentEl.getAttribute("data-state") === "open"
+        ) {
+          // delay curto pra o conteúdo renderizar/animar
+          setTimeout(updateScrollButtons, 100);
+        }
+      }
+    });
+
+    observer.observe(contentEl, {
+      attributes: true,
+      attributeFilter: ["data-state"],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // scroll suave
   const scrollBy = (distance: number) => {
     containerRef.current?.scrollBy({ left: distance, behavior: "smooth" });
   };
 
-  // JSX compartilhado para o container de produtos + setas
+  // JSX compartilhado: container + setas
   const ScrollContainer = (
     <div className="relative w-full">
       <div
@@ -88,11 +116,6 @@ export default function ProductsSection({
         />
       </div>
 
-      {/*
-        3) Setas condicionais:
-        - Esquerda se canScrollLeft
-        - Direita se canScrollRight
-      */}
       {canScrollLeft && (
         <button
           className="absolute left-2 top-1/2 -translate-y-1/2 bg-background border border-border rounded-full shadow p-1 hover:bg-muted transition"
@@ -116,9 +139,10 @@ export default function ProductsSection({
     </div>
   );
 
+  // versão com Accordion
   if (modoAccordion) {
     return (
-      <AccordionItem value={value} className={`${bgClass}`}>
+      <AccordionItem value={value} className={bgClass}>
         <AccordionTrigger
           className="text-xl font-bold"
           rightElement={
@@ -143,7 +167,7 @@ export default function ProductsSection({
           </div>
         </AccordionTrigger>
 
-        <AccordionContent>
+        <AccordionContent ref={contentRef}>
           {ScrollContainer}
         </AccordionContent>
       </AccordionItem>
@@ -152,7 +176,7 @@ export default function ProductsSection({
 
   // versão plana sem Accordion
   return (
-    <div className={`${bgClass}`}>
+    <div className={bgClass}>
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="flex">
           {categoriaLabel}
