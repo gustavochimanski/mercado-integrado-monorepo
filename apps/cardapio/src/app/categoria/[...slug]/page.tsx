@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { useCategoriasDelivery } from "@cardapio/hooks/useCategoriasDelivery";
@@ -18,15 +18,49 @@ import ProductsSection from "@cardapio/components/Shared/Category/ProductsSectio
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
+  const [secaoAtiva, setSecaoAtiva] = useState<string | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const sorted = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (sorted.length > 0) {
+          const id = sorted[0].target.id;
+          setSecaoAtiva(id);
+
+          const button = document.querySelector(`[data-scroll-button='${id}']`);
+          if (button) {
+            button.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+          }
+        }
+      },
+      {
+        rootMargin: "-30% 0px -50% 0px", // foco no meio da tela
+        threshold: 0.25,
+      }
+    );
+
+    const sections = document.querySelectorAll("[id^='secao-']");
+    sections.forEach((secao) => observer.observe(secao));
+
+    return () => {
+      sections.forEach((secao) => observer.unobserve(secao));
+    };
+  }, []);
+
+
 
   const router = useRouter();
   const empresaId = 1;
-
+  
   const params = useParams<{ slug?: string | string[] }>();
   const slugAtual = Array.isArray(params.slug)
-    ? params.slug[params.slug.length - 1]
-    : params.slug ?? "";
-
+  ? params.slug[params.slug.length - 1]
+  : params.slug ?? "";
+  
   const { data: categorias = [], isLoading } = useCategoriasDelivery(empresaId);
 
   const categoriaAtual = categorias.find((cat) => cat.slug === slugAtual);
@@ -79,9 +113,11 @@ export default function RouteCategoryPage() {
     );
   }
 
+
+
   return (
     <div className="min-h-screen flex flex-col gap-4">
-      <HeaderComponent />
+      {/* <HeaderComponent /> */}
 
       <Button onClick={router.back} variant="link" className="mr-auto">
         <CircleArrowLeft /> Voltar
@@ -102,25 +138,23 @@ export default function RouteCategoryPage() {
           <div className="overflow-x-auto whitespace-nowrap hide-scrollbar sticky top-0 z-50 bg-background shadow-sm py-2 px-2 h-22">
             <div className="flex gap-2">
               {vitrines.map((vitrine) => (
-                <button
+                <Button
+                  variant={"ghost"}
                   key={vitrine.id}
+                  data-scroll-button={`secao-${vitrine.id}`}
                   onClick={() => {
                     const target = document.getElementById(`secao-${vitrine.id}`);
-                    const header = document.querySelector("header"); // seu header sticky
-
-                    if (target && header) {
-                      const headerHeight = header.getBoundingClientRect().height;
-                      const targetY = target.getBoundingClientRect().top + window.pageYOffset;
-                      const scrollY = targetY - headerHeight - 8; // 8px de margem opcional
-
-                      window.scrollTo({ top: scrollY, behavior: "smooth" });
-                    }
+                    target?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-
-                  className="px-4 py-1 text-sm font-medium bg-muted rounded-full hover:bg-muted/80 transition"
+                  className={`px-4 py-1 text-sm font-medium rounded-full transition
+                    ${secaoAtiva === `secao-${vitrine.id}` 
+                      ? "bg-primary text-white" 
+                      : "bg-muted hover:bg-muted/80"}
+                  `}
                 >
                   {vitrine.titulo}
-                </button>
+                </Button>
+
               ))}
             </div>
           </div>
