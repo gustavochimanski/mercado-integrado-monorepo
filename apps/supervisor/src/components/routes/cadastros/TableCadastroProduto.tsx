@@ -38,51 +38,19 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
       headerName: "Preço",
       flex: 1,
       type: "number",
-      valueFormatter: ({ value }) =>
-        Number(value).toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        }),
+      editable: true
+
     },
     {
       field: "custo",
       headerName: "Custo",
       flex: 1,
       type: "number",
-      valueFormatter: ({ value }) =>
-        value != null
-          ? Number(value).toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })
-          : "-",
     },
     {
       field: "label_categoria",
       headerName: "Categoria",
       flex: 2,
-      renderCell: (params) => (
-        <Select
-          value={params.row.cod_categoria ?? ""}
-          onChange={(e) => {
-            const newCatId = Number(e.target.value);
-            const formData = new FormData();
-            formData.append("cod_categoria", String(newCatId));
-            updateProduto.mutate({
-              cod_barras: params.row.cod_barras,
-              formData,
-            });
-          }}
-          fullWidth
-          disabled={updateProduto.isPending}
-        >
-          {categorias.map((cat) => (
-            <MenuItem key={cat.id} value={cat.id}>
-              {cat.label}
-            </MenuItem>
-          ))}
-        </Select>
-      ),
     },
   ];
 

@@ -13,7 +13,7 @@ import { getCookie } from "cookies-next";
 export default function PageAdminCardapio() {
   // "produtos" | "promocoes" | "categorias" | "secoes" | null
   const [openSheet, setOpenSheet] = useState<"produtos" | "promocoes" | "categorias" | "secoes" | null>(null);
-  
+
   const linkProd = "https://mercado-integrado-monorepo-cardapio.vercel.app/?via=supervisor"
   const linkDev = "http://localhost:3000/?via=supervisor"
 
@@ -51,43 +51,19 @@ export default function PageAdminCardapio() {
         >
           <Apple className="w-5 h-5 mr-2" /> Produtos
         </Button>
-
-        <Button
-          variant="ghost"
-          className="justify-start"
-          onClick={() => setOpenSheet("promocoes")}
-        >
-          <Tag className="w-5 h-5 mr-2" /> Promoções
-        </Button>
-
-        <Button
-          variant="ghost"
-          className="justify-start"
-          onClick={() => setOpenSheet("categorias")}
-        >
-          <List className="w-5 h-5 mr-2" /> Categorias
-        </Button>
-
-        <Button
-          variant="ghost"
-          className="justify-start"
-          onClick={() => setOpenSheet("secoes")}
-        >
-          <Grid className="w-5 h-5 mr-2" /> Seções
-        </Button>
       </aside>
 
       <main className="flex-1 p-6 justify-start">
-        <Card className="h-full flex flex-col">
+        <Card className="h-full flex flex-col ">
 
-          <CardContent className="flex-1 flex justify-start items-start min-h-0">
+          <CardContent className="flex-1 flex justify-start items-center min-h-0">
             <div className="flex flex-col w-[390px] h-full min-h-0 border rounded-xl overflow-hidden shadow-md bg-white">
               <div className="bg-gray-100 p-2 text-sm font-medium text-center">
                 Preview do cardápio
               </div>
               <iframe
                 ref={iframeRef}
-                src={linkDev}
+                src={linkProd}
                 className="w-full flex-1"
               />
             </div>
