@@ -10,6 +10,7 @@ export function useCategorias() {
       const res = await apiAdmin.get("/mensura/categorias/delivery");
       return res.data;
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
