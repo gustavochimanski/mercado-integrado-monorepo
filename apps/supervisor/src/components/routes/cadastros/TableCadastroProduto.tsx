@@ -5,13 +5,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@superviso
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import type { GridColDef } from "@mui/x-data-grid";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 
 import { useCategorias } from "@supervisor/hooks/routes/cadastros/useCategoriasDelivery";
 import { ModalNovoProduto } from "@supervisor/components/routes/cadastros/ModalAddProduto";
 import { useFetchCadProdDelivery, useMutateProduto } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
-import { CircleCheckIcon, CirclePlus, Trash2 } from "lucide-react";
+import { CirclePlus, Trash2 } from "lucide-react";
 
 interface Props {
   empresaId: number;

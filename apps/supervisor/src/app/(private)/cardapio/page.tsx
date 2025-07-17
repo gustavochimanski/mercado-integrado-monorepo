@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Apple, Tag, List, Grid } from "lucide-react";
+import {  Store } from "lucide-react";
 
 import { Button } from "@supervisor/components/ui/button";
 import {
@@ -12,8 +12,8 @@ import { getCookie } from "cookies-next";
 
 export default function PageAdminCardapio() {
   // "produtos" | "promocoes" | "categorias" | "secoes" | null
-  const [openSheet, setOpenSheet] = useState<"produtos" | "promocoes" | "categorias" | "secoes" | null>(null);
-
+  const [openSheet, setOpenSheet] = useState<"Loja" | "promocoes" | "categorias" | "secoes" | null>(null);
+    
   const linkProd = "https://mercado-integrado-monorepo-cardapio.vercel.app/?via=supervisor"
   const linkDev = "http://localhost:3000/?via=supervisor"
 
@@ -47,9 +47,9 @@ export default function PageAdminCardapio() {
         <Button
           variant="ghost"
           className="justify-start"
-          onClick={() => setOpenSheet("produtos")}
+          onClick={() => setOpenSheet("Loja")}
         >
-          <Apple className="w-5 h-5 mr-2" /> Produtos
+          <Store className="w-5 h-5 mr-2" /> Loja
         </Button>
       </aside>
 

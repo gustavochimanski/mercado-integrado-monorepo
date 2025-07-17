@@ -26,7 +26,7 @@ const AdminSecaoSubCategOptions = ({ empresaId, codCategoria, subcategoriaId }: 
     <div className="ml-auto">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-            <Settings size={18} className="mx-4 mt-1 h-full cursor-pointer" />
+            <Settings size={18} className="mx-4 h-full cursor-pointer" />
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end">

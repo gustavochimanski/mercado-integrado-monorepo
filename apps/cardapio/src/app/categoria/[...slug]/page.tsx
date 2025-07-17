@@ -15,7 +15,7 @@ import { CircleArrowLeft } from "lucide-react";
 import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddSecaoSubCateg";
 import ProductsSection from "@cardapio/components/Shared/Category/ProductsSection";
 
-export default function CategoriaPage() {
+export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
 
