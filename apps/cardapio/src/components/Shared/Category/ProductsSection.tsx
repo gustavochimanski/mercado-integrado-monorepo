@@ -142,7 +142,7 @@ export default function ProductsSection({
   // versão com Accordion
   if (modoAccordion) {
     return (
-      <AccordionItem value={value} className={bgClass}>
+      <AccordionItem value={value} className={bgClass} id={`secao-${subcategoriaId}`}>
         <AccordionTrigger
           className="text-xl font-bold"
           rightElement={
@@ -176,7 +176,7 @@ export default function ProductsSection({
 
   // versão plana sem Accordion
   return (
-    <div className={bgClass}>
+    <div className={bgClass} id={`secao-${subcategoriaId}`}>
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="flex">
           {categoriaLabel}

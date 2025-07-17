@@ -97,7 +97,36 @@ export default function RouteCategoryPage() {
           />
         )}
 
-        {vitrines.length > 5 ? (
+        {/* 🧭 Atalhos de seções */}
+        {vitrines.length > 0 && (
+          <div className="overflow-x-auto whitespace-nowrap hide-scrollbar sticky top-0 z-50 bg-background shadow-sm py-2 px-2 h-22">
+            <div className="flex gap-2">
+              {vitrines.map((vitrine) => (
+                <button
+                  key={vitrine.id}
+                  onClick={() => {
+                    const target = document.getElementById(`secao-${vitrine.id}`);
+                    const header = document.querySelector("header"); // seu header sticky
+
+                    if (target && header) {
+                      const headerHeight = header.getBoundingClientRect().height;
+                      const targetY = target.getBoundingClientRect().top + window.pageYOffset;
+                      const scrollY = targetY - headerHeight - 8; // 8px de margem opcional
+
+                      window.scrollTo({ top: scrollY, behavior: "smooth" });
+                    }
+                  }}
+
+                  className="px-4 py-1 text-sm font-medium bg-muted rounded-full hover:bg-muted/80 transition"
+                >
+                  {vitrine.titulo}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {vitrines.length > 10 ? (
           <Accordion type="single" collapsible className="w-full">
             {renderVitrines(true)}
           </Accordion>

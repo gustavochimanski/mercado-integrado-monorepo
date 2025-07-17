@@ -1,7 +1,8 @@
 // src/components/Footer/FooterComponent.tsx
 
-import { Home, Tag, ClipboardPen, Apple, CircleUser } from "lucide-react";
+import { Home, Tag, ClipboardPen,  CircleUser, Search } from "lucide-react";
 import Link from "next/link";
+import { Button } from "./ui/button";
 
 const FooterComponent = () => {
   return (
@@ -16,11 +17,16 @@ const FooterComponent = () => {
         <Tag size={18} />
         <span className="text-xs">Promoções</span>
       </Link>
-      {/* Categorias */}
-      <Link href="/categorias" className="flex flex-col items-center gap-1 hover:text-secondary transition">
-        <Apple size={18} />
-        <span className="text-xs">Categorias</span>
-      </Link>
+      {/* FAB central: Pesquisar */}
+      <div className="relative -top-6 z-50">
+        <Button
+          className="w-14 h-14 bg-background text-primary rounded-full flex flex-col items-center justify-center shadow-lg border-1 border-primary transition hover:bg-muted"
+        >
+          <Search size={20} />
+          <span className="text-[10px] font-medium leading-none">Buscar</span>
+        </Button>
+      </div>
+
       {/* Pedidos */}
       <Link href="/pedidos" className="flex flex-col items-center gap-1 hover:text-secondary transition">
         <ClipboardPen size={18} />
