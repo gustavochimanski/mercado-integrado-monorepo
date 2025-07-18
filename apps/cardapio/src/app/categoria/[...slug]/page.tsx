@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useCardapio } from "@cardapio/hooks/useCategoriasDelivery";
+import { useCardapio } from "@cardapio/hooks/useCardapio";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import CategoryScrollSection from "@cardapio/components/Shared/Category/categoryScrollSection";

@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useCategoriasDelivery } from "@cardapio/hooks/useCategoriasDelivery";
+import { useCategoriasDelivery } from "@cardapio/hooks/useCardapio";
 import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
 import Image from "next/image";
 

@@ -8,15 +8,15 @@ import { ProdutoEmpMini } from "../types/Produtos";
 import CategoryScrollSection from "../components/Shared/Category/categoryScrollSection";
 import HeaderComponent from "../components/Shared/Header";
 import { SheetAdicionarProduto } from "../components/Shared/Sheet/SheetAddProduto";
-import { useCategoriasDelivery } from "../hooks/useCategoriasDelivery";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
+import { useCardapio } from "@cardapio/hooks/useCardapio";
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
 
   const empresaId = 1;
-  const { data: categorias = [] } = useCategoriasDelivery(empresaId);
+  const { data: categorias = [] } = useCardapio(empresaId);
   const categoriasRaiz = categorias.filter((cat) => cat.slug_pai === null);
 
   function handleAdd(produto: ProdutoEmpMini, quantity: number) {
