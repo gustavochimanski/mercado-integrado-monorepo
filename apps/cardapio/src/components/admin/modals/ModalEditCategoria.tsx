@@ -10,9 +10,9 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useCategoriasDelivery } from "@cardapio/hooks/useCardapio";
 import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
 import Image from "next/image";
+import { useCardapio } from "@cardapio/hooks/useCardapio";
 
 interface ModalEditCategoriaProps {
   open: boolean;
@@ -32,7 +32,7 @@ export const ModalEditCategoria = ({
     data: categorias = [],
     isLoading,
     isError,
-  } = useCategoriasDelivery(empresaId);
+  } = useCardapio(empresaId);
 
   // 2) Encontra a categoria selecionada
   const categoria = categorias.find((c) => c.id === categoriaId);
