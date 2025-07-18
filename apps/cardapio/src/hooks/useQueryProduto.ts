@@ -5,13 +5,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface CreateProdutoBody {
+  cod_empresa: number;
   formData: FormData;
 }
 
 interface UpdateProdutoBody {
+  cod_empresa: number;
   cod_barras: string;
   formData: FormData;
 }
+
 
 export function useFetchCadProdDelivery(
   cod_empresa: number,
@@ -33,8 +36,10 @@ export function useMutateProduto() {
   const qc = useQueryClient();
 
   const create = useMutation({
-    mutationFn: async ({ formData }: CreateProdutoBody) => {
+    mutationFn: async ({ cod_empresa, formData }: CreateProdutoBody) => {
       try {
+        formData.append("cod_empresa", String(cod_empresa));
+
         const { data } = await apiAdmin.post(
           "/mensura/produtos/delivery",
           formData
@@ -56,8 +61,10 @@ export function useMutateProduto() {
   });
 
   const update = useMutation({
-    mutationFn: async ({ cod_barras, formData }: UpdateProdutoBody) => {
+    mutationFn: async ({ cod_barras, cod_empresa, formData }: UpdateProdutoBody) => {
       try {
+        formData.append("cod_empresa", String(cod_empresa));
+
         const { data } = await apiAdmin.put(
           `/mensura/produtos/delivery/${cod_barras}`,
           formData
@@ -77,6 +84,7 @@ export function useMutateProduto() {
       qc.invalidateQueries({ queryKey: ["produtos"], exact: false });
     },
   });
+
 
   const remove = useMutation({
     mutationFn: async (cod_barras: string) => {

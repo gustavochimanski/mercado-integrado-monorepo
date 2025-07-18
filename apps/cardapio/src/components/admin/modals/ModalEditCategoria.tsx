@@ -59,6 +59,7 @@ export const ModalEditCategoria = ({
 
     update.mutate(
       {
+        cod_empresa: empresaId,
         id: categoriaId,
         descricao,
         imagem: imagemFile,

@@ -24,7 +24,7 @@ export default function RouteCategoryPage() {
 
   const { data: categorias = [], isLoading } = useCardapio(empresaId);
 
-  // ─── MEMOIZAÇÕES ───────────────────────────────────────────────────────────────
+  // ─── MEMORIZAÇÕES ───────────────────────────────────────────────────────────────
   const categoriaAtual = useMemo(
     () => categorias.find((cat) => cat.slug === slugAtual),
     [categorias, slugAtual]

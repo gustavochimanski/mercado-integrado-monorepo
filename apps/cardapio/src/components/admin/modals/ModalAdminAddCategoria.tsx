@@ -26,6 +26,8 @@ export const ModalAdminAddCategoria = ({
   const [descricao, setDescricao] = useState("");
   const [imagem, setImagem] = useState<File | undefined>(undefined);
 
+  const cod_empresa = 1
+
   const { createSub } = useMutateCategoria(parentSlug);
   const isLoading = createSub.isPending;
 
@@ -33,7 +35,10 @@ export const ModalAdminAddCategoria = ({
     if (!descricao.trim()) return;
 
     createSub.mutate(
-      { descricao, imagem },
+      {
+        descricao, imagem,
+        cod_empresa: cod_empresa
+      },
       {
         onSuccess: () => {
           setDescricao("");

@@ -66,7 +66,7 @@ export const ModalNovoProduto = ({
     formData.append("custo", String(form.custo));
     if (form.imagem) formData.append("imagem", form.imagem);
 
-    createProduct.mutate({ formData }, {
+    createProduct.mutate({ cod_empresa: empresaId, formData }, {
       onSuccess: () => {
         onOpenChange(false);
         setForm({
