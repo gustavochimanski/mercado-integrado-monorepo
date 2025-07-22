@@ -31,7 +31,7 @@ export default function CategoryScrollSection({
           <CategoryCard
             key={cat.id}
             id={cat.id}
-            label={cat.descricao}
+            label={cat.label}
             image={cat.imagem}
             href={
               cat.slug_pai

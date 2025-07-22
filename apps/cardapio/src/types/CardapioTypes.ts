@@ -13,10 +13,7 @@ export type CategoriaComProdutos = {
   id: number;
   slug: string;
   slug_pai: string | null;
-  descricao: string;
+  label: string;
   imagem: string | null;
-  destacar_em_slug: string | null;
   href: string;
-  produtos: ProdutoEmpMini[];
-  vitrines?: VitrineConfig[]; // aparece só na categoria raiz
 };

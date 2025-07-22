@@ -5,7 +5,7 @@ export const fetchCache = "force-no-store";
 
 import { useState } from "react";
 import { ProdutoEmpMini } from "../types/Produtos";
-import CategoryScrollSection from "../components/Shared/Category/categoryScrollSection";
+import CategoryScrollSection from "../components/Shared/section/categoryScrollSection";
 import HeaderComponent from "../components/Shared/Header";
 import { SheetAdicionarProduto } from "../components/Shared/Sheet/SheetAddProduto";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
