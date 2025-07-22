@@ -62,9 +62,8 @@ export default function PageAdminCardapio() {
                 Preview do cardápio
               </div>
               <iframe
-                id="cardapio-preview"
                 ref={iframeRef}
-                src={linkDev}
+                src={linkProd}
                 className="w-full flex-1"
               />
             </div>
