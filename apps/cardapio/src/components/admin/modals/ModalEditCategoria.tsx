@@ -48,7 +48,7 @@ export const ModalEditCategoria = ({
   // 5) Popula o form quando a categoria carrega
   useEffect(() => {
     if (categoria) {
-      setDescricao(categoria.descricao);
+      setDescricao(categoria.label);
       setImagemFile(undefined);
     }
   }, [categoria]);

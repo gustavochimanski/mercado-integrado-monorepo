@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useCreateSubcategoria } from "@cardapio/hooks/useSecoes";
+import { useMutateSubcategoria } from "@cardapio/hooks/useSecoes";
 import { Label } from "@cardapio/components/Shared/ui/label";
 
 interface ModalAddSecaoProps {
@@ -29,8 +29,7 @@ export const ModalAddSecao = ({
   const [titulo, setTitulo] = useState("");
   const [ordem, setOrdem] = useState(0); // valor inicial padrão
 
-  const create = useCreateSubcategoria();
-  const isLoading = create.isPending;
+  const { create }  = useMutateSubcategoria();
 
   function handleSubmit() {
     if (!titulo.trim()) return;
@@ -83,8 +82,8 @@ export const ModalAddSecao = ({
             onChange={(e) => setOrdem(Number(e.target.value))}
           />
 
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? "Criando..." : "Criar"}
+          <Button onClick={handleSubmit} disabled={create.isPending}>
+            {create.isPending ? "Criando..." : "Criar"}
           </Button>
         </div>
       </DialogContent>

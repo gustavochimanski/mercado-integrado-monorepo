@@ -61,6 +61,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
       toast.success("Categoria criada com sucesso!");
+      setTimeout(() => window.location.reload(), 800);
     },
     onError: () => {
       toast.error("Erro ao criar categoria.");
@@ -74,6 +75,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
       toast.success("Categoria atualizada com sucesso!");
+      setTimeout(() => window.location.reload(), 800);
     },
     onError: () => {
       toast.error("Erro ao atualizar categoria.");
@@ -87,6 +89,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
       toast.success("Categoria removida com sucesso!");
+      setTimeout(() => window.location.reload(), 800);
     },
     onError: () => {
       toast.error("Erro ao remover categoria.");
@@ -100,6 +103,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
       toast.success("Categoria movida para a direita!");
+      setTimeout(() => window.location.reload(), 800);
     },
     onError: () => {
       toast.error("Erro ao mover categoria para a direita.");
@@ -113,6 +117,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
       toast.success("Categoria movida para a esquerda!");
+      setTimeout(() => window.location.reload(), 800);
     },
     onError: () => {
       toast.error("Erro ao mover categoria para a esquerda.");

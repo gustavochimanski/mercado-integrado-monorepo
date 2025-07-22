@@ -10,6 +10,7 @@ import { SheetAdicionarProduto } from "@cardapio/components/Shared/Sheet/SheetAd
 import { CircleArrowLeft } from "lucide-react";
 import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddSecaoSubCateg";
 import ProductsSection from "@cardapio/components/Shared/section/ProductsSection";
+import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -46,7 +47,7 @@ export default function RouteCategoryPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <span className="text-lg">Carregando categoria e produtos…</span>
+        <LoadingSpinner/>
       </div>
     );
   }
