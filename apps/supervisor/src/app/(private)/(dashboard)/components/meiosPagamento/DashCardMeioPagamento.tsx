@@ -19,7 +19,7 @@ interface Props {
   data: MeioPagamentoItem[];
 }
 
-export function ComponentMeioPagamento({ data }: Props) {
+export default function ComponentMeioPagamento({ data }: Props) {
 
   const coresMeiosPagamento: Record<string, string> = {
     "PIX": "var(--chart-1)",

@@ -27,8 +27,8 @@ export default function TabelaParticipacaoDepartamentos({ data }: Props) {
             <TableRow>
                 <TableHead></TableHead> {/* coluna da bolinha */}
                 <TableHead>Departamento</TableHead>
-                <TableHead className="text-right">Vendas (R$)</TableHead>
-                <TableHead className="text-right">% Participação</TableHead>
+                <TableHead className="text-right">Vendas</TableHead>
+                <TableHead className="text-right">Part %</TableHead>
             </TableRow>
             </TableHeader>
 

@@ -3,9 +3,9 @@
 import { TypeDashboardResponse } from "../types/typeDashboard";
 import CompanyMetricCards from "./metrics/DashCardCompanyMetricCards";
 import { dashboardMock } from "./meiosPagamento/mock";
-import { ComponentMeioPagamento } from "./meiosPagamento/DashCardMeioPagamento";
 import VendasPorHoraChart from "./vendasPorHora/ComponentChartVendasbyHour";
 import DashCardClientesPorHoraChart from "./clientesPorHora/DashCardClientePorHora";
+import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 
 
 interface Props {
