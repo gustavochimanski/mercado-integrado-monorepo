@@ -1,10 +1,11 @@
 // components/shared/TabsWrapper.tsx
 'use client';
 
-import Tabs from "@supervisor/components/shared/tabs/tabs";
+import Tabs, { TabItem } from "./tabs";
+
 
 interface TabsWrapperProps {
-  items: any[];
+  items: TabItem[];
 }
 
 export default function TabsWrapper({ items }: TabsWrapperProps) {

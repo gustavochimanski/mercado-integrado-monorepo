@@ -1,4 +1,3 @@
-"use client"
 // app/seu-caminho/page.tsx (Server Component)
 import { Barcode, Network, RefreshCcwDot, Waypoints } from "lucide-react";
 import ComponentComunicacao from "./components/comunicacao/ComponentComunicacao";
@@ -19,7 +18,7 @@ const PageProcessos = async () => {
           <Network size={14} /> Central NFCE
         </span>
       ),
-      Component: () =><ComponentCentralNFCE  dados={dadosCentralNFCE}/>,
+      content: <ComponentCentralNFCE  dados={dadosCentralNFCE}/>,
     },
     {
       value: "etiquetas",
@@ -28,7 +27,7 @@ const PageProcessos = async () => {
           <Barcode size={14} /> Etiquetas
         </span>
       ),
-      Component: () =><ComponentEtiquetas/>,
+      content: <ComponentEtiquetas/>,
     },
     {
       value: "caixas",
@@ -37,7 +36,7 @@ const PageProcessos = async () => {
           <Waypoints size={14} /> Comunicação
         </span>
       ),
-      Component: () =><ComponentComunicacao />,
+      content: <ComponentComunicacao />,
     },
     {
       value: "processamentos",
@@ -46,7 +45,7 @@ const PageProcessos = async () => {
           <RefreshCcwDot size={14} /> Processamentos
         </span>
       ),
-      Component:() => <ComponentProcessamentos />,
+      content: <ComponentProcessamentos />,
     }
   ];
 

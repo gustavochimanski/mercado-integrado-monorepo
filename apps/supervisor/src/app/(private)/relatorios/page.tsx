@@ -1,5 +1,3 @@
-"use client";
-
 import { Monitor } from "lucide-react";
 
 import Tabs from "@supervisor/components/shared/tabs/tabs";
@@ -13,7 +11,7 @@ const ComponentRelatorios: React.FC = () => {
             <Monitor size={14} /> Caixas
           </span>
         ),
-        Component: () => <div>Hello</div>,
+        content: <div>Hello</div>,
       }
     ];
   

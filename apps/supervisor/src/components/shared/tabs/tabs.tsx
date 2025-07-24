@@ -1,22 +1,31 @@
-"use client"
+"use client";
 
-import { useDraggableScroll } from "@supervisor/utils/effects/useDraggableScroll"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
-import React, { useState } from "react"
-import { cn } from "@supervisor/lib/utils"
+import { useDraggableScroll } from "@supervisor/utils/effects/useDraggableScroll";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import React, { useState } from "react";
+import { cn } from "@supervisor/lib/utils";
 
-interface TabItem {
-  value: string
-  label: React.ReactNode
-  Component: () => React.ReactNode  // ✅ AGORA É UMA FUNÇÃO
+interface TabItemBase {
+  value: string;
+  label: React.ReactNode;
 }
 
+export interface TabItemWithComponent extends TabItemBase {
+  Component: () => React.ReactNode; // usado no client (dinâmico)
+}
+
+export interface TabItemWithContent extends TabItemBase {
+  content: React.ReactNode; // usado no server (estático)
+}
+
+export type TabItem = TabItemWithComponent | TabItemWithContent;
+
 interface TabsProps {
-  items: TabItem[]
-  defaultValue?: string
-  containerClassName?: string
-  triggerClassName?: string
-  contentClassName?: string
+  items: TabItem[];
+  defaultValue?: string;
+  containerClassName?: string;
+  triggerClassName?: string;
+  contentClassName?: string;
 }
 
 const Tabs: React.FC<TabsProps> = ({
@@ -34,16 +43,16 @@ const Tabs: React.FC<TabsProps> = ({
     handleTouchStart,
     handleTouchMove,
     moved,
-  } = useDraggableScroll()
+  } = useDraggableScroll();
 
-  const [activeTab, setActiveTab] = useState(defaultValue || items[0].value)
+  const [activeTab, setActiveTab] = useState(defaultValue || items[0].value);
 
-  const activeItem = items.find((item) => item.value === activeTab)
+  const activeItem = items.find((item) => item.value === activeTab);
 
   return (
     <TabsPrimitive.Root
       defaultValue={defaultValue || items[0].value}
-      onValueChange={setActiveTab} // ✅ salva o valor ativo
+      onValueChange={setActiveTab}
       className={cn("flex flex-col h-full w-full border border-input", containerClassName)}
     >
       <TabsPrimitive.List
@@ -82,12 +91,14 @@ const Tabs: React.FC<TabsProps> = ({
             value={activeItem.value}
             className={cn("h-full w-full overflow-auto p-4 bg-background", contentClassName)}
           >
-            {activeItem.Component()}
+            {"Component" in activeItem
+              ? activeItem.Component()
+              : activeItem.content}
           </TabsPrimitive.Content>
         )}
       </div>
     </TabsPrimitive.Root>
-  )
-}
+  );
+};
 
-export default Tabs
+export default Tabs;
