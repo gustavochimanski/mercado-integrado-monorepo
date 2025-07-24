@@ -4,7 +4,7 @@ export const fetchCache = "force-no-store";
 
 import { useState, useCallback } from "react";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
-import { useCardapio } from "@cardapio/hooks/useCardapio";
+import { useCardapio } from "@cardapio/hooks/useQueryCardapio";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
 import { CartFab } from "@cardapio/components/Shared/cart/CartFab";

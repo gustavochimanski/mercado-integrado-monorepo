@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useCardapio } from "@cardapio/hooks/useCardapio";
+import { useCardapio } from "@cardapio/hooks/useQueryCardapio";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CircleArrowLeft } from "lucide-react";
@@ -92,7 +92,6 @@ export default function RouteCategoryPage() {
               onOpenSheet={openSheet}
               sectionRefFactory={register}
               onMeta={setVitrinesMeta}
-              isAdmin={true}
             />
 
             <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={categoriaAtual.id} />

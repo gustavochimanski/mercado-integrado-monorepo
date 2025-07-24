@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import LoadingSpinner from "../ui/loader";
 import ProductsVitrineSection from "./ProductsVitrineSection";
-import { useProdutosVitrinePorCategoria } from "@cardapio/hooks/useCardapio";
+import { useProdutosVitrinePorCategoria } from "@cardapio/hooks/useQueryCardapio";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 
 interface Props {
@@ -11,7 +11,6 @@ interface Props {
   onOpenSheet?: (p: ProdutoEmpMini) => void;
   sectionRefFactory?: (id: number) => (el: HTMLDivElement | null) => void;
   onMeta?: React.Dispatch<React.SetStateAction<{ id: number; titulo: string }[]>>;
-  isAdmin?: boolean;
 }
 
 export default function ProductsSection({
@@ -20,7 +19,6 @@ export default function ProductsSection({
   onOpenSheet,
   sectionRefFactory,
   onMeta,
-  isAdmin,
 }: Props) {
   const { data: vitrines = [], isLoading } = useProdutosVitrinePorCategoria(codCategoria, empresaId);
 
@@ -55,7 +53,6 @@ export default function ProductsSection({
           empresaId={empresaId}
           onOpenSheet={onOpenSheet}
           sectionRef={sectionRefFactory?.(vitrine.id)}
-          isAdmin={isAdmin}
         />
       ))}
     </>

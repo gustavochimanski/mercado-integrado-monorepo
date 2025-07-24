@@ -14,7 +14,6 @@ interface Props {
   empresaId: number;
   onOpenSheet?: (p: ProdutoEmpMini) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
-  isAdmin?: boolean;
 }
 
 export default function ProductsVitrineSection({
@@ -25,7 +24,6 @@ export default function ProductsVitrineSection({
   empresaId,
   onOpenSheet,
   sectionRef,
-  isAdmin,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -75,13 +73,13 @@ export default function ProductsVitrineSection({
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
-        {isAdmin && (
+        
           <AdminSecaoSubCategOptions
             subcategoriaId={vitrineId}
             empresaId={empresaId}
             codCategoria={codCategoria}
           />
-        )}
+       
       </div>
 
       <div className="relative">
@@ -109,18 +107,14 @@ export default function ProductsVitrineSection({
                 <ProductCard
                   produto={produto}
                   onOpenSheet={() => onOpenSheet?.(produto)}
-                  isAdmin={isAdmin}
                 />
               </div>
             ))}
-
-            {isAdmin && (
               <CardAddProduto
                 subcategoriaId={vitrineId}
                 codCategoria={codCategoria}
                 empresaId={empresaId}
               />
-            )}
           </div>
         </div>
       </div>

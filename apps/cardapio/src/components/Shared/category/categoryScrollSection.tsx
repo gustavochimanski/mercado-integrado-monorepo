@@ -21,20 +21,27 @@ export default function CategoryScrollSection({ categorias, titulo, parentSlug =
           <h2 className="text-xl font-bold mb-2">{titulo ?? "Categorias"}</h2>
         </div>
       )}
-      <div className="flex overflow-x-auto gap-4 pb-2 hide-scrollbar px-2">
-        {categorias.map((cat) => (
-          <CategoryCard
-            key={cat.id}
-            id={cat.id}
-            label={cat.label}
-            image={cat.imagem}
-            href={cat.slug_pai ? `/categoria/${cat.slug_pai}/${cat.slug}` : `/categoria/${cat.slug}`}
-            empresaId={empresaId}
-            isActive={activeId === cat.id}
-          />
-        ))}
-        <CardAdminAddCategoria parentSlug={parentSlug} />
+      <div className="relative px-2">
+        {/* Linha colorida só no topo */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/20 to-primary  rounded-t-xl z-10" />
+
+        <div className="relative flex overflow-x-auto gap-4 pb-2 hide-scrollbar rounded-xl z-20 px-4 py-2">
+          {categorias.map((cat) => (
+            <CategoryCard
+              key={cat.id}
+              id={cat.id}
+              label={cat.label}
+              image={cat.imagem}
+              href={cat.slug_pai ? `/categoria/${cat.slug_pai}/${cat.slug}` : `/categoria/${cat.slug}`}
+              empresaId={empresaId}
+              isActive={activeId === cat.id}
+            />
+          ))}
+          <CardAdminAddCategoria parentSlug={parentSlug} />
+        </div>
       </div>
+
+
     </section>
   );
 }

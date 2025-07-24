@@ -12,7 +12,7 @@ import {
 } from "@cardapio/components/Shared/ui/dialog";
 import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
 import Image from "next/image";
-import { useCardapio } from "@cardapio/hooks/useCardapio";
+import { useCardapio } from "@cardapio/hooks/useQueryCardapio";
 
 interface ModalEditCategoriaProps {
   open: boolean;
