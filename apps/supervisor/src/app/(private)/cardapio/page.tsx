@@ -54,7 +54,7 @@ export default function PageAdminCardapio() {
   // Links do cardápio
   const linkProd = "https://mercado-integrado-monorepo-cardapio.vercel.app";
   const linkDev = "http://localhost:3000";
-  const isDev = true;
+  const isDev = false;
 
   // Monta URL do iframe com base na empresa e ambiente
   const iframeUrl = empresaId
