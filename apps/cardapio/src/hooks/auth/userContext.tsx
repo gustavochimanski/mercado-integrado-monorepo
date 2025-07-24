@@ -10,9 +10,9 @@ import {
   useCallback,
 } from "react";
 import axios from "axios";
-import { getToken, setToken, clearToken } from "../token/tokenStore";
+import { getToken, setToken, clearToken } from "../../stores/token/tokenStore";
 import { loginService, logoutService } from "./authenticate";
-import { useReceiveTokenFromParent } from "../token/UseReceiveTokenFromParent";
+import { useReceiveTokenFromParent } from "../../stores/token/UseReceiveTokenFromParent";
 
 export interface User {
   id: string;

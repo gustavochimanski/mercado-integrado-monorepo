@@ -5,8 +5,8 @@ import { useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { Card } from "../../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { ModalAddSecao } from "../modals/ModalAddSecaoSubCateg";
 
-import { ModalAddSecao } from "../modals/ModalAddSecao";
 
 interface Props {
   empresaId: number;

@@ -11,7 +11,6 @@ export function useReceiveTokenFromParent(onTokenReceived?: () => void) {
     const listener = (event: MessageEvent) => {
       const { type, token } = event.data || {};
       if (type === "auth_token" && token) {
-        console.log("🔐 Token recebido:", token);
         setToken(token);
         onTokenReceived?.();
       }
@@ -19,5 +18,5 @@ export function useReceiveTokenFromParent(onTokenReceived?: () => void) {
 
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
-  }, [onTokenReceived]); // ✅ adiciona a dependência corretamente
+  }, [onTokenReceived]); 
 }

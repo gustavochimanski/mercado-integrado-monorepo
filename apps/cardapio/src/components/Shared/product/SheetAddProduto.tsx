@@ -14,8 +14,8 @@ import { Label } from "../ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { ProdutoEmpMini } from "../../../types/Produtos";
 import { Badge } from "../ui/badge";
+import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 
 const schema = z.object({
   quantity: z
@@ -33,7 +33,7 @@ interface SheetAdicionarProdutoProps {
   onAdd?: (produto: ProdutoEmpMini, quantity: number) => void;
   isOpen: boolean;
   onClose: () => void;
-  quickAddQuantity?: number; // ✅ Apenas 1 valor de atalho
+  quickAddQuantity?: number;
 }
 
 export function SheetAdicionarProduto({
@@ -41,7 +41,7 @@ export function SheetAdicionarProduto({
   onAdd,
   isOpen,
   onClose,
-  quickAddQuantity = 6, // ✅ valor padrão
+  quickAddQuantity = 6,
 }: SheetAdicionarProdutoProps) {
   const {
     register,
@@ -104,42 +104,40 @@ export function SheetAdicionarProduto({
             </SheetTitle>
           </SheetHeader>
 
-          {/* Quantidade + Botão extra */}
           <div className="flex flex-col gap-2 p-2">
-              <Label htmlFor="quantity" className="text-lg">
-                Quantidade
-              </Label>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 ">
-                  <Button type="button" className="w-16" onClick={decrement}>
-                    -
-                  </Button>
-                  <Input
-                    type="number"
-                    id="quantity"
-                    {...register("quantity", { valueAsNumber: true })}
-                    className="text-center w-full"
-                    />
-                  <Button type="button" size="icon" className="w-16" onClick={increment}>
-                    +
-                  </Button>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="text-xs px-3 py-1"
-                  onClick={addQuickQuantity}
-                >
-                  +{quickAddQuantity} unidades
+            <Label htmlFor="quantity" className="text-lg">
+              Quantidade
+            </Label>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 ">
+                <Button type="button" className="w-16" onClick={decrement}>
+                  -
                 </Button>
+                <Input
+                  type="number"
+                  id="quantity"
+                  {...register("quantity", { valueAsNumber: true })}
+                  className="text-center w-full"
+                />
+                <Button type="button" className="w-16" onClick={increment}>
+                  +
+                </Button>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="text-xs px-3 py-1"
+                onClick={addQuickQuantity}
+              >
+                +{quickAddQuantity} unidades
+              </Button>
 
               {errors.quantity && (
                 <p className="text-destructive text-sm">{errors.quantity.message}</p>
               )}
-              </div>
             </div>
-
+          </div>
 
           <SheetFooter>
             <Button type="submit" className="w-full bg-primary text-background">

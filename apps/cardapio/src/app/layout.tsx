@@ -7,6 +7,7 @@ import { ReactQueryProvider } from "../providers/ReactQueryClientProvider";
 import { Suspense } from "react";
 import { UserProvider } from "@cardapio/hooks/auth/userContext";
 import { Toaster } from "@cardapio/components/Shared/ui/sonner";
+import { CartGlobalClient } from "@cardapio/components/Shared/cart/CartGlobalClient";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
               } as React.CSSProperties}
             />
             {children}
+            <CartGlobalClient />
           </UserProvider>
         </ReactQueryProvider>
         <FooterComponent />

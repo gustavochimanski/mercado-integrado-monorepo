@@ -3,7 +3,7 @@
 import React from "react";
 import type { CategoriaComProdutos } from "@cardapio/types/CardapioTypes";
 import CardAdminAddCategoria from "@cardapio/components/admin/card/CardAdminAddCategoria";
-import { CategoryCard } from "@cardapio/components/Shared/card/CategoryCard";
+import { CategoryCard } from "@cardapio/components/Shared/category/CategoryCard";
 
 interface Props {
   categorias: CategoriaComProdutos[];

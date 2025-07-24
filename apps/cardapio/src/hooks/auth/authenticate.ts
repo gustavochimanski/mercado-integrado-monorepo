@@ -1,6 +1,6 @@
 // src/services/auth/authenticate.ts
 import axios from "axios";
-import { setToken } from "../token/tokenStore";
+import { setToken } from "../../stores/token/tokenStore";
 
 export type LoginResponse = {
   token_type: string;

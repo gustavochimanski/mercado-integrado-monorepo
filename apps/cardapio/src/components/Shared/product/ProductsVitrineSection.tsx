@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ProdutoEmpMini } from "../../../types/Produtos";
-import { ProductCard } from "../card/ProductCard";
 import { CardAddProduto } from "@cardapio/components/admin/card/CardAddProduto";
 import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/SecaoSubCategOptions";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ProdutoEmpMini } from "@cardapio/types/Produtos";
+import { ProductCard } from "./ProductCard";
 
 interface Props {
   vitrineId: number;
@@ -12,8 +12,9 @@ interface Props {
   produtos: ProdutoEmpMini[];
   codCategoria: number;
   empresaId: number;
-  onAdd?: (p: ProdutoEmpMini) => void;
-  sectionRef?: (el: HTMLElement | null) => void;
+  onOpenSheet?: (p: ProdutoEmpMini) => void;
+  sectionRef?: (el: HTMLDivElement | null) => void;
+  isAdmin?: boolean;
 }
 
 export default function ProductsVitrineSection({
@@ -22,8 +23,9 @@ export default function ProductsVitrineSection({
   produtos,
   codCategoria,
   empresaId,
-  onAdd,
+  onOpenSheet,
   sectionRef,
+  isAdmin,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -33,26 +35,20 @@ export default function ProductsVitrineSection({
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const overflow = el.scrollWidth > el.clientWidth + 1; // tolerância
+    const overflow = el.scrollWidth > el.clientWidth + 1;
     setHasOverflow(overflow);
     setCanScrollLeft(overflow && el.scrollLeft > 0);
-    setCanScrollRight(
-      overflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1
-    );
+    setCanScrollRight(overflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    // 1) Listener de scroll
     el.addEventListener("scroll", checkScroll);
-
-    // 2) ResizeObserver para mudanças de tamanho/conteúdo
     const ro = new ResizeObserver(checkScroll);
     ro.observe(el);
 
-    // 3) Recalcular quando produtos mudarem (ex.: carregou mais itens)
     checkScroll();
 
     return () => {
@@ -64,27 +60,28 @@ export default function ProductsVitrineSection({
   const scrollBy = (offset: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    const targetScroll = el.scrollLeft + offset;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    el.scrollTo({ left: Math.min(Math.max(0, targetScroll), maxScroll), behavior: "smooth" });
+    const target = el.scrollLeft + offset;
+    const max = el.scrollWidth - el.clientWidth;
+    el.scrollTo({ left: Math.min(Math.max(0, target), max), behavior: "smooth" });
   };
 
-  // Se não tem produtos, nem renderiza a barra/ setas
   if (produtos.length === 0) return null;
 
   return (
     <section
       id={`secao-${vitrineId}`}
-      ref={sectionRef as any}
+      ref={sectionRef}
       className="relative p-4 bg-muted rounded-xl scroll-mt-20"
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
-        <AdminSecaoSubCategOptions
-          subcategoriaId={vitrineId}
-          empresaId={empresaId}
-          codCategoria={codCategoria}
-        />
+        {isAdmin && (
+          <AdminSecaoSubCategOptions
+            subcategoriaId={vitrineId}
+            empresaId={empresaId}
+            codCategoria={codCategoria}
+          />
+        )}
       </div>
 
       <div className="relative">
@@ -106,20 +103,24 @@ export default function ProductsVitrineSection({
         )}
 
         <div className="relative">
-          <div
-            ref={scrollRef}
-            className="flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth"
-          >
+          <div ref={scrollRef} className="flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
             {produtos.map((produto) => (
               <div key={produto.cod_barras} className="shrink-0 w-[120px]">
-                <ProductCard produto={produto} />
+                <ProductCard
+                  produto={produto}
+                  onOpenSheet={() => onOpenSheet?.(produto)}
+                  isAdmin={isAdmin}
+                />
               </div>
             ))}
-            <CardAddProduto
-              subcategoriaId={vitrineId}
-              codCategoria={codCategoria}
-              empresaId={empresaId}
-            />
+
+            {isAdmin && (
+              <CardAddProduto
+                subcategoriaId={vitrineId}
+                codCategoria={codCategoria}
+                empresaId={empresaId}
+              />
+            )}
           </div>
         </div>
       </div>

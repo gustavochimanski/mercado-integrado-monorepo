@@ -1,27 +1,26 @@
-// components/Shared/section/ProductsSection.tsx
 "use client";
 import { useEffect, useMemo, useRef } from "react";
-import { ProdutoEmpMini } from "../../../types/Produtos";
 import LoadingSpinner from "../ui/loader";
 import ProductsVitrineSection from "./ProductsVitrineSection";
 import { useProdutosVitrinePorCategoria } from "@cardapio/hooks/useCardapio";
+import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 
 interface Props {
   codCategoria: number;
   empresaId: number;
-  categoriaLabel?: string;
-  onAdd?: (p: ProdutoEmpMini) => void;
-  sectionRefFactory?: (id: number) => (el: HTMLElement | null) => void;
+  onOpenSheet?: (p: ProdutoEmpMini) => void;
+  sectionRefFactory?: (id: number) => (el: HTMLDivElement | null) => void;
   onMeta?: React.Dispatch<React.SetStateAction<{ id: number; titulo: string }[]>>;
+  isAdmin?: boolean;
 }
 
 export default function ProductsSection({
   codCategoria,
   empresaId,
-  categoriaLabel,
-  onAdd,
+  onOpenSheet,
   sectionRefFactory,
   onMeta,
+  isAdmin,
 }: Props) {
   const { data: vitrines = [], isLoading } = useProdutosVitrinePorCategoria(codCategoria, empresaId);
 
@@ -31,7 +30,7 @@ export default function ProductsSection({
   useEffect(() => {
     if (!onMeta) return;
     const json = JSON.stringify(meta);
-    if (json === lastJson.current) return; // evita loop
+    if (json === lastJson.current) return;
     lastJson.current = json;
     onMeta(meta);
   }, [meta, onMeta]);
@@ -54,8 +53,9 @@ export default function ProductsSection({
           produtos={vitrine.produtos}
           codCategoria={codCategoria}
           empresaId={empresaId}
-          onAdd={onAdd}
+          onOpenSheet={onOpenSheet}
           sectionRef={sectionRefFactory?.(vitrine.id)}
+          isAdmin={isAdmin}
         />
       ))}
     </>

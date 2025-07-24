@@ -1,42 +1,56 @@
-// app/categoria/[...slug]/page.tsx  (RouteCategoryPage.tsx)
 "use client";
 import React, { useCallback, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCardapio } from "@cardapio/hooks/useCardapio";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import CategoryScrollSection from "@cardapio/components/Shared/section/categoryScrollSection";
-import { SheetAdicionarProduto } from "@cardapio/components/Shared/Sheet/SheetAddProduto";
 import { CircleArrowLeft } from "lucide-react";
 import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddSecaoSubCateg";
-import ProductsSection from "@cardapio/components/Shared/section/ProductsSection";
-import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import { HorizontalSpy } from "@cardapio/components/Shared/HorizontalScrollSpy";
+import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
+import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
+import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
+import ProductsSection from "@cardapio/components/Shared/product/ProductsSection";
+import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
+import { useCart } from "@cardapio/stores/cart/useCart";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
-
   const router = useRouter();
-  const empresaId = 1;
+
+  const empresaId = getEmpresaId()
   const params = useParams<{ slug?: string | string[] }>();
   const slugAtual = Array.isArray(params.slug) ? params.slug[params.slug.length - 1] : params.slug ?? "";
 
   const { data: categorias = [], isLoading } = useCardapio(empresaId);
 
-  const categoriaAtual = useMemo(() => categorias.find((cat) => cat.slug === slugAtual), [categorias, slugAtual]);
-  const subcategorias = useMemo(() => categorias.filter((cat) => cat.slug_pai === slugAtual), [categorias, slugAtual]);
+  const categoriaAtual = useMemo(
+    () => categorias.find((cat) => cat.slug === slugAtual),
+    [categorias, slugAtual]
+  );
+  const subcategorias = useMemo(
+    () => categorias.filter((cat) => cat.slug_pai === slugAtual),
+    [categorias, slugAtual]
+  );
 
-  const handleOpenSheet = useCallback((produto: ProdutoEmpMini) => {
+  // abre o sheet
+  const openSheet = useCallback((produto: ProdutoEmpMini) => {
     setProdutoSelecionado(produto);
     setSheetOpen(true);
   }, []);
 
-  const handleAdd = useCallback((produto: ProdutoEmpMini, quantity: number) => {
-    alert(`Adicionado: ${produto.produto.descricao} x${quantity}`);
-    setSheetOpen(false);
-  }, []);
+  // adiciona no carrinho
+  const add = useCart((s) => s.add);
+  const handleAdd = useCallback(
+    (produto: ProdutoEmpMini, quantity: number) => {
+      add(mapProdutoToCartItem(produto, quantity));
+      setSheetOpen(false);
+    },
+    [add]
+  );
 
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
@@ -75,10 +89,10 @@ export default function RouteCategoryPage() {
             <ProductsSection
               codCategoria={categoriaAtual.id}
               empresaId={empresaId}
-              categoriaLabel={categoriaAtual.label}
-              onAdd={handleOpenSheet}
+              onOpenSheet={openSheet}
               sectionRefFactory={register}
               onMeta={setVitrinesMeta}
+              isAdmin={true}
             />
 
             <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={categoriaAtual.id} />
