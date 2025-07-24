@@ -13,7 +13,7 @@ const ComponentEtiquetas = () => {
             <Barcode size={14} /> Preço
           </span>
         ),
-        Component: <ComponentEtiquetasPreco/>,
+        content: <ComponentEtiquetasPreco/>,
       },
       {
         value: "etiquetasPreco",
@@ -22,7 +22,7 @@ const ComponentEtiquetas = () => {
             <IdCard size={15} /> Supervisor
           </span>
         ),
-        Component: <ComponentEtiquetasUsuarios/>,
+        content: <ComponentEtiquetasUsuarios/>,
       },
     ]
     return(
