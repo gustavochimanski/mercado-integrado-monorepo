@@ -1,4 +1,4 @@
-
+"use client"
 import { Monitor } from "lucide-react";
 
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper"; // Componente genérico que renderiza tabs
@@ -6,7 +6,7 @@ import TableCadastroProdutos from "@supervisor/components/routes/cadastros/Table
 
 
 // Componente principal da página de cadastros
-const PageCadastros = async () => {
+const PageCadastros = () => {
   const nestedTabItems = [
     {
       value: "caixas",
@@ -15,7 +15,7 @@ const PageCadastros = async () => {
           <Monitor size={15} /> Caixas
         </span>
       ),
-      Component: <TableCadastroProdutos empresaId={1} />, 
+      Component: () => <TableCadastroProdutos empresaId={1} />, 
     }
   ];
 

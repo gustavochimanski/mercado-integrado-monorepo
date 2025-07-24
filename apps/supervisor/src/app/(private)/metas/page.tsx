@@ -1,3 +1,4 @@
+"use client"
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper"
 import { BarChart,  Pencil } from "lucide-react"
 import TabComponentConfigMetas from "./components/TabComponentConfigMetas"
@@ -13,7 +14,7 @@ const PageMetas = () => {
                     <BarChart size={15} /> Dashboard
                 </span>
             ),
-            Component: <div />
+            Component: () => <div />
         },
         {
             value: "calendario",
@@ -22,7 +23,7 @@ const PageMetas = () => {
                     <Pencil size={15} /> Metas
                 </span>
             ),
-            Component: <TabComponentConfigMetas />
+            Component:() => <TabComponentConfigMetas />
 
         },
     ]

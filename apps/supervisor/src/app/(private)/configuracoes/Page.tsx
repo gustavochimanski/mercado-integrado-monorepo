@@ -1,8 +1,9 @@
+"use client";
 
 import { Monitor } from "lucide-react";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 
-const ComponentConfiguracoes: React.FC = async () => {
+const ComponentConfiguracoes: React.FC = () => {
     const nestedTabItems = [
       {
         value: "caixas",
@@ -11,7 +12,7 @@ const ComponentConfiguracoes: React.FC = async () => {
             <Monitor size={14} /> Caixas
           </span>
         ),
-        Component: <div>Hello</div>,
+        Component: () => <div>Hello</div>,
       }
     ];
   

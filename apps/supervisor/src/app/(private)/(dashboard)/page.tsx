@@ -11,7 +11,6 @@ import {
 import { formatDateToYYYYMMDD } from "@supervisor/utils/format/formatDate";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresas";
-import { TypeEmpresas } from "@supervisor/types/empresas/TypeEmpresas";
 import dynamic from "next/dynamic";
 import TabComponentDashboardEmpresaGeral from "./components/TabComponentEmpresaGeral";
 
@@ -49,10 +48,9 @@ export default function PageDashboard() {
   useEffect(() => {
     mutateAsync(payload)
       .then(setDashboardData)
-      .catch(() => {
-        if (dashboardData !== null) setDashboardData(null);
-      });
+      .catch(() => setDashboardData(null));
   }, [payload, mutateAsync]);
+
 
   const tabs = useMemo(() => {
     if (!dashboardData) return [];
