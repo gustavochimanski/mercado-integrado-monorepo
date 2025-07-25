@@ -4,7 +4,7 @@ export const fetchCache = "force-no-store";
 
 import { useState, useCallback } from "react";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
-import { useCardapio } from "@cardapio/hooks/useQueryCardapio";
+import { useCardapio } from "@cardapio/services/useQueryCardapio";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
 import { CartFab } from "@cardapio/components/Shared/cart/CartFab";
@@ -26,7 +26,8 @@ export default function HomePage() {
   useReceiveEmpresaFromQuery();
 
   const empresaId = getEmpresaId();
-  const { data: categorias = [] } = useCardapio(empresaId || 0);
+  const { data: categorias = [], isError} = useCardapio(empresaId || 0);
+
   const categoriasRaiz = categorias.filter((cat) => cat.slug_pai === null);
 
   const openSheet = useCallback((p: ProdutoEmpMini) => {
@@ -49,6 +50,11 @@ export default function HomePage() {
       </div>
     );
   }
+
+  if (!empresaId || isError) {
+    return null;
+  }
+
 
   return (
     <div className="min-h-screen flex flex-col gap-4">

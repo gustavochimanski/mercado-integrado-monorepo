@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import LoadingSpinner from "../ui/loader";
 import ProductsVitrineSection from "./ProductsVitrineSection";
-import { useProdutosVitrinePorCategoria } from "@cardapio/hooks/useQueryCardapio";
+import { useProdutosVitrinePorCategoria } from "@cardapio/services/useQueryCardapio";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 
 interface Props {

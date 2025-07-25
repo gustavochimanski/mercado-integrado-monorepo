@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useMutateSubcategoria } from "@cardapio/hooks/useSecoes";
 import { Label } from "@cardapio/components/Shared/ui/label";
+import { useMutateSubcategoria } from "@cardapio/services/useQuerySecoesSubCateg";
 
 interface ModalAddSecaoProps {
   open: boolean;

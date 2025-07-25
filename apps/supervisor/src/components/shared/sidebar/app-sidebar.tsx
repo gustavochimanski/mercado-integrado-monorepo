@@ -21,6 +21,7 @@ import {
     Bot,
     FileText,
     Utensils,
+    Scroll,
   } from "lucide-react";
 
 
@@ -34,7 +35,7 @@ import { logoutService } from "@supervisor/services/Auth/authenticate";
   const items = [
     { title: "Home", url: "/home", icon: Home },
     { title: "Dashboard", url: "/", icon: PieChart },
-    { title: "ChatBot", url: "/chatbot", icon: Bot },
+    { title: "Pedidos", url: "/pedidos", icon: Scroll},
     { title: "Cardápio", url: "/cardapio", icon: Utensils },
     { title: "Relatórios", url: "/relatorios", icon: FileText },
     { title: "Metas", url: "/metas", icon: Target },

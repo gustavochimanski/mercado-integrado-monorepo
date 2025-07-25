@@ -10,9 +10,9 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useMutateCategoria } from "@cardapio/hooks/useMutateCategoria";
+import { useMutateCategoria } from "@cardapio/services/useMutateCategoria";
 import Image from "next/image";
-import { useCardapio } from "@cardapio/hooks/useQueryCardapio";
+import { useCardapio } from "@cardapio/services/useQueryCardapio";
 
 interface ModalEditCategoriaProps {
   open: boolean;

@@ -49,12 +49,12 @@ export default function PageAdminCardapio() {
 
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
-  }, []);
+  }, [empresaId]);
 
   // Links do cardápio
   const linkProd = "https://mercado-integrado-monorepo-cardapio.vercel.app";
   const linkDev = "http://localhost:3000";
-  const isDev = false;
+  const isDev = true;
 
   // Monta URL do iframe com base na empresa e ambiente
   const iframeUrl = empresaId

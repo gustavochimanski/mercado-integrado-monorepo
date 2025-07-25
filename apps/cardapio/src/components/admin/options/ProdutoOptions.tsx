@@ -4,7 +4,7 @@
 import { useState } from "react";
 
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
+import { useMutateProduto } from "@cardapio/services/useQueryProduto";
 import { Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@cardapio/components/Shared/ui/dropdown-menu";

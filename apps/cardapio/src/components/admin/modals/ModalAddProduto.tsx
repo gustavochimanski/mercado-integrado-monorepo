@@ -11,7 +11,7 @@ import {
 } from "@cardapio/components/Shared/ui/dialog";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import { Label } from "@cardapio/components/Shared/ui/label";
-import { useMutateProduto } from "@cardapio/hooks/useQueryProduto";
+import { useMutateProduto } from "@cardapio/services/useQueryProduto";
 
 
 interface Props {
