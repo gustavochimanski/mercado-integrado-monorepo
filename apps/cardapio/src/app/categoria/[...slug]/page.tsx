@@ -92,6 +92,7 @@ export default function RouteCategoryPage() {
               onOpenSheet={openSheet}
               sectionRefFactory={register}
               onMeta={setVitrinesMeta}
+              isHome={false}
             />
 
             <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={categoriaAtual.id} />

@@ -33,7 +33,7 @@ export interface VitrineComProdutos {
 }
 
 // Hook para buscar produtos da vitrine por categoria
-export function useProdutosVitrinePorCategoria(codCategoria: number, empresa_id: number) {
+export function useProdutosVitrinePorCategoria(codCategoria: number, empresa_id: number, is_home: boolean = false) {
   return useQuery<VitrineComProdutos[]>({
     queryKey: ["produtos-vitrine-categoria", codCategoria],
     queryFn: async () => {
@@ -42,6 +42,7 @@ export function useProdutosVitrinePorCategoria(codCategoria: number, empresa_id:
           params: {
             cod_categoria: codCategoria,
             empresa_id: empresa_id,
+            is_home: is_home
           },
         });
         return data;

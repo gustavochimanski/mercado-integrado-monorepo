@@ -11,7 +11,10 @@ interface Props {
   onOpenSheet?: (p: ProdutoEmpMini) => void;
   sectionRefFactory?: (id: number) => (el: HTMLDivElement | null) => void;
   onMeta?: React.Dispatch<React.SetStateAction<{ id: number; titulo: string }[]>>;
+  isHome?: boolean;
+  hrefCategoria?: string; 
 }
+
 
 export default function ProductsSection({
   codCategoria,
@@ -19,8 +22,10 @@ export default function ProductsSection({
   onOpenSheet,
   sectionRefFactory,
   onMeta,
+  isHome = false,
+  hrefCategoria
 }: Props) {
-  const { data: vitrines = [], isLoading } = useProdutosVitrinePorCategoria(codCategoria, empresaId);
+  const { data: vitrines = [], isLoading } = useProdutosVitrinePorCategoria(codCategoria, empresaId, isHome);
 
   const meta = useMemo(() => vitrines.map((v) => ({ id: v.id, titulo: v.titulo })), [vitrines]);
   const lastJson = useRef("");
@@ -48,11 +53,13 @@ export default function ProductsSection({
           key={vitrine.id}
           vitrineId={vitrine.id}
           titulo={vitrine.titulo}
-          produtos={vitrine.produtos}
+          produtos={isHome ? vitrine.produtos.slice(0, 3) : vitrine.produtos} // 👈 aqui
           codCategoria={codCategoria}
           empresaId={empresaId}
           onOpenSheet={onOpenSheet}
           sectionRef={sectionRefFactory?.(vitrine.id)}
+          hrefCategoria={hrefCategoria}
+          isHome={isHome}
         />
       ))}
     </>

@@ -30,11 +30,6 @@ export default function HomePage() {
 
   const categoriasRaiz = categorias.filter((cat) => cat.slug_pai === null);
 
-  const openSheet = useCallback((p: ProdutoEmpMini) => {
-    setProdutoSelecionado(p);
-    setSheetOpen(true);
-  }, []);
-
   const add = useCart((s) => s.add);
   const handleAdd = useCallback((produto: ProdutoEmpMini, quantity: number) => {
     add(mapProdutoToCartItem(produto, quantity));

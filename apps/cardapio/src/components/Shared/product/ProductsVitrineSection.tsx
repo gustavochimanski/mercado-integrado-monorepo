@@ -5,6 +5,7 @@ import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/SecaoS
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
+import { CardVerMais } from "../CardVerMais";
 
 interface Props {
   vitrineId: number;
@@ -14,6 +15,8 @@ interface Props {
   empresaId: number;
   onOpenSheet?: (p: ProdutoEmpMini) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
+  hrefCategoria?: string;
+  isHome?: boolean;
 }
 
 export default function ProductsVitrineSection({
@@ -24,6 +27,8 @@ export default function ProductsVitrineSection({
   empresaId,
   onOpenSheet,
   sectionRef,
+  hrefCategoria,
+  isHome
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -110,6 +115,11 @@ export default function ProductsVitrineSection({
                 />
               </div>
             ))}
+            {isHome && hrefCategoria && (
+              <CardVerMais href={hrefCategoria} />
+            )}
+
+
               <CardAddProduto
                 subcategoriaId={vitrineId}
                 codCategoria={codCategoria}
