@@ -9,8 +9,8 @@ import {
 import { useState } from "react";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 import { toast } from "sonner";
-import { useMutateSubcategoria } from "@cardapio/services/useQuerySecoesSub";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
+import { useMutateSubcategoria } from "@cardapio/services/useQuerySecoesSubCateg";
 
 interface AdminSecaoSubCategOptionsProps {
   empresaId: number;
