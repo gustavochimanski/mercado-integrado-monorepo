@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const cliente = "gerente"
+const cliente = "teste2"
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "imagens.mensuraapi.com.br",
+        hostname: "media.mensuraapi.com.br",
         pathname: "/**",
       },
     ],

@@ -5,7 +5,7 @@ import axios from "axios";
 import { getCookie } from "cookies-next";
 
 const apiMensura = axios.create({
-  baseURL: "https://gerente.mensuraapi.com.br",
+  baseURL: "https://teste2.mensuraapi.com.br",
 });
 
 apiMensura.interceptors.request.use((config) => {

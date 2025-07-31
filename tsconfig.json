@@ -33,5 +33,5 @@
     ]
   },
   "exclude": ["node_modules", "dist", ".turbo"],
-  "include": ["packages", "apps"]
+  "include": ["packages", "apps", "apps/supervisor/src/app/(private)/(dashboard)/components/porHora/.tsx"]
 }

@@ -3,11 +3,7 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import { PieValueType } from "@mui/x-charts/models";
 import { TotaisPorEmpresa } from "../../types/typeDashboard";
-import {
-  Card,
-  CardContent,
-  CardTitle,
-} from "@supervisor/components/ui/card";
+import { Card, CardContent, CardTitle } from "@supervisor/components/ui/card";
 import { BarChart, legendClasses } from "@mui/x-charts";
 import {
   Select,
@@ -16,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@supervisor/components/ui/select";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -25,98 +21,76 @@ import {
   TableHeader,
   TableRow,
 } from "@supervisor/components/ui/table";
-import { useMediaQuery, useTheme } from "@mui/material";
+import { chartColors } from "@supervisor/utils/dashColors";
 
 interface Props {
   data: TotaisPorEmpresa[];
-  empresas: any[] | undefined;
+  empresas?: { empr_codigo: string; empr_nomereduzido: string }[];
 }
 
 export default function ComponentParticipacaoEmpresas({
   data,
   empresas,
 }: Props) {
-  const [typeChartSelected, setTypeChartSelected] = useState("Pizza");
+  const [typeChartSelected, setTypeChartSelected] = useState<"Pizza" | "Colunas">("Pizza");
   const isColunas = typeChartSelected === "Colunas";
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const labels = data.map((empresa) => empresa.lcpr_codempresa);
-  const dataOrdenada = [...data].sort(
-    (a, b) => b.total_vendas - a.total_vendas
+  const dataOrdenada = useMemo(
+    () => [...data].sort((a, b) => b.total_vendas - a.total_vendas),
+    [data]
   );
-  const vendas = data.map((empresa) => empresa.total_vendas);
-
-  const coresEmpresas: string[] = [
-    "var(--chart-1)",
-    "var(--chart-2)",
-    "var(--chart-3)",
-    "var(--chart-4)",
-    "var(--chart-5)",
-    "var(--chart-6)",
-    "var(--chart-7)",
-    "var(--chart-8)",
-    "var(--chart-9)",
-    "var(--chart-10)",
-    "var(--chart-11)",
-    "var(--chart-12)",
-    "var(--chart-13)",
-    "var(--chart-14)",
-    "var(--chart-15)",
-    "var(--chart-16)",
-  ];
-
-  const findLabelEmp = (code_emp: string) => {
-    return empresas?.find((e) => e.empr_codigo === code_emp)
-      ?.empr_nomereduzido;
-  };
-
-  const totalVendas = data.reduce(
-    (acc, empresa) => acc + empresa.total_vendas,
-    0
+  const totalVendas = useMemo(
+    () => data.reduce((sum, e) => sum + e.total_vendas, 0),
+    [data]
   );
 
-  const chartPieData: PieValueType[] = dataOrdenada.map((empresa, idx) => {
-    const nome = findLabelEmp(empresa.lcpr_codempresa);
-    const percentual = (
-      (empresa.total_vendas / totalVendas) *
-      100
-    ).toFixed(1);
-
-    return {
-      id: idx,
-      value: empresa.total_vendas,
-      label: `${nome} (${percentual}%)`,
-      color: coresEmpresas[idx % coresEmpresas.length],
-    };
-  });
+  const chartPieData: PieValueType[] = useMemo(
+    () =>
+      dataOrdenada.map((e, i) => {
+        const nome =
+          empresas?.find((x) => x.empr_codigo === e.lcpr_codempresa)
+            ?.empr_nomereduzido ?? e.lcpr_codempresa;
+        const pct = totalVendas > 0 ? ((e.total_vendas / totalVendas) * 100).toFixed(1) : "0";
+        return {
+          id: i,
+          value: e.total_vendas,
+          label: `${nome} (${pct}%)`,
+          color: chartColors[i % chartColors.length],
+        };
+      }),
+    [dataOrdenada, empresas, totalVendas]
+  );
 
   function renderTabelaDetalhes() {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-muted-foreground px-2">Detalhamento</p>
-        <div className="overflow-auto max-h-[300px]">
+        <p className="text-sm font-semibold text-muted-foreground px-2">
+          Detalhamento
+        </p>
+        <div className="overflow-auto w-full">
           <Table className="bg-background text-sm">
             <TableHeader className="sticky top-0 bg-muted z-10">
               <TableRow>
                 <TableHead>Cor</TableHead>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Vendas</TableHead>
-                <TableHead className="text-right">Margem%</TableHead>
+                <TableHead>Part%</TableHead>
+                <TableHead>Cupons</TableHead>
+                <TableHead>Ticket Médio</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {chartPieData.map((item, idx) => {
-                const nome =
+                const e = dataOrdenada[idx];
+                const labelStr =
                   typeof item.label === "string"
-                    ? item.label.split(" (")[0]
+                    ? item.label
+                    : typeof item.label === "function"
+                    ? item.label("legend")
                     : "";
-
-                const percentual =
-                  typeof item.label === "string"
-                    ? item.label.match(/\((.*?)%\)/)?.[1] ?? "0"
-                    : "0";
+                const nome = labelStr.split(" (")[0];
+                const pctMatch = labelStr.match(/\((.*?)%\)/);
+                const pct = pctMatch ? pctMatch[1] : "0";
 
                 return (
                   <TableRow key={idx}>
@@ -127,14 +101,23 @@ export default function ComponentParticipacaoEmpresas({
                       />
                     </TableCell>
                     <TableCell>{nome}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
                       {item.value.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {percentual}%
+                    <TableCell>{pct}%</TableCell>
+                    <TableCell>
+                      {e.total_cupons.toLocaleString("pt-BR")}
+                    </TableCell>
+                    <TableCell>
+                      {e.ticket_medio.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </TableCell>
                   </TableRow>
                 );
@@ -150,9 +133,9 @@ export default function ComponentParticipacaoEmpresas({
     <Card className="flex flex-col flex-1 min-h-[250px] max-h-[500px]">
       <Select
         value={typeChartSelected}
-        onValueChange={setTypeChartSelected}
+        onValueChange={(v) => setTypeChartSelected(v as "Pizza" | "Colunas")}
       >
-        <SelectTrigger className="w-[180px] ml-auto border-r-0 border-t-0 rounded-r-none rounded-t-none">
+        <SelectTrigger className="w-[180px] ml-auto">
           <SelectValue placeholder="Tipo de Gráfico" />
         </SelectTrigger>
         <SelectContent>
@@ -162,21 +145,13 @@ export default function ComponentParticipacaoEmpresas({
       </Select>
 
       <CardTitle className="mx-4">Participação por Empresa</CardTitle>
-
       <CardContent className="flex-1">
         <div className="flex flex-col md:flex-row justify-center gap-4">
-          <div className="w-full flex justify-center">
+          <div className="w-full md:w-1/2 flex justify-center">
             {isColunas ? (
               <BarChart
-                xAxis={[{ data: labels }]}
-                margin={1}
-                series={[
-                  {
-                    id: "Vendas",
-                    data: vendas,
-                    color: "var(--chart-1)",
-                  },
-                ]}
+                xAxis={[{ data: data.map((e) => e.lcpr_codempresa) }]}
+                series={[{ id: "Vendas", data: data.map((e) => e.total_vendas) }]}
                 height={250}
                 borderRadius={5}
                 sx={{ width: "100%" }}
@@ -194,14 +169,11 @@ export default function ComponentParticipacaoEmpresas({
                 sx={{
                   width: "100%",
                   margin: 3,
-                  [`& .${legendClasses.root}`]: {
-                    display: "none",
-                  },
+                  [`& .${legendClasses.root}`]: { display: "none" },
                 }}
               />
             )}
           </div>
-
           <div className="w-full">{renderTabelaDetalhes()}</div>
         </div>
       </CardContent>

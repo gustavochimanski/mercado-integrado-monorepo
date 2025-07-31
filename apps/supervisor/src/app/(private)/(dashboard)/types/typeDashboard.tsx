@@ -3,10 +3,15 @@ import { TypeDashboardMetaHeader } from "./typeMetas";
 import { TypeVendaPorHoraResponse } from "./typeVendasPorHora";
 
 /**
+ * Alias para código de empresa
+ */
+export type CodEmpresa = string;
+
+/**
  * Totais por empresa retornados pela API do dashboard de vendas
  */
 export type TotaisPorEmpresa = {
-  lcpr_codempresa: string;
+  lcpr_codempresa: CodEmpresa;
   total_cupons: number;
   total_vendas: number;
   ticket_medio: number;
@@ -22,30 +27,61 @@ export type TotaisGerais = {
 };
 
 type TypeRelacao = {
-  relacaoValue: number
-  relacaoPorcentagem: number
-}
+  relacaoValue: number;
+  relacaoPorcentagem: number;
+};
 
 type TypeVendaDetalhadaByDate = {
-  data: string
-  valor: number
-}
+  data: string;
+  valor: number;
+};
 
 type TypeVendaDetalhadaEmpresas = {
-  empresa: string
-  dates: TypeVendaDetalhadaByDate[]
-}
+  empresa: CodEmpresa;
+  dates: TypeVendaDetalhadaByDate[];
+};
 
 export type TypeVendaDetalhadaResponse = {
-  empresas: string[]
-  dataInicio: string
-  dataFinal: string
-  vendaEmpresas: TypeVendaDetalhadaEmpresas[]
-}
+  empresas: CodEmpresa[];
+  dataInicio: string;
+  dataFinal: string;
+  vendaEmpresas: TypeVendaDetalhadaEmpresas[];
+};
 
-/**
- * Header do dashboard de vendas
- */
+type TypeCompraDetalhadaByDate = {
+  data: string;
+  valor: number;
+};
+
+type TypeCompraDetalhadaEmpresas = {
+  empresa: CodEmpresa;
+  dates: TypeCompraDetalhadaByDate[];
+};
+
+export type TypeCompraDetalhadaResponse = {
+  empresas: CodEmpresa[];
+  dataInicio: string;
+  dataFinal: string;
+  compraEmpresas: TypeCompraDetalhadaEmpresas[];
+};
+
+export type TypeMeioPgtoResponseDash = {
+  tipo: string;
+  descricao: string;
+  valor_total: number;
+  empresa?: CodEmpresa;
+};
+
+export type MeiosPorEmpresa = {
+  empresa: CodEmpresa;
+  meios: TypeMeioPgtoResponseDash[];
+};
+
+export type MeiosPagamento = {
+  total_geral: TypeMeioPgtoResponseDash[];
+  por_empresa: MeiosPorEmpresa[];
+};
+
 export type TypeDashboardResponse = {
   totais_por_empresa: TotaisPorEmpresa[];
   total_geral: TotaisGerais;
@@ -53,9 +89,10 @@ export type TypeDashboardResponse = {
   relacao: TypeRelacao;
   compras: TypeComprasGeralResponse;
   vendaDetalhada: TypeVendaDetalhadaResponse;
-  vendaPorHora: TypeVendaPorHoraResponse;  
+  compraDetalhada: TypeCompraDetalhadaResponse;
+  vendaPorHora: TypeVendaPorHoraResponse;
+  meios_pagamento: MeiosPagamento;
 };
-
 
 /**
  * Filtros usados no dashboard (payload enviado)

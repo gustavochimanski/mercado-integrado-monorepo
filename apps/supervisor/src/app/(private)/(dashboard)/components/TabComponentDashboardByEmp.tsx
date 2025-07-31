@@ -1,15 +1,15 @@
 "use client";
 
-import { TypeDashboardResponse } from "../types/typeDashboard";
+import React, { useMemo } from "react";
+import { TypeDashboardResponse, CodEmpresa } from "../types/typeDashboard";
 import CompanyMetricCards from "./metrics/DashCardCompanyMetricCards";
-import { dashboardMock } from "./meiosPagamento/mock";
-import VendasPorHoraChart from "./vendasPorHora/ComponentChartVendasbyHour";
-import DashCardClientesPorHoraChart from "./clientesPorHora/DashCardClientePorHora";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
-
+import ComponentParticipacaoDepartamentos from "./departamento/DashCardParticipacaoDepartamento";
+import { mockDepartamentos } from "./porHora/mockDepartamento";
+import VendasEClientesPorHoraChart from "./porHora/VendasEClientesPorHoraChart";
 
 interface Props {
-  codEmpresa: string;
+  codEmpresa: CodEmpresa;
   dashboardData: TypeDashboardResponse;
 }
 
@@ -17,52 +17,52 @@ export default function TabComponentDashboardByEmp({
   codEmpresa,
   dashboardData,
 }: Props) {
-  const compraItem = dashboardData.compras.por_empresa.find(
-    (c) => String(c.empresa) === String(codEmpresa)
-  );
-  const compras = compraItem?.valorTotal ?? 0;
+  // 1️⃣ Meios de pagamento: geral vs. específico da empresa
+  const meiosGerais = dashboardData.meios_pagamento.total_geral.map((item) => ({
+    descricao: item.descricao,
+    valorTotal: item.valor_total,
+  }));
 
-  const meiosEmpresa = dashboardMock.meiosPagamento.por_empresa.find(
-    (m) => String(m.empresa) === String(codEmpresa)
+  const meiosEspecificos =
+    dashboardData.meios_pagamento.por_empresa
+      .find((m) => String(m.empresa) === String(codEmpresa))
+      ?.meios.map((item) => ({
+        descricao: item.descricao,
+        valorTotal: item.valor_total,
+      })) || [];
+
+  const meiosPagamentoData =
+    meiosEspecificos.length > 0 ? meiosEspecificos : meiosGerais;
+
+  // 2️⃣ Vendas por hora: usar a propriedade correta do TypeDashboardResponse
+  const vendasPorHoraData = useMemo(
+    () => dashboardData.vendaPorHora,
+    [dashboardData.vendaPorHora]
   );
-  
-  const meiosPagamentoData = meiosEmpresa?.meios.map((m) => ({
-    empresa: m.tipo,
-    valorTotal: m.valorTotal,
-  })) ?? [];
-  
 
   return (
     <div className="flex flex-col gap-4">
-      {/* PRIMEIRA LINHA: MÉTRICAS GERAIS */}
+      {/* Cartões de métricas */}
       <CompanyMetricCards codEmpresa={codEmpresa} data={dashboardData} />
 
-      {/* SEGUNDA LINHA */}
+      {/* Linha com Participação de Departamentos e Gráfico de Vendas/Clientes por Hora */}
       <div className="flex md:flex-row flex-col gap-4 h-full">
-        {/* Gráficos de vendas e clientes por hora */}
-        <div className="w-full md:w-1/2 flex md:flex-row  flex-col gap-4">
+        <div className="w-full md:w-1/2 flex flex-col gap-4">
+          <ComponentParticipacaoDepartamentos data={mockDepartamentos} />
         </div>
 
-        {/* Componentes de meios de pagamento */}
-        <div className="w-full md:w-1/2 flex md:flex-row flex-col gap-4">
-
-          <VendasPorHoraChart
-            data={dashboardData.vendaPorHora}
-            empresaSelecionada={codEmpresa}
-          />
-          <DashCardClientesPorHoraChart
-            data={dashboardData.vendaPorHora}
+        <div className="w-full md:w-1/2 flex flex-col gap-4">
+          <VendasEClientesPorHoraChart
+            data={vendasPorHoraData}
             empresaSelecionada={codEmpresa}
           />
         </div>
       </div>
 
-      {/* TERCEIRA LINHA */}
+      {/* Gráfico de meios de pagamento */}
       <div className="md:w-1/2 md:ml-auto flex-1">
         <ComponentMeioPagamento data={meiosPagamentoData} />
-      </div> 
-    
+      </div>
     </div>
-
   );
 }

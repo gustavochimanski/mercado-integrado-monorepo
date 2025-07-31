@@ -30,7 +30,7 @@
     "next-auth.d.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "src/app/(private)/(dashboard)/components/porHora/.tsx"  ],
   "exclude": [
     "node_modules",
     "src/components/orizon/**",

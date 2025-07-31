@@ -1,17 +1,21 @@
 "use client";
-import { useMediaQuery, useTheme } from "@mui/material";
 
-import {
-  Card,
-  CardContent,
-  CardTitle,
-  CardHeader,
-} from "@supervisor/components/ui/card";
+import { useMediaQuery, useTheme } from "@mui/material";
+import { Card, CardContent, CardHeader, CardTitle } from "@supervisor/components/ui/card";
 import { PieChart, legendClasses } from "@mui/x-charts";
 import { PieValueType } from "@mui/x-charts/models";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@supervisor/components/ui/table";
+import { chartColors } from "@supervisor/utils/dashColors";
 
 interface MeioPagamentoItem {
-  empresa: string;
+  descricao: string;
   valorTotal: number;
 }
 
@@ -20,40 +24,92 @@ interface Props {
 }
 
 export default function ComponentMeioPagamento({ data }: Props) {
-
-  const coresMeiosPagamento: Record<string, string> = {
-    "PIX": "var(--chart-1)",
-    "Crédito TEF": "var(--chart-2)",
-    "Débito TEF": "var(--chart-3)",
-    "Crédito POS": "var(--chart-4)",
-    "Débito POS": "var(--chart-5)",
-    "Dinheiro": "var(--chart-6)",
-    "Alimentação": "var(--chart-7)",
-  };
-
-
-
-  const chartPieData: PieValueType[] = data.map((item, idx) => ({
-    id: idx,
-    value: item.valorTotal,
-    label: item.empresa,
-    color: coresMeiosPagamento[item.empresa] ?? undefined,
-  }));
-
-  // Detectando se é mobile (tela pequena)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Total geral para cálculo de %
+  const total = data.reduce((acc, item) => acc + item.valorTotal, 0);
+
+  // Cores
+  const getChartColor = (index: number) =>
+    chartColors[index % chartColors.length];
+
+  // Dados pro gráfico
+  const chartPieData: PieValueType[] = [...data]
+    .sort((a, b) => b.valorTotal - a.valorTotal)
+    .map((item, idx) => ({
+      id: idx,
+      value: item.valorTotal,
+      label: item.descricao,
+      color: getChartColor(idx),
+    }));
+
+  // Tabela de detalhamento
+function renderTabelaDetalhes() {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold text-muted-foreground px-2">
+        Detalhamento
+      </p>
+      <div className="overflow-auto max-h-[300px]">
+        <Table className="bg-background text-sm">
+          <TableHeader className="sticky top-0 bg-muted z-10">
+            <TableRow>
+              <TableHead>Cor</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead className="text-center">%</TableHead>
+              <TableHead className="text-right">Valor</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {chartPieData.map((item) => {
+              const percentual = ((item.value / total) * 100).toFixed(1);
+
+              // Normaliza o label para sempre ser string
+              const labelText =
+                typeof item.label === "function"
+                  ? item.label("legend")
+                  : item.label ?? "";
+
+              return (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                  </TableCell>
+                  <TableCell>{labelText}</TableCell>
+                  <TableCell className="text-center">
+                    {percentual}%
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {item.value.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+
   return (
     <Card className="flex flex-col flex-1 min-h-[300px]">
-
       <CardHeader className="pb-0">
         <CardTitle className="mx-4">Meio de Pagamento</CardTitle>
       </CardHeader>
-
       <CardContent className="md:p-2 p-3 flex-1">
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-          <PieChart
+        <div className="flex flex-col md:flex-row justify-center items-start gap-4">
+          {/* Gráfico sem legenda */}
+          <div className="w-full flex justify-center">
+            <PieChart
               height={200}
               series={[
                 {
@@ -62,27 +118,18 @@ export default function ComponentMeioPagamento({ data }: Props) {
                   highlightScope: { fade: "global", highlight: "item" },
                 },
               ]}
-              slotProps={{
-                legend: {
-                  direction: isMobile ? "horizontal" : "vertical",  // Mudando a direção da legenda com base no tamanho da tela
-                  markType: "circle",
-                },
-              }}
               sx={{
                 width: "100%",
+                // esconde toda a área de legenda
                 [`& .${legendClasses.root}`]: {
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "12px 24px",
-                  maxHeight: 100,
-                  flexDirection: isMobile ? "row" : "column",  // Se for mobile, a legenda vai ficar em linha (horizontal)
-                },
-                [`& .${legendClasses.mark}`]: {
-                  width: 16,
-                  height: 16,
+                  display: "none",
                 },
               }}
             />
+          </div>
+
+          {/* Tabela de Detalhes */}
+          <div className="w-full">{renderTabelaDetalhes()}</div>
         </div>
       </CardContent>
     </Card>
