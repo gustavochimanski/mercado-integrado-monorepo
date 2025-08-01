@@ -51,18 +51,18 @@ export default function TabComponentDashboardByEmp({
           <ComponentParticipacaoDepartamentos data={mockDepartamentos} />
         </div>
 
+        <div className="md:w-1/2 md:ml-auto flex-1">
+        <ComponentMeioPagamento data={meiosPagamentoData} />
+      </div>
+
+      </div>
         <div className="w-full md:w-1/2 flex flex-col gap-4">
           <VendasEClientesPorHoraChart
             data={vendasPorHoraData}
             empresaSelecionada={codEmpresa}
           />
         </div>
-      </div>
 
-      {/* Gráfico de meios de pagamento */}
-      <div className="md:w-1/2 md:ml-auto flex-1">
-        <ComponentMeioPagamento data={meiosPagamentoData} />
-      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "media.mensuraapi.com.br",
+        hostname: "image.mensuraapi.com.br",
         pathname: "/**",
       },
     ],

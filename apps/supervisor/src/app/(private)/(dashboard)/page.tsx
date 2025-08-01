@@ -77,7 +77,7 @@ export default function PageDashboard() {
   }, [dashboardData, mapaCodigosNomes]);
 
   return (
-    <div>
+    <div className="mb-5 md:mb-0">
       <ComponentCardHeader
         initialPayload={payload}
         onChangePayload={handleChangePayload}

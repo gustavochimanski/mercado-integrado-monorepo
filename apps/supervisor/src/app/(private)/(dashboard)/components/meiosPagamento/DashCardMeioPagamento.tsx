@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@supervisor/components/ui/table";
-import { chartColors } from "@supervisor/utils/dashColors";
+import { altChartColors } from "@supervisor/utils/dashColors";
 
 interface MeioPagamentoItem {
   descricao: string;
@@ -32,7 +32,7 @@ export default function ComponentMeioPagamento({ data }: Props) {
 
   // Cores
   const getChartColor = (index: number) =>
-    chartColors[index % chartColors.length];
+    altChartColors[index % altChartColors.length];
 
   // Dados pro gráfico
   const chartPieData: PieValueType[] = [...data]

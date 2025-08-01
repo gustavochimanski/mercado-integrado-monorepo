@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import TabelaParticipacaoDepartamentos from "./TabelaParticipacaoDepartamento";
+import { chartColors } from "@supervisor/utils/dashColors";
 
 // Tipo dos dados
 export interface TotaisPorDepartamento {
@@ -27,13 +28,6 @@ export default function ComponentParticipacaoDepartamentos({ data }: Props) {
   const labels = data.map((d) => d.depto_nome);
   const vendas = data.map((d) => d.total_vendas);
 
-  const coresDepartamentos = [
-    "var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)",
-    "var(--chart-5)", "var(--chart-6)", "var(--chart-7)", "var(--chart-8)",
-    "var(--chart-9)", "var(--chart-10)", "var(--chart-11)", "var(--chart-12)",
-    "var(--chart-13)", "var(--chart-14)", "var(--chart-15)", "var(--chart-16)",
-  ];
-
   const totalVendas = data.reduce((acc, d) => acc + d.total_vendas, 0);
 
   const chartPieData: PieValueType[] = data.map((d, idx) => {
@@ -42,12 +36,11 @@ export default function ComponentParticipacaoDepartamentos({ data }: Props) {
       id: idx,
       value: d.total_vendas,
       label: `${d.depto_nome} (${percentual}%)`,
-      color: coresDepartamentos[idx % coresDepartamentos.length],
+      color: chartColors[idx % chartColors.length],
     };
   });
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Card className="flex flex-col flex-1">
@@ -102,7 +95,7 @@ export default function ComponentParticipacaoDepartamentos({ data }: Props) {
           <div className="w-full">
             <TabelaParticipacaoDepartamentos
               data={data}
-              cores={coresDepartamentos}
+              cores={chartColors}
             />
           </div>
         </div>

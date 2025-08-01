@@ -16,7 +16,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "teste2.mensuraapi.com.br", pathname: "/**" },
-      { protocol: "https", hostname: "media.mensuraapi.com.br", pathname: "/**" },
+      { protocol: "https", hostname: "image.mensuraapi.com.br", pathname: "/**" },
     ],
   },
 

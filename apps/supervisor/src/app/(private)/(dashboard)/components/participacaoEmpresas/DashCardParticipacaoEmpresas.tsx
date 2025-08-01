@@ -22,6 +22,8 @@ import {
   TableRow,
 } from "@supervisor/components/ui/table";
 import { chartColors } from "@supervisor/utils/dashColors";
+import { mockComparativoTemporal } from "./mockComparativoTemporal";
+import TabelaResumoEmpresas from "./TabelaResumoEmpresas";
 
 interface Props {
   data: TotaisPorEmpresa[];
@@ -61,122 +63,67 @@ export default function ComponentParticipacaoEmpresas({
     [dataOrdenada, empresas, totalVendas]
   );
 
-  function renderTabelaDetalhes() {
-    return (
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-muted-foreground px-2">
-          Detalhamento
-        </p>
-        <div className="overflow-auto w-full">
-          <Table className="bg-background text-sm">
-            <TableHeader className="sticky top-0 bg-muted z-10">
-              <TableRow>
-                <TableHead>Cor</TableHead>
-                <TableHead>Empresa</TableHead>
-                <TableHead>Vendas</TableHead>
-                <TableHead>Part%</TableHead>
-                <TableHead>Cupons</TableHead>
-                <TableHead>Ticket Médio</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {chartPieData.map((item, idx) => {
-                const e = dataOrdenada[idx];
-                const labelStr =
-                  typeof item.label === "string"
-                    ? item.label
-                    : typeof item.label === "function"
-                    ? item.label("legend")
-                    : "";
-                const nome = labelStr.split(" (")[0];
-                const pctMatch = labelStr.match(/\((.*?)%\)/);
-                const pct = pctMatch ? pctMatch[1] : "0";
+return (
+  <Card className="flex flex-col flex-1 min-h-[250px] max-h-[1000px]">
+    <Select
+      value={typeChartSelected}
+      onValueChange={(v) => setTypeChartSelected(v as "Pizza" | "Colunas")}
+    >
+      <SelectTrigger className="w-[180px] ml-auto">
+        <SelectValue>{typeChartSelected}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Pizza">Pizza</SelectItem>
+        <SelectItem value="Colunas">Colunas</SelectItem>
+      </SelectContent>
+    </Select>
 
-                return (
-                  <TableRow key={idx}>
-                    <TableCell>
-                      <div
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                    </TableCell>
-                    <TableCell>{nome}</TableCell>
-                    <TableCell>
-                      {item.value.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </TableCell>
-                    <TableCell>{pct}%</TableCell>
-                    <TableCell>
-                      {e.total_cupons.toLocaleString("pt-BR")}
-                    </TableCell>
-                    <TableCell>
-                      {e.ticket_medio.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+
+    <CardTitle className="mx-4">Participação por Empresa</CardTitle>
+
+    <CardContent className="flex-1">
+      {/* Container das 3 colunas */}
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6 items-center">
+        {/* Comparativo Temporal */}
+        <div className="w-full ">
+          <TabelaResumoEmpresas
+              data={data}
+              comparativo={mockComparativoTemporal}
+              empresas={empresas}
+            />
+        </div>
+
+        {/* Gráfico */}
+        <div className="w-full flex justify-center items-center">
+          {isColunas ? (
+            <BarChart
+              xAxis={[{ data: data.map((e) => e.lcpr_codempresa) }]}
+              series={[{ id: "Vendas", data: data.map((e) => e.total_vendas) }]}
+              height={250}
+              borderRadius={5}
+              sx={{ width: "100%" }}
+            />
+          ) : (
+            <PieChart
+              height={200}
+              series={[
+                {
+                  data: chartPieData,
+                  cornerRadius: 3,
+                  highlightScope: { fade: "global", highlight: "item" },
+                },
+              ]}
+              sx={{
+                width: "100%",
+                margin: 3,
+                [`& .${legendClasses.root}`]: { display: "none" },
+              }}
+            />
+          )}
         </div>
       </div>
-    );
-  }
+    </CardContent>
+  </Card>
+);
 
-  return (
-    <Card className="flex flex-col flex-1 min-h-[250px] max-h-[500px]">
-      <Select
-        value={typeChartSelected}
-        onValueChange={(v) => setTypeChartSelected(v as "Pizza" | "Colunas")}
-      >
-        <SelectTrigger className="w-[180px] ml-auto">
-          <SelectValue placeholder="Tipo de Gráfico" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Pizza">Pizza</SelectItem>
-          <SelectItem value="Colunas">Colunas</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <CardTitle className="mx-4">Participação por Empresa</CardTitle>
-      <CardContent className="flex-1">
-        <div className="flex flex-col md:flex-row justify-center gap-4">
-          <div className="w-full md:w-1/2 flex justify-center">
-            {isColunas ? (
-              <BarChart
-                xAxis={[{ data: data.map((e) => e.lcpr_codempresa) }]}
-                series={[{ id: "Vendas", data: data.map((e) => e.total_vendas) }]}
-                height={250}
-                borderRadius={5}
-                sx={{ width: "100%" }}
-              />
-            ) : (
-              <PieChart
-                height={200}
-                series={[
-                  {
-                    data: chartPieData,
-                    cornerRadius: 3,
-                    highlightScope: { fade: "global", highlight: "item" },
-                  },
-                ]}
-                sx={{
-                  width: "100%",
-                  margin: 3,
-                  [`& .${legendClasses.root}`]: { display: "none" },
-                }}
-              />
-            )}
-          </div>
-          <div className="w-full">{renderTabelaDetalhes()}</div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 }
