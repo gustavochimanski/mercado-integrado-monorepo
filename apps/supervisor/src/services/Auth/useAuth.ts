@@ -32,7 +32,7 @@ export function useAuth() {
       loginService(creds.username, creds.password),
 
     onSuccess: (data) => {
-      setTypeUser(data.type_user);
+      setTypeUser(data.type_user!);
       // full reload para garantir middleware
       window.location.href = "/";
     },
