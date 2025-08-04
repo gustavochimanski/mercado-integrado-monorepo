@@ -7,11 +7,11 @@ import {
   TableHeader,
   TableRow,
 } from "@supervisor/components/ui/table";
+import { TypeTotaisPorDepartamento } from "./DashCardParticipacaoDepartamento";
 
-import { TotaisPorDepartamento } from "./DashCardParticipacaoDepartamento";
 
 interface Props {
-  data: TotaisPorDepartamento[];
+  data: TypeTotaisPorDepartamento[];
   cores: string[]; 
 }
 
@@ -45,7 +45,7 @@ export default function TabelaParticipacaoDepartamentos({ data }: Props) {
                         style={{ backgroundColor: cor }}
                     ></div>
                     </TableCell>
-                    <TableCell>{dep.depto_nome}</TableCell>
+                    <TableCell>{dep.departamento}</TableCell>
                     <TableCell className="text-right">
                     {dep.total_vendas.toLocaleString("pt-BR", {
                         style: "currency",

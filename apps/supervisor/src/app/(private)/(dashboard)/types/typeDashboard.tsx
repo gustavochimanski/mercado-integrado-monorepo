@@ -1,3 +1,4 @@
+import { TypeTotaisPorDepartamento } from "../components/departamento/DashCardParticipacaoDepartamento";
 import { TypeComprasGeralResponse } from "./typeCompras";
 import { TypeDashboardMetaHeader } from "./typeMetas";
 import { TypeVendaPorHoraResponse } from "./typeVendasPorHora";
@@ -93,6 +94,7 @@ export type TypeDashboardResponse = {
   compraDetalhada: TypeCompraDetalhadaResponse;
   vendaPorHora: TypeVendaPorHoraResponse;
   meios_pagamento: MeiosPagamento;
+  departamentos: TypeTotaisPorDepartamento[]
 };
 
 /**

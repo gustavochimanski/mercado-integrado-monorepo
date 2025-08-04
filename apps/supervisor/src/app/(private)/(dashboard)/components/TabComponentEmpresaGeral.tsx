@@ -2,11 +2,9 @@
 
 import React, { memo, useMemo } from "react";
 import { TypeDashboardResponse } from "../types/typeDashboard";
-import DashboardMetricCards from "./metrics/DashCardMetricCards";
 import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresas";
 import dynamic from "next/dynamic";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
-import { mockDepartamentos } from "./porHora/mockDepartamento";
 
 const ComponentParticipacaoEmpresas = dynamic(
   () => import("./participacaoEmpresas/DashCardParticipacaoEmpresas"),
@@ -55,7 +53,7 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
           <ComponentMeioPagamento data={meiosPagamentoData} />
         </div>
         <div className="flex-1 md:ml-auto md:w-1/2">
-          <ComponentParticipacaoDepartamentos data={mockDepartamentos} />
+          <ComponentParticipacaoDepartamentos data={dashboardData.departamentos} />
         </div>
       </div>
 
