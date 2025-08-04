@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@supervisor/components/ui/table";
-import { TypeTotaisPorDepartamento } from "./DashCardParticipacaoDepartamento";
+import { TypeTotaisPorDepartamento } from "./ComponentPartPorDepartamento";
 
 
 interface Props {
@@ -28,7 +28,7 @@ export default function TabelaParticipacaoDepartamentos({ data }: Props) {
                 <TableHead></TableHead> {/* coluna da bolinha */}
                 <TableHead>Departamento</TableHead>
                 <TableHead className="text-right">Vendas</TableHead>
-                <TableHead className="text-right">Part %</TableHead>
+                <TableHead className="text-right">%</TableHead>
             </TableRow>
             </TableHeader>
 

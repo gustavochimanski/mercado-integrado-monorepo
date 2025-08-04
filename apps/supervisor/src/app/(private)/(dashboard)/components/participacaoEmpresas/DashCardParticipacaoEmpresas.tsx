@@ -77,14 +77,7 @@ return (
     <CardContent className="flex-1">
       {/* Container das 3 colunas */}
       <div className="flex flex-col gap-4 md:flex-row md:gap-6 items-center">
-        {/* Comparativo Temporal */}
-        <div className="w-full ">
-          <TabelaResumoEmpresas
-              periodo_anterior={periodo_anterior}
-              totais_por_empresa={totais_por_empresa}
-              empresas={empresas}
-            />
-        </div>
+
 
         {/* Gráfico */}
         <div className="w-full flex justify-center items-center">
@@ -113,6 +106,15 @@ return (
               }}
             />
           )}
+        </div>
+
+                {/* Comparativo Temporal */}
+        <div className="w-full ">
+          <TabelaResumoEmpresas
+              periodo_anterior={periodo_anterior}
+              totais_por_empresa={totais_por_empresa}
+              empresas={empresas}
+            />
         </div>
       </div>
     </CardContent>

@@ -1,4 +1,4 @@
-import { TypeTotaisPorDepartamento } from "../components/departamento/DashCardParticipacaoDepartamento";
+import { TypeTotaisPorDepartamento } from "../components/departamento/ComponentPartPorDepartamento";
 import { TypeComprasGeralResponse } from "./typeCompras";
 import { TypeDashboardMetaHeader } from "./typeMetas";
 import { TypeVendaPorHoraResponse } from "./typeVendasPorHora";

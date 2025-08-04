@@ -1,4 +1,4 @@
-import { TotaisPorDepartamento } from "../departamento/DashCardParticipacaoDepartamento";
+import { TotaisPorDepartamento } from "../departamento/ComponentPartPorDepartamento";
 
 export const mockDepartamentos: TotaisPorDepartamento[] = [
   { depto_codigo: "1", depto_nome: "Mercearia", total_vendas: 120000 },

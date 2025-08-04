@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { TypeDashboardResponse, CodEmpresa } from "../types/typeDashboard";
 import CompanyMetricCards from "./metrics/DashCardCompanyMetricCards";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
-import ComponentParticipacaoDepartamentos from "./departamento/DashCardParticipacaoDepartamento";
+import ComponentParticipacaoDepartamentos from "./departamento/ComponentPartPorDepartamento";
 import VendasEClientesPorHoraChart from "./porHora/VendasEClientesPorHoraChart";
 import { mockDepartamentos } from "./porHora/mockDepartamento";
 

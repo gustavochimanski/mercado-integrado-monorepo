@@ -11,7 +11,7 @@ const ComponentParticipacaoEmpresas = dynamic(
   { ssr: false, loading: () => <p>Carregando gráfico...</p> }
 );
 const ComponentParticipacaoDepartamentos = dynamic(
-  () => import("./departamento/DashCardParticipacaoDepartamento"),
+  () => import("./departamento/ComponentPartPorDepartamento"),
   { ssr: false, loading: () => <p>Carregando tabela...</p> }
 );
 
