@@ -13,37 +13,30 @@ import {
   SelectValue,
 } from "@supervisor/components/ui/select";
 import { useState, useMemo } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@supervisor/components/ui/table";
 import { chartColors } from "@supervisor/utils/dashColors";
-import { mockComparativoTemporal } from "./mockComparativoTemporal";
 import TabelaResumoEmpresas from "./TabelaResumoEmpresas";
 
 interface Props {
-  data: TotaisPorEmpresa[];
+  totais_por_empresa: TotaisPorEmpresa[];
+  periodo_anterior: TotaisPorEmpresa[];
   empresas?: { empr_codigo: string; empr_nomereduzido: string }[];
 }
 
 export default function ComponentParticipacaoEmpresas({
-  data,
+  totais_por_empresa,
+  periodo_anterior,
   empresas,
 }: Props) {
   const [typeChartSelected, setTypeChartSelected] = useState<"Pizza" | "Colunas">("Pizza");
   const isColunas = typeChartSelected === "Colunas";
 
   const dataOrdenada = useMemo(
-    () => [...data].sort((a, b) => b.total_vendas - a.total_vendas),
-    [data]
+    () => [...totais_por_empresa].sort((a, b) => b.total_vendas - a.total_vendas),
+    [totais_por_empresa]
   );
   const totalVendas = useMemo(
-    () => data.reduce((sum, e) => sum + e.total_vendas, 0),
-    [data]
+    () => totais_por_empresa.reduce((sum, e) => sum + e.total_vendas, 0),
+    [totais_por_empresa]
   );
 
   const chartPieData: PieValueType[] = useMemo(
@@ -87,8 +80,8 @@ return (
         {/* Comparativo Temporal */}
         <div className="w-full ">
           <TabelaResumoEmpresas
-              data={data}
-              comparativo={mockComparativoTemporal}
+              periodo_anterior={periodo_anterior}
+              totais_por_empresa={totais_por_empresa}
               empresas={empresas}
             />
         </div>
@@ -97,8 +90,8 @@ return (
         <div className="w-full flex justify-center items-center">
           {isColunas ? (
             <BarChart
-              xAxis={[{ data: data.map((e) => e.lcpr_codempresa) }]}
-              series={[{ id: "Vendas", data: data.map((e) => e.total_vendas) }]}
+              xAxis={[{ data: totais_por_empresa.map((e) => e.lcpr_codempresa) }]}
+              series={[{ id: "Vendas", data: totais_por_empresa.map((e) => e.total_vendas) }]}
               height={250}
               borderRadius={5}
               sx={{ width: "100%" }}

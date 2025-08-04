@@ -52,13 +52,10 @@ export type { TypeResumoVendasResponse } from './models/TypeResumoVendasResponse
 export { TypeTotaisPorEmpresaMetaResponse } from './models/TypeTotaisPorEmpresaMetaResponse';
 export type { TypeVendaByDay } from './models/TypeVendaByDay';
 export type { TypeVendaDetalhadaEmpresa } from './models/TypeVendaDetalhadaEmpresa';
-export type { TypeVendaDetalhadaRequest } from './models/TypeVendaDetalhadaRequest';
 export type { TypeVendaDetalhadaResponse } from './models/TypeVendaDetalhadaResponse';
 export type { TypeVendaPorHora } from './models/TypeVendaPorHora';
 export type { TypeVendaPorHoraComTotalGeralResponse } from './models/TypeVendaPorHoraComTotalGeralResponse';
-export type { TypeVendaPorHoraRequest } from './models/TypeVendaPorHoraRequest';
 export type { TypeVendaPorHoraResponse } from './models/TypeVendaPorHoraResponse';
-export type { TypeVendasPeriodoGeral } from './models/TypeVendasPeriodoGeral';
 export type { UserCreate } from './models/UserCreate';
 export type { UserUpdate } from './models/UserUpdate';
 export type { ValidationError } from './models/ValidationError';

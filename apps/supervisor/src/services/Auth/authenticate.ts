@@ -1,8 +1,7 @@
 // src/services/Auth/authenticate.ts
 
 import { LoginRequest, TokenResponse } from "@supervisor/api";
-import { mensuraApi } from "@supervisor/api/ClientApi";
-import axios from "axios";
+import { mensuraApi } from "@supervisor/api/MensuraApi";
 import { deleteCookie, setCookie } from "cookies-next"; // ✅ funciona no client e server
 
 

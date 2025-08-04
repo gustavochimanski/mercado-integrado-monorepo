@@ -2,12 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { TypeDashboardRequest } from '../models/TypeDashboardRequest';
 import type { TypeResumoVendasResponse } from '../models/TypeResumoVendasResponse';
-import type { TypeVendaDetalhadaRequest } from '../models/TypeVendaDetalhadaRequest';
 import type { TypeVendaDetalhadaResponse } from '../models/TypeVendaDetalhadaResponse';
 import type { TypeVendaPorHoraComTotalGeralResponse } from '../models/TypeVendaPorHoraComTotalGeralResponse';
-import type { TypeVendaPorHoraRequest } from '../models/TypeVendaPorHoraRequest';
-import type { TypeVendasPeriodoGeral } from '../models/TypeVendasPeriodoGeral';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class VendasService {
@@ -19,7 +17,7 @@ export class VendasService {
      * @throws ApiError
      */
     public resumoVendasControllerBiVendasPeriodoPost(
-        requestBody: TypeVendasPeriodoGeral,
+        requestBody: TypeDashboardRequest,
     ): CancelablePromise<TypeResumoVendasResponse> {
         return this.httpRequest.request({
             method: 'POST',
@@ -38,7 +36,7 @@ export class VendasService {
      * @throws ApiError
      */
     public consultaVendaDetalhadaControllerBiVendasVendaDetalhadaPost(
-        requestBody: TypeVendaDetalhadaRequest,
+        requestBody: TypeDashboardRequest,
     ): CancelablePromise<TypeVendaDetalhadaResponse> {
         return this.httpRequest.request({
             method: 'POST',
@@ -57,7 +55,7 @@ export class VendasService {
      * @throws ApiError
      */
     public consultaVendaPorHoraControllerBiVendasPorHoraPost(
-        requestBody: TypeVendaPorHoraRequest,
+        requestBody: TypeDashboardRequest,
     ): CancelablePromise<TypeVendaPorHoraComTotalGeralResponse> {
         return this.httpRequest.request({
             method: 'POST',

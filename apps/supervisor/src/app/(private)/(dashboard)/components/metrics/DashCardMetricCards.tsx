@@ -7,7 +7,6 @@ import {
   CardTitle,
   CardContent,
 } from "@supervisor/components/ui/card";
-import { TypeDashboardResponse } from "../../types/typeDashboard";
 import { Popover, PopoverTrigger, PopoverContent } from "@supervisor/components/ui/popover";
 import { Info } from "lucide-react";
 import { formatCurrency, formatInt } from "@supervisor/utils/format/formatNumber";
@@ -16,6 +15,7 @@ import {
   getProgressBar,
   getProgressValue,
 } from "@supervisor/utils/progress/getProgressColor";
+import { TypeDashboardResponse } from "../../types/typeDashboard";
 
 type Props = { data: TypeDashboardResponse };
 

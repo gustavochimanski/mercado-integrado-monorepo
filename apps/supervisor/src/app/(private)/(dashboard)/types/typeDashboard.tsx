@@ -85,6 +85,7 @@ export type MeiosPagamento = {
 export type TypeDashboardResponse = {
   totais_por_empresa: TotaisPorEmpresa[];
   total_geral: TotaisGerais;
+  periodo_anterior: TotaisPorEmpresa[]
   metas: TypeDashboardMetaHeader;
   relacao: TypeRelacao;
   compras: TypeComprasGeralResponse;

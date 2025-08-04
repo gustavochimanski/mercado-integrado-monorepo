@@ -7,7 +7,6 @@ import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresas"
 import dynamic from "next/dynamic";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import { mockDepartamentos } from "./porHora/mockDepartamento";
-import VendasEClientesPorHoraChart from "./porHora/VendasEClientesPorHoraChart";
 
 const ComponentParticipacaoEmpresas = dynamic(
   () => import("./participacaoEmpresas/DashCardParticipacaoEmpresas"),
@@ -45,7 +44,8 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
       {/* <DashboardMetricCards data={dashboardData} /> */}
         <div className="flex flex-col gap-2 w-full">
           <ComponentParticipacaoEmpresas
-            data={totaisPorEmpresa}
+            periodo_anterior={dashboardData.periodo_anterior}
+            totais_por_empresa={dashboardData.totais_por_empresa}
             empresas={empresasMemo}
           />
         </div>

@@ -11,7 +11,6 @@ import {
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { TotaisPorEmpresa } from "../../types/typeDashboard";
 import { chartColors } from "@supervisor/utils/dashColors";
-import { ComparativoEmpresa } from "./mockComparativoTemporal";
 
 interface Empresa {
   empr_codigo: string;
@@ -19,8 +18,8 @@ interface Empresa {
 }
 
 interface Props {
-  data: TotaisPorEmpresa[];
-  comparativo: ComparativoEmpresa[];
+  totais_por_empresa: TotaisPorEmpresa[];
+  periodo_anterior: TotaisPorEmpresa[];
   empresas?: Empresa[];
 }
 
@@ -29,9 +28,13 @@ function getVariacaoPercentual(atual: number, anterior: number): number {
   return ((atual - anterior) / anterior) * 100;
 }
 
-export default function TabelaResumoEmpresas({ data, comparativo, empresas }: Props) {
-  const totalVendas = data.reduce((sum, e) => sum + e.total_vendas, 0);
-  const dataOrdenada = [...data].sort((a, b) => b.total_vendas - a.total_vendas);
+export default function TabelaResumoEmpresas({
+  totais_por_empresa,
+  periodo_anterior,
+  empresas,
+}: Props) {
+  const totalVendas = totais_por_empresa.reduce((sum, e) => sum + e.total_vendas, 0);
+  const dataOrdenada = [...totais_por_empresa].sort((a, b) => b.total_vendas - a.total_vendas);
 
   return (
     <div className="flex flex-col gap-2">
@@ -51,18 +54,14 @@ export default function TabelaResumoEmpresas({ data, comparativo, empresas }: Pr
           </TableHeader>
           <TableBody>
             {dataOrdenada.map((e, idx) => {
-              // Nome reduzido da empresa
               const codigo = e.lcpr_codempresa;
               const nome =
                 empresas?.find((x) => x.empr_codigo === codigo)?.empr_nomereduzido ?? codigo;
 
-              const dadoComparativo = comparativo.find((c) => c.empresa === codigo);
-
+              const dadoAnterior = periodo_anterior.find((c) => c.lcpr_codempresa === codigo);
+              const anterior = dadoAnterior?.total_vendas ?? 0;
 
               const part = totalVendas > 0 ? ((e.total_vendas / totalVendas) * 100).toFixed(1) : "0";
-
-              // Match com mockComparativoTemporal baseado no nome
-              const anterior = dadoComparativo?.valorAnterior ?? 0;
               const variacao = getVariacaoPercentual(e.total_vendas, anterior);
               const isPositivo = variacao > 0;
               const isIgual = variacao === 0;
@@ -105,18 +104,10 @@ export default function TabelaResumoEmpresas({ data, comparativo, empresas }: Pr
                       <span className="text-muted-foreground">0,0%</span>
                     ) : (
                       <span
-                        className={
-                          isPositivo
-                            ? "text-green-600 font-medium"
-                            : "text-red-600 font-medium"
-                        }
+                        className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
                       >
                         <span className="inline-flex items-center gap-1">
-                          {isPositivo ? (
-                            <ArrowUp size={14} />
-                          ) : (
-                            <ArrowDown size={14} />
-                          )}
+                          {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
                           {Math.abs(variacao).toFixed(1)}%
                         </span>
                       </span>
