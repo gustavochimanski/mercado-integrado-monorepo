@@ -6,7 +6,6 @@ import CompanyMetricCards from "./metrics/DashCardCompanyMetricCards";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import ComponentParticipacaoDepartamentos from "./departamento/ComponentPartPorDepartamento";
 import VendasEClientesPorHoraChart from "./porHora/VendasEClientesPorHoraChart";
-import { mockDepartamentos } from "./porHora/mockDepartamento";
 
 interface Props {
   codEmpresa: CodEmpresa;
@@ -55,7 +54,7 @@ export default function TabComponentDashboardByEmp({
       {/* 📊 Linha com Participação de Departamentos + Meios de Pagamento */}
       <div className="flex md:flex-row flex-col gap-4 h-full">
         <div className="w-full md:w-1/2 flex flex-col gap-4">
-          <ComponentParticipacaoDepartamentos data={mockDepartamentos} />
+          <ComponentParticipacaoDepartamentos data={dashboardData.departamentos} />
         </div>
 
         <div className="md:w-1/2 md:ml-auto flex-1">
