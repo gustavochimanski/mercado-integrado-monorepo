@@ -45,8 +45,8 @@ export default function TabelaResumoEmpresas({
   const dataOrdenada = [...totais_por_empresa].sort((a, b) => b.total_vendas - a.total_vendas);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="overflow-auto w-full">
+    <div>
+      <div className="overflow-auto h-[220px]">
         <Table className="bg-background text-sm">
           <TableHeader className="sticky top-0 bg-muted z-10">
             <TableRow className="whitespace-nowrap">
@@ -113,9 +113,7 @@ export default function TabelaResumoEmpresas({
                       <span className="text-muted-foreground">0,0%</span>
                     ) : (
                       <span
-                        className={
-                          isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"
-                        }
+                        className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
                       >
                         <span className="inline-flex items-center gap-1">
                           {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
@@ -161,9 +159,175 @@ export default function TabelaResumoEmpresas({
                   <span className="text-muted-foreground">0,0%</span>
                 ) : (
                   <span
-                    className={
-                      isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"
-                    }
+                    className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                      {Math.abs(variacaoTotal).toFixed(1)}%
+                    </span>
+                  </span>
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow className="font-bold border-t border-muted">
+              <TableCell />
+              <TableCell>Total</TableCell>
+              <TableCell className="text-right">
+                {totalVendas.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">100%</TableCell>
+              <TableCell className="text-right">
+                {totalCupons.toLocaleString("pt-BR")}
+              </TableCell>
+              <TableCell className="text-right">
+                {ticketMedioGeral.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {totalAnterior.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {isIgual ? (
+                  <span className="text-muted-foreground">0,0%</span>
+                ) : (
+                  <span
+                    className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                      {Math.abs(variacaoTotal).toFixed(1)}%
+                    </span>
+                  </span>
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow className="font-bold border-t border-muted">
+              <TableCell />
+              <TableCell>Total</TableCell>
+              <TableCell className="text-right">
+                {totalVendas.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">100%</TableCell>
+              <TableCell className="text-right">
+                {totalCupons.toLocaleString("pt-BR")}
+              </TableCell>
+              <TableCell className="text-right">
+                {ticketMedioGeral.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {totalAnterior.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {isIgual ? (
+                  <span className="text-muted-foreground">0,0%</span>
+                ) : (
+                  <span
+                    className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                      {Math.abs(variacaoTotal).toFixed(1)}%
+                    </span>
+                  </span>
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow className="font-bold border-t border-muted">
+              <TableCell />
+              <TableCell>Total</TableCell>
+              <TableCell className="text-right">
+                {totalVendas.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">100%</TableCell>
+              <TableCell className="text-right">
+                {totalCupons.toLocaleString("pt-BR")}
+              </TableCell>
+              <TableCell className="text-right">
+                {ticketMedioGeral.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {totalAnterior.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {isIgual ? (
+                  <span className="text-muted-foreground">0,0%</span>
+                ) : (
+                  <span
+                    className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                      {Math.abs(variacaoTotal).toFixed(1)}%
+                    </span>
+                  </span>
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow className="font-bold border-t border-muted">
+              <TableCell />
+              <TableCell>Total</TableCell>
+              <TableCell className="text-right">
+                {totalVendas.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">100%</TableCell>
+              <TableCell className="text-right">
+                {totalCupons.toLocaleString("pt-BR")}
+              </TableCell>
+              <TableCell className="text-right">
+                {ticketMedioGeral.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {totalAnterior.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                {isIgual ? (
+                  <span className="text-muted-foreground">0,0%</span>
+                ) : (
+                  <span
+                    className={isPositivo ? "text-green-600 font-medium" : "text-red-600 font-medium"}
                   >
                     <span className="inline-flex items-center gap-1">
                       {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}

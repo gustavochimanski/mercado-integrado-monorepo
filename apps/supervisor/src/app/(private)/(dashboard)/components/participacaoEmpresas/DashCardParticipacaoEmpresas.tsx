@@ -57,7 +57,7 @@ export default function ComponentParticipacaoEmpresas({
   );
 
 return (
-  <Card className="flex flex-col flex-1 min-h-[250px] max-h-[1000px]">
+  <Card className="flex flex-col flex-1">
     <Select
       value={typeChartSelected}
       onValueChange={(v) => setTypeChartSelected(v as "Pizza" | "Colunas")}
