@@ -33,30 +33,44 @@ export default function TabelaParticipacaoDepartamentos({ data }: Props) {
             </TableHeader>
 
             <TableBody>
-            {data.map((dep, idx) => {
+              {data.map((dep, idx) => {
                 const percentual = ((dep.total_vendas / totalGeral) * 100).toFixed(1);
                 const cor = `var(--chart-${(idx % 16) + 1})`;
 
                 return (
-                <TableRow key={idx}>
+                  <TableRow key={idx}>
                     <TableCell>
-                    <div
+                      <div
                         className="w-4 h-4 rounded-full"
                         style={{ backgroundColor: cor }}
-                    ></div>
+                      ></div>
                     </TableCell>
                     <TableCell>{dep.departamento}</TableCell>
                     <TableCell className="text-right">
-                    {dep.total_vendas.toLocaleString("pt-BR", {
+                      {dep.total_vendas.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
-                    })}
+                      })}
                     </TableCell>
                     <TableCell className="text-right">{percentual}%</TableCell>
-                </TableRow>
+                  </TableRow>
                 );
-            })}
+              })}
+
+              {/* Linha do total */}
+              <TableRow className="font-bold border-t border-muted">
+                <TableCell /> {/* coluna da bolinha vazia */}
+                <TableCell>Total</TableCell>
+                <TableCell className="text-right">
+                  {totalGeral.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </TableCell>
+                <TableCell className="text-right">100%</TableCell>
+              </TableRow>
             </TableBody>
+
 
 
         </Table>

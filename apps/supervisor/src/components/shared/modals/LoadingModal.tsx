@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogPortal, DialogOverlay, DialogContent } from "@supervisor/components/ui/dialog";
+import { Dialog, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from "@supervisor/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
 interface Props {
@@ -13,6 +13,7 @@ export default function LoadingModal({ open }: Props) {
       <DialogPortal>
         <DialogOverlay />
         <DialogContent className="flex flex-col items-center justify-center gap-4 w-40 text-center pointer-events-none">
+          <DialogTitle>Carregando</DialogTitle>
           <Loader2 className="animate-spin text-primary" size={32} />
           <p className="text-sm font-medium">Carregando...</p>
         </DialogContent>

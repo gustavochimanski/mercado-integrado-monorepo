@@ -45,59 +45,70 @@ export default function ComponentMeioPagamento({ data }: Props) {
     }));
 
   // Tabela de detalhamento
-function renderTabelaDetalhes() {
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="text-sm font-semibold text-muted-foreground px-2">
-        Detalhamento
-      </p>
-      <div className="overflow-auto max-h-[300px]">
-        <Table className="bg-background text-sm">
-          <TableHeader className="sticky top-0 bg-muted z-10">
-            <TableRow>
-              <TableHead>Cor</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead className="text-center">%</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {chartPieData.map((item) => {
-              const percentual = ((item.value / total) * 100).toFixed(1);
+  function renderTabelaDetalhes() {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold text-muted-foreground px-2">
+          Detalhamento
+        </p>
+        <div className="overflow-auto h-full">
+          <Table className="bg-background text-sm">
+            <TableHeader className="sticky top-0 bg-muted z-10">
+              <TableRow>
+                <TableHead>Cor</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-center">%</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {chartPieData.map((item) => {
+                const percentual = ((item.value / total) * 100).toFixed(1);
 
-              // Normaliza o label para sempre ser string
-              const labelText =
-                typeof item.label === "function"
-                  ? item.label("legend")
-                  : item.label ?? "";
+                const labelText =
+                  typeof item.label === "function"
+                    ? item.label("legend")
+                    : item.label ?? "";
 
-              return (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  </TableCell>
-                  <TableCell>{labelText}</TableCell>
-                  <TableCell className="text-center">
-                    {percentual}%
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.value.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                    </TableCell>
+                    <TableCell>{labelText}</TableCell>
+                    <TableCell className="text-center">{percentual}%</TableCell>
+                    <TableCell className="text-right">
+                      {item.value.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+
+              {/* Linha do TOTAL */}
+              <TableRow className="font-bold border-t border-muted">
+                <TableCell />
+                <TableCell>Total</TableCell>
+                <TableCell className="text-center">100%</TableCell>
+                <TableCell className="text-right">
+                  {total.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+
 
 
   return (
@@ -105,10 +116,10 @@ function renderTabelaDetalhes() {
       <CardHeader className="pb-0">
         <CardTitle className="mx-4">Meio de Pagamento</CardTitle>
       </CardHeader>
-      <CardContent className="md:p-2 p-3 flex-1">
-        <div className="flex flex-col md:flex-row justify-center items-start gap-4">
+      <CardContent className="p-3 flex-1">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4">
           {/* Gráfico sem legenda */}
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center items-center">
             <PieChart
               height={200}
               series={[
@@ -129,7 +140,7 @@ function renderTabelaDetalhes() {
           </div>
 
           {/* Tabela de Detalhes */}
-          <div className="w-full">{renderTabelaDetalhes()}</div>
+          <div className="w-full h-full">{renderTabelaDetalhes()}</div>
         </div>
       </CardContent>
     </Card>

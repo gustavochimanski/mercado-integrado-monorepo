@@ -1,5 +1,6 @@
 import { TypeTotaisPorDepartamento } from "../components/departamento/ComponentPartPorDepartamento";
 import { TypeComprasGeralResponse } from "./typeCompras";
+import { PorEmpresaDepartamentos } from "./typeDepartamento";
 import { TypeDashboardMetaHeader } from "./typeMetas";
 import { TypeVendaPorHoraResponse } from "./typeVendasPorHora";
 
@@ -94,7 +95,8 @@ export type TypeDashboardResponse = {
   compraDetalhada: TypeCompraDetalhadaResponse;
   vendaPorHora: TypeVendaPorHoraResponse;
   meios_pagamento: MeiosPagamento;
-  departamentos: TypeTotaisPorDepartamento[]
+  departamento_geral: TypeTotaisPorDepartamento[];
+  departamento_empresa: PorEmpresaDepartamentos[];
 };
 
 /**

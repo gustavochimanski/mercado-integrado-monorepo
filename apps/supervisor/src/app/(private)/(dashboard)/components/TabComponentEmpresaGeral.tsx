@@ -25,10 +25,6 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
 
   // Memoize empresasData to avoid unnecessary renders
   const empresasMemo = useMemo(() => empresasData, [empresasData]);
-  const totaisPorEmpresa = useMemo(
-    () => dashboardData.totais_por_empresa,
-    [dashboardData.totais_por_empresa]
-  );
 
   const meiosPagamentoData = dashboardData.meios_pagamento.total_geral.map(
     (item) => ({
@@ -52,8 +48,8 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
         <div className="md:w-1/2 md:ml-auto flex-1">
           <ComponentMeioPagamento data={meiosPagamentoData} />
         </div>
-        <div className="flex-1 md:ml-auto md:w-1/2">
-          <ComponentParticipacaoDepartamentos data={dashboardData.departamentos} />
+        <div className="flex-1  md:w-1/2">
+          <ComponentParticipacaoDepartamentos data={dashboardData.departamento_geral} />
         </div>
       </div>
 

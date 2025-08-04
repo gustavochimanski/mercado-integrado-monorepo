@@ -2,17 +2,8 @@
 
 import { PieChart } from "@mui/x-charts/PieChart";
 import { PieValueType } from "@mui/x-charts/models";
-import { Card, CardContent, CardTitle } from "@supervisor/components/ui/card";
-import { BarChart, legendClasses } from "@mui/x-charts";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@supervisor/components/ui/select";
-import { useState } from "react";
-import { useTheme } from "@mui/material";
+import { Card, CardContent, CardHeader, CardTitle } from "@supervisor/components/ui/card";
+import {  legendClasses } from "@mui/x-charts";
 import TabelaParticipacaoDepartamentos from "./TabelaParticipacaoDepartamento";
 import { chartColors } from "@supervisor/utils/dashColors";
 
@@ -27,11 +18,10 @@ interface Props {
 }
 
 export default function ComponentParticipacaoDepartamentos({ data }: Props) {
-  const [typeChartSelected, setTypeChartSelected] = useState("Pizza");
-  const isColunas = typeChartSelected === "Colunas";
-  const theme = useTheme();
+    if (!data || !Array.isArray(data)) {
+      return null; 
+    }
 
-  const departamentos = data.map((d) => d.departamento);
   const vendas = data.map((d) => d.total_vendas);
   const totalVendas = vendas.reduce((acc, v) => acc + v, 0);
 
@@ -45,38 +35,16 @@ export default function ComponentParticipacaoDepartamentos({ data }: Props) {
     };
   });
 
+
   return (
     <Card className="flex flex-col flex-1">
-      <Select value={typeChartSelected} onValueChange={setTypeChartSelected}>
-        <SelectTrigger className="w-[180px] ml-auto border-r-0 border-t-0 rounded-r-none rounded-t-none">
-          <SelectValue placeholder="Tipo de gráfico" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Pizza">Pizza</SelectItem>
-          <SelectItem value="Colunas">Colunas</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <CardTitle className="mx-4">Participação por Departamento</CardTitle>
+      <CardHeader className="pb-0">
+        <CardTitle className="mx-4">Departamentos</CardTitle>
+      </CardHeader>
 
       <CardContent className="md:p-2 p-3">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="w-full flex justify-center items-center">
-            {isColunas ? (
-              <BarChart
-                xAxis={[{ data: departamentos }]}
-                series={[
-                  {
-                    id: "Vendas",
-                    data: vendas,
-                    color: "var(--chart-1)",
-                  },
-                ]}
-                height={250}
-                borderRadius={5}
-                sx={{ width: "100%" }}
-              />
-            ) : (
               <PieChart
                 height={200}
                 series={[
@@ -99,7 +67,6 @@ export default function ComponentParticipacaoDepartamentos({ data }: Props) {
                   [`& .${legendClasses.mark}`]: { width: 16, height: 16 },
                 }}
               />
-            )}
           </div>
 
           <div className="w-full">
