@@ -1,5 +1,7 @@
 // src/services/Auth/authenticate.ts
 
+import { LoginRequest, TokenResponse } from "@supervisor/api";
+import { mensuraApi } from "@supervisor/api/ClientApi";
 import axios from "axios";
 import { deleteCookie, setCookie } from "cookies-next"; // ✅ funciona no client e server
 
@@ -10,19 +12,15 @@ export type LoginResponse = {
   access_token: string
 };
 
-const api = axios.create({
-  baseURL: "https://teste2.mensuraapi.com.br",      
-});
-
-
 export async function loginService(
   username: string,
   password: string
-): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>(
-    "/auth/token",
-    { username, password }
-  );
+): Promise<TokenResponse> {
+
+  const data = await mensuraApi.auth.loginUsuarioAuthTokenPost({
+    username,
+    password
+  } satisfies LoginRequest)
   
 
   // 🔐 Armazena em cookie para acesso universal (SSR + client)
