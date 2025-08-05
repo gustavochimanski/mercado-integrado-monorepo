@@ -76,13 +76,13 @@ export default function VendasEClientesPorHoraContainer({
         </h6>
     </CardHeader>
     <CardContent className="p-0 pb-4">
-        <div className="flex flex-col gap-6 pt-4 lg:flex-row">
-        <div className="w-full lg:w-1/2 min-w-0">
-            <VendasPorHoraChart chartData={chartData} />
-        </div>
-        <div className="w-full lg:w-1/2 min-w-0 overflow-x-auto">
-            <VendasPorHoraTable data={acumulado} />
-        </div>
+        <div className="flex flex-col gap-2 pt-4 lg:flex-row">
+            <div className="w-full lg:w-1/2 min-w-0">
+                <VendasPorHoraChart chartData={chartData} />
+            </div>
+            <div className="w-full lg:w-1/2 min-w-0 overflow-x-auto">
+                <VendasPorHoraTable data={acumulado} />
+            </div>
         </div>
     </CardContent>
     </Card>

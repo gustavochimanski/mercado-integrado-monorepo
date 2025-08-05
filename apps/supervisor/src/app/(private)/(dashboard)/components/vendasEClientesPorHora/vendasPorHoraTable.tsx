@@ -15,6 +15,8 @@ interface LinhaAcumulada {
   total_cupons: number;
   total_vendas: number;
   ticket_medio: number;
+  // 🆕 campo acumulado
+  vendas_acumuladas?: number;
 }
 
 interface Props {
@@ -22,34 +24,46 @@ interface Props {
 }
 
 export default function VendasPorHoraTable({ data }: Props) {
+  // 🧠 calculando vendas acumuladas por linha
+  const dataComAcumulado = data.reduce<LinhaAcumulada[]>((acc, linha, index) => {
+    const acumuladoAnterior = acc[index - 1]?.vendas_acumuladas ?? 0;
+    const acumuladoAtual = acumuladoAnterior + linha.total_vendas;
+
+    acc.push({
+      ...linha,
+      vendas_acumuladas: acumuladoAtual,
+    });
+
+    return acc;
+  }, []);
+
   return (
     <div className="w-full max-h-[350px] overflow-auto rounded-sm">
-      <Table className="bg-background text-sm rounded-sm min-w-[600px]">
-        <TableHeader>
-          <TableRow>
+      <Table className="bg-background text-xs rounded-sm min-w-[700px]">
+        <TableHeader className="sticky top-0 bg-muted z-10">
+          <TableRow >
             <TableHead className="sticky top-0 z-10 bg-muted">Hora</TableHead>
-            <TableHead className="sticky top-0 z-10 bg-muted">
-              Cupons da Hora
-            </TableHead>
-            <TableHead className="sticky top-0 z-10 bg-muted">
-              Cupons Acumulados
-            </TableHead>
-            <TableHead className="sticky top-0 z-10 bg-muted">
-              Total de Vendas
-            </TableHead>
-            <TableHead className="sticky top-0 z-10 bg-muted">
-              Ticket Médio
-            </TableHead>
+            <TableHead className="sticky top-0 z-10 bg-muted">Cupons</TableHead>
+            <TableHead className="sticky top-0 z-10 bg-muted">Cupons Acumu</TableHead>
+            <TableHead className="sticky top-0 z-10 bg-muted">Total de Vendas</TableHead>
+            <TableHead className="sticky top-0 z-10 bg-muted">Vendas Acumu</TableHead>
+            <TableHead className="sticky top-0 z-10 bg-muted">Ticket Médio</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row) => (
+          {dataComAcumulado.map((row) => (
             <TableRow key={row.hora}>
               <TableCell>{row.hora}</TableCell>
               <TableCell>{row.cupons_hora}</TableCell>
               <TableCell>{row.total_cupons}</TableCell>
               <TableCell>
                 {row.total_vendas.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </TableCell>
+              <TableCell>
+                {row.vendas_acumuladas?.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 })}
