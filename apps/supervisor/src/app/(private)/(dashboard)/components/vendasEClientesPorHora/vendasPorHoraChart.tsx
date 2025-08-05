@@ -32,7 +32,7 @@ interface Props {
 }
 
 export default function VendasPorHoraChart({ chartData }: Props) {
-  const isMobile = useIsMobile(); // 👈 usando seu hook aqui
+  const isMobile = useIsMobile(); 
 
   const chartConfig = {
     total_vendas: {
