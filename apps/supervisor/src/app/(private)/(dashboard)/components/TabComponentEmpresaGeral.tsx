@@ -6,6 +6,7 @@ import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresas"
 import dynamic from "next/dynamic";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import { Card, CardContent, CardHeader } from "@supervisor/components/ui/card";
+import DashCardRelacaoVendaCompra from "./vendaCompra/dashVendaCompra";
 
 const ComponentParticipacaoEmpresas = dynamic(
   () => import("./participacaoEmpresas/DashCardParticipacaoEmpresas"),
@@ -35,21 +36,12 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {/* Bloco 1: Resumo + Participação Empresas */}
-      <div className="flex flex-col md:flex-row gap-4 w-full">
-        {/* CARD lateral - ocupa 100% no mobile, 1/3 na horizontal */}
-        <Card className="w-full md:w-1/3 flex flex-col max-h-[40vh]">
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Resumo</h3>
-          </CardHeader>
-          <CardContent className="overflow-y-auto flex-1">
-            <div className="space-y-2">
-              {[...Array(50)].map((_, i) => (
-                <p key={i}>Linha {i + 1} - conteúdo exemplo</p>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="flex flex-col md:flex-row h-[45vh] gap-4 w-full">
+            <DashCardRelacaoVendaCompra
+              className="h-full"
+              relacaoGeral={dashboardData.relacao}
+              relacaoPorEmpresa={dashboardData.relacao_por_empresa}
+            />
         {/* PARTICIPAÇÃO - ocupa o restante da largura */}
         <div className="w-full md:w-2/3 flex h-full flex-col">
           <ComponentParticipacaoEmpresas

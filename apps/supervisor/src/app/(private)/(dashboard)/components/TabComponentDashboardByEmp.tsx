@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { TypeDashboardResponse, CodEmpresa } from "../types/typeDashboard";
+import { CodEmpresa, TypeDashboardResponse } from "../types/typeDashboard";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import ComponentParticipacaoDepartamentos, { TypeTotaisPorDepartamento } from "./departamento/ComponentPartPorDepartamento";
 import VendasEClientesPorHoraContainer from "./vendasEClientesPorHora/vendasEClientesPorHoraContainer";
+import DashCardRelacaoVendaCompra from "./vendaCompra/dashVendaCompra"; // 👈 importa aqui
 
 interface Props {
   codEmpresa: CodEmpresa;
@@ -24,6 +25,7 @@ export default function TabComponentDashboardByEmp({
       })),
     [dashboardData]
   );
+
   const meiosEspecificos = useMemo(() => {
     return (
       dashboardData.meios_pagamento.por_empresa
@@ -34,23 +36,23 @@ export default function TabComponentDashboardByEmp({
         })) || []
     );
   }, [dashboardData, codEmpresa]);
+
   const meiosPagamentoData =
     meiosEspecificos.length > 0 ? meiosEspecificos : meiosGerais;
 
-  /** 2️⃣ Participação de Departamentos **/
-  // sempre temos o geral
+  /** 2️⃣ Departamentos **/
   const departamentosGerais: TypeTotaisPorDepartamento[] = useMemo(
     () => dashboardData.departamento_geral,
     [dashboardData.departamento_geral]
   );
-  // filtra pelo código da empresa, que agora é exatamente o `empresa` no JSON
+
   const departamentosEspecificos: TypeTotaisPorDepartamento[] = useMemo(() => {
     const entry = dashboardData.departamento_empresa.find(
       (d) => String(d.empresa) === String(codEmpresa)
     );
     return entry?.departamentos ?? [];
   }, [dashboardData.departamento_empresa, codEmpresa]);
-  // fallback para geral
+
   const departamentosData =
     departamentosEspecificos.length > 0
       ? departamentosEspecificos
@@ -62,10 +64,22 @@ export default function TabComponentDashboardByEmp({
     [dashboardData.vendaPorHora]
   );
 
+  /** 4️⃣ Relacao Venda x Compra por empresa **/
+  const relacaoEmpresa = useMemo(() => {
+    return dashboardData.relacao_por_empresa.find(
+      (r) => String(r.empresa) === String(codEmpresa)
+    );
+  }, [dashboardData, codEmpresa]);
+
   return (
     <div className="flex flex-col gap-4">
-      {/* 🔢 Cartões de Métricas */}
-      {/* <CompanyMetricCards codEmpresa={codEmpresa} data={dashboardData} /> */}
+      {/* 📊 Gráfico Vendas vs Compras (empresa) */}
+      {relacaoEmpresa && (
+        <DashCardRelacaoVendaCompra
+          relacaoGeral={undefined}
+          relacaoPorEmpresa={[relacaoEmpresa]} // 👈 usa só a empresa atual
+        />
+      )}
 
       {/* 📊 Participação de Departamentos + Meios de Pagamento */}
       <div className="flex md:flex-row flex-col gap-4 h-full">

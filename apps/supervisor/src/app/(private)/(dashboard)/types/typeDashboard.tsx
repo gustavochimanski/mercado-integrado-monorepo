@@ -14,6 +14,7 @@ export type CodEmpresa = string;
  */
 export type TotaisPorEmpresa = {
   lcpr_codempresa: CodEmpresa;
+  empr_nomereduzido: string;
   total_cupons: number;
   total_vendas: number;
   ticket_medio: number;
@@ -28,17 +29,36 @@ export type TotaisGerais = {
   ticket_medio: number;
 };
 
-type TypeRelacao = {
+/**
+ * Relação geral de vendas vs compras
+ */
+export type TypeRelacao = {
+  total_vendas: number;
+  total_compras: number;
   relacaoValue: number;
   relacaoPorcentagem: number;
 };
 
-type TypeVendaDetalhadaByDate = {
+/**
+ * Relação de margem por empresa
+ */
+export type TypeRelacaoEmpresa = {
+  empresa: CodEmpresa;
+  total_vendas: number;
+  total_compras: number;
+  relacaoValue: number;
+  relacaoPorcentagem: number;
+};
+
+/**
+ * Detalhamento de vendas por data
+ */
+export type TypeVendaDetalhadaByDate = {
   data: string;
   valor: number;
 };
 
-type TypeVendaDetalhadaEmpresas = {
+export type TypeVendaDetalhadaEmpresas = {
   empresa: CodEmpresa;
   dates: TypeVendaDetalhadaByDate[];
 };
@@ -50,12 +70,12 @@ export type TypeVendaDetalhadaResponse = {
   vendaEmpresas: TypeVendaDetalhadaEmpresas[];
 };
 
-type TypeCompraDetalhadaByDate = {
+export type TypeCompraDetalhadaByDate = {
   data: string;
   valor: number;
 };
 
-type TypeCompraDetalhadaEmpresas = {
+export type TypeCompraDetalhadaEmpresas = {
   empresa: CodEmpresa;
   dates: TypeCompraDetalhadaByDate[];
 };
@@ -87,9 +107,10 @@ export type MeiosPagamento = {
 export type TypeDashboardResponse = {
   totais_por_empresa: TotaisPorEmpresa[];
   total_geral: TotaisGerais;
-  periodo_anterior: TotaisPorEmpresa[]
+  periodo_anterior: TotaisPorEmpresa[];
   metas: TypeDashboardMetaHeader;
   relacao: TypeRelacao;
+  relacao_por_empresa: TypeRelacaoEmpresa[];
   compras: TypeComprasGeralResponse;
   vendaDetalhada: TypeVendaDetalhadaResponse;
   compraDetalhada: TypeCompraDetalhadaResponse;
