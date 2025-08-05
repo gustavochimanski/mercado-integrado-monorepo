@@ -49,7 +49,7 @@ export default function DashCardRelacaoVendaCompra({
   return (
     <Card className={`w-full flex flex-col ${className}`}>
       <CardHeader>
-        <h3 className="text-lg font-semibold">Vendas vs Compras</h3>
+        <h3 className="text-lg font-semibold">Venda vs Compra</h3>
       </CardHeader>
 
       <CardContent className="flex-grow overflow-x-auto">
