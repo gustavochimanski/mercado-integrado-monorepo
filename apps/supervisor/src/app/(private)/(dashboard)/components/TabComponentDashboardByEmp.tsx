@@ -2,10 +2,9 @@
 
 import React, { useMemo } from "react";
 import { TypeDashboardResponse, CodEmpresa } from "../types/typeDashboard";
-import CompanyMetricCards from "./metrics/DashCardCompanyMetricCards";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import ComponentParticipacaoDepartamentos, { TypeTotaisPorDepartamento } from "./departamento/ComponentPartPorDepartamento";
-import VendasEClientesPorHoraChart from "./porHora/VendasEClientesPorHoraChart";
+import VendasEClientesPorHoraContainer from "./vendasEClientesPorHora/vendasEClientesPorHoraContainer";
 
 interface Props {
   codEmpresa: CodEmpresa;
@@ -79,8 +78,8 @@ export default function TabComponentDashboardByEmp({
       </div>
 
       {/* 📈 Vendas e Clientes por Hora */}
-      <div className="w-full md:w-1/2 flex flex-col gap-4">
-        <VendasEClientesPorHoraChart
+      <div className="w-full flex flex-col gap-4">
+        <VendasEClientesPorHoraContainer
           data={vendasPorHoraData}
           empresaSelecionada={codEmpresa}
         />
