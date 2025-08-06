@@ -74,12 +74,12 @@ export default function TabComponentDashboardByEmp({
   return (
     <div className="flex flex-col gap-4">
       {/* 📊 Gráfico Vendas vs Compras (empresa) */}
-      {relacaoEmpresa && (
+      {/* {relacaoEmpresa && (
         <DashCardRelacaoVendaCompra
           relacaoGeral={undefined}
           relacaoPorEmpresa={[relacaoEmpresa]} // 👈 usa só a empresa atual
         />
-      )}
+      )} */}
 
       {/* 📊 Participação de Departamentos + Meios de Pagamento */}
       <div className="flex md:flex-row flex-col gap-4 h-full">
