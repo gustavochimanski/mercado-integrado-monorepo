@@ -55,7 +55,7 @@ export default function PageDashboard() {
   }, [dashboardData, mapaCodigosNomes]);
 
   return (
-    <div className="mb-5 md:mb-0">
+    <div className="mb-20 md:mb-0">
       <ComponentCardHeader
         empresasDetalhes={dataEmpresas}
         onSuccess={setDashboardData}
