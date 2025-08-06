@@ -25,40 +25,18 @@ import { TypeVendaPorHoraResponse } from "../../types/typeVendasPorHora";
 
 interface Props {
   data: TypeVendaPorHoraResponse;
-  empresaSelecionada: string;
 }
 
-export default function DashCardClientesPorHoraChart({ data, empresaSelecionada }: Props) {
-  const porEmpresa = data.porEmpresa;
-
-  let chartData;
-
-  if (empresaSelecionada) {
-    const empresaData = porEmpresa.find(
-      (e) => String(e.empresa) === String(empresaSelecionada)
-    );
-
-    if (!empresaData) {
-      return <p>Nenhum dado encontrado para a empresa {empresaSelecionada}.</p>;
-    }
-
-    chartData = empresaData.vendasPorHora.map((v) => ({
-      hora: `${v.hora.toString().padStart(2, "0")}:00`,
-      total_clientes: v.total_cupons
-    }));
-  } else {
-    const totalGeral = data.totalGeral;
-
-    chartData = totalGeral.map((v) => ({
-      hora: `${v.hora.toString().padStart(2, "0")}:00`,
-      total_clientes: v.total_cupons,
-    }));
-  }
+export default function DashCardClientesPorHoraChart({ data }: Props) {
+  const chartData = data.vendasPorHora.map((v) => ({
+    hora: `${v.hora.toString().padStart(2, "0")}:00`,
+    total_clientes: v.total_cupons,
+  }));
 
   const chartConfig = {
     total_clientes: {
       label: "Total de Clientes",
-      color: "var(--chart-1)", // Pode criar essa cor no seu tema se quiser
+      color: "var(--chart-1)",
     },
   };
 
@@ -66,13 +44,13 @@ export default function DashCardClientesPorHoraChart({ data, empresaSelecionada 
     <Card className="font-sans p-0">
       <CardHeader>
         <h6 className="font-sans font-semibold text-muted-foreground">
-          Clientes por Hora
+          Clientes por Hora - {data.empresa}
         </h6>
       </CardHeader>
-      <CardContent className="p-0">
-        <ChartContainer className="m-0!" config={chartConfig}>
+      <CardContent className="p-0 min-h-[200px]">
+        <ChartContainer className="m-0" config={chartConfig}>
           <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={chartData} margin={{ left: 0, right: 0}}>
+            <AreaChart data={chartData} margin={{ left: 0, right: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
                 dataKey="hora"
@@ -80,7 +58,7 @@ export default function DashCardClientesPorHoraChart({ data, empresaSelecionada 
                 axisLine={false}
                 tickMargin={8}
               />
-              <YAxis tickLine={false}   />
+              <YAxis tickLine={false} />
               <Tooltip cursor={true} content={<ChartTooltipContent />} />
 
               <defs>

@@ -10,7 +10,7 @@ export function useCardapio(empresa_id: number) {
     queryKey: ["categorias-delivery", empresa_id],
     queryFn: async () => {
       try {
-        const { data } = await api.get("/mensura/cardapio", {
+        const { data } = await api.get("/delivery/cardapio", {
           params: { empresa_id },
         });
         return data;

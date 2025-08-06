@@ -1,6 +1,6 @@
-// src/lib/api.ts
 import axios from "axios";
 
+// ✅ Usa mesma URL de ambiente
 export const api = axios.create({
-  baseURL: "https://gerente.mensuraapi.com.br",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });

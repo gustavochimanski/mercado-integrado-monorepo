@@ -1,11 +1,11 @@
-// src/lib/api/apiMensura.ts
 "use client";
 
 import { getToken } from "@cardapio/stores/token/tokenStore";
 import axios from "axios";
 
+// ✅ Use variável de ambiente
 const apiAdmin = axios.create({
-  baseURL: "https://gerente.mensuraapi.com.br",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 apiAdmin.interceptors.request.use((config) => {
