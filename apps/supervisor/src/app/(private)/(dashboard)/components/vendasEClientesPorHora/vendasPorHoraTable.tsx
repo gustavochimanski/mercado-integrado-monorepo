@@ -12,10 +12,9 @@ import {
 interface LinhaAcumulada {
   hora: string;
   cupons_hora: number;
-  total_cupons: number;
-  total_vendas: number;
-  ticket_medio: number;
-  // 🆕 campo acumulado
+  total_cupons: number; // acumulado
+  total_vendas: number; // valor da hora
+  ticket_medio: number; // da hora
   vendas_acumuladas?: number;
 }
 
@@ -24,14 +23,19 @@ interface Props {
 }
 
 export default function VendasPorHoraTable({ data }: Props) {
-  // 🧠 calculando vendas acumuladas por linha
   const dataComAcumulado = data.reduce<LinhaAcumulada[]>((acc, linha, index) => {
-    const acumuladoAnterior = acc[index - 1]?.vendas_acumuladas ?? 0;
-    const acumuladoAtual = acumuladoAnterior + linha.total_vendas;
+    const anterior = acc[index - 1] ?? {
+      vendas_acumuladas: 0,
+      total_cupons: 0,
+    };
+
+    const vendasAcumuladas = anterior.vendas_acumuladas! + linha.total_vendas;
+    const cuponsAcumulados = anterior.total_cupons + linha.cupons_hora;
 
     acc.push({
       ...linha,
-      vendas_acumuladas: acumuladoAtual,
+      vendas_acumuladas: vendasAcumuladas,
+      total_cupons: cuponsAcumulados,
     });
 
     return acc;
@@ -41,7 +45,7 @@ export default function VendasPorHoraTable({ data }: Props) {
     <div className="w-full max-h-[350px] overflow-auto rounded-sm">
       <Table className="bg-background text-xs rounded-sm min-w-[700px]">
         <TableHeader className="sticky top-0 bg-muted z-10">
-          <TableRow >
+          <TableRow>
             <TableHead className="sticky top-0 z-10 bg-muted">Hora</TableHead>
             <TableHead className="sticky top-0 z-10 bg-muted">Cupons</TableHead>
             <TableHead className="sticky top-0 z-10 bg-muted">Cupons Acumu</TableHead>

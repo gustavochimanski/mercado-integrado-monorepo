@@ -114,7 +114,7 @@ export type TypeDashboardResponse = {
   compras: TypeComprasGeralResponse;
   vendaDetalhada: TypeVendaDetalhadaResponse;
   compraDetalhada: TypeCompraDetalhadaResponse;
-  vendaPorHora: TypeVendaPorHoraResponse;
+  vendaPorHora: TypeVendaPorHoraResponse[];
   meios_pagamento: MeiosPagamento;
   departamento_geral: TypeTotaisPorDepartamento[];
   departamento_empresa: PorEmpresaDepartamentos[];

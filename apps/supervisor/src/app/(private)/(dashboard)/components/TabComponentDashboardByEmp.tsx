@@ -5,7 +5,7 @@ import { CodEmpresa, TypeDashboardResponse } from "../types/typeDashboard";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import ComponentParticipacaoDepartamentos, { TypeTotaisPorDepartamento } from "./departamento/ComponentPartPorDepartamento";
 import VendasEClientesPorHoraContainer from "./vendasEClientesPorHora/vendasEClientesPorHoraContainer";
-import DashCardRelacaoVendaCompra from "./vendaCompra/dashVendaCompra"; // 👈 importa aqui
+import { TypeVendaPorHoraResponse } from "../types/typeVendasPorHora";
 
 interface Props {
   codEmpresa: CodEmpresa;
@@ -29,7 +29,7 @@ export default function TabComponentDashboardByEmp({
   const meiosEspecificos = useMemo(() => {
     return (
       dashboardData.meios_pagamento.por_empresa
-        .find((m) => String(m.empresa) === String(codEmpresa))
+        .find((m) => m.empresa === codEmpresa)
         ?.meios.map((item) => ({
           descricao: item.descricao,
           valorTotal: item.valor_total,
@@ -41,46 +41,20 @@ export default function TabComponentDashboardByEmp({
     meiosEspecificos.length > 0 ? meiosEspecificos : meiosGerais;
 
   /** 2️⃣ Departamentos **/
-  const departamentosGerais: TypeTotaisPorDepartamento[] = useMemo(
-    () => dashboardData.departamento_geral,
-    [dashboardData.departamento_geral]
-  );
-
-  const departamentosEspecificos: TypeTotaisPorDepartamento[] = useMemo(() => {
-    const entry = dashboardData.departamento_empresa.find(
-      (d) => String(d.empresa) === String(codEmpresa)
-    );
-    return entry?.departamentos ?? [];
-  }, [dashboardData.departamento_empresa, codEmpresa]);
-
+  const departamentosGerais: TypeTotaisPorDepartamento[] = dashboardData.departamento_geral;
+  const departamentosEspecificos: TypeTotaisPorDepartamento[] =
+    dashboardData.departamento_empresa.find((d) => d.empresa === codEmpresa)
+      ?.departamentos ?? [];
   const departamentosData =
     departamentosEspecificos.length > 0
       ? departamentosEspecificos
       : departamentosGerais;
 
   /** 3️⃣ Vendas por Hora **/
-  const vendasPorHoraData = useMemo(
-    () => dashboardData.vendaPorHora,
-    [dashboardData.vendaPorHora]
-  );
-
-  /** 4️⃣ Relacao Venda x Compra por empresa **/
-  const relacaoEmpresa = useMemo(() => {
-    return dashboardData.relacao_por_empresa.find(
-      (r) => String(r.empresa) === String(codEmpresa)
-    );
-  }, [dashboardData, codEmpresa]);
+  const vendasPorHoraData: TypeVendaPorHoraResponse[] = dashboardData.vendaPorHora;
 
   return (
     <div className="flex flex-col gap-4">
-      {/* 📊 Gráfico Vendas vs Compras (empresa) */}
-      {/* {relacaoEmpresa && (
-        <DashCardRelacaoVendaCompra
-          relacaoGeral={undefined}
-          relacaoPorEmpresa={[relacaoEmpresa]} // 👈 usa só a empresa atual
-        />
-      )} */}
-
       {/* 📊 Participação de Departamentos + Meios de Pagamento */}
       <div className="flex md:flex-row flex-col gap-4 h-full">
         <div className="w-full md:w-1/2 flex flex-col gap-4">
