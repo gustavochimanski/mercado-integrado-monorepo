@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { Card, CardContent, CardHeader, CardTitle } from "@supervisor/components/ui/card";
 import { PieChart, legendClasses } from "@mui/x-charts";
@@ -27,14 +28,10 @@ export default function ComponentMeioPagamento({ data }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Total geral para cálculo de %
   const total = data.reduce((acc, item) => acc + item.valorTotal, 0);
-
-  // Cores
   const getChartColor = (index: number) =>
     altChartColors[index % altChartColors.length];
 
-  // Dados pro gráfico
   const chartPieData: PieValueType[] = [...data]
     .sort((a, b) => b.valorTotal - a.valorTotal)
     .map((item, idx) => ({
@@ -44,15 +41,15 @@ export default function ComponentMeioPagamento({ data }: Props) {
       color: getChartColor(idx),
     }));
 
-  // Tabela de detalhamento
   function renderTabelaDetalhes() {
     return (
       <div className="flex flex-col gap-2">
         <p className="text-sm font-semibold text-muted-foreground px-2">
           Detalhamento
         </p>
-        <div className="overflow-auto h-full">
-          <Table className="bg-background text-sm">
+        {/* container com scroll ao ultrapassar 300px */}
+        <div className="relative overflow-auto max-h-[300px]">
+          <Table className="bg-background text-sm min-w-[400px]">
             <TableHeader className="sticky top-0 bg-muted z-10">
               <TableRow>
                 <TableHead>Cor</TableHead>
@@ -64,7 +61,6 @@ export default function ComponentMeioPagamento({ data }: Props) {
             <TableBody>
               {chartPieData.map((item) => {
                 const percentual = ((item.value / total) * 100).toFixed(1);
-
                 const labelText =
                   typeof item.label === "function"
                     ? item.label("legend")
@@ -90,12 +86,14 @@ export default function ComponentMeioPagamento({ data }: Props) {
                 );
               })}
 
-              {/* Linha do TOTAL */}
-              <TableRow className="font-bold border-t border-muted">
-                <TableCell />
-                <TableCell>Total</TableCell>
-                <TableCell className="text-center">100%</TableCell>
-                <TableCell className="text-right">
+              {/* Linha do TOTAL fixa no bottom */}
+              <TableRow className="sticky bottom-0 z-20 font-bold">
+                <TableCell className="bg-muted" />
+                <TableCell className="bg-muted text-primary">Total</TableCell>
+                <TableCell className="bg-muted text-center text-primary">
+                  100%
+                </TableCell>
+                <TableCell className="bg-muted text-right text-primary">
                   {total.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
@@ -109,8 +107,6 @@ export default function ComponentMeioPagamento({ data }: Props) {
     );
   }
 
-
-
   return (
     <Card className="flex flex-col flex-1 min-h-[300px]">
       <CardHeader className="pb-0">
@@ -118,7 +114,6 @@ export default function ComponentMeioPagamento({ data }: Props) {
       </CardHeader>
       <CardContent className="p-3 flex-1">
         <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-          {/* Gráfico sem legenda */}
           <div className="w-full flex justify-center items-center">
             <PieChart
               height={200}
@@ -131,16 +126,13 @@ export default function ComponentMeioPagamento({ data }: Props) {
               ]}
               sx={{
                 width: "100%",
-                // esconde toda a área de legenda
                 [`& .${legendClasses.root}`]: {
                   display: "none",
                 },
               }}
             />
           </div>
-
-          {/* Tabela de Detalhes */}
-          <div className="w-full h-full">{renderTabelaDetalhes()}</div>
+          <div className="w-full">{renderTabelaDetalhes()}</div>
         </div>
       </CardContent>
     </Card>
