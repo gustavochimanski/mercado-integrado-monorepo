@@ -56,8 +56,8 @@ return (
             <TableHead className="text-right">Vendas</TableHead>
             <TableHead className="text-right">Mês Ant.</TableHead>
             <TableHead className="text-right">Variação</TableHead>
-            <TableHead className="text-right">Cupons</TableHead>
             <TableHead className="text-right whitespace-nowrap">Ticket Médio</TableHead>
+            <TableHead className="text-right">Cupons</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -96,6 +96,7 @@ return (
                     style: "currency",
                     currency: "BRL",
                   })}
+                </TableCell>
                 <TableCell className="text-right">
                   {isIgual ? (
                     <span className="text-muted-foreground">0,0%</span>
@@ -112,10 +113,6 @@ return (
                     </span>
                   )}
                 </TableCell>
-                </TableCell>
-                <TableCell className="text-right">
-                  {e.total_cupons.toLocaleString("pt-BR")}
-                </TableCell>
                 <TableCell className="text-right">
                   {e.ticket_medio.toLocaleString("pt-BR", {
                     style: "currency",
@@ -123,6 +120,9 @@ return (
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
+                </TableCell>
+                <TableCell className="text-right">
+                  {e.total_cupons.toLocaleString("pt-BR")}
                 </TableCell>
               </TableRow>
             );
@@ -132,22 +132,11 @@ return (
           <TableRow className="font-bold border-t border-muted">
             <TableCell />
             <TableCell>Total</TableCell>
+            <TableCell className="text-right">100%</TableCell>
             <TableCell className="text-right">
               {totalVendas.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              })}
-            </TableCell>
-            <TableCell className="text-right">100%</TableCell>
-            <TableCell className="text-right">
-              {totalCupons.toLocaleString("pt-BR")}
-            </TableCell>
-            <TableCell className="text-right">
-              {ticketMedioGeral.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
               })}
             </TableCell>
             <TableCell className="text-right">
@@ -171,6 +160,18 @@ return (
                   </span>
                 </span>
               )}
+            </TableCell>
+            <TableCell className="text-right">
+              {ticketMedioGeral.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </TableCell>
+
+            <TableCell className="text-right">
+              {totalCupons.toLocaleString("pt-BR")}
             </TableCell>
           </TableRow>
         </TableBody>
