@@ -52,12 +52,12 @@ return (
           <TableRow className="whitespace-nowrap">
             <TableHead>Cor</TableHead>
             <TableHead>Empresa</TableHead>
-            <TableHead className="text-right">Vendas</TableHead>
             <TableHead className="text-right">Part%</TableHead>
-            <TableHead className="text-right">Cupons</TableHead>
-            <TableHead className="text-right whitespace-nowrap">Ticket Médio</TableHead>
+            <TableHead className="text-right">Vendas</TableHead>
             <TableHead className="text-right">Mês Ant.</TableHead>
             <TableHead className="text-right">Variação</TableHead>
+            <TableHead className="text-right">Cupons</TableHead>
+            <TableHead className="text-right whitespace-nowrap">Ticket Médio</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -84,22 +84,11 @@ return (
                   />
                 </TableCell>
                 <TableCell>{nome}</TableCell>
+                <TableCell className="text-right">{part}%</TableCell>
                 <TableCell className="text-right">
                   {e.total_vendas.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  })}
-                </TableCell>
-                <TableCell className="text-right">{part}%</TableCell>
-                <TableCell className="text-right">
-                  {e.total_cupons.toLocaleString("pt-BR")}
-                </TableCell>
-                <TableCell className="text-right">
-                  {e.ticket_medio.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
                   })}
                 </TableCell>
                 <TableCell className="text-right">
@@ -107,7 +96,6 @@ return (
                     style: "currency",
                     currency: "BRL",
                   })}
-                </TableCell>
                 <TableCell className="text-right">
                   {isIgual ? (
                     <span className="text-muted-foreground">0,0%</span>
@@ -123,6 +111,18 @@ return (
                       </span>
                     </span>
                   )}
+                </TableCell>
+                </TableCell>
+                <TableCell className="text-right">
+                  {e.total_cupons.toLocaleString("pt-BR")}
+                </TableCell>
+                <TableCell className="text-right">
+                  {e.ticket_medio.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </TableCell>
               </TableRow>
             );
