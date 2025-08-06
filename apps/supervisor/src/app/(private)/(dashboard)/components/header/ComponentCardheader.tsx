@@ -85,7 +85,7 @@ export default function ComponentCardHeader({ empresasDetalhes, onSuccess }: Pro
                     )}
                     <Popover>
                       <PopoverTrigger asChild className="rounded-l-none md:rounded">
-                        <Button variant="outline" className="h-7">
+                        <Button variant="outline" className="h-7 hover:text-background">
                           <CalendarIcon />
                         </Button>
                       </PopoverTrigger>
@@ -126,7 +126,7 @@ export default function ComponentCardHeader({ empresasDetalhes, onSuccess }: Pro
                     )}
                     <Popover>
                       <PopoverTrigger asChild className="rounded-l-none md:rounded">
-                        <Button variant="outline" className="h-7">
+                        <Button variant="outline" className="h-7 hover:text-background ">
                           <CalendarIcon />
                         </Button>
                       </PopoverTrigger>
