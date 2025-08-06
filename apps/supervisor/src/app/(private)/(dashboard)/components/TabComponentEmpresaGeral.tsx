@@ -8,8 +8,9 @@ import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import { Card, CardContent, CardHeader } from "@supervisor/components/ui/card";
 import DashCardRelacaoVendaCompra from "./vendaCompra/dashVendaCompra";
 
+// Componentes dinâmicos
 const ComponentParticipacaoEmpresas = dynamic(
-  () => import("./participacaoEmpresas/DashCardParticipacaoEmpresas"),
+  () => import("./participacaoEmpresas/ComponentPartEmpresas"),
   { ssr: false, loading: () => <p>Carregando gráfico...</p> }
 );
 const ComponentParticipacaoDepartamentos = dynamic(
@@ -34,16 +35,18 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Bloco 1: Resumo + Participação Empresas */}
-      <div className="flex flex-col md:flex-row h-[45vh] gap-4 w-full">
-            <DashCardRelacaoVendaCompra
-              className="h-full"
-              relacaoGeral={dashboardData.relacao}
-              relacaoPorEmpresa={dashboardData.relacao_por_empresa}
-            />
-        {/* PARTICIPAÇÃO - ocupa o restante da largura */}
-        <div className="w-full md:w-2/3 flex h-full flex-col">
+    <div className="flex flex-col gap-4 w-full px-2 md:px-0">
+      {/* Bloco 1: Rel. Venda/Compra + Participação Empresas */}
+      <div className="flex flex-col md:flex-row gap-4 w-full">
+        <div className="w-full md:w-1/3 h-[300px] md:h-[45vh]">
+          <DashCardRelacaoVendaCompra
+            className="h-full"
+            relacaoGeral={dashboardData.relacao}
+            relacaoPorEmpresa={dashboardData.relacao_por_empresa}
+          />
+        </div>
+
+        <div className="w-full md:w-2/3 h-[450px] md:h-[45vh]">
           <ComponentParticipacaoEmpresas
             periodo_anterior={dashboardData.periodo_anterior}
             totais_por_empresa={dashboardData.totais_por_empresa}
@@ -52,15 +55,13 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
         </div>
       </div>
 
-      {/* Bloco 2: Departamentos e Meios de Pagamento */}
-      <div className="flex flex-col md:flex-row gap-4 h-full">
-        {/* Departamentos primeiro no mobile */}
-        <div className="flex-1 md:w-1/2 order-1 md:order-1">
+      {/* Bloco 2: Departamentos + Meios de Pagamento */}
+      <div className="flex flex-col md:flex-row gap-4 w-full">
+        <div className="w-full md:w-1/2">
           <ComponentParticipacaoDepartamentos data={dashboardData.departamento_geral} />
         </div>
 
-        {/* Meios de pagamento abaixo no mobile, à direita no desktop */}
-        <div className="flex-1 md:w-1/2 md:ml-auto order-2 md:order-2">
+        <div className="w-full md:w-1/2">
           <ComponentMeioPagamento data={meiosPagamentoData} />
         </div>
       </div>

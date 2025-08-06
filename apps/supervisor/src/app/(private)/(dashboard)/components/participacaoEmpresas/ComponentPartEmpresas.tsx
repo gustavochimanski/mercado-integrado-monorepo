@@ -56,31 +56,28 @@ export default function ComponentParticipacaoEmpresas({
     [dataOrdenada, empresas, totalVendas]
   );
 
-return (
-  <Card className="flex flex-col flex-1">
-    <Select
-      value={typeChartSelected}
-      onValueChange={(v) => setTypeChartSelected(v as "Pizza" | "Colunas")}
-    >
-      <SelectTrigger className="w-[180px] ml-auto">
-        <SelectValue>{typeChartSelected}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="Pizza">Pizza</SelectItem>
-        <SelectItem value="Colunas">Colunas</SelectItem>
-      </SelectContent>
-    </Select>
+  return (
+    <Card className="flex flex-col flex-1 h-full">
+
+      <Select
+        value={typeChartSelected}
+        onValueChange={(v) => setTypeChartSelected(v as "Pizza" | "Colunas")}
+      >
+        <SelectTrigger className="w-[180px] ml-auto">
+          <SelectValue>{typeChartSelected}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Pizza">Pizza</SelectItem>
+          <SelectItem value="Colunas">Colunas</SelectItem>
+        </SelectContent>
+      </Select>
 
 
-    <CardTitle className="mx-4">Participação por Empresa</CardTitle>
+      <CardTitle className="mx-4">Participação por Empresa</CardTitle>
 
-    <CardContent className="flex-1">
-      {/* Container das 3 colunas */}
-      <div className="flex flex-col gap-4 md:flex-row md:gap-6 items-center">
-
-
+      <CardContent className="flex flex-1 overflow-hidden flex-col md:flex-row gap-4">
         {/* Gráfico */}
-        <div className="w-full flex justify-center items-center">
+        <div className="w-full md:w-1/2 flex justify-center items-center">
           {isColunas ? (
             <BarChart
               xAxis={[{ data: totais_por_empresa.map((e) => e.lcpr_codempresa) }]}
@@ -108,17 +105,16 @@ return (
           )}
         </div>
 
-                {/* Comparativo Temporal */}
-        <div className="w-full ">
+        {/* Tabela com scroll e altura controlada */}
+        <div className="w-full  overflow-auto">
           <TabelaResumoEmpresas
-              periodo_anterior={periodo_anterior}
-              totais_por_empresa={totais_por_empresa}
-              empresas={empresas}
-            />
+            periodo_anterior={periodo_anterior}
+            totais_por_empresa={totais_por_empresa}
+            empresas={empresas}
+          />
         </div>
-      </div>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
 
+    </Card>
+  );
 }

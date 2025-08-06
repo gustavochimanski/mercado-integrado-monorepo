@@ -70,9 +70,6 @@ export default function TabelaParticipacaoDepartamentos({ data }: Props) {
                 <TableCell className="text-right">100%</TableCell>
               </TableRow>
             </TableBody>
-
-
-
         </Table>
       </CardContent>
     </div>
