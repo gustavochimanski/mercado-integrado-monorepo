@@ -11,7 +11,7 @@ import { CartFab } from "@cardapio/components/Shared/cart/CartFab";
 import { CartSheet } from "@cardapio/components/Shared/cart/CartSheet";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
-import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddSecaoSubCateg";
+import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddVitrine";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
@@ -62,9 +62,6 @@ export default function HomePage() {
           titulo="Categorias"
           empresaId={empresaId}
         />
-
-        <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={0} />
-
       </main>
 
       {produtoSelecionado && (

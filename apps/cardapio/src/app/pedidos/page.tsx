@@ -87,7 +87,7 @@ const RoutePedidos = () => {
     <div className="min-h-screen flex flex-col gap-6 p-6">
       {sortGroups(groupedOrders).map(([group, orders]) => (
         <Card key={group} className="w-full p-0 gap-0 ">
-          <CardHeader className="p-2 bg-muted h-10 items-center ">
+          <CardHeader className="p-4 bg-primary h-12 items-center rounded-t-xl text-background ">
             <CardTitle >{group}</CardTitle>
           </CardHeader>
 

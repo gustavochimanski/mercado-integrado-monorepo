@@ -1,11 +1,10 @@
-// components/admin/card/CardAddSecaoSubCateg.tsx
 "use client";
 
 import { useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { Card } from "../../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { ModalAddSecao } from "../modals/ModalAddSecaoSubCateg";
+import { ModalAddVitrine } from "../modals/ModalAddVitrine";
 
 
 interface Props {
@@ -13,7 +12,7 @@ interface Props {
   codCategoria: number;
 }
 
-const CardAddSecaoSubCateg = ({ empresaId, codCategoria }: Props) => {
+const CardAddVitrine = ({ empresaId, codCategoria }: Props) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
 
@@ -33,7 +32,7 @@ const CardAddSecaoSubCateg = ({ empresaId, codCategoria }: Props) => {
         </span>
       </Card>
 
-      <ModalAddSecao
+      <ModalAddVitrine
         open={open}
         onOpenChange={setOpen}
         empresaId={empresaId}
@@ -43,4 +42,4 @@ const CardAddSecaoSubCateg = ({ empresaId, codCategoria }: Props) => {
   );
 };
 
-export default CardAddSecaoSubCateg;
+export default CardAddVitrine;

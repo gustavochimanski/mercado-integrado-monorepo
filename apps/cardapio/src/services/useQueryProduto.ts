@@ -20,7 +20,7 @@ export function useFetchCadProdDelivery(cod_empresa: number, page: number, limit
     queryKey: ["produtos", cod_empresa, page, limit],
     queryFn: async () => {
       const res = await apiAdmin.get(
-        `/mensura/produtos/delivery?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
+        `/delivery/produtos/delivery?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
       );
       return res.data;
     },
@@ -33,7 +33,7 @@ export function useMutateProduto() {
   const create = useMutation({
     mutationFn: async ({ cod_empresa, formData }: CreateProdutoBody) => {
       formData.append("cod_empresa", String(cod_empresa));
-      const { data } = await apiAdmin.post("/mensura/produtos/delivery", formData);
+      const { data } = await apiAdmin.post("/delivery/produtos/delivery", formData);
       return data;
     },
     onSuccess: () => {
@@ -50,7 +50,7 @@ export function useMutateProduto() {
   const update = useMutation({
     mutationFn: async ({ cod_barras, cod_empresa, formData }: UpdateProdutoBody) => {
       formData.append("cod_empresa", String(cod_empresa));
-      const { data } = await apiAdmin.put(`/mensura/produtos/delivery/${cod_barras}`, formData);
+      const { data } = await apiAdmin.put(`/delivery/produtos/delivery/${cod_barras}`, formData);
       return data;
     },
     onSuccess: () => {
@@ -66,7 +66,7 @@ export function useMutateProduto() {
 
   const remove = useMutation({
     mutationFn: async (cod_barras: string) => {
-      await apiAdmin.delete(`/mensura/produtos/delivery/${cod_barras}`);
+      await apiAdmin.delete(`/delivery/produtos/delivery/${cod_barras}`);
     },
     onSuccess: () => {
       toast.success("Produto removido com sucesso!");

@@ -14,21 +14,22 @@ import { useMutateCategoria } from "@cardapio/services/useMutateCategoria";
 interface ModalCategoriaProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  parentSlug?: string | null;
+  parentId?: number | null;
   titulo?: string;
+  empresaId: number
 }
 
 export const ModalAdminAddCategoria = ({
   open,
   onOpenChange,
-  parentSlug = null,
+  parentId = null,
+  empresaId
 }: ModalCategoriaProps) => {
   const [descricao, setDescricao] = useState("");
   const [imagem, setImagem] = useState<File | undefined>(undefined);
 
-  const cod_empresa = 1
 
-  const { createSub } = useMutateCategoria(parentSlug);
+  const { createSub } = useMutateCategoria();
   const isLoading = createSub.isPending;
 
   function handleSubmit() {
@@ -37,7 +38,8 @@ export const ModalAdminAddCategoria = ({
     createSub.mutate(
       {
         descricao, imagem,
-        cod_empresa: cod_empresa
+        cod_empresa: empresaId,
+        parent_id: parentId
       },
       {
         onSuccess: () => {

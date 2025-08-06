@@ -11,22 +11,19 @@ type Props = {
   produto: ProdutoEmpMini;
   onOpenSheet?: () => void;
   onEdit?: (codBarras: string) => void;
-  isAdmin?: boolean;
 };
 
-export function ProductCard({ produto, onOpenSheet, onEdit, isAdmin }: Props) {
+export function ProductCard({ produto, onOpenSheet, onEdit }: Props) {
   const { produto: produtoBase, preco_venda } = produto;
   const codBarras = produto.cod_barras;
   const price = Number(preco_venda) || 0;
 
   return (
     <div className="relative">
-      {isAdmin && (
         <ProductOptions
           codBarras={codBarras}
           onEdit={() => onEdit?.(codBarras)}
         />
-      )}
 
       <Card
         className="w-[120px] h-[220px] flex flex-col justify-between overflow-hidden p-0 gap-0 cursor-pointer"

@@ -9,7 +9,14 @@ interface NovoBody {
   descricao: string;
   slug?: string;
   imagem?: File;
+  parent_id?: number | null; // ✅ novo campo correto
 }
+
+interface UpdateBody extends NovoBody {
+  id: number;
+  posicao?: number;
+}
+
 
 interface UpdateBody extends NovoBody {
   id: number;
@@ -39,24 +46,27 @@ export function useMutateCategoria(parentSlug: string | null = null) {
     slug,
     imagem,
     posicao,
-    slug_pai,
-  }: NovoBody & { posicao?: number; slug_pai?: string | null }) {
+    parent_id,
+  }: NovoBody & { posicao?: number }) {
     const fd = new FormData();
     const finalSlug = slug ?? slugify(descricao);
 
     fd.append("cod_empresa", String(cod_empresa));
     fd.append("descricao", descricao.trim());
     fd.append("slug", finalSlug);
-    fd.append("slug_pai", slug_pai ?? parentSlug ?? "");
-    if (posicao   !== undefined) fd.append("posicao", String(posicao));
-    if (imagem     )                fd.append("imagem", imagem);
+    if (parent_id !== undefined && parent_id !== null) {
+      fd.append("parent_id", String(parent_id));
+    }
+    if (posicao !== undefined) fd.append("posicao", String(posicao));
+    if (imagem) fd.append("imagem", imagem);
 
     return fd;
   }
 
+
   const createSub = useMutation({
     mutationFn: (body: NovoBody) =>
-      apiAdmin.post("/mensura/categorias/delivery", buildFormData(body)),
+      apiAdmin.post("/delivery/categorias/delivery", buildFormData(body)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
@@ -70,7 +80,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: UpdateBody) =>
-      apiAdmin.put(`/mensura/categorias/delivery/${id}`, buildFormData(body)),
+      apiAdmin.put(`/delivery/categorias/delivery/${id}`, buildFormData(body)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
@@ -84,7 +94,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
 
   const remove = useMutation({
     mutationFn: (id: number) =>
-      apiAdmin.delete(`/mensura/categorias/delivery/${id}`),
+      apiAdmin.delete(`/delivery/categorias/delivery/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
@@ -98,7 +108,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
 
   const moveRight = useMutation({
     mutationFn: (id: number) =>
-      apiAdmin.post(`/mensura/categorias/delivery/${id}/move-right`),
+      apiAdmin.post(`/delivery/categorias/delivery/${id}/move-right`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });
@@ -112,7 +122,7 @@ export function useMutateCategoria(parentSlug: string | null = null) {
 
   const moveLeft = useMutation({
     mutationFn: (id: number) =>
-      apiAdmin.post(`/mensura/categorias/delivery/${id}/move-left`),
+      apiAdmin.post(`/delivery/categorias/delivery/${id}/move-left`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categorias_planas"] });
       qc.invalidateQueries({ queryKey: ["categorias"] });

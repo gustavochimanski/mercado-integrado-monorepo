@@ -11,13 +11,13 @@ import { ModalNovoProduto } from "../modals/ModalAddProduto";
 interface Props {
   empresaId: number;
   codCategoria: number;     // 👈 agora precisa disso também
-  subcategoriaId: number;
+  vitrineId: number;
 }
 
 export const CardAddProduto = ({
   empresaId,
   codCategoria,
-  subcategoriaId,
+  vitrineId,
 }: Props) => {
   const { isAdmin } = useUserContext();
   const [modalOpen, setModalOpen] = useState(false);
@@ -55,7 +55,7 @@ export const CardAddProduto = ({
         onOpenChange={setModalOpen}
         empresaId={empresaId}
         codCategoria={codCategoria}     // ✅ agora envia também
-        subcategoriaId={subcategoriaId}
+        vitrineId={vitrineId}
       />
     </>
   );

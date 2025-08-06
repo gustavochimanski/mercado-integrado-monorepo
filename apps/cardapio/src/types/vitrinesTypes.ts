@@ -1,5 +1,5 @@
 
-export interface SecaoDelivery {
+export interface VitrineDelivery {
   id: number;
   cod_empresa: number;
   cod_categoria: number;
@@ -9,7 +9,7 @@ export interface SecaoDelivery {
 }
 
 
-export interface CreateSecaoDTO {
+export interface CreateVitrineDTO {
   cod_empresa: number;
   cod_categoria: number;
   titulo: string;

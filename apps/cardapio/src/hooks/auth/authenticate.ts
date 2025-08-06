@@ -9,7 +9,7 @@ export type LoginResponse = {
 };
 
 const api = axios.create({
-  baseURL: "https://gerente.mensuraapi.com.br",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 export async function loginService(
@@ -17,7 +17,7 @@ export async function loginService(
   password: string
 ): Promise<LoginResponse> {
   const { data } = await api.post<LoginResponse>(
-    "/mensura/auth/token",
+    "/auth/token",
     { username, password }
   );
 

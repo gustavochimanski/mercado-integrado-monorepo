@@ -24,6 +24,6 @@
       "@cardapio/*": ["./*"]
     },
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../supervisor/src/components/modals/cadastros/ModalAddProduto.tsx", "src/services/useQuerySecoesSubCateg.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../supervisor/src/components/modals/cadastros/ModalAddProduto.tsx", "src/services/useQueryVitrine.ts"],
   "exclude": ["node_modules"]
 }

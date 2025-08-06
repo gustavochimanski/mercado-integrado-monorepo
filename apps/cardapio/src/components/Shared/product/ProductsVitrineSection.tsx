@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { CardAddProduto } from "@cardapio/components/admin/card/CardAddProduto";
-import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/SecaoSubCategOptions";
+import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/VitrineOptions";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
@@ -68,7 +68,6 @@ export default function ProductsVitrineSection({
     el.scrollTo({ left: Math.min(Math.max(0, target), max), behavior: "smooth" });
   };
 
-  if (produtos.length === 0) return null;
 
   return (
     <section
@@ -80,7 +79,7 @@ export default function ProductsVitrineSection({
         <h2 className="text-xl font-semibold">{titulo}</h2>
         
           <AdminSecaoSubCategOptions
-            subcategoriaId={vitrineId}
+            vitrineId={vitrineId}
             empresaId={empresaId}
             codCategoria={codCategoria}
           />
@@ -121,7 +120,7 @@ export default function ProductsVitrineSection({
 
 
               <CardAddProduto
-                subcategoriaId={vitrineId}
+                vitrineId={vitrineId}
                 codCategoria={codCategoria}
                 empresaId={empresaId}
               />

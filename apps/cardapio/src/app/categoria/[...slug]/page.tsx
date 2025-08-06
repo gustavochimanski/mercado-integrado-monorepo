@@ -5,7 +5,6 @@ import { useCardapio } from "@cardapio/services/useQueryCardapio";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CircleArrowLeft } from "lucide-react";
-import CardAddSecaoSubCateg from "@cardapio/components/admin/card/CardAddSecaoSubCateg";
 import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import { HorizontalSpy } from "@cardapio/components/Shared/HorizontalScrollSpy";
 import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
@@ -15,6 +14,7 @@ import ProductsSection from "@cardapio/components/Shared/product/ProductsSection
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -81,7 +81,7 @@ export default function RouteCategoryPage() {
 
             <CategoryScrollSection
               categorias={subcategorias}
-              parentSlug={categoriaAtual.slug}
+              parentId={categoriaAtual.id}
               empresaId={empresaId}
               activeId={activeId}
             />
@@ -95,7 +95,7 @@ export default function RouteCategoryPage() {
               isHome={false}
             />
 
-            <CardAddSecaoSubCateg empresaId={empresaId} codCategoria={categoriaAtual.id} />
+            <CardAddVitrine empresaId={empresaId} codCategoria={categoriaAtual.id} />
           </>
         )}
       </main>

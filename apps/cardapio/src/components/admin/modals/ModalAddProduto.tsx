@@ -19,7 +19,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   empresaId: number;
   codCategoria: number;
-  subcategoriaId: number;
+  vitrineId: number;
 }
 
 export const ModalNovoProduto = ({
@@ -27,7 +27,7 @@ export const ModalNovoProduto = ({
   onOpenChange,
   empresaId,
   codCategoria,
-  subcategoriaId,
+  vitrineId,
 }: Props) => {
   const [form, setForm] = useState({
     cod_barras: "",
@@ -61,7 +61,7 @@ export const ModalNovoProduto = ({
     formData.append("descricao", form.descricao);
     formData.append("cod_empresa", String(empresaId));
     formData.append("cod_categoria", String(codCategoria));
-    formData.append("subcategoria_id", String(subcategoriaId));
+    formData.append("vitrine_id", String(vitrineId));
     formData.append("preco_venda", String(form.preco_venda));
     formData.append("custo", String(form.custo));
     if (form.imagem) formData.append("imagem", form.imagem);

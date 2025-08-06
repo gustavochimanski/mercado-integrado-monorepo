@@ -8,12 +8,12 @@ import { CategoryCard } from "@cardapio/components/Shared/category/CategoryCard"
 interface Props {
   categorias: CategoriaComProdutos[];
   titulo?: string;
-  parentSlug?: string | null;
+  parentId?: number | null;
   empresaId: number;
   activeId?: number | null;
 }
 
-export default function CategoryScrollSection({ categorias, titulo, parentSlug = null, empresaId, activeId }: Props) {
+export default function CategoryScrollSection({ categorias, titulo, parentId = null, empresaId, activeId }: Props) {
   return (
     <section className="mb-4">
       {categorias.length > 1 && (
@@ -37,7 +37,7 @@ export default function CategoryScrollSection({ categorias, titulo, parentSlug =
               isActive={activeId === cat.id}
             />
           ))}
-          <CardAdminAddCategoria parentSlug={parentSlug} />
+          <CardAdminAddCategoria parentID={parentId} empresaId={empresaId} />
         </div>
       </div>
 

@@ -10,30 +10,30 @@ import { useState } from "react";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
-import { useMutateSubcategoria } from "@cardapio/services/useQuerySecoesSubCateg";
+import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
 
-interface AdminSecaoSubCategOptionsProps {
+interface AdminVitrineOptionsProps {
   empresaId: number;
   codCategoria: number;
-  subcategoriaId: number;
+  vitrineId: number;
 }
 
-const AdminSecaoSubCategOptions = ({
+const AdminVitrineOptions = ({
   empresaId,
   codCategoria,
-  subcategoriaId,
-}: AdminSecaoSubCategOptionsProps) => {
+  vitrineId,
+}: AdminVitrineOptionsProps) => {
   const { isAdmin } = useUserContext();
 
   const [openModalAddProduto, setOpenModalAddProduto] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
-  const { remove } = useMutateSubcategoria();
+  const { remove } = useMutateVitrine();
 
   if (!isAdmin) return null;
 
   const handleDelete = () => {
-    remove.mutate(subcategoriaId);
+    remove.mutate(vitrineId);
   };
 
   return (
@@ -71,7 +71,7 @@ const AdminSecaoSubCategOptions = ({
         onOpenChange={setOpenModalAddProduto}
         empresaId={empresaId}
         codCategoria={codCategoria}
-        subcategoriaId={subcategoriaId}
+        vitrineId={vitrineId}
       />
 
       <ConfirmDialog
@@ -86,4 +86,4 @@ const AdminSecaoSubCategOptions = ({
   );
 };
 
-export default AdminSecaoSubCategOptions;
+export default AdminVitrineOptions;

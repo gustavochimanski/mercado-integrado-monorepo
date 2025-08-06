@@ -6,7 +6,11 @@ import { useState } from "react";
 import { ModalAdminAddCategoria } from "../modals/ModalAdminAddCategoria";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
-const CardAdminAddCategoria = ({ parentSlug = null }: { parentSlug: string | null }) => {
+interface Props {
+  parentID: number | null
+  empresaId: number
+}
+const CardAdminAddCategoria = ({ empresaId, parentID}: Props) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
 
@@ -30,7 +34,8 @@ const CardAdminAddCategoria = ({ parentSlug = null }: { parentSlug: string | nul
       <ModalAdminAddCategoria
         open={open}
         onOpenChange={setOpen}
-        parentSlug={parentSlug}
+        parentId={parentID} 
+        empresaId={empresaId}      
       />
 
     </>

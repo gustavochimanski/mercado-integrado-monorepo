@@ -1,4 +1,3 @@
-// packages/ui/components/shared/ModalAddSecao.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,25 +10,25 @@ import {
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
 import { Label } from "@cardapio/components/Shared/ui/label";
-import { useMutateSubcategoria } from "@cardapio/services/useQuerySecoesSubCateg";
+import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
 
-interface ModalAddSecaoProps {
+interface ModalAddVitrineProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   empresaId: number;
   codCategoria: number;
 }
 
-export const ModalAddSecao = ({
+export const ModalAddVitrine = ({
   open,
   onOpenChange,
   empresaId,
   codCategoria,
-}: ModalAddSecaoProps) => {
+}: ModalAddVitrineProps) => {
   const [titulo, setTitulo] = useState("");
   const [ordem, setOrdem] = useState(0); // valor inicial padrão
 
-  const { create }  = useMutateSubcategoria();
+  const { create }  = useMutateVitrine();
 
   function handleSubmit() {
     if (!titulo.trim()) return;
