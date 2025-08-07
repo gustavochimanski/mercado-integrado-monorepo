@@ -1,17 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Card, CardContent, CardHeader } from "@supervisor/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@supervisor/components/ui/card";
-import { BarChart } from "@mui/x-charts/BarChart";
-import {
-  TypeRelacao,
-  TypeRelacaoEmpresa,
-} from "../../types/typeDashboard";
-
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@supervisor/components/ui/chart";
 import {
   Table,
   TableBody,
@@ -20,6 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@supervisor/components/ui/table";
+import { TypeRelacao, TypeRelacaoEmpresa } from "../../types/typeDashboard";
+import { Separator } from "@supervisor/components/ui/separator";
 
 interface Props {
   relacaoGeral?: TypeRelacao;
@@ -27,20 +26,78 @@ interface Props {
   className?: string;
 }
 
+// Tooltip customizado: inclui compras, vendas, relação valor e %
+function CustomTooltip({ active, payload }: any) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white shadow p-2 rounded">
+        {/* Mantém o conteúdo básico de séries */}
+        <ChartTooltipContent indicator="dashed" payload={payload} />
+        {/* Compras e Vendas explicitas */}
+        <div className="text-sm">
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[var(--chart-5)] inline-block" />
+            <p className="text-primary font-semibold">Compras:</p>
+            <span>
+              {data.compra.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </span>
+          </div>
+          <Separator className="mt-2"/>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[var(--chart-3)] inline-block" />
+            <p className="text-primary font-semibold">Vendas:</p>
+            <span>
+              {data.venda.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </span>
+          </div>
+        </div>
+        <Separator className="mt-2"/>
+        {/* Relação valor e percentual */}
+        <div className="text-sm pl-3">
+          <div className="flex gap-1">
+            <p className="text-primary font-semibold ">Lucro: </p>
+            {data.relacaoValue.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </div>
+          <Separator className="mt-2"/>
+          <div className="flex gap-1">
+            <p className="text-primary font-semibold">Lucro %: </p>
+            {data.relacaoPorcentagem.toFixed(2)}%
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
 export default function DashCardRelacaoVendaCompra({
   relacaoGeral,
   relacaoPorEmpresa,
   className = "",
 }: Props) {
-  const dataset = relacaoPorEmpresa.map((item) => ({
+  const chartData = relacaoPorEmpresa.map((item) => ({
     empresa: item.empresa,
-    venda: item.total_vendas,
     compra: item.total_compras,
+    venda: item.total_vendas,
+    relacaoValue: item.relacaoValue,
+    relacaoPorcentagem: item.relacaoPorcentagem,
   }));
 
-  const altura = Math.max(dataset.length * 25, 180);
+  const chartConfig = {
+    compra: { label: "Compras", color: "var(--chart-5)" },
+    venda: { label: "Vendas", color: "var(--chart-3)" },
+  } satisfies ChartConfig;
 
-  // Se tiver só 1 empresa, usamos ela na tabela. Senão usamos o total geral
   const dadosTabela =
     relacaoPorEmpresa.length === 1
       ? {
@@ -58,43 +115,15 @@ export default function DashCardRelacaoVendaCompra({
       </CardHeader>
 
       <CardContent className="flex-grow overflow-x-auto">
-        <BarChart
-          dataset={dataset}
-          layout="vertical"
-          height={altura}
-          margin={{ top: 20, left: 20, right: 20 }}
-          xAxis={[
-            {
-              scaleType: "band",
-              dataKey: "empresa",
-              categoryGapRatio: 0.3,
-              barGapRatio: 0.2, // 👈 separa as barras
-            },
-          ]}
-          yAxis={[
-            {
-              position: "none", // esconde os números do eixo Y
-            },
-          ]}
-          series={[
-            {
-              dataKey: "compra",
-              label: "Compras",
-              color: "var(--chart-5)",
-            },
-            {
-              dataKey: "venda",
-              label: "Vendas",
-              color: "var(--chart-3)",
-            },
-          ]}
-          slotProps={{
-            legend: {
-              direction: "horizontal",
-              position: { vertical: "bottom", horizontal: "center" },
-            },
-          }}
-        />
+        <ChartContainer config={chartConfig}>
+          <BarChart accessibilityLayer data={chartData}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="empresa" tickLine={false} axisLine={false} />
+            <ChartTooltip cursor={false} content={<CustomTooltip />} />
+            <Bar dataKey="compra" fill={chartConfig.compra.color} radius={3} />
+            <Bar dataKey="venda" fill={chartConfig.venda.color} radius={3} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
 
       <div className="mt-auto">

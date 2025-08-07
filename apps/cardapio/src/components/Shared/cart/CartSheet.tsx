@@ -30,12 +30,14 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const { user } = useUser();
   const { loading, finalizarPedido } = useFinalizarPedido();
 
-  if (!user)
+  if (!user) {
+    <div></div>
+  }
 
   async function handleFinalizar() {
     try {
       await finalizarPedido({
-        cliente_id: '1',
+        cliente_id: 'user.id',
         meio_pagamento_id: undefined,
         endereco_entrega_id: undefined,
       });
