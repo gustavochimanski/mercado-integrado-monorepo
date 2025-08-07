@@ -126,7 +126,7 @@ export default function DashCardRelacaoVendaCompra({
         </ChartContainer>
       </CardContent>
 
-      <div className="mt-auto">
+      <div className="mt-auto overflow-x-auto overflow-y-hidden h-20">
         <Table className="w-full text-sm">
           <TableHeader>
             <TableRow>
