@@ -16,6 +16,11 @@ const config: Config = {
     'bg-indigo-700',
     'bg-yellow-600',
     'bg-red-700',
+	"md:w-1/5",
+	"md:w-1/4",
+	"md:w-1/3",
+	"md:w-2/5",
+	"md:w-1/2",
   ],
   theme: {
   	extend: {

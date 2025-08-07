@@ -50,42 +50,6 @@ export type TypeRelacaoEmpresa = {
   relacaoPorcentagem: number;
 };
 
-/**
- * Detalhamento de vendas por data
- */
-export type TypeVendaDetalhadaByDate = {
-  data: string;
-  valor: number;
-};
-
-export type TypeVendaDetalhadaEmpresas = {
-  empresa: CodEmpresa;
-  dates: TypeVendaDetalhadaByDate[];
-};
-
-export type TypeVendaDetalhadaResponse = {
-  empresas: CodEmpresa[];
-  dataInicio: string;
-  dataFinal: string;
-  vendaEmpresas: TypeVendaDetalhadaEmpresas[];
-};
-
-export type TypeCompraDetalhadaByDate = {
-  data: string;
-  valor: number;
-};
-
-export type TypeCompraDetalhadaEmpresas = {
-  empresa: CodEmpresa;
-  dates: TypeCompraDetalhadaByDate[];
-};
-
-export type TypeCompraDetalhadaResponse = {
-  empresas: CodEmpresa[];
-  dataInicio: string;
-  dataFinal: string;
-  compraEmpresas: TypeCompraDetalhadaEmpresas[];
-};
 
 export type TypeMeioPgtoResponseDash = {
   tipo: string;
@@ -112,8 +76,6 @@ export type TypeDashboardResponse = {
   relacao: TypeRelacao;
   relacao_por_empresa: TypeRelacaoEmpresa[];
   compras: TypeComprasGeralResponse;
-  vendaDetalhada: TypeVendaDetalhadaResponse;
-  compraDetalhada: TypeCompraDetalhadaResponse;
   vendaPorHora: TypeVendaPorHoraResponse[];
   meios_pagamento: MeiosPagamento;
   departamento_geral: TypeTotaisPorDepartamento[];

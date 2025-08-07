@@ -1,7 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@supervisor/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "@supervisor/components/ui/card";
 import { BarChart } from "@mui/x-charts/BarChart";
 import {
   TypeRelacao,
@@ -15,7 +19,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@supervisor/components/ui/table"
+} from "@supervisor/components/ui/table";
+
 interface Props {
   relacaoGeral?: TypeRelacao;
   relacaoPorEmpresa: TypeRelacaoEmpresa[];
@@ -47,7 +52,7 @@ export default function DashCardRelacaoVendaCompra({
       : relacaoGeral;
 
   return (
-    <Card className={`w-full flex flex-col ${className}`}>
+    <Card className={`flex flex-col ${className}`}>
       <CardHeader>
         <h3 className="text-lg font-semibold">Venda vs Compra</h3>
       </CardHeader>
@@ -63,7 +68,12 @@ export default function DashCardRelacaoVendaCompra({
               scaleType: "band",
               dataKey: "empresa",
               categoryGapRatio: 0.3,
-              barGapRatio: 0,
+              barGapRatio: 0.2, // 👈 separa as barras
+            },
+          ]}
+          yAxis={[
+            {
+              position: "none", // esconde os números do eixo Y
             },
           ]}
           series={[
@@ -71,19 +81,23 @@ export default function DashCardRelacaoVendaCompra({
               dataKey: "compra",
               label: "Compras",
               color: "var(--chart-5)",
-              stack: "total",
             },
             {
               dataKey: "venda",
               label: "Vendas",
               color: "var(--chart-3)",
-              stack: "total",
             },
           ]}
+          slotProps={{
+            legend: {
+              direction: "horizontal",
+              position: { vertical: "bottom", horizontal: "center" },
+            },
+          }}
         />
       </CardContent>
 
-      <div className="mt-auto overflow-x-auto">
+      <div className="mt-auto">
         <Table className="w-full text-sm">
           <TableHeader>
             <TableRow>
