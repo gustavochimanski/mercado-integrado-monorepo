@@ -34,7 +34,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <SidebarProvider defaultOpen={isSideBarOpen}>
           <AppSidebar />
           <main className="flex h-screen w-full overflow-hidden">

@@ -3,7 +3,6 @@ import "./globals.css";
 import ClientLayout from "@supervisor/components/security/ClientLayout";
 import ProtectedRoute from "@supervisor/components/security/ProtectedRoute";
 import { ReactQueryProvider } from "@supervisor/providers/ReactQueryProvider";
-import { ThemeProvider } from "@supervisor/providers/theme-provider";
 
 export const metadata = {
   title: "Unitec",
@@ -30,13 +29,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body >
-        <ThemeProvider>
         <ReactQueryProvider>
           <ProtectedRoute>
             <ClientLayout>{children}</ClientLayout>
           </ProtectedRoute>
         </ReactQueryProvider>
-        </ThemeProvider>
       </body>
     </html>
   );
