@@ -12,6 +12,7 @@ import {
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { TotaisPorEmpresa } from "../../types/typeDashboard";
 import { chartColors } from "@supervisor/utils/dashColors";
+import { Card } from "@supervisor/components/ui/card";
 
 interface Empresa {
   empr_codigo: string;
@@ -48,7 +49,7 @@ export default function TabelaResumoEmpresas({
   return (
     <div className="flex-1">
       {/* container com scroll e altura máxima */}
-      <div className="relative  max-h-[300px] rounded-md border border-muted">
+      <Card className="relative  max-h-[300px] ">
         <Table className="bg-background text-sm w-full min-w-[600px]">
           <TableHeader className="sticky top-0 bg-muted z-10">
             <TableRow className="whitespace-nowrap">
@@ -85,7 +86,7 @@ export default function TabelaResumoEmpresas({
                       style={{ backgroundColor: chartColors[idx % chartColors.length] }}
                     />
                   </TableCell>
-                  <TableCell>{nome}</TableCell>
+                  <TableCell>{codigo}{" "} - {" "}{nome}</TableCell>
                   <TableCell className="text-right">{part}%</TableCell>
                   <TableCell className="text-right">
                     {e.total_vendas.toLocaleString("pt-BR", {
@@ -181,7 +182,7 @@ export default function TabelaResumoEmpresas({
             </TableRow>
           </TableBody>
         </Table>
-      </div>
+      </Card>
     </div>
   );
 }

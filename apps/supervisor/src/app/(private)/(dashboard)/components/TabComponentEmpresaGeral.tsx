@@ -7,19 +7,11 @@ import dynamic from "next/dynamic";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import DashCardRelacaoVendaCompra from "./vendaCompra/dashVendaCompra";
 import { useIsMobile } from "@supervisor/hooks/use-mobile";
-
-function getLarguraTailwind(qtd: number): string {
-  if (qtd < 2) return "w-full md:w-1/5";     // 20%
-  if (qtd < 4) return "w-full md:w-1/4";     // 25%
-  if (qtd < 6) return "w-full md:w-1/3";     // 33%
-  if (qtd < 8) return "w-full md:w-2/5";     // 40%
-  return "w-full md:w-1/2";                  // 50%
-}
-
+import TabelaResumoEmpresas from "./participacaoEmpresas/TabelaResumoEmpresas";
 
 // Componentes dinâmicos
-const ComponentParticipacaoEmpresas = dynamic(
-  () => import("./participacaoEmpresas/ComponentPartEmpresas"),
+const PieChartParticipacaoEmpresa = dynamic(
+  () => import("./participacaoEmpresas/PieChartParticipacaoEmpresa"),
   { ssr: false, loading: () => <p>Carregando gráfico...</p> }
 );
 const ComponentParticipacaoDepartamentos = dynamic(
@@ -45,8 +37,7 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
   );
 
   function getLarguraPercentual(qtd: number): string {
-    if (qtd < 2) return "20%";
-    if (qtd < 4) return "25%";
+    if (qtd < 4) return "35%";
     if (qtd < 6) return "33%";
     if (qtd < 8) return "37%";
     return "40%";
@@ -73,12 +64,27 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
 
 
         <div className="w-full md:h-[45vh]">
-          <ComponentParticipacaoEmpresas
-            periodo_anterior={dashboardData.periodo_anterior}
+          <PieChartParticipacaoEmpresa
             totais_por_empresa={dashboardData.totais_por_empresa}
             empresas={empresasMemo}
           />
         </div>
+
+        <div className="w-full md:h-[45vh]">
+          <PieChartParticipacaoEmpresa
+            totais_por_empresa={dashboardData.totais_por_empresa}
+            empresas={empresasMemo}
+          />
+        </div>
+      </div>
+
+      {/* Tabela com scroll e altura controlada */}
+      <div className="w-full  overflow-auto">
+        <TabelaResumoEmpresas
+          periodo_anterior={dashboardData.periodo_anterior}
+          totais_por_empresa={dashboardData.totais_por_empresa}
+          empresas={empresasMemo}
+        />
       </div>
 
       {/* Bloco 2: Departamentos + Meios de Pagamento */}
