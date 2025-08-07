@@ -12,3 +12,5 @@ export const useCartSheet = create<CartSheetState>((set) => ({
   openSheet: () => set({ open: true }),
   closeSheet: () => set({ open: false }),
 }));
+
+

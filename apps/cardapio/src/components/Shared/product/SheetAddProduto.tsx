@@ -11,6 +11,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,13 +25,14 @@ const schema = z.object({
     .positive()
     .min(1)
     .max(99),
+  observacao: z.string().max(200, "Observação muito longa").optional(),
 });
 
 type FormData = z.infer<typeof schema>;
 
 interface SheetAdicionarProdutoProps {
   produto: ProdutoEmpMini;
-  onAdd?: (produto: ProdutoEmpMini, quantity: number) => void;
+  onAdd?: (produto: ProdutoEmpMini, quantity: number, observacao?: string) => void;
   isOpen: boolean;
   onClose: () => void;
   quickAddQuantity?: number;
@@ -51,7 +53,10 @@ export function SheetAdicionarProduto({
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { quantity: 1 },
+    defaultValues: {
+      quantity: 1,
+      observacao: "",
+    },
   });
 
   const quantity = watch("quantity");
@@ -70,7 +75,7 @@ export function SheetAdicionarProduto({
   }
 
   function onSubmit(data: FormData) {
-    onAdd?.(produto, data.quantity);
+    onAdd?.(produto, data.quantity, data.observacao);
     onClose();
   }
 
@@ -109,7 +114,7 @@ export function SheetAdicionarProduto({
               Quantidade
             </Label>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 ">
+              <div className="flex items-center gap-2">
                 <Button type="button" className="w-16" onClick={decrement}>
                   -
                 </Button>
@@ -137,6 +142,20 @@ export function SheetAdicionarProduto({
                 <p className="text-destructive text-sm">{errors.quantity.message}</p>
               )}
             </div>
+          </div>
+
+          {/* Campo de observação */}
+          <div className="flex flex-col gap-2 px-2">
+            <Label htmlFor="observacao">Observação</Label>
+            <Textarea
+              id="observacao"
+              placeholder="Ex: sem cebola, ponto médio, embalagem separada..."
+              {...register("observacao")}
+              maxLength={200}
+            />
+            {errors.observacao && (
+              <p className="text-destructive text-sm">{errors.observacao.message}</p>
+            )}
           </div>
 
           <SheetFooter>
