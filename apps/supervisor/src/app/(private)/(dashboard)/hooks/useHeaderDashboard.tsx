@@ -65,7 +65,7 @@ export function useFiltroDashboard(
     } finally {
       setIsLoading(false);
     }
-  };
+  };''
 
   return {
     control,
