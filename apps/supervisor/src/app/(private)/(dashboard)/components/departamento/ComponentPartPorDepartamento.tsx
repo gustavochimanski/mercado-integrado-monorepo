@@ -35,6 +35,20 @@ export default function ComponentParticipacaoDepartamentos({ data }: Props) {
     };
   });
 
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <Card className="flex flex-col flex-1 p-2 items-center justify-center">
+        <CardHeader >
+          <CardTitle className="">Departamentos</CardTitle>
+        </CardHeader>
+        <CardContent >
+          <p className="text-muted-foreground text-center">
+            Atenção. Os departamentos só aparecem no final do dia após o movimento ser importado!
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex flex-col flex-1">
