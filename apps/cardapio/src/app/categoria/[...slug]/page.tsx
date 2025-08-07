@@ -7,7 +7,6 @@ import { Button } from "@cardapio/components/Shared/ui/button";
 import { CircleArrowLeft } from "lucide-react";
 import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import { HorizontalSpy } from "@cardapio/components/Shared/HorizontalScrollSpy";
-import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
 import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import ProductsSection from "@cardapio/components/Shared/product/ProductsSection";
@@ -15,6 +14,7 @@ import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/Sheet
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
+import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);

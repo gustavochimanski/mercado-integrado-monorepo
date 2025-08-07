@@ -6,7 +6,6 @@ import { useState, useCallback } from "react";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 import { useCardapio } from "@cardapio/services/useQueryCardapio";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
 import { CartFab } from "@cardapio/components/Shared/cart/CartFab";
 import { CartSheet } from "@cardapio/components/Shared/cart/CartSheet";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
@@ -16,6 +15,7 @@ import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
+import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);

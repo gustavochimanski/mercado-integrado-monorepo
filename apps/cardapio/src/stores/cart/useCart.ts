@@ -5,7 +5,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 /* ---------- Types ---------- */
 export interface CartItem {
-  id: string;
+  cod_barras: string;
   nome: string;
   preco: number;
   quantity: number;
@@ -13,24 +13,24 @@ export interface CartItem {
   imagem?: string | null;
   categoriaId?: number;
   subcategoriaId?: number;
-  observacao?: string; // ✅ observação do item
+  observacao?: string;
 }
 
 interface CartState {
   items: CartItem[];
-  observacao: string; // ✅ observação global
+  observacao: string;
   setObservacao: (texto: string) => void;
   add: (item: CartItem) => void;
-  inc: (id: string, step?: number) => void;
-  dec: (id: string, step?: number) => void;
-  updateObservacaoItem: (id: string, observacao: string) => void;
-  remove: (id: string) => void;
+  inc: (cod_barras: string, step?: number) => void;
+  dec: (cod_barras: string, step?: number) => void;
+  updateObservacaoItem: (cod_barras: string, observacao: string) => void;
+  remove: (cod_barras: string) => void;
   clear: () => void;
   totalItems: () => number;
   totalPrice: () => number;
 }
 
-/* ---------- Logger middleware (with extra logs) ---------- */
+/* ---------- Logger middleware ---------- */
 const withLogger =
   <T extends object>(fn: (set: any, get: any, api: any) => T) =>
   (set: any, get: any, api: any): T => {
@@ -67,52 +67,63 @@ export const useCart = create<CartState>()(
 
       add: (item) => {
         const items = get().items;
-        const i = items.findIndex((p: any) => p.id === item.id);
-        if (i === -1) {
+        const index = items.findIndex((p: { cod_barras: string; }) => p.cod_barras === item.cod_barras);
+
+        if (index === -1) {
           set({ items: [...items, item] });
         } else {
-          const clone = [...items];
-          clone[i].quantity += item.quantity;
-          // se vier observação nova, substitui
+          const updated = [...items];
+          updated[index].quantity += item.quantity;
+
           if (item.observacao) {
-            clone[i].observacao = item.observacao;
+            updated[index].observacao = item.observacao;
           }
-          set({ items: clone });
+
+          set({ items: updated });
         }
       },
 
-      inc: (id, step = 1) =>
+      inc: (cod_barras, step = 1) =>
         set({
-          items: get().items.map((p: any) =>
-            p.id === id ? { ...p, quantity: p.quantity + step } : p
+          items: get().items.map((p: { cod_barras: string; quantity: number; }) =>
+            p.cod_barras === cod_barras
+              ? { ...p, quantity: p.quantity + step }
+              : p
           ),
         }),
 
-      dec: (id, step = 1) =>
+      dec: (cod_barras, step = 1) =>
         set({
           items: get().items
-            .map((p: any) =>
-              p.id === id ? { ...p, quantity: p.quantity - step } : p
+            .map((p: { cod_barras: string; quantity: number; }) =>
+              p.cod_barras === cod_barras
+                ? { ...p, quantity: p.quantity - step }
+                : p
             )
-            .filter((p: any) => p.quantity > 0),
+            .filter((p: { quantity: number; }) => p.quantity > 0),
         }),
 
-      updateObservacaoItem: (id, texto) =>
+      updateObservacaoItem: (cod_barras, texto) =>
         set({
-          items: get().items.map((item: any) =>
-            item.id === id ? { ...item, observacao: texto } : item
+          items: get().items.map((item: { cod_barras: string; }) =>
+            item.cod_barras === cod_barras
+              ? { ...item, observacao: texto }
+              : item
           ),
         }),
 
-      remove: (id) => set({ items: get().items.filter((p: any) => p.id !== id) }),
+      remove: (cod_barras) =>
+        set({
+          items: get().items.filter((p: { cod_barras: string; }) => p.cod_barras !== cod_barras),
+        }),
 
       clear: () => set({ items: [], observacao: "" }),
 
       totalItems: () =>
-        get().items.reduce((s: any, p: any) => s + p.quantity, 0),
+        get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0),
 
       totalPrice: () =>
-        get().items.reduce((s: any, p: any) => s + p.quantity * p.preco, 0),
+        get().items.reduce((total: number, item: { quantity: number; preco: number; }) => total + item.quantity * item.preco, 0),
     })),
     {
       name: "cardapio-cart",
@@ -125,7 +136,7 @@ export const useCart = create<CartState>()(
   )
 );
 
-/* ---------- Extra: log após hidratar ---------- */
+/* ---------- Log ao hidratar ---------- */
 if (typeof window !== "undefined") {
   useCart.persist.onFinishHydration(() => {
     console.log("[Cart] State restored from localStorage:", useCart.getState());

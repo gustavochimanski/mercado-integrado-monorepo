@@ -2,17 +2,16 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { toast } from "sonner";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { FinalizarPedidoPayload } from "@cardapio/types/pedido";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
-import apiAdmin from "@cardapio/app/api/apiAdmin";
+import { api } from "@cardapio/app/api/api";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
   finalizarPedido: (opts: {
-    cliente_id: string;
+    telefone_cliente: string;
     meio_pagamento_id?: string;
     endereco_entrega_id?: string;
   }) => Promise<void>;
@@ -23,11 +22,11 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
   const [loading, setLoading] = useState(false);
 
   async function finalizarPedido({
-    cliente_id,
+    telefone_cliente,
     meio_pagamento_id,
     endereco_entrega_id,
   }: {
-    cliente_id: string;
+    telefone_cliente: string;
     meio_pagamento_id?: string;
     endereco_entrega_id?: string;
   }) {
@@ -44,13 +43,13 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
     }
 
     const payload: FinalizarPedidoPayload = {
-      cliente_id,
+      telefone_cliente,
       empresa_id,
       meio_pagamento_id,
       endereco_entrega_id,
       observacao_geral: observacao,
       itens: items.map((item) => ({
-        produto_id: item.id,
+        produto_cod_barras: item.cod_barras,
         quantidade: item.quantity,
         observacao: item.observacao,
       })),
@@ -58,7 +57,7 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
 
     try {
       setLoading(true);
-      await apiAdmin.post("/api/delivery/pedido/finalizar", payload);
+      await api.post("/delivery/pedidos/finalizar", payload);
       toast.success("Pedido finalizado com sucesso!");
       clear();
     } catch (err: any) {

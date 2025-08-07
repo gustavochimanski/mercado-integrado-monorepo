@@ -1,12 +1,12 @@
 // types/pedido.ts
 export interface ItemPedido {
-  produto_id: string;
+  produto_cod_barras: string;
   quantidade: number;
   observacao?: string;
 }
 
 export interface FinalizarPedidoPayload {
-  cliente_id: string;
+  telefone_cliente: string;
   empresa_id: number;
   meio_pagamento_id?: string;
   endereco_entrega_id?: string;
