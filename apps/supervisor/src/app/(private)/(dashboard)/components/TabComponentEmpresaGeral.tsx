@@ -63,18 +63,20 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
         )}
 
 
-        <div className="w-full md:h-[45vh]">
-          <PieChartParticipacaoEmpresa
-            totais_por_empresa={dashboardData.totais_por_empresa}
-            empresas={empresasMemo}
-          />
-        </div>
+        <div className="flex justify-between w-full gap-2">
+            <div className="w-full md:h-[45vh]">
+            <PieChartParticipacaoEmpresa
+              totais_por_empresa={dashboardData.totais_por_empresa}
+              empresas={empresasMemo}
+            />
+          </div>
 
-        <div className="w-full md:h-[45vh]">
-          <PieChartParticipacaoEmpresa
-            totais_por_empresa={dashboardData.totais_por_empresa}
-            empresas={empresasMemo}
-          />
+          <div className="w-full md:h-[45vh]">
+            <PieChartParticipacaoEmpresa
+              totais_por_empresa={dashboardData.totais_por_empresa}
+              empresas={empresasMemo}
+            />
+          </div>
         </div>
       </div>
 
