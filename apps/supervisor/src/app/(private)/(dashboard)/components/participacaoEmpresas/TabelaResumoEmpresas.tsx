@@ -10,7 +10,7 @@ import {
   TableCell,
 } from "@supervisor/components/ui/table";
 import { ArrowUp, ArrowDown } from "lucide-react";
-import { TotaisPorEmpresa } from "../../types/typeDashboard";
+import { TotaisPorEmpresa, TypeRelacaoEmpresa } from "../../types/typeDashboard";
 import { chartColors } from "@supervisor/utils/dashColors";
 import { Card } from "@supervisor/components/ui/card";
 
@@ -22,6 +22,7 @@ interface Empresa {
 interface Props {
   totais_por_empresa: TotaisPorEmpresa[];
   periodo_anterior: TotaisPorEmpresa[];
+  relacaoEmpresa: TypeRelacaoEmpresa[];
   empresas?: Empresa[];
 }
 
@@ -33,47 +34,85 @@ function getVariacaoPercentual(atual: number, anterior: number): number {
 export default function TabelaResumoEmpresas({
   totais_por_empresa,
   periodo_anterior,
+  relacaoEmpresa,
   empresas,
 }: Props) {
-  const totalVendas = totais_por_empresa.reduce((sum, e) => sum + e.total_vendas, 0);
-  const totalCupons = totais_por_empresa.reduce((sum, e) => sum + e.total_cupons, 0);
-  const totalAnterior = periodo_anterior.reduce((sum, e) => sum + e.total_vendas, 0);
+  // 1. Dados agregados: total geral para o footer
+  const totalVendasGeral = totais_por_empresa.reduce((sum, e) => sum + e.total_vendas, 0);
+  const totalCuponsGeral = totais_por_empresa.reduce((sum, e) => sum + e.total_cupons, 0);
+  const totalAnteriorGeral = periodo_anterior.reduce((sum, e) => sum + e.total_vendas, 0);
+  const ticketMedioGeral =
+    totalCuponsGeral > 0 ? totalVendasGeral / totalCuponsGeral : 0;
+  const variacaoTotalGeral = getVariacaoPercentual(
+    totalVendasGeral,
+    totalAnteriorGeral
+  );
+  const isPositivoTotal = variacaoTotalGeral > 0;
+  const isIgualTotal = variacaoTotalGeral === 0;
 
-  const ticketMedioGeral = totalCupons > 0 ? totalVendas / totalCupons : 0;
-  const variacaoTotal = getVariacaoPercentual(totalVendas, totalAnterior);
-  const isPositivoTotal = variacaoTotal > 0;
-  const isIgualTotal = variacaoTotal === 0;
+  // 2. Construir array unificado para iteração
+  const dataUnificada = totais_por_empresa.map((e) => {
+    const codigo = e.lcpr_codempresa;
+    const anteriorItem =
+      periodo_anterior.find((p) => p.lcpr_codempresa === codigo)?.total_vendas ?? 0;
+    const rel = relacaoEmpresa.find((r) => r.empresa === codigo);
 
-  const dataOrdenada = [...totais_por_empresa].sort((a, b) => b.total_vendas - a.total_vendas);
+    return {
+      codigo,
+      nome:
+        empresas?.find((x) => x.empr_codigo === codigo)?.empr_nomereduzido ??
+        codigo,
+      total_vendas: e.total_vendas,
+      total_cupons: e.total_cupons,
+      ticket_medio: e.ticket_medio,
+      total_vendas_anterior: anteriorItem,
+      total_compras: rel?.total_compras ?? 0,
+      relacaoPorcentagem: rel?.relacaoPorcentagem ?? 0,
+    };
+  });
+
+  // 3. Se quiser incluir empresas que só constam em relacaoEmpresa, descomente:
+// relacaoEmpresa.forEach((r) => {
+//   if (!totais_por_empresa.some((e) => e.lcpr_codempresa === r.empresa)) {
+//     dataUnificada.push({
+//       codigo: r.empresa,
+//       nome: r.empresa,
+//       total_vendas: 0,
+//       total_cupons: 0,
+//       ticket_medio: 0,
+//       total_vendas_anterior: 0,
+//       total_compras: r.total_compras,
+//       relacaoPorcentagem: r.relacaoPorcentagem,
+//     });
+//   }
+// });
+
+  // 4. Ordenar pelo total de vendas
+  dataUnificada.sort((a, b) => b.total_vendas - a.total_vendas);
 
   return (
-  <Card className="flex-1 bg-background border max-h-[400px] flex flex-col">
-    <div className="overflow-autoflex-1">
-    <Table className="bg-background text-sm w-full min-w-[600px]">
+    <Card className="flex-1 bg-background border max-h-[400px] flex flex-col">
+      <div className="overflow-auto flex-1">
+        <Table className="bg-background text-sm w-full min-w-[800px]">
           <TableHeader className="sticky top-0 bg-muted z-10">
             <TableRow className="whitespace-nowrap">
               <TableHead>Cor</TableHead>
               <TableHead>Empresa</TableHead>
-              <TableHead className="text-right">Part%</TableHead>
               <TableHead className="text-right">Vendas</TableHead>
               <TableHead className="text-right">Mês Ant.</TableHead>
               <TableHead className="text-right">Variação</TableHead>
-              <TableHead className="text-right whitespace-nowrap">Ticket Médio</TableHead>
+              <TableHead className="text-right">Ticket Médio</TableHead>
               <TableHead className="text-right">Cupons</TableHead>
+              <TableHead className="text-right">Compras</TableHead>
+              <TableHead className="text-right">Relação (%)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dataOrdenada.map((e, idx) => {
-              const codigo = e.lcpr_codempresa;
-              const nome =
-                empresas?.find((x) => x.empr_codigo === codigo)?.empr_nomereduzido ?? codigo;
-
-              const dadoAnterior = periodo_anterior.find((c) => c.lcpr_codempresa === codigo);
-              const anterior = dadoAnterior?.total_vendas ?? 0;
-
-              const part =
-                totalVendas > 0 ? ((e.total_vendas / totalVendas) * 100).toFixed(1) : "0";
-              const variacao = getVariacaoPercentual(e.total_vendas, anterior);
+            {dataUnificada.map((row, idx) => {
+              const variacao = getVariacaoPercentual(
+                row.total_vendas,
+                row.total_vendas_anterior
+              );
               const isPositivo = variacao > 0;
               const isIgual = variacao === 0;
 
@@ -82,19 +121,25 @@ export default function TabelaResumoEmpresas({
                   <TableCell>
                     <div
                       className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: chartColors[idx % chartColors.length] }}
+                      style={{
+                        backgroundColor:
+                          chartColors[idx % chartColors.length],
+                      }}
                     />
                   </TableCell>
-                  <TableCell>{codigo}{" "} - {" "} {nome}</TableCell>
-                  <TableCell className="text-right">{part}%</TableCell>
+                  <TableCell>
+                    {row.codigo} – {row.nome} (
+                    {((row.total_vendas / totalVendasGeral) * 100).toFixed(1)}
+                    %)
+                  </TableCell>
                   <TableCell className="text-right">
-                    {e.total_vendas.toLocaleString("pt-BR", {
+                    {row.total_vendas.toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     })}
                   </TableCell>
                   <TableCell className="text-right">
-                    {anterior.toLocaleString("pt-BR", {
+                    {row.total_vendas_anterior.toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     })}
@@ -111,14 +156,18 @@ export default function TabelaResumoEmpresas({
                         }
                       >
                         <span className="inline-flex items-center gap-1">
-                          {isPositivo ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                          {isPositivo ? (
+                            <ArrowUp size={14} />
+                          ) : (
+                            <ArrowDown size={14} />
+                          )}
                           {Math.abs(variacao).toFixed(1)}%
                         </span>
                       </span>
-                    )}  
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
-                    {e.ticket_medio.toLocaleString("pt-BR", {
+                    {row.ticket_medio.toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                       minimumFractionDigits: 2,
@@ -126,25 +175,33 @@ export default function TabelaResumoEmpresas({
                     })}
                   </TableCell>
                   <TableCell className="text-right">
-                    {e.total_cupons.toLocaleString("pt-BR")}
+                    {row.total_cupons.toLocaleString("pt-BR")}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {row.total_compras.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {row.relacaoPorcentagem.toFixed(1)}%
                   </TableCell>
                 </TableRow>
               );
             })}
 
-            {/* Linha TOTAL fixa no bottom com bg em cada célula */}
+            {/* Rodapé TOTAL */}
             <TableRow className="sticky bottom-0 z-20 font-bold">
               <TableCell />
               <TableCell className="bg-muted text-primary">Total</TableCell>
-              <TableCell className="bg-muted text-right text-primary">100%</TableCell>
               <TableCell className="bg-muted text-right text-primary">
-                {totalVendas.toLocaleString("pt-BR", {
+                {totalVendasGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 })}
               </TableCell>
               <TableCell className="bg-muted text-right text-primary">
-                {totalAnterior.toLocaleString("pt-BR", {
+                {totalAnteriorGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 })}
@@ -161,8 +218,12 @@ export default function TabelaResumoEmpresas({
                     }
                   >
                     <span className="inline-flex items-center gap-1">
-                      {isPositivoTotal ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                      {Math.abs(variacaoTotal).toFixed(1)}%
+                      {isPositivoTotal ? (
+                        <ArrowUp size={14} />
+                      ) : (
+                        <ArrowDown size={14} />
+                      )}
+                      {Math.abs(variacaoTotalGeral).toFixed(1)}%
                     </span>
                   </span>
                 )}
@@ -176,7 +237,24 @@ export default function TabelaResumoEmpresas({
                 })}
               </TableCell>
               <TableCell className="bg-muted text-right text-primary">
-                {totalCupons.toLocaleString("pt-BR")}
+                {totalCuponsGeral.toLocaleString("pt-BR")}
+              </TableCell>
+              <TableCell className="bg-muted text-right text-primary">
+                {/* Soma total de compras */}
+                {relacaoEmpresa
+                  .reduce((sum, r) => sum + r.total_compras, 0)
+                  .toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+              </TableCell>
+              <TableCell className="bg-muted text-right text-primary">
+                {/* Relação média ponderada */}
+                {(
+                  relacaoEmpresa.reduce((sum, r) => sum + r.relacaoPorcentagem, 0) /
+                  relacaoEmpresa.length || 0
+                ).toFixed(1)}
+                %
               </TableCell>
             </TableRow>
           </TableBody>

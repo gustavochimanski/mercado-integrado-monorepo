@@ -85,6 +85,7 @@ function TabComponentDashboardEmpresaGeral({ dashboardData }: Props) {
         <TabelaResumoEmpresas
           periodo_anterior={dashboardData.periodo_anterior}
           totais_por_empresa={dashboardData.totais_por_empresa}
+          relacaoEmpresa={dashboardData.relacao_por_empresa}
           empresas={empresasMemo}
         />
       </div>
