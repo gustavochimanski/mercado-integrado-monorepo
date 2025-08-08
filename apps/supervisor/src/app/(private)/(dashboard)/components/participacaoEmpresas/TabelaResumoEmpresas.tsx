@@ -47,9 +47,9 @@ export default function TabelaResumoEmpresas({
   const dataOrdenada = [...totais_por_empresa].sort((a, b) => b.total_vendas - a.total_vendas);
 
   return (
-    <div className="flex-1">
+    <Card className="flex-1 p-4">
       {/* container com scroll e altura máxima */}
-      <Card className="relative  max-h-[300px] ">
+      <div className="relative  max-h-[300px] ">
         <Table className="bg-background text-sm w-full min-w-[600px]">
           <TableHeader className="sticky top-0 bg-muted z-10">
             <TableRow className="whitespace-nowrap">
@@ -86,7 +86,7 @@ export default function TabelaResumoEmpresas({
                       style={{ backgroundColor: chartColors[idx % chartColors.length] }}
                     />
                   </TableCell>
-                  <TableCell>{codigo}{" "} - {" "}{nome}</TableCell>
+                  <TableCell>{codigo}{" "} - {" "} {nome}</TableCell>
                   <TableCell className="text-right">{part}%</TableCell>
                   <TableCell className="text-right">
                     {e.total_vendas.toLocaleString("pt-BR", {
@@ -182,7 +182,7 @@ export default function TabelaResumoEmpresas({
             </TableRow>
           </TableBody>
         </Table>
-      </Card>
-    </div>
+      </div>
+    </Card>
   );
 }
