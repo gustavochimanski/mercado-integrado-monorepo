@@ -47,10 +47,9 @@ export default function TabelaResumoEmpresas({
   const dataOrdenada = [...totais_por_empresa].sort((a, b) => b.total_vendas - a.total_vendas);
 
   return (
-    <Card className="flex-1 p-4">
-      {/* container com scroll e altura máxima */}
-      <div className="relative  max-h-[300px] ">
-        <Table className="bg-background text-sm w-full min-w-[600px]">
+  <Card className="flex-1 bg-background border max-h-[400px] flex flex-col">
+    <div className="overflow-autoflex-1">
+    <Table className="bg-background text-sm w-full min-w-[600px]">
           <TableHeader className="sticky top-0 bg-muted z-10">
             <TableRow className="whitespace-nowrap">
               <TableHead>Cor</TableHead>
@@ -116,7 +115,7 @@ export default function TabelaResumoEmpresas({
                           {Math.abs(variacao).toFixed(1)}%
                         </span>
                       </span>
-                    )}
+                    )}  
                   </TableCell>
                   <TableCell className="text-right">
                     {e.ticket_medio.toLocaleString("pt-BR", {

@@ -3,18 +3,10 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import { PieValueType } from "@mui/x-charts/models";
 import { TotaisPorEmpresa } from "../../types/typeDashboard";
-import { Card, CardContent, CardTitle } from "@supervisor/components/ui/card";
-import { BarChart, legendClasses } from "@mui/x-charts";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@supervisor/components/ui/select";
-import { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@supervisor/components/ui/card";
+import { legendClasses } from "@mui/x-charts";
+import {  useMemo } from "react";
 import { chartColors } from "@supervisor/utils/dashColors";
-import TabelaResumoEmpresas from "./TabelaResumoEmpresas";
 
 interface Props {
   totais_por_empresa: TotaisPorEmpresa[];
@@ -55,11 +47,11 @@ export default function PieChartParticipacaoEmpresa({
   return (
     <Card className="flex flex-col flex-1 h-full">
 
-      <CardTitle className="mx-4">Participação por Empresa</CardTitle>
-
+      <CardHeader>
+        <CardTitle>Participação por Empresa</CardTitle>
+      </CardHeader>
       <CardContent className="flex flex-1 overflow-hidden flex-col md:flex-row gap-4">
         {/* Gráfico */}
- 
         <PieChart
           height={200}
           series={[
@@ -75,9 +67,7 @@ export default function PieChartParticipacaoEmpresa({
             [`& .${legendClasses.root}`]: { display: "none" },
           }}
         />
-          
-
-
+        
       </CardContent>
 
     </Card>
