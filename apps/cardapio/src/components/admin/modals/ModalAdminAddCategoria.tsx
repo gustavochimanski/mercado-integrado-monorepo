@@ -29,13 +29,13 @@ export const ModalAdminAddCategoria = ({
   const [imagem, setImagem] = useState<File | undefined>(undefined);
 
 
-  const { createSub } = useMutateCategoria();
-  const isLoading = createSub.isPending;
+  const { create } = useMutateCategoria();
+  const isLoading = create.isPending;
 
   function handleSubmit() {
     if (!descricao.trim()) return;
 
-    createSub.mutate(
+    create.mutate(
       {
         descricao, imagem,
         cod_empresa: empresaId,

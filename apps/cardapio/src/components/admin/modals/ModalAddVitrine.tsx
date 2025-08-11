@@ -16,7 +16,7 @@ interface ModalAddVitrineProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   empresaId: number;
-  codCategoria: string;
+  codCategoria: number;
 }
 
 export const ModalAddVitrine = ({
@@ -36,7 +36,7 @@ export const ModalAddVitrine = ({
     create.mutate(
       {
         cod_empresa: empresaId,
-        cod_categoria: codCategoria,
+        cod_categoria: codCategoria.toString(),
         titulo,
         ordem,
       },

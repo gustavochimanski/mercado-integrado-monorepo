@@ -10,7 +10,7 @@ import { ModalNovoProduto } from "../modals/ModalAddProduto";
 
 interface Props {
   empresaId: number;
-  codCategoria: number;     // 👈 agora precisa disso também
+  codCategoria: number;    
   vitrineId: number;
 }
 
