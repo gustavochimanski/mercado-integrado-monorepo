@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Body_put_product_by_fied_public_produtos__produto_id__put = {
+export type Body_put_product_by_fied_produtos__produto_id__put = {
     /**
      * Novo valor para o campo
      */

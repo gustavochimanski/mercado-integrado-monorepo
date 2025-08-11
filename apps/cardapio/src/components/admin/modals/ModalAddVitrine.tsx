@@ -16,7 +16,7 @@ interface ModalAddVitrineProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   empresaId: number;
-  codCategoria: number;
+  codCategoria: string;
 }
 
 export const ModalAddVitrine = ({

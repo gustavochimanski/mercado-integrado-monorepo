@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type TypeVendaByDay = {
-    data: string;
-    valor: number;
+export type ItemPedidoRequest = {
+    produto_cod_barras: string;
+    quantidade: number;
+    observacao?: (string | null);
 };
 

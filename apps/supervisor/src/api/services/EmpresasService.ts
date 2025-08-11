@@ -15,12 +15,12 @@ export class EmpresasService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public createEmpresaMensuraEmpresasPost(
+    public createEmpresaApiMensuraEmpresasPost(
         requestBody: EmpresaCreate,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/mensura/empresas/',
+            url: '/api/mensura/empresas/',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -35,13 +35,13 @@ export class EmpresasService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public listEmpresasMensuraEmpresasGet(
+    public listEmpresasApiMensuraEmpresasGet(
         skip?: number,
         limit: number = 100,
     ): CancelablePromise<Array<EmpresaResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/mensura/empresas/',
+            url: '/api/mensura/empresas/',
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -57,12 +57,12 @@ export class EmpresasService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public getEmpresaMensuraEmpresasIdGet(
+    public getEmpresaApiMensuraEmpresasIdGet(
         id: number,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/mensura/empresas/{id}',
+            url: '/api/mensura/empresas/{id}',
             path: {
                 'id': id,
             },
@@ -78,13 +78,13 @@ export class EmpresasService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public updateEmpresaMensuraEmpresasIdPut(
+    public updateEmpresaApiMensuraEmpresasIdPut(
         id: number,
         requestBody: EmpresaUpdate,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/mensura/empresas/{id}',
+            url: '/api/mensura/empresas/{id}',
             path: {
                 'id': id,
             },
@@ -101,12 +101,12 @@ export class EmpresasService {
      * @returns void
      * @throws ApiError
      */
-    public deleteEmpresaMensuraEmpresasIdDelete(
+    public deleteEmpresaApiMensuraEmpresasIdDelete(
         id: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/mensura/empresas/{id}',
+            url: '/api/mensura/empresas/{id}',
             path: {
                 'id': id,
             },

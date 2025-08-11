@@ -11,5 +11,6 @@ export type CategoriaDeliveryOut = {
     imagem?: (string | null);
     href: string;
     posicao: number;
+    is_home: boolean;
 };
 

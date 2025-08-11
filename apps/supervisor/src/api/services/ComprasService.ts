@@ -18,12 +18,12 @@ export class ComprasService {
      * @returns ConsultaMovimentoCompraResponse Successful Response
      * @throws ApiError
      */
-    public handleConsultaMovimentoCompraBiComprasConsultaMovimentoPost(
+    public handleConsultaMovimentoCompraApiBiComprasConsultaMovimentoPost(
         requestBody: ConsultaMovimentoCompraRequest,
     ): CancelablePromise<ConsultaMovimentoCompraResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/bi/compras/consulta_movimento',
+            url: '/api/bi/compras/consulta_movimento',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

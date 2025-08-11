@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CriarVitrineRequest = {
-    cod_categoria: number;
-    titulo: string;
-    ordem?: number;
-};
-
+export enum OrigemPedidoEnum {
+    WEB = 'WEB',
+    APP = 'APP',
+    BALCAO = 'BALCAO',
+}

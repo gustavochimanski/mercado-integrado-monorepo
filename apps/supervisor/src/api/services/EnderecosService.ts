@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EnderecoCreate } from '../models/EnderecoCreate';
+import type { app__api__mensura__schemas__endereco_schema__EnderecoCreate } from '../models/app__api__mensura__schemas__endereco_schema__EnderecoCreate';
+import type { app__api__mensura__schemas__endereco_schema__EnderecoUpdate } from '../models/app__api__mensura__schemas__endereco_schema__EnderecoUpdate';
 import type { EnderecoResponse } from '../models/EnderecoResponse';
-import type { EnderecoUpdate } from '../models/EnderecoUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class EnderecosService {
@@ -15,12 +15,12 @@ export class EnderecosService {
      * @returns EnderecoResponse Successful Response
      * @throws ApiError
      */
-    public createEnderecoMensuraEnderecosPost(
-        requestBody: EnderecoCreate,
+    public createEnderecoApiMensuraEnderecosPost(
+        requestBody: app__api__mensura__schemas__endereco_schema__EnderecoCreate,
     ): CancelablePromise<EnderecoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/mensura/enderecos/',
+            url: '/api/mensura/enderecos/',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -35,13 +35,13 @@ export class EnderecosService {
      * @returns EnderecoResponse Successful Response
      * @throws ApiError
      */
-    public listEnderecosMensuraEnderecosGet(
+    public listEnderecosApiMensuraEnderecosGet(
         skip?: number,
         limit: number = 100,
     ): CancelablePromise<Array<EnderecoResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/mensura/enderecos/',
+            url: '/api/mensura/enderecos/',
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -57,12 +57,12 @@ export class EnderecosService {
      * @returns EnderecoResponse Successful Response
      * @throws ApiError
      */
-    public getEnderecoMensuraEnderecosIdGet(
+    public getEnderecoApiMensuraEnderecosIdGet(
         id: number,
     ): CancelablePromise<EnderecoResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/mensura/enderecos/{id}',
+            url: '/api/mensura/enderecos/{id}',
             path: {
                 'id': id,
             },
@@ -78,13 +78,13 @@ export class EnderecosService {
      * @returns EnderecoResponse Successful Response
      * @throws ApiError
      */
-    public updateEnderecoMensuraEnderecosIdPut(
+    public updateEnderecoApiMensuraEnderecosIdPut(
         id: number,
-        requestBody: EnderecoUpdate,
+        requestBody: app__api__mensura__schemas__endereco_schema__EnderecoUpdate,
     ): CancelablePromise<EnderecoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/mensura/enderecos/{id}',
+            url: '/api/mensura/enderecos/{id}',
             path: {
                 'id': id,
             },
@@ -101,12 +101,12 @@ export class EnderecosService {
      * @returns void
      * @throws ApiError
      */
-    public deleteEnderecoMensuraEnderecosIdDelete(
+    public deleteEnderecoApiMensuraEnderecosIdDelete(
         id: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/mensura/enderecos/{id}',
+            url: '/api/mensura/enderecos/{id}',
             path: {
                 'id': id,
             },

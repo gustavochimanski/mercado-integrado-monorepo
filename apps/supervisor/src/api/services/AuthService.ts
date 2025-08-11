@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__mensura__schemas__user_schema__UserResponse } from '../models/app__api__mensura__schemas__user_schema__UserResponse';
 import type { LoginRequest } from '../models/LoginRequest';
 import type { TokenResponse } from '../models/TokenResponse';
+import type { UserResponse } from '../models/UserResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class AuthService {
@@ -31,10 +31,10 @@ export class AuthService {
     /**
      * Retorna o usuário atual baseado no token JWT
      * Puxa o usuário já autenticado pelo get_current_user e devolve seus campos.
-     * @returns app__api__mensura__schemas__user_schema__UserResponse Successful Response
+     * @returns UserResponse Successful Response
      * @throws ApiError
      */
-    public obterUsuarioAtualAuthMeGet(): CancelablePromise<app__api__mensura__schemas__user_schema__UserResponse> {
+    public obterUsuarioAtualAuthMeGet(): CancelablePromise<UserResponse> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/auth/me',

@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__mensura__schemas__usuario_schema__UserResponse } from '../models/app__api__mensura__schemas__usuario_schema__UserResponse';
 import type { UserCreate } from '../models/UserCreate';
+import type { UserResponse } from '../models/UserResponse';
 import type { UserUpdate } from '../models/UserUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -12,15 +12,15 @@ export class UsuariosService {
     /**
      * Create User
      * @param requestBody
-     * @returns app__api__mensura__schemas__usuario_schema__UserResponse Successful Response
+     * @returns UserResponse Successful Response
      * @throws ApiError
      */
-    public createUserMensuraUsuariosPost(
+    public createUserApiMensuraUsuariosPost(
         requestBody: UserCreate,
-    ): CancelablePromise<app__api__mensura__schemas__usuario_schema__UserResponse> {
+    ): CancelablePromise<UserResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/mensura/usuarios/',
+            url: '/api/mensura/usuarios/',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -32,16 +32,16 @@ export class UsuariosService {
      * List Users
      * @param skip
      * @param limit
-     * @returns app__api__mensura__schemas__usuario_schema__UserResponse Successful Response
+     * @returns UserResponse Successful Response
      * @throws ApiError
      */
-    public listUsersMensuraUsuariosGet(
+    public listUsersApiMensuraUsuariosGet(
         skip?: number,
         limit: number = 100,
-    ): CancelablePromise<Array<app__api__mensura__schemas__usuario_schema__UserResponse>> {
+    ): CancelablePromise<Array<UserResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/mensura/usuarios/',
+            url: '/api/mensura/usuarios/',
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -54,15 +54,15 @@ export class UsuariosService {
     /**
      * Get User
      * @param id
-     * @returns app__api__mensura__schemas__usuario_schema__UserResponse Successful Response
+     * @returns UserResponse Successful Response
      * @throws ApiError
      */
-    public getUserMensuraUsuariosIdGet(
+    public getUserApiMensuraUsuariosIdGet(
         id: number,
-    ): CancelablePromise<app__api__mensura__schemas__usuario_schema__UserResponse> {
+    ): CancelablePromise<UserResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/mensura/usuarios/{id}',
+            url: '/api/mensura/usuarios/{id}',
             path: {
                 'id': id,
             },
@@ -75,16 +75,16 @@ export class UsuariosService {
      * Update User
      * @param id
      * @param requestBody
-     * @returns app__api__mensura__schemas__usuario_schema__UserResponse Successful Response
+     * @returns UserResponse Successful Response
      * @throws ApiError
      */
-    public updateUserMensuraUsuariosIdPut(
+    public updateUserApiMensuraUsuariosIdPut(
         id: number,
         requestBody: UserUpdate,
-    ): CancelablePromise<app__api__mensura__schemas__usuario_schema__UserResponse> {
+    ): CancelablePromise<UserResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/mensura/usuarios/{id}',
+            url: '/api/mensura/usuarios/{id}',
             path: {
                 'id': id,
             },
@@ -101,12 +101,12 @@ export class UsuariosService {
      * @returns void
      * @throws ApiError
      */
-    public deleteUserMensuraUsuariosIdDelete(
+    public deleteUserApiMensuraUsuariosIdDelete(
         id: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/mensura/usuarios/{id}',
+            url: '/api/mensura/usuarios/{id}',
             path: {
                 'id': id,
             },

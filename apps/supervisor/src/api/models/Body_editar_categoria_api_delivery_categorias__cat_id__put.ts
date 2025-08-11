@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Body_criar_categoria_delivery_categorias_delivery_post = {
+export type Body_editar_categoria_api_delivery_categorias__cat_id__put = {
     cod_empresa: number;
     descricao: string;
     slug: string;

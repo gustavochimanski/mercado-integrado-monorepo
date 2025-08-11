@@ -2,15 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ProdutoListItem = {
+export type ProdutoEmpDTO = {
+    empresa_id: number;
     cod_barras: string;
-    descricao: string;
-    imagem?: (string | null);
     preco_venda: number;
     custo?: (number | null);
-    cod_categoria: number;
-    label_categoria: string;
+    vitrine_id?: (number | null);
+    sku_empresa?: (string | null);
     disponivel: boolean;
-    exibir_delivery?: boolean;
+    created_at: string;
+    updated_at: string;
 };
 

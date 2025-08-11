@@ -6,20 +6,21 @@ import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
 import type { VitrineComProdutosResponse } from '../models/VitrineComProdutosResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class CardapioService {
+export class CardPioService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Cardapio
-     * @param empresaId
+     * Retorna a árvore (nível raiz) de categorias do cardápio para a empresa.
+     * @param empresaId ID da empresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public listarCardapioDeliveryCardapioGet(
+    public listarCardapioApiDeliveryCardapioGet(
         empresaId: number,
     ): CancelablePromise<Array<CategoriaDeliveryOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/delivery/cardapio',
+            url: '/api/delivery/cardapio',
             query: {
                 'empresa_id': empresaId,
             },
@@ -30,18 +31,19 @@ export class CardapioService {
     }
     /**
      * Listar Vitrines E Produtos Por Categoria
+     * Retorna as vitrines (e seus produtos) vinculadas a uma categoria.
      * @param empresaId
      * @param codCategoria
      * @returns VitrineComProdutosResponse Successful Response
      * @throws ApiError
      */
-    public listarVitrinesEProdutosPorCategoriaDeliveryProdutosVitrinePorCategoriaGet(
+    public listarVitrinesEProdutosPorCategoriaApiDeliveryProdutosVitrinePorCategoriaGet(
         empresaId: number,
         codCategoria: number,
     ): CancelablePromise<Array<VitrineComProdutosResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/delivery/produtos/vitrine-por-categoria',
+            url: '/api/delivery/produtos/vitrine-por-categoria',
             query: {
                 'empresa_id': empresaId,
                 'cod_categoria': codCategoria,

@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type EnderecoUpdate = {
+export type app__api__mensura__schemas__endereco_schema__EnderecoCreate = {
     cep?: (string | null);
     logradouro?: (string | null);
     numero?: (string | null);

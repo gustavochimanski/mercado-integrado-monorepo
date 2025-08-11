@@ -10,7 +10,7 @@ export function useCardapio(empresa_id: number) {
     queryKey: ["categorias-delivery", empresa_id],
     queryFn: async () => {
       try {
-        const { data } = await api.get("/delivery/cardapio", {
+        const { data } = await api.get("/api/delivery/cardapio", {
           params: { empresa_id },
         });
         return data;
@@ -38,7 +38,7 @@ export function useProdutosVitrinePorCategoria(codCategoria: number, empresa_id:
     queryKey: ["produtos-vitrine-categoria", codCategoria],
     queryFn: async () => {
       try {
-        const { data } = await api.get("/delivery/produtos/vitrine-por-categoria", {
+        const { data } = await api.get("/api/delivery/produtos/vitrine-por-categoria", {
           params: {
             cod_categoria: codCategoria,
             empresa_id: empresa_id,

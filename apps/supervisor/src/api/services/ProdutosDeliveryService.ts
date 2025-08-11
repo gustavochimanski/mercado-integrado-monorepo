@@ -2,10 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_atualizar_produto_delivery_produtos_delivery__cod_barras__put } from '../models/Body_atualizar_produto_delivery_produtos_delivery__cod_barras__put';
-import type { Body_criar_produto_delivery_produtos_delivery_post } from '../models/Body_criar_produto_delivery_produtos_delivery_post';
+import type { Body_atualizar_produto_api_delivery_produtos_delivery__cod_barras__put } from '../models/Body_atualizar_produto_api_delivery_produtos_delivery__cod_barras__put';
+import type { Body_criar_produto_api_delivery_produtos_delivery_post } from '../models/Body_criar_produto_api_delivery_produtos_delivery_post';
 import type { CriarNovoProdutoResponse } from '../models/CriarNovoProdutoResponse';
 import type { ProdutosPaginadosResponse } from '../models/ProdutosPaginadosResponse';
+import type { SetDisponibilidadeRequest } from '../models/SetDisponibilidadeRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ProdutosDeliveryService {
@@ -15,21 +16,24 @@ export class ProdutosDeliveryService {
      * @param codEmpresa
      * @param page
      * @param limit
+     * @param apenasDisponiveis
      * @returns ProdutosPaginadosResponse Successful Response
      * @throws ApiError
      */
-    public listarDeliveryDeliveryProdutosDeliveryGet(
-        codEmpresa: number = 1,
+    public listarDeliveryApiDeliveryProdutosDeliveryGet(
+        codEmpresa: number,
         page: number = 1,
         limit: number = 30,
+        apenasDisponiveis: boolean = false,
     ): CancelablePromise<ProdutosPaginadosResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/delivery/produtos/delivery',
+            url: '/api/delivery/produtos/delivery',
             query: {
                 'cod_empresa': codEmpresa,
                 'page': page,
                 'limit': limit,
+                'apenas_disponiveis': apenasDisponiveis,
             },
             errors: {
                 422: `Validation Error`,
@@ -42,12 +46,12 @@ export class ProdutosDeliveryService {
      * @returns CriarNovoProdutoResponse Successful Response
      * @throws ApiError
      */
-    public criarProdutoDeliveryProdutosDeliveryPost(
-        formData: Body_criar_produto_delivery_produtos_delivery_post,
+    public criarProdutoApiDeliveryProdutosDeliveryPost(
+        formData: Body_criar_produto_api_delivery_produtos_delivery_post,
     ): CancelablePromise<CriarNovoProdutoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/delivery/produtos/delivery',
+            url: '/api/delivery/produtos/delivery',
             formData: formData,
             mediaType: 'multipart/form-data',
             errors: {
@@ -62,13 +66,13 @@ export class ProdutosDeliveryService {
      * @returns CriarNovoProdutoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarProdutoDeliveryProdutosDeliveryCodBarrasPut(
+    public atualizarProdutoApiDeliveryProdutosDeliveryCodBarrasPut(
         codBarras: string,
-        formData: Body_atualizar_produto_delivery_produtos_delivery__cod_barras__put,
+        formData: Body_atualizar_produto_api_delivery_produtos_delivery__cod_barras__put,
     ): CancelablePromise<CriarNovoProdutoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/delivery/produtos/delivery/{cod_barras}',
+            url: '/api/delivery/produtos/delivery/{cod_barras}',
             path: {
                 'cod_barras': codBarras,
             },
@@ -85,15 +89,40 @@ export class ProdutosDeliveryService {
      * @returns void
      * @throws ApiError
      */
-    public deletarProdutoDeliveryProdutosDeliveryCodBarrasDelete(
+    public deletarProdutoApiDeliveryProdutosDeliveryCodBarrasDelete(
         codBarras: string,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/delivery/produtos/delivery/{cod_barras}',
+            url: '/api/delivery/produtos/delivery/{cod_barras}',
             path: {
                 'cod_barras': codBarras,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Set Disponibilidade
+     * Liga/desliga disponibilidade do produto (empresa x produto).
+     * @param codBarras
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public setDisponibilidadeApiDeliveryProdutosDeliveryCodBarrasDisponibilidadePatch(
+        codBarras: string,
+        requestBody: SetDisponibilidadeRequest,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/api/delivery/produtos/delivery/{cod_barras}/disponibilidade',
+            path: {
+                'cod_barras': codBarras,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

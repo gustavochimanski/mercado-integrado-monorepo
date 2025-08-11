@@ -7,7 +7,8 @@ export type ProdutoEmpMiniDTO = {
     empresa_id: number;
     cod_barras: string;
     preco_venda: number;
-    vitrine_id: number;
+    vitrine_id?: (number | null);
+    disponivel?: boolean;
     produto: ProdutoMiniDTO;
 };
 

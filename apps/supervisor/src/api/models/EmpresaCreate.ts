@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EnderecoCreate } from './EnderecoCreate';
+import type { app__api__mensura__schemas__endereco_schema__EnderecoCreate } from './app__api__mensura__schemas__endereco_schema__EnderecoCreate';
 export type EmpresaCreate = {
     nome: string;
     cnpj?: (string | null);
     slug: string;
     logo?: (string | null);
-    endereco: EnderecoCreate;
+    endereco: app__api__mensura__schemas__endereco_schema__EnderecoCreate;
 };
 

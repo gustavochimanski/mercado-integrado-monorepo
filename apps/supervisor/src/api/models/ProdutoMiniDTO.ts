@@ -7,5 +7,7 @@ export type ProdutoMiniDTO = {
     descricao: string;
     imagem?: (string | null);
     cod_categoria?: (number | null);
+    ativo?: boolean;
+    unidade_medida?: (string | null);
 };
 

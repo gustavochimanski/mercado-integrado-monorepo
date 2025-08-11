@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type app__api__mensura__schemas__user_schema__UserResponse = {
-    id: number;
-    username: string;
-    type_user: string;
+export type VinculoRequest = {
+    empresa_id: number;
+    cod_barras: string;
 };
 

@@ -11,22 +11,25 @@ type Props = {
   produto: ProdutoEmpMini;
   onOpenSheet?: () => void;
   onEdit?: (codBarras: string) => void;
+  isHome?: boolean
 };
 
-export function ProductCard({ produto, onOpenSheet, onEdit }: Props) {
+export function ProductCard({ produto, onOpenSheet, onEdit, isHome }: Props) {
   const { produto: produtoBase, preco_venda } = produto;
   const codBarras = produto.cod_barras;
   const price = Number(preco_venda) || 0;
 
+  const sizeClass = isHome ? "w-[100px] h-[200px]" : "w-[120px] h-[220px]";
+
   return (
     <div className="relative">
-        <ProductOptions
-          codBarras={codBarras}
-          onEdit={() => onEdit?.(codBarras)}
-        />
+      <ProductOptions
+        codBarras={codBarras}
+        onEdit={() => onEdit?.(codBarras)}
+      />
 
       <Card
-        className="w-[120px] h-[220px] flex flex-col justify-between overflow-hidden p-0 gap-0 cursor-pointer"
+        className={`${sizeClass} flex flex-col justify-between overflow-hidden p-0 gap-0 cursor-pointer`}
         onClick={onOpenSheet}
       >
         <div className="flex flex-col items-start gap-2 flex-grow">

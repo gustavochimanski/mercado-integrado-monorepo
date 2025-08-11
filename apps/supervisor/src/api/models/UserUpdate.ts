@@ -6,5 +6,6 @@ export type UserUpdate = {
     username?: (string | null);
     type_user?: (string | null);
     empresa_ids?: (Array<number> | null);
+    password?: (string | null);
 };
 

@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { CriarVitrineRequest } from '../models/CriarVitrineRequest';
 import type { CriarVitrineResponse } from '../models/CriarVitrineResponse';
+import type { VinculoRequest } from '../models/VinculoRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DeliveryVitrinesService {
@@ -15,13 +16,13 @@ export class DeliveryVitrinesService {
      * @returns CriarVitrineResponse Successful Response
      * @throws ApiError
      */
-    public listarVitrinesDeliveryVitrinesDeliveryGet(
+    public listarVitrinesApiDeliveryVitrinesGet(
         empresaId: number,
         codCategoria?: (number | null),
     ): CancelablePromise<Array<CriarVitrineResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/delivery/vitrines/delivery',
+            url: '/api/delivery/vitrines',
             query: {
                 'empresa_id': empresaId,
                 'cod_categoria': codCategoria,
@@ -32,17 +33,17 @@ export class DeliveryVitrinesService {
         });
     }
     /**
-     * Criar Vitrines
+     * Criar Vitrine
      * @param requestBody
      * @returns CriarVitrineResponse Successful Response
      * @throws ApiError
      */
-    public criarVitrinesDeliveryVitrinesDeliveryPost(
+    public criarVitrineApiDeliveryVitrinesPost(
         requestBody: CriarVitrineRequest,
     ): CancelablePromise<CriarVitrineResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/delivery/vitrines/delivery',
+            url: '/api/delivery/vitrines',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -52,18 +53,72 @@ export class DeliveryVitrinesService {
     }
     /**
      * Deletar Vitrine
-     * @param subId
+     * @param vitrineId
      * @returns void
      * @throws ApiError
      */
-    public deletarVitrineDeliveryVitrinesDeliverySubIdDelete(
-        subId: number,
+    public deletarVitrineApiDeliveryVitrinesVitrineIdDelete(
+        vitrineId: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/delivery/vitrines/delivery/{sub_id}',
+            url: '/api/delivery/vitrines/{vitrine_id}',
             path: {
-                'sub_id': subId,
+                'vitrine_id': vitrineId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Vincular Produto
+     * Vincula um produto (empresa x cod_barras) à vitrine.
+     * @param vitrineId
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public vincularProdutoApiDeliveryVitrinesVitrineIdVincularPost(
+        vitrineId: number,
+        requestBody: VinculoRequest,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/delivery/vitrines/{vitrine_id}/vincular',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Desvincular Produto
+     * Desvincula um produto (empresa x cod_barras) da vitrine.
+     * @param vitrineId
+     * @param codBarras
+     * @param empresaId
+     * @returns void
+     * @throws ApiError
+     */
+    public desvincularProdutoApiDeliveryVitrinesVitrineIdVincularCodBarrasDelete(
+        vitrineId: number,
+        codBarras: string,
+        empresaId: number,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/delivery/vitrines/{vitrine_id}/vincular/{cod_barras}',
+            path: {
+                'vitrine_id': vitrineId,
+                'cod_barras': codBarras,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

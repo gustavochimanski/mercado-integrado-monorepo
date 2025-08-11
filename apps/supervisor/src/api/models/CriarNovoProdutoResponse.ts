@@ -2,11 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ProdutoBaseDTO } from './ProdutoBaseDTO';
+import type { ProdutoEmpDTO } from './ProdutoEmpDTO';
 export type CriarNovoProdutoResponse = {
-    cod_barras: string;
-    descricao: string;
-    cod_categoria: number;
-    imagem?: (string | null);
-    data_cadastro?: (string | null);
+    produto: ProdutoBaseDTO;
+    produto_emp: ProdutoEmpDTO;
 };
 

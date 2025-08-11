@@ -4,8 +4,7 @@
 /* eslint-disable */
 import type { TypeDashboardRequest } from '../models/TypeDashboardRequest';
 import type { TypeResumoVendasResponse } from '../models/TypeResumoVendasResponse';
-import type { TypeVendaDetalhadaResponse } from '../models/TypeVendaDetalhadaResponse';
-import type { TypeVendaPorHoraComTotalGeralResponse } from '../models/TypeVendaPorHoraComTotalGeralResponse';
+import type { TypeVendaPorHoraResponse } from '../models/TypeVendaPorHoraResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class VendasService {
@@ -16,31 +15,12 @@ export class VendasService {
      * @returns TypeResumoVendasResponse Successful Response
      * @throws ApiError
      */
-    public resumoVendasControllerBiVendasPeriodoPost(
+    public resumoVendasControllerApiBiVendasPeriodoPost(
         requestBody: TypeDashboardRequest,
     ): CancelablePromise<TypeResumoVendasResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/bi/vendas/periodo',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Consulta venda Detalhada
-     * @param requestBody
-     * @returns TypeVendaDetalhadaResponse Successful Response
-     * @throws ApiError
-     */
-    public consultaVendaDetalhadaControllerBiVendasVendaDetalhadaPost(
-        requestBody: TypeDashboardRequest,
-    ): CancelablePromise<TypeVendaDetalhadaResponse> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/bi/vendas/venda-detalhada',
+            url: '/api/bi/vendas/periodo',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -51,15 +31,15 @@ export class VendasService {
     /**
      * Venda por hora
      * @param requestBody
-     * @returns TypeVendaPorHoraComTotalGeralResponse Successful Response
+     * @returns TypeVendaPorHoraResponse Successful Response
      * @throws ApiError
      */
-    public consultaVendaPorHoraControllerBiVendasPorHoraPost(
+    public consultaVendaPorHoraControllerApiBiVendasPorHoraPost(
         requestBody: TypeDashboardRequest,
-    ): CancelablePromise<TypeVendaPorHoraComTotalGeralResponse> {
+    ): CancelablePromise<TypeVendaPorHoraResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/bi/vendas/por-hora',
+            url: '/api/bi/vendas/por-hora',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

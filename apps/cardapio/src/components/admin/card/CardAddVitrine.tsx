@@ -9,7 +9,7 @@ import { ModalAddVitrine } from "../modals/ModalAddVitrine";
 
 interface Props {
   empresaId: number;
-  codCategoria: number;
+  codCategoria: string;
 }
 
 const CardAddVitrine = ({ empresaId, codCategoria }: Props) => {

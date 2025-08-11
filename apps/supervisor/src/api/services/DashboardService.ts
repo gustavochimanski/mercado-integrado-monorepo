@@ -8,17 +8,17 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DashboardService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * Dados Dashboard geral
+     * Dashboard Visão panorâmica
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public dashboardControllerBiDashboardPeriodoPost(
+    public dashboardControllerApiBiDashboardPeriodoPost(
         requestBody: TypeDashboardRequest,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/bi/dashboard/periodo',
+            url: '/api/bi/dashboard/periodo',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

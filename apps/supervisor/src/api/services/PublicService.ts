@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_put_product_by_fied_public_produtos__produto_id__put } from '../models/Body_put_product_by_fied_public_produtos__produto_id__put';
+import type { Body_put_product_by_fied_produtos__produto_id__put } from '../models/Body_put_product_by_fied_produtos__produto_id__put';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class PublicService {
@@ -12,10 +12,10 @@ export class PublicService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public getEmpresasCodigosPublicEmpresasGet(): CancelablePromise<any> {
+    public getEmpresasCodigosEmpresasGet(): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/public/empresas',
+            url: '/empresas',
         });
     }
     /**
@@ -23,10 +23,10 @@ export class PublicService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public getEmpresasCompletasPublicEmpresasDetalhesGet(): CancelablePromise<any> {
+    public getEmpresasCompletasEmpresasDetalhesGet(): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/public/empresas/detalhes',
+            url: '/empresas/detalhes',
         });
     }
     /**
@@ -36,13 +36,13 @@ export class PublicService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public getPaginatedProductsPublicProdutosGet(
+    public getPaginatedProductsProdutosGet(
         page: number = 1,
         limit: number = 30,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/public/produtos',
+            url: '/produtos',
             query: {
                 'page': page,
                 'limit': limit,
@@ -60,14 +60,14 @@ export class PublicService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public putProductByFiedPublicProdutosProdutoIdPut(
+    public putProductByFiedProdutosProdutoIdPut(
         produtoId: number,
         field: string,
-        requestBody: Body_put_product_by_fied_public_produtos__produto_id__put,
+        requestBody: Body_put_product_by_fied_produtos__produto_id__put,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/public/produtos/{produto_id}',
+            url: '/produtos/{produto_id}',
             path: {
                 'produto_id': produtoId,
             },

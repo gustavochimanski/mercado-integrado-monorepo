@@ -16,6 +16,9 @@ import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
+import VitrineDestaques from "../Shared/VitrineDestaques";
+import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
+import { CardHeader, CardTitle } from "../Shared/ui/card";
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -56,12 +59,29 @@ export default function HomePage() {
       <LoginWrapper />
       <HeaderComponent />
 
-      <main className="flex-1 p-2">
+      <main className="flex-1 p-2 gap-2">
         <CategoryScrollSection
           categorias={categoriasRaiz}
           titulo="Categorias"
           empresaId={empresaId}
         />
+
+          <VitrineDestaques
+            verMaisHref={`/vitrine?empresaId=${empresaId}`}
+            onSelectProduto={(p) => {
+              setProdutoSelecionado(p);
+              setSheetOpen(true);
+            }}
+            // opcional: você pode passar "produtos" aqui; se não, usa o mock interno
+            // produtos={minhaListaDeProdutos}
+          />
+          
+          <div className="mt-4">
+            <CardHeader>
+              <CardTitle>Adcionar vitrine de </CardTitle>
+            </CardHeader>
+            <CardAddVitrine empresaId={empresaId} codCategoria={"D"} />
+          </div>
       </main>
 
       {produtoSelecionado && (
