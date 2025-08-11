@@ -58,7 +58,7 @@ export function useFiltroDashboard(
     const dashboardService: DashboardService = mensuraApi.dashboard;
 
     try {
-      const result = await dashboardService.dashboardControllerBiDashboardPeriodoPost(payload);
+      const result = await dashboardService.dashboardControllerApiBiDashboardPeriodoPost(payload);
       onSuccess(result);
     } catch (err: any) {
       showToast(err?.message ?? "Erro ao carregar dashboard");
