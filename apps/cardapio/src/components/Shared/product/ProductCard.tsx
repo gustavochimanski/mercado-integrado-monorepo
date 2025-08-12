@@ -12,7 +12,7 @@ type Props = {
   onOpenSheet?: () => void;
   onEdit?: (codBarras: string) => void;
   isHome?: boolean
-  empresa_id: number
+  empresa_id?: number
 };
 
 export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id }: Props) {
@@ -27,7 +27,7 @@ export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id }
       <ProductOptions
         codBarras={codBarras}
         onEdit={() => onEdit?.(codBarras)}
-        empresa_id={empresa_id}
+        empresa_id={empresa_id!}
         />
 
       <Card

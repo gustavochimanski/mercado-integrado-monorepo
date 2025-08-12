@@ -1,7 +1,8 @@
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { CategoriaMini } from "./useQueryHome";
 
 interface CreateCategoriaBody {
   descricao: string;
@@ -21,6 +22,18 @@ interface UploadImagemBody {
   imagem: File;
 }
 
+
+// ✅ Hook para buscar por ID
+export function useCategoriaById(catId: number) {
+  return useQuery({
+    queryKey: ["categoria", catId],
+    queryFn: async () => {
+      const { data } = await apiAdmin.get<CategoriaMini>(`api/delivery/categorias/${catId}`);
+      return data;
+    },
+    enabled: !!catId, // só busca se tiver ID válido
+  });
+}
 
 export function useMutateCategoria() {
   const qc = useQueryClient();
@@ -71,7 +84,6 @@ export function useMutateCategoria() {
     onError: (err) => toast.error(extractErrorMessage(err)), 
   });
 
-    // --- NOVO: mover categoria para a direita (aumenta posicao entre irmãs)
   const moveRight = useMutation({
     mutationFn: (id: number) => apiAdmin.post(`api/delivery/categorias/${id}/move-right`),
     onSuccess: () => {
@@ -81,7 +93,6 @@ export function useMutateCategoria() {
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
-  // --- NOVO: mover categoria para a esquerda (diminui posicao entre irmãs)
   const moveLeft = useMutation({
     mutationFn: (id: number) => apiAdmin.post(`api/delivery/categorias/${id}/move-left`),
     onSuccess: () => {
@@ -91,5 +102,5 @@ export function useMutateCategoria() {
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
-  return { create, update, uploadImagem, remove, moveRight,moveLeft };
+  return { create, update, uploadImagem, remove, moveRight, moveLeft };
 }

@@ -10,9 +10,11 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useMutateCategoria } from "@cardapio/services/useQueryCategoria";
+import {
+  useCategoriaById,
+  useMutateCategoria,
+} from "@cardapio/services/useQueryCategoria";
 import Image from "next/image";
-import { useHome } from "@cardapio/services/useQueryHome";
 import type { CategoriaMini } from "@cardapio/services/useQueryHome";
 
 interface ModalEditCategoriaProps {
@@ -28,27 +30,22 @@ export const ModalEditCategoria = ({
   empresaId,
   categoriaId,
 }: ModalEditCategoriaProps) => {
-  // 1) Busca categorias via HomeResponse
+  // Busca a categoria pelo ID
   const {
-    data,
+    data: categoria,
     isLoading,
     isError,
-  } = useHome(empresaId);
+  } = useCategoriaById(categoriaId);
 
-  const categorias: CategoriaMini[] = data?.categorias ?? [];
-
-  // 2) Encontra a categoria selecionada
-  const categoria = categorias.find((c) => c.id === categoriaId);
-
-  // 3) Estados do form
+  // Estados do form
   const [descricao, setDescricao] = useState("");
   const [imagemFile, setImagemFile] = useState<File | undefined>(undefined);
 
-  // 4) Mutação de update
-  const { update } = useMutateCategoria();
-  const isUpdating = update.isPending;
+  // Mutations
+  const { update, uploadImagem } = useMutateCategoria();
+  const isUpdating = update.isPending || uploadImagem.isPending;
 
-  // 5) Popula o form quando a categoria carrega
+  // Preenche o form quando carrega
   useEffect(() => {
     if (categoria) {
       setDescricao(categoria.label);
@@ -56,24 +53,37 @@ export const ModalEditCategoria = ({
     }
   }, [categoria]);
 
-  // 6) Handle salvar
+  // Salvar alterações
   function handleSubmit() {
     if (!descricao.trim() || !categoria) return;
 
+    // Atualiza a categoria
     update.mutate(
       {
         cod_empresa: empresaId,
-        id: categoriaId,
+        id: categoria.id,
         descricao,
         slug: categoria.slug,
+        parent_id: categoria.parent_id ?? null,
+        posicao: categoria.posicao,
       },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => {
+          // Se tiver imagem nova, faz upload
+          if (imagemFile) {
+            uploadImagem.mutate({
+              id: categoria.id,
+              cod_empresa: empresaId,
+              imagem: imagemFile,
+            });
+          }
+          onOpenChange(false);
+        },
       }
     );
   }
 
-  // 7) Loading / erro
+  // Loading / Erro
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,7 +97,7 @@ export const ModalEditCategoria = ({
   }
   if (isError || !categoria) return null;
 
-  // 8) Render
+  // Render
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

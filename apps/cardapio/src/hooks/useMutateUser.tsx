@@ -2,7 +2,7 @@
 import { api } from '@cardapio/app/api/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { User } from './useUser'
+import { User } from './auth/userContext'
 
 /**
  * Corpo esperado na criação de usuário

@@ -2,7 +2,7 @@
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import { mapProdutoToCartItem } from "@cardapio/utils/mapProdutoToCartItem";
+import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 
 type Props = {
   produto: ProdutoEmpMini;
@@ -21,7 +21,7 @@ export function AddableProductCard({ produto, quantity = 1, openSheet }: Props) 
   return (
     <ProductCard
       produto={produto}
-      onOpenSheet={handleAdd}
+      onOpenSheet={handleAdd} 
     />
   );
 }
