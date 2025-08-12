@@ -16,7 +16,8 @@ interface Props {
   onOpenSheet?: (p: ProdutoEmpMini) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
   hrefCategoria?: string;
-  isHome?: boolean;
+  isHome?: boolean;         // se está renderizando em contexto de home
+  vitrineIsHome?: boolean;  // estado real vindo do backend/categoria
 }
 
 export default function ProductsVitrineSection({
@@ -28,8 +29,14 @@ export default function ProductsVitrineSection({
   onOpenSheet,
   sectionRef,
   hrefCategoria,
-  isHome
+  isHome,
+  vitrineIsHome
 }: Props) {
+  // ---- NOVO: só renderiza se isHome === vitrineIsHome ----
+  if (typeof vitrineIsHome === "boolean" && vitrineIsHome !== isHome) {
+    return null;
+  }
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -68,7 +75,6 @@ export default function ProductsVitrineSection({
     el.scrollTo({ left: Math.min(Math.max(0, target), max), behavior: "smooth" });
   };
 
-
   return (
     <section
       id={`secao-${vitrineId}`}
@@ -77,13 +83,11 @@ export default function ProductsVitrineSection({
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
-        
-          <AdminSecaoSubCategOptions
-            vitrineId={vitrineId}
-            empresaId={empresaId}
-            codCategoria={codCategoria}
-          />
-       
+        <AdminSecaoSubCategOptions
+          vitrineId={vitrineId}
+          empresaId={empresaId}
+          codCategoria={codCategoria}
+        />
       </div>
 
       <div className="relative">
@@ -110,20 +114,21 @@ export default function ProductsVitrineSection({
               <div key={produto.cod_barras} className="shrink-0 w-[120px]">
                 <ProductCard
                   produto={produto}
-                  onOpenSheet={() => onOpenSheet?.(produto)}
-                />
+                  onOpenSheet={() => onOpenSheet?.(produto)} 
+                  empresa_id={empresaId}
+                  />
               </div>
             ))}
+
             {isHome && hrefCategoria && (
               <CardVerMais href={hrefCategoria} />
             )}
 
-
-              <CardAddProduto
-                vitrineId={vitrineId}
-                codCategoria={codCategoria}
-                empresaId={empresaId}
-              />
+            <CardAddProduto
+              vitrineId={vitrineId}
+              codCategoria={codCategoria}
+              empresaId={empresaId}
+            />
           </div>
         </div>
       </div>

@@ -7,7 +7,7 @@ import { toast } from "sonner";
  * IMPORTANTE:
  * Se o apiAdmin NÃO tiver baseURL '/api', troque BASE para "/api/delivery/produtos/delivery"
  */
-const BASE = "/delivery/produtos/delivery";
+const BASE = "api/delivery/produtos";
 
 // ----- Tipos (espelham seu backend) -----
 export type ProdutoListItem = {
@@ -150,12 +150,15 @@ export function useMutateProduto() {
   });
 
   const remove = useMutation({
-    mutationFn: async ({ cod_barras }: { cod_barras: string }) => {
-      await apiAdmin.delete(`${BASE}/${encodeURIComponent(cod_barras)}`);
+    mutationFn: async ({ cod_barras, empresa_id }: { cod_barras: string; empresa_id: number }) => {
+      await apiAdmin.delete(
+        `${BASE}/${encodeURIComponent(cod_barras)}`,
+        { params: { empresa_id } }
+      );
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
       toast.success("Produto removido com sucesso!");
-      invalidate();
+      invalidate(vars?.empresa_id);
     },
     onError: (err: any) => toast.error(errMsg(err, "Erro ao remover produto")),
   });

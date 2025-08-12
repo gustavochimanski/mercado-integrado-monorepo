@@ -2,8 +2,8 @@
 import { useEffect, useMemo, useRef } from "react";
 import LoadingSpinner from "../ui/loader";
 import ProductsVitrineSection from "./ProductsVitrineSection";
-import { useProdutosVitrinePorCategoria } from "@cardapio/services/useQueryCardapio";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
+import { useProdutosVitrinePorCategoria } from "@cardapio/services/useQueryHome";
 
 interface Props {
   codCategoria: number;
@@ -49,18 +49,21 @@ export default function ProductsSection({
   return (
     <>
       {vitrines.map((vitrine) => (
+        // ProductsSection.tsx
         <ProductsVitrineSection
           key={vitrine.id}
           vitrineId={vitrine.id}
           titulo={vitrine.titulo}
-          produtos={isHome ? vitrine.produtos.slice(0, 3) : vitrine.produtos} // 👈 aqui
+          produtos={isHome ? vitrine.produtos.slice(0, 3) : vitrine.produtos}
           codCategoria={codCategoria}
           empresaId={empresaId}
           onOpenSheet={onOpenSheet}
           sectionRef={sectionRefFactory?.(vitrine.id)}
           hrefCategoria={hrefCategoria}
           isHome={isHome}
+          vitrineIsHome={vitrine.is_home}   // 👈 agora sim
         />
+
       ))}
     </>
   );

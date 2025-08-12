@@ -6,6 +6,7 @@ export interface VitrineDelivery {
   titulo: string;
   slug: string;
   ordem: number;
+  is_home: boolean
 }
 
 
@@ -15,3 +16,4 @@ export interface CreateVitrineDTO {
   titulo: string;
   ordem: number;
 }
+

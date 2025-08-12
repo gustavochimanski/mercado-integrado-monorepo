@@ -6,15 +6,18 @@ import { Card } from "../../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import { ModalAddVitrine } from "../modals/ModalAddVitrine";
 
-
 interface Props {
-  empresaId: number;
-  codCategoria: number;
+  is_home: boolean;
+  cod_categoria: number | null;
+  empresa_id: number
 }
 
-const CardAddVitrine = ({ empresaId, codCategoria }: Props) => {
+const CardAddVitrine = ({ is_home, cod_categoria,empresa_id}: Props) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
+
+  // Se for home, categoria não deve ser vinculada
+  const categoriaId = is_home ? null : cod_categoria;
 
   if (!isAdmin) return null;
 
@@ -35,8 +38,9 @@ const CardAddVitrine = ({ empresaId, codCategoria }: Props) => {
       <ModalAddVitrine
         open={open}
         onOpenChange={setOpen}
-        empresaId={empresaId}
-        codCategoria={codCategoria}
+        codCategoria={categoriaId}
+        is_home={is_home}
+        empresa_id={empresa_id}
       />
     </>
   );

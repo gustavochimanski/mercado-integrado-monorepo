@@ -12,9 +12,10 @@ type Props = {
   onOpenSheet?: () => void;
   onEdit?: (codBarras: string) => void;
   isHome?: boolean
+  empresa_id: number
 };
 
-export function ProductCard({ produto, onOpenSheet, onEdit, isHome }: Props) {
+export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id }: Props) {
   const { produto: produtoBase, preco_venda } = produto;
   const codBarras = produto.cod_barras;
   const price = Number(preco_venda) || 0;
@@ -26,7 +27,8 @@ export function ProductCard({ produto, onOpenSheet, onEdit, isHome }: Props) {
       <ProductOptions
         codBarras={codBarras}
         onEdit={() => onEdit?.(codBarras)}
-      />
+        empresa_id={empresa_id}
+        />
 
       <Card
         className={`${sizeClass} flex flex-col justify-between overflow-hidden p-0 gap-0 cursor-pointer`}

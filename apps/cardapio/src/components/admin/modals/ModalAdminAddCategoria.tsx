@@ -9,40 +9,47 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useMutateCategoria } from "@cardapio/services/useMutateCategoria";
+import { useMutateCategoria } from "@cardapio/services/useQueryCategoria";
 
 interface ModalCategoriaProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   parentId?: number | null;
-  titulo?: string;
-  empresaId: number
+  empresaId: number;
 }
 
 export const ModalAdminAddCategoria = ({
   open,
   onOpenChange,
   parentId = null,
-  empresaId
+  empresaId,
 }: ModalCategoriaProps) => {
   const [descricao, setDescricao] = useState("");
   const [imagem, setImagem] = useState<File | undefined>(undefined);
 
-
-  const { create } = useMutateCategoria();
-  const isLoading = create.isPending;
+  const { create, uploadImagem } = useMutateCategoria();
+  const isLoading = create.isPending || uploadImagem.isPending;
 
   function handleSubmit() {
     if (!descricao.trim()) return;
 
     create.mutate(
       {
-        descricao, imagem,
+        descricao,
         cod_empresa: empresaId,
-        parent_id: parentId
+        parent_id: parentId,
+        slug: descricao.toLowerCase().replace(/\s+/g, "-"), // opcional
       },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
+          // Se tiver imagem, chama o upload
+          if (imagem) {
+            uploadImagem.mutate({
+              id: res.data.id, // id retornado pelo backend
+              cod_empresa: empresaId,
+              imagem,
+            });
+          }
           setDescricao("");
           setImagem(undefined);
           onOpenChange(false);
@@ -65,7 +72,7 @@ export const ModalAdminAddCategoria = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adcionar Categoria</DialogTitle>
+          <DialogTitle>Adicionar Categoria</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">

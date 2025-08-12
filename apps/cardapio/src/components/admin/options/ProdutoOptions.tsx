@@ -13,11 +13,13 @@ import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
 interface ProductOptionsProps {
   codBarras: string;
   onEdit: () => void;
+  empresa_id: number
 }
 
 export function ProductOptions({
   codBarras,
   onEdit,
+  empresa_id
 }: ProductOptionsProps) {
   const { isAdmin } = useUserContext();
   const { remove } = useMutateProduto();
@@ -26,7 +28,10 @@ export function ProductOptions({
   if (!isAdmin) return null;
 
   function handleConfirmRemove() {
-    remove.mutate(codBarras);
+    remove.mutate({
+      cod_barras: codBarras, 
+      empresa_id: empresa_id
+    });
   }
 
   return (

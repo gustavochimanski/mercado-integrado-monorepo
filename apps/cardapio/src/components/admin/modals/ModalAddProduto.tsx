@@ -13,7 +13,6 @@ import { Input } from "@cardapio/components/Shared/ui/input";
 import { Label } from "@cardapio/components/Shared/ui/label";
 import { useMutateProduto } from "@cardapio/services/useQueryProduto";
 
-
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -29,55 +28,59 @@ export const ModalNovoProduto = ({
   codCategoria,
   vitrineId,
 }: Props) => {
+  // guarde números como string para evitar NaN enquanto digita
   const [form, setForm] = useState({
     cod_barras: "",
     descricao: "",
-    preco_venda: 0,
-    custo: 0,
+    preco_venda: "", // string
+    custo: "",       // string
     imagem: undefined as File | undefined,
   });
 
-  // Importa o create/update/remove já configurado para apiAdmin
   const { create: createProduct } = useMutateProduto();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, type, value } = e.target;
+    const { name, value, type } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "number" ? parseFloat(value) : value,
+      [name]: type === "file" ? prev[name as keyof typeof prev] : value,
     }));
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setForm((prev) => ({ ...prev, imagem: file }));
+    setForm((prev) => ({ ...prev, imagem: file }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("cod_barras", form.cod_barras);
-    formData.append("descricao", form.descricao);
-    formData.append("cod_empresa", String(empresaId));
-    formData.append("cod_categoria", String(codCategoria));
-    formData.append("vitrine_id", String(vitrineId));
-    formData.append("preco_venda", String(form.preco_venda));
-    formData.append("custo", String(form.custo));
-    if (form.imagem) formData.append("imagem", form.imagem);
+    if (!form.cod_barras.trim() || !form.descricao.trim() || !form.preco_venda.trim()) return;
 
-    createProduct.mutate({ cod_empresa: empresaId, formData }, {
-      onSuccess: () => {
-        onOpenChange(false);
-        setForm({
-          cod_barras: "",
-          descricao: "",
-          preco_venda: 0,
-          custo: 0,
-          imagem: undefined,
-        });
+    createProduct.mutate(
+      {
+        cod_empresa: empresaId,
+        cod_barras: form.cod_barras.trim(),
+        descricao: form.descricao.trim(),
+        cod_categoria: codCategoria,
+        vitrine_id: vitrineId,
+        preco_venda: form.preco_venda, // o hook converte para string decimal corretamente
+        custo: form.custo === "" ? undefined : form.custo,
+        imagem: form.imagem ?? null,
       },
-    });
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          setForm({
+            cod_barras: "",
+            descricao: "",
+            preco_venda: "",
+            custo: "",
+            imagem: undefined,
+          });
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -85,8 +88,8 @@ export const ModalNovoProduto = ({
       setForm({
         cod_barras: "",
         descricao: "",
-        preco_venda: 0,
-        custo: 0,
+        preco_venda: "",
+        custo: "",
         imagem: undefined,
       });
     }
@@ -128,6 +131,8 @@ export const ModalNovoProduto = ({
               id="preco_venda"
               name="preco_venda"
               type="number"
+              inputMode="decimal"
+              step="0.01"
               value={form.preco_venda}
               onChange={handleChange}
               required
@@ -140,6 +145,8 @@ export const ModalNovoProduto = ({
               id="custo"
               name="custo"
               type="number"
+              inputMode="decimal"
+              step="0.00001"
               value={form.custo}
               onChange={handleChange}
             />

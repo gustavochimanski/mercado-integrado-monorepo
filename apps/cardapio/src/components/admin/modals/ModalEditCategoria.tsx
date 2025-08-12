@@ -10,9 +10,10 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useMutateCategoria } from "@cardapio/services/useMutateCategoria";
+import { useMutateCategoria } from "@cardapio/services/useQueryCategoria";
 import Image from "next/image";
-import { useCardapio } from "@cardapio/services/useQueryCardapio";
+import { useHome } from "@cardapio/services/useQueryHome";
+import type { CategoriaMini } from "@cardapio/services/useQueryHome";
 
 interface ModalEditCategoriaProps {
   open: boolean;
@@ -27,12 +28,14 @@ export const ModalEditCategoria = ({
   empresaId,
   categoriaId,
 }: ModalEditCategoriaProps) => {
-  // 1) Busca categorias
+  // 1) Busca categorias via HomeResponse
   const {
-    data: categorias = [],
+    data,
     isLoading,
     isError,
-  } = useCardapio(empresaId);
+  } = useHome(empresaId);
+
+  const categorias: CategoriaMini[] = data?.categorias ?? [];
 
   // 2) Encontra a categoria selecionada
   const categoria = categorias.find((c) => c.id === categoriaId);
@@ -62,9 +65,7 @@ export const ModalEditCategoria = ({
         cod_empresa: empresaId,
         id: categoriaId,
         descricao,
-        imagem: imagemFile,
         slug: categoria.slug,
-        slug_pai: categoria.slug_pai ?? undefined,
       },
       {
         onSuccess: () => onOpenChange(false),
@@ -120,20 +121,19 @@ export const ModalEditCategoria = ({
             }}
           />
         </div>
-      <DialogFooter className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={() => onOpenChange(false)}
-          disabled={isUpdating}
-        >
-          Cancelar
-        </Button>
-        <Button onClick={handleSubmit} disabled={isUpdating}>
-          {isUpdating ? "Salvando..." : "Salvar"}
-        </Button>
-      </DialogFooter>
+        <DialogFooter className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isUpdating}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} disabled={isUpdating}>
+            {isUpdating ? "Salvando..." : "Salvar"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-
     </Dialog>
   );
 };

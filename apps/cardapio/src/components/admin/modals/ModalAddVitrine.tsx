@@ -15,15 +15,17 @@ import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
 interface ModalAddVitrineProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  empresaId: number;
-  codCategoria: number;
+  codCategoria?: number | null;
+  is_home: boolean
+  empresa_id: number
 }
 
 export const ModalAddVitrine = ({
   open,
   onOpenChange,
-  empresaId,
   codCategoria,
+  is_home,
+  empresa_id
 }: ModalAddVitrineProps) => {
   const [titulo, setTitulo] = useState("");
   const [ordem, setOrdem] = useState(0); // valor inicial padrão
@@ -35,10 +37,11 @@ export const ModalAddVitrine = ({
 
     create.mutate(
       {
-        cod_empresa: empresaId,
-        cod_categoria: codCategoria.toString(),
+        cod_categoria: codCategoria,
         titulo,
         ordem,
+        is_home,
+        empresa_id: empresa_id
       },
       {
         onSuccess: () => {
