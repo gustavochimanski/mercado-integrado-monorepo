@@ -22,7 +22,7 @@ export function useFetchCadProdDelivery(
     queryKey: ["produtos", cod_empresa, page, limit],
     queryFn: async () => {
       const res = await apiMensura.get(
-        `/mensura/produtos/delivery?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
+        `/api/delivery/produtos?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
       );
       return res.data;
     },
@@ -36,7 +36,7 @@ export function useMutateProduto() {
     mutationFn: async ({ formData }: CreateProdutoBody) => {
       try {
         const { data } = await apiMensura.post(
-          "/mensura/produtos/delivery",
+          "/api/delivery/produtos",
           formData
         );
         toast.success("Produto criado com sucesso!");
@@ -59,7 +59,7 @@ export function useMutateProduto() {
     mutationFn: async ({ cod_barras, formData }: UpdateProdutoBody) => {
       try {
         const { data } = await apiMensura.put(
-          `/mensura/produtos/delivery/${cod_barras}`,
+          `/api/delivery/produtos/${cod_barras}`,
           formData
         );
         toast.success("Produto atualizado com sucesso!");
@@ -81,7 +81,7 @@ export function useMutateProduto() {
   const remove = useMutation({
     mutationFn: async (cod_barras: string) => {
       try {
-        await apiMensura.delete(`/mensura/produtos/delivery/${cod_barras}`);
+        await apiMensura.delete(`/api/delivery/produtos/${cod_barras}`);
         toast.success("Produto removido com sucesso!");
       } catch (err: any) {
         const msg =
