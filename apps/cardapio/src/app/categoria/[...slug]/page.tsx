@@ -88,7 +88,7 @@ export default function RouteCategoryPage() {
         <CircleArrowLeft /> Voltar
       </Button>
 
-      <main className="flex-1 p-0">
+      <main className="flex-1 p-2">
         <HorizontalSpy
           items={vitrinesMeta}
           activeId={activeId}

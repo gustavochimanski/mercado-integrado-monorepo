@@ -42,11 +42,16 @@ export function useMutateCategoria() {
     qc.invalidateQueries({ queryKey: ["categorias"] });
   };
 
+  const reloadPage = () => {
+    invalidate();
+    window.location.reload();
+  };
+
   const create = useMutation({
     mutationFn: (body: CreateCategoriaBody) => apiAdmin.post("api/delivery/categorias", body),
     onSuccess: () => {
       toast.success("Categoria criada com sucesso!");
-      invalidate();
+      reloadPage();
     },
     onError: (err) => toast.error(extractErrorMessage(err)), 
   });
@@ -56,7 +61,7 @@ export function useMutateCategoria() {
       apiAdmin.put(`api/delivery/categorias/${id}`, body),
     onSuccess: () => {
       toast.success("Categoria atualizada com sucesso!");
-      invalidate();
+      reloadPage();
     },
     onError: (err) => toast.error(extractErrorMessage(err)), 
   });
@@ -70,7 +75,7 @@ export function useMutateCategoria() {
     },
     onSuccess: () => {
       toast.success("Imagem atualizada!");
-      invalidate();
+      reloadPage();
     },
     onError: (err) => toast.error(extractErrorMessage(err)), 
   });
@@ -79,7 +84,7 @@ export function useMutateCategoria() {
     mutationFn: (id: number) => apiAdmin.delete(`api/delivery/categorias/${id}`),
     onSuccess: () => {
       toast.success("Categoria removida com sucesso!");
-      invalidate();
+      reloadPage();
     },
     onError: (err) => toast.error(extractErrorMessage(err)), 
   });
@@ -88,7 +93,7 @@ export function useMutateCategoria() {
     mutationFn: (id: number) => apiAdmin.post(`api/delivery/categorias/${id}/move-right`),
     onSuccess: () => {
       toast.success("Categoria movida para a direita!");
-      invalidate();
+      reloadPage();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
@@ -97,7 +102,7 @@ export function useMutateCategoria() {
     mutationFn: (id: number) => apiAdmin.post(`api/delivery/categorias/${id}/move-left`),
     onSuccess: () => {
       toast.success("Categoria movida para a esquerda!");
-      invalidate();
+      reloadPage();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });

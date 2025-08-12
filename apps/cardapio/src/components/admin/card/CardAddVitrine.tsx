@@ -10,9 +10,10 @@ interface Props {
   is_home: boolean;
   cod_categoria: number | null;
   empresa_id: number
+  className?: string
 }
 
-const CardAddVitrine = ({ is_home, cod_categoria,empresa_id}: Props) => {
+const CardAddVitrine = ({ is_home, cod_categoria, empresa_id, className}: Props) => {
   const { isAdmin } = useUserContext();
   const [open, setOpen] = useState(false);
 

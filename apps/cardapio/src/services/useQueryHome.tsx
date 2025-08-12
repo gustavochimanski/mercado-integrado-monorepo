@@ -22,6 +22,7 @@ export interface VitrineComProdutosResponse {
   id: number;
   titulo: string;
   slug: string;
+  href_categoria: string
   ordem: number;
   is_home: boolean;
   cod_categoria: number;

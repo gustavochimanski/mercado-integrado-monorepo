@@ -30,7 +30,7 @@ export default function CategoryScrollSection({
         </div>
       )}
 
-      <div className="relative px-2">
+      <div className="relative">
         {/* Linha colorida no topo */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/20 to-primary rounded-t-xl z-10" />
 

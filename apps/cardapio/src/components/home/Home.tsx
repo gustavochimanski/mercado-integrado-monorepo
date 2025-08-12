@@ -15,14 +15,17 @@ import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
-import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
+import VitrineDestaques from "@cardapio/components/Shared/VitrineDestaques";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { CardHeader, CardTitle } from "../Shared/ui/card";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+
+  const { isAdmin } = useUserContext();
 
   // ✅ Seta o ID da empresa via query param
   useReceiveEmpresaFromQuery();
@@ -31,9 +34,6 @@ export default function HomePage() {
   const { data, isError } = useHome(empresa_id || 0, true);
   const categorias = data?.categorias ?? [];
   const vitrines = data?.vitrines ?? [];
-
-  // Categorias raiz: sem pai
-  const categoriasRaiz = categorias.filter((cat) => cat.parent_id == null);
 
   const add = useCart((s) => s.add);
   const handleAdd = useCallback((produto: ProdutoEmpMini, quantity: number) => {
@@ -51,9 +51,7 @@ export default function HomePage() {
     );
   }
 
-  if (isError) {
-    return null;
-  }
+  if (isError) return null;
 
   return (
     <div className="min-h-screen flex flex-col gap-4">
@@ -63,7 +61,7 @@ export default function HomePage() {
       <main className="flex-1 p-2 gap-2">
         {/* Categorias raiz */}
         <CategoryScrollSection
-          categorias={categoriasRaiz}
+          categorias={categorias}
           titulo="Categorias"
           empresaId={empresa_id}
         />
@@ -72,28 +70,32 @@ export default function HomePage() {
         {vitrines
           .filter((v) => v.is_home)
           .map((v) => (
-            <ProductsVitrineSection
+            <VitrineDestaques
               key={v.id}
-              vitrineId={v.id}
               titulo={v.titulo}
-              produtos={v.produtos.slice(0, 3)} // Exemplo: limita a 3 produtos
-              codCategoria={v.cod_categoria ?? 0}
+              produtos={v.produtos}
+              verMaisHref={v.href_categoria}
               empresaId={empresa_id}
-              onOpenSheet={(p) => {
+              codCategoria={v.cod_categoria}
+              vitrineId={v.id}
+              is_home={v.is_home}
+              onSelectProduto={(p) => {
                 setProdutoSelecionado(p);
                 setSheetOpen(true);
               }}
-              isHome={true}
-              vitrineIsHome={v.is_home}
             />
           ))}
 
-        <div className="mt-4">
-          <CardHeader>
-            <CardTitle>Adicionar vitrine de Promoção</CardTitle>
-          </CardHeader>
-          <CardAddVitrine is_home={true} cod_categoria={null} empresa_id={empresa_id} />
-        </div>
+
+
+        {isAdmin && (
+          <div className="mt-4">
+            <CardHeader>
+              <CardTitle>Adicionar vitrine de Promoção</CardTitle>
+            </CardHeader>
+            <CardAddVitrine is_home={true} cod_categoria={null} empresa_id={empresa_id} />
+          </div>
+        )}
       </main>
 
       {produtoSelecionado && (

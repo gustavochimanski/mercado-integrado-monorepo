@@ -120,6 +120,13 @@ export function useMutateProduto() {
     }
   };
 
+  const reloadPage = (cod_empresa: number) => {
+    invalidate(cod_empresa);
+    window.location.reload();
+  };
+
+  
+
   const create = useMutation({
     mutationFn: async (input: CreateProdutoInput) => {
       const fd = buildProdutoFormData(input);
@@ -129,7 +136,7 @@ export function useMutateProduto() {
     },
     onSuccess: (_data, vars) => {
       toast.success("Produto criado com sucesso!");
-      invalidate(vars.cod_empresa);
+      reloadPage(vars.cod_empresa);
     },
     onError: (err: any) => toast.error(errMsg(err, "Erro ao criar produto")),
   });
@@ -144,7 +151,7 @@ export function useMutateProduto() {
     },
     onSuccess: (_data, vars) => {
       toast.success("Produto atualizado com sucesso!");
-      invalidate(vars.cod_empresa);
+      reloadPage(vars.cod_empresa);
     },
     onError: (err: any) => toast.error(errMsg(err, "Erro ao atualizar produto")),
   });
@@ -158,7 +165,7 @@ export function useMutateProduto() {
     },
     onSuccess: (_d, vars) => {
       toast.success("Produto removido com sucesso!");
-      invalidate(vars?.empresa_id);
+      reloadPage(vars?.empresa_id);
     },
     onError: (err: any) => toast.error(errMsg(err, "Erro ao remover produto")),
   });

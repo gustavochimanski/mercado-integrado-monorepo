@@ -61,7 +61,7 @@ export default function ProductsSection({
           sectionRef={sectionRefFactory?.(vitrine.id)}
           hrefCategoria={hrefCategoria}
           isHome={isHome}
-          vitrineIsHome={vitrine.is_home}   // 👈 agora sim
+          vitrineIsHome={vitrine.is_home}   
         />
 
       ))}

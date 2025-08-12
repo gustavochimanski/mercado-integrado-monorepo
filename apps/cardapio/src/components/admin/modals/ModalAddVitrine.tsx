@@ -49,7 +49,7 @@ export const ModalAddVitrine = ({
           setOrdem(0);
           onOpenChange(false);
         },
-        onError: (err) => console.error("Erro ao criar seção:", err),
+        onError: (err) => console.error("Erro ao criar Vitrine:", err),
       }
     );
   }
@@ -65,13 +65,13 @@ export const ModalAddVitrine = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adicionar Seção</DialogTitle>
+          <DialogTitle>Adicionar Vitrine</DialogTitle>
         </DialogHeader>
 
         <Label>Titulo</Label>
         <div className="flex flex-col gap-2">
           <Input
-            placeholder="Título da nova seção"
+            placeholder="Título da nova Vitrine"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
           />

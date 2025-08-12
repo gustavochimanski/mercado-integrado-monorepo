@@ -42,6 +42,12 @@ export function useMutateVitrine() {
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
 
+  const reloadPage = () => {
+    invalidate();
+    window.location.reload();
+  };
+
+
   const create = useMutation({
     mutationFn: async (body: CreateVitrineDTO) => {
       const { data } = await apiAdmin.post("api/delivery/vitrines", body);
@@ -49,7 +55,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Vitrine criada com sucesso!");
-      invalidate();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao criar vitrine";
@@ -64,7 +70,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Vitrine atualizada!");
-      invalidate();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao atualizar vitrine";
@@ -78,7 +84,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Vitrine removida com sucesso!");
-      invalidate();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao remover vitrine";
@@ -95,7 +101,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Produto vinculado!");
-      invalidate();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao vincular produto";
@@ -111,7 +117,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Produto desvinculado!");
-      invalidate();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao desvincular produto";
