@@ -91,20 +91,19 @@ export default function TabelaResumoEmpresas({
   dataUnificada.sort((a, b) => b.total_vendas - a.total_vendas);
 
   return (
-    <Card className="flex-1 bg-background border max-h-[400px] flex flex-col">
+    <Card className="flex-1 bg-background border max-h-[350px] flex flex-col">
       <div className="overflow-auto flex-1">
         <Table className="bg-background text-sm w-full min-w-[800px]">
           <TableHeader className="sticky top-0 bg-muted z-10">
             <TableRow className="whitespace-nowrap">
               <TableHead>Cor</TableHead>
               <TableHead>Empresa</TableHead>
+              <TableHead className="text-right">Compras</TableHead>
               <TableHead className="text-right">Vendas</TableHead>
               <TableHead className="text-right">Mês Ant.</TableHead>
               <TableHead className="text-right">Variação</TableHead>
               <TableHead className="text-right">Ticket Médio</TableHead>
               <TableHead className="text-right">Cupons</TableHead>
-              <TableHead className="text-right">Compras</TableHead>
-              <TableHead className="text-right">Relação (%)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,6 +117,7 @@ export default function TabelaResumoEmpresas({
 
               return (
                 <TableRow key={idx}>
+                  
                   <TableCell>
                     <div
                       className="w-4 h-4 rounded-full"
@@ -131,6 +131,12 @@ export default function TabelaResumoEmpresas({
                     {row.codigo} – {row.nome} (
                     {((row.total_vendas / totalVendasGeral) * 100).toFixed(1)}
                     %)
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {row.total_compras.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                   </TableCell>
                   <TableCell className="text-right">
                     {row.total_vendas.toLocaleString("pt-BR", {
@@ -177,15 +183,6 @@ export default function TabelaResumoEmpresas({
                   <TableCell className="text-right">
                     {row.total_cupons.toLocaleString("pt-BR")}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {row.total_compras.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {row.relacaoPorcentagem.toFixed(1)}%
-                  </TableCell>
                 </TableRow>
               );
             })}
@@ -195,12 +192,21 @@ export default function TabelaResumoEmpresas({
               <TableCell />
               <TableCell className="bg-muted text-primary">Total</TableCell>
               <TableCell className="bg-muted text-right text-primary">
+                {/* Soma total de compras */}
+                {relacaoEmpresa
+                  .reduce((sum, r) => sum + r.total_compras, 0)
+                  .toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+              </TableCell>
+              <TableCell className="bg-muted text-right text-primary">
                 {totalVendasGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 })}
               </TableCell>
-              <TableCell className="bg-muted text-right text-primary">
+              <TableCell className="bg-muted text-right text-yellow-600">
                 {totalAnteriorGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
@@ -238,23 +244,6 @@ export default function TabelaResumoEmpresas({
               </TableCell>
               <TableCell className="bg-muted text-right text-primary">
                 {totalCuponsGeral.toLocaleString("pt-BR")}
-              </TableCell>
-              <TableCell className="bg-muted text-right text-primary">
-                {/* Soma total de compras */}
-                {relacaoEmpresa
-                  .reduce((sum, r) => sum + r.total_compras, 0)
-                  .toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-              </TableCell>
-              <TableCell className="bg-muted text-right text-primary">
-                {/* Relação média ponderada */}
-                {(
-                  relacaoEmpresa.reduce((sum, r) => sum + r.relacaoPorcentagem, 0) /
-                  relacaoEmpresa.length || 0
-                ).toFixed(1)}
-                %
               </TableCell>
             </TableRow>
           </TableBody>
