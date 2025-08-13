@@ -4,7 +4,7 @@ import { TypeEmpresas } from "@supervisor/types/empresas/TypeEmpresas";
 
 export async function fetchEmpresasDetalhes(): Promise<TypeEmpresas[]> {
     try {
-      const { data } = await apiMensura.get("/public/empresas/detalhes");
+      const { data } = await apiMensura.get("api/public/empresas/detalhes");
 
       return data;
     } catch (err: any) {
