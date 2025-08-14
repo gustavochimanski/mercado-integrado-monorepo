@@ -1,3 +1,4 @@
+// @cardapio/services/useQueryVitrine.ts
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -12,13 +13,16 @@ export type VitrineOut = {
   is_home: boolean;
 };
 
-export type CreateVitrineDTO = {
-  cod_categoria?: number | null;
+// Payload que o backend realmente aceita
+export type CreateVitrinePayload = {
+  cod_categoria: number;           // obrigatório
   titulo: string;
   ordem?: number;
   is_home?: boolean;
-  empresa_id: number
 };
+
+// Permite receber empresa_id do app, mas não envia para o backend
+type CreateVitrineDTO = CreateVitrinePayload & { empresa_id?: number };
 
 export function useFetchVitrine(empresaId: number, codCategoria?: number) {
   return useQuery<VitrineOut[]>({
@@ -26,7 +30,7 @@ export function useFetchVitrine(empresaId: number, codCategoria?: number) {
     queryFn: async () => {
       const { data } = await apiAdmin.get("api/delivery/vitrines", {
         params: {
-          empresa_id: empresaId,
+          empresa_id: empresaId,                      // se seu GET usa isso, mantém
           ...(codCategoria ? { cod_categoria: codCategoria } : {}),
         },
       });
@@ -39,18 +43,23 @@ export function useFetchVitrine(empresaId: number, codCategoria?: number) {
 
 export function useMutateVitrine() {
   const qc = useQueryClient();
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
 
   const reloadPage = () => {
     invalidate();
     window.location.reload();
   };
 
-
   const create = useMutation({
     mutationFn: async (body: CreateVitrineDTO) => {
-      const { data } = await apiAdmin.post("api/delivery/vitrines", body);
+      // envia apenas o que o backend aceita
+      const payload: CreateVitrinePayload = {
+        cod_categoria: body.cod_categoria,
+        titulo: body.titulo,
+        ...(typeof body.ordem === "number" ? { ordem: body.ordem } : {}),
+        ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
+      };
+      const { data } = await apiAdmin.post("api/delivery/vitrines", payload);
       return data as VitrineOut;
     },
     onSuccess: () => {
@@ -64,8 +73,15 @@ export function useMutateVitrine() {
   });
 
   const update = useMutation({
+    // aceita alteração de cod_categoria; ignora empresa_id
     mutationFn: async ({ id, ...body }: { id: number } & Partial<CreateVitrineDTO>) => {
-      const { data } = await apiAdmin.put(`api/delivery/vitrines/${id}`, body);
+      const payload: Partial<CreateVitrinePayload> = {
+        ...(typeof body.cod_categoria === "number" ? { cod_categoria: body.cod_categoria } : {}),
+        ...(typeof body.titulo === "string" ? { titulo: body.titulo } : {}),
+        ...(typeof body.ordem === "number" ? { ordem: body.ordem } : {}),
+        ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
+      };
+      const { data } = await apiAdmin.put(`api/delivery/vitrines/${id}`, payload);
       return data as VitrineOut;
     },
     onSuccess: () => {

@@ -1,4 +1,3 @@
-// components/Shared/card/CategoryCard.tsx
 "use client";
 import { useState } from "react";
 import Image from "next/image";
@@ -13,31 +12,39 @@ interface CategoryCardProps {
   image: string | null;
   href: string;
   empresaId: number;
-  isActive?: boolean;
 }
 
-export function CategoryCard({ id, label, image, href, empresaId, isActive = false }: CategoryCardProps) {
+export function CategoryCard({ id, label, image, href, empresaId }: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
   const [editOpen, setEditOpen] = useState(false);
 
   return (
     <div className="relative">
       <Link href={href} className="block group">
-        <Card
-          className={`flex flex-col items-center min-w-[120px] w-[120px] gap-1 p-2 transition-all border-2 ${
-            isActive ? "border-primary bg-primary/10 shadow" : "border-transparent bg-muted"
-          }`}
-        >
-          <div className="relative w-20 h-20 rounded-full overflow-hidden bg-background flex items-center justify-center">
-            <Image src={src} alt={label} fill sizes="80px" className="object-cover group-hover:scale-105 transition" />
+        <div className="flex flex-col items-center w-16 gap-1 rounded-lg  bg-muted/30 hover:bg-muted/50 transition-colors">
+          <div className="relative w-full aspect-square rounded-full  overflow-hidden bg-background flex items-center justify-center">
+            <Image
+              src={src}
+              alt={label}
+              fill
+              sizes="100px"
+              className="object-cover group-hover:scale-105 transition-transform duration-200"
+            />
           </div>
-          <span className="block text-center text-sm font-semibold truncate max-w-full">{label}</span>
-        </Card>
+          <span className="block text-center text-xs font-medium text-foreground/80 truncate max-w-full px-1">
+            {label}
+          </span>
+        </div>
       </Link>
 
       <CategoryOptions categoryId={id} onEdit={() => setEditOpen(true)} />
 
-      <ModalEditCategoria open={editOpen} onOpenChange={setEditOpen} empresaId={empresaId} categoriaId={id} />
+      <ModalEditCategoria
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        empresaId={empresaId}
+        categoriaId={id}
+      />
     </div>
   );
 }

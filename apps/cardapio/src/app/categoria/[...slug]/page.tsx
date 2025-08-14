@@ -99,7 +99,6 @@ export default function RouteCategoryPage() {
           categorias={subcategorias}
           parentId={categoriaAtual.id}
           empresaId={empresa_id}
-          activeId={activeId}
         />
 
         <ProductsSection
@@ -108,7 +107,7 @@ export default function RouteCategoryPage() {
           onOpenSheet={openSheet}
           sectionRefFactory={register}
           onMeta={setVitrinesMeta}
-          isHome={false}
+          isHome={true}
         />
 
         <CardAddVitrine

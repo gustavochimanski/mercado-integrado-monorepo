@@ -10,7 +10,6 @@ interface Props {
   titulo?: string;
   parentId?: number | null;
   empresaId: number;
-  activeId?: number | null;
 }
 
 export default function CategoryScrollSection({
@@ -18,7 +17,6 @@ export default function CategoryScrollSection({
   titulo,
   parentId = null,
   empresaId,
-  activeId,
 }: Props) {
   return (
     <section className="mb-4">
@@ -47,7 +45,6 @@ export default function CategoryScrollSection({
                   : `/categoria/${cat.slug}`
               }
               empresaId={empresaId}
-              isActive={activeId === cat.id}
             />
           ))}
 

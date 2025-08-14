@@ -47,13 +47,13 @@ const CategoryOptions = ({ categoryId, onEdit }: CategoryOptionsProps) => {
 
   return (
     <>
-      <div className="absolute top-1 right-1 z-10">
+      <div className="absolute top-0 right-7 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="w-6 h-6 p-0 text-muted-foreground hover:text-foreground"
+              className="w-6 h-6 p-0 text-muted-foreground bg-background rounded-full"
             >
               <MoreVertical className="w-4 h-4" />
             </Button>

@@ -30,7 +30,6 @@ export default function VitrineDestaques({
   vitrineId,
   is_home = true,
 }: Props) {
-  if (!produtos || produtos.length === 0) return null;
 
   const lista = produtos.slice(0, 3);
 

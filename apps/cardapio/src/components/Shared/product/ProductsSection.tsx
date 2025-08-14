@@ -25,7 +25,7 @@ export default function ProductsSection({
   isHome = false,
   hrefCategoria
 }: Props) {
-  const { data: vitrines = [], isLoading } = useProdutosVitrinePorCategoria(codCategoria, empresaId, isHome);
+  const { data: vitrines = [], isLoading } = useProdutosVitrinePorCategoria(codCategoria, empresaId);
 
   const meta = useMemo(() => vitrines.map((v) => ({ id: v.id, titulo: v.titulo })), [vitrines]);
   const lastJson = useRef("");

@@ -50,15 +50,13 @@ export function useHome(empresa_id: number, isHome: boolean) {
 
 export function useProdutosVitrinePorCategoria(
   codCategoria: number,
-  empresa_id: number,
-  isHome: boolean
+  empresa_id: number
 ) {
   return useQuery<VitrineComProdutosResponse[], Error>({
-    queryKey: ["produtos-vitrine-categoria", empresa_id, codCategoria, { isHome }],
+    queryKey: ["produtos-vitrine-categoria", empresa_id, codCategoria],
     enabled: !!empresa_id && !!codCategoria,
     queryFn: async () => {
       const params: Record<string, any> = { cod_categoria: codCategoria, empresa_id };
-      if (typeof isHome === "boolean") params.is_home = isHome;
       const { data } = await api.get<VitrineComProdutosResponse[]>("/api/delivery/home/vitrine-por-categoria", { params });
       return data;
     },
