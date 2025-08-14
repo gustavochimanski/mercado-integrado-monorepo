@@ -111,7 +111,6 @@ export default function RouteCategoryPage() {
         />
 
         <CardAddVitrine
-          empresa_id={empresa_id}
           cod_categoria={categoriaAtual.id}
           is_home={false}
         />
