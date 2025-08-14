@@ -11,9 +11,9 @@ import { useEmpresas } from "@supervisor/services/global/useGetEmpresasMensura";
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 
 // Ajuste aqui seus links de ambiente
-const LINK_PROD = "https://mercado-integrado-monorepo-cardapio.vercel.app";
+const LINK_PROD = "https://mi-cardapio.vercel.app";
 const LINK_DEV = "http://localhost:3000";
-const IS_DEV = true;
+const IS_DEV = false;
 
 // Coerção segura: se vier "001" => 1; se vier number => mantém
 function toIntId(value: unknown): number | null {
