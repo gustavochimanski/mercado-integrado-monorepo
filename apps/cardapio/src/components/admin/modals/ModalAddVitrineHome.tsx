@@ -124,14 +124,14 @@ export function ModalVitrineMarkHome({ open, onOpenChange, codCategoria }: Props
                       variant={isSelected ? "default" : "secondary"}
                       onClick={() => setSelectedCategoriaId(cat.id)}
                     >
-                      {isSelected ? "Selecionada" : "Selecionionar"}
+                      {isSelected ? "Selecionada" : "Selecionar"}
                     </Button>
                   </div>
                 );
               })}
             </div>
           </div>
-
+""
           {/* Coluna direita — Vitrines filtradas pela categoria */}
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
