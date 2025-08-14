@@ -1,3 +1,5 @@
+import { Key } from "readline";
+
 export type TypeEmpresas = {
     id: Key | null | undefined;
     empr_razaosocial: string;
