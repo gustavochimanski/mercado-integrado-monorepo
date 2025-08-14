@@ -1,4 +1,5 @@
 export type TypeEmpresas = {
+    id: Key | null | undefined;
     empr_razaosocial: string;
     empr_codgrupo: string;
     empr_cpfresponsavel: string;

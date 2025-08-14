@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { CardContent } from "@supervisor/components/ui/card";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import ComponentCardHeader from "./components/header/ComponentCardheader";
-import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresas";
+import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresasPublic";
 import { TypeDashboardResponse } from "./types/typeDashboard";
 import dynamic from "next/dynamic";
 

@@ -1,5 +1,5 @@
 import apiMensura from "@supervisor/lib/api/apiMensura";
-import { TypeEmpresas } from "@supervisor/types/empresas/TypeEmpresas";
+import { TypeEmpresas } from "@supervisor/types/empresas/TypeEmpresasPublic";
 
 
 export async function fetchEmpresasDetalhes(): Promise<TypeEmpresas[]> {

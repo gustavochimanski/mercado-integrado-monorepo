@@ -2,7 +2,7 @@
 
 import React, { memo, useMemo } from "react";
 import { TypeDashboardResponse } from "../types/typeDashboard";
-import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresas";
+import { useEmpresasDetalhes } from "@supervisor/services/global/useGetEmpresasPublic";
 import dynamic from "next/dynamic";
 import ComponentMeioPagamento from "./meiosPagamento/DashCardMeioPagamento";
 import DashCardRelacaoVendaCompra from "./vendaCompra/dashVendaCompra";

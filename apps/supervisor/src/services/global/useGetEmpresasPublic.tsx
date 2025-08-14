@@ -2,7 +2,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchEmpresasDetalhes } from "./serviceGetEmpresas";
+import { fetchEmpresasDetalhes } from "./serviceGetEmpresasPublic";
 
 export function useEmpresasDetalhes() {
   return useQuery({
