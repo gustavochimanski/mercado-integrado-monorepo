@@ -1,12 +1,9 @@
 // src/services/useQueryProduto.ts
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-/**
- * IMPORTANTE:
- * Se o apiAdmin NÃO tiver baseURL '/api', troque BASE para "/api/delivery/produtos/delivery"
- */
 const BASE = "api/delivery/produtos";
 
 // ----- Tipos (espelham seu backend) -----
@@ -35,15 +32,6 @@ function errMsg(err: any, fallback: string) {
   return err?.response?.data?.detail ?? err?.message ?? fallback;
 }
 
-/** Backend espera Decimal via form: envie *string* com ponto. */
-function decimalToForm(v: number | string | null | undefined, decimals: number) {
-  if (v === null || v === undefined || v === "") return undefined;
-  const n = typeof v === "string" ? Number(v.replace(",", ".")) : Number(v);
-  if (Number.isNaN(n)) return undefined;
-  return n.toFixed(decimals); // ex.: "10.00"
-}
-
-
 export type CreateProdutoInput = {
   cod_empresa: number;
   cod_barras: string;
@@ -60,16 +48,68 @@ export type UpdateProdutoInput = Omit<CreateProdutoInput, "cod_barras"> & {
   cod_barras: string; // no path
 };
 
+function decimalToForm(v: number | string | null | undefined, decimals: number) {
+  if (v === null || v === undefined || v === "") return undefined;
+  const n = typeof v === "string" ? Number(v.replace(",", ".")) : Number(v);
+  if (Number.isNaN(n)) return undefined;
+  return n.toFixed(decimals);
+}
+
+function useDebounced<T>(value: T, delay = 350) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
+export function useSearchProdutos(
+  cod_empresa: number,
+  q: string,
+  opts?: { page?: number; limit?: number; apenas_disponiveis?: boolean; enabled?: boolean }
+) {
+  const {
+    page = 1,
+    limit = 30,
+    apenas_disponiveis = false,
+    enabled,
+  } = opts ?? {};
+  const qDeb = useDebounced(q, 350);
+
+  return useQuery({
+    queryKey: ["produtos_search", cod_empresa, qDeb, page, limit, apenas_disponiveis],
+    queryFn: async () => {
+      const params: Record<string, any> = {
+        cod_empresa,
+        page,
+        limit,
+        apenas_disponiveis,
+      };
+      if (qDeb?.trim()) params.q = qDeb.trim();
+
+      const { data } = await apiAdmin.get(`${BASE}/search`, { params });
+      return data as ProdutosPaginadosResponse;
+    },
+    enabled: enabled ?? !!cod_empresa,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function buildProdutoFormData(input: CreateProdutoInput | UpdateProdutoInput) {
   const fd = new FormData();
 
   fd.append("cod_empresa", String(input.cod_empresa));
-  fd.append("cod_barras", String((input as any).cod_barras ?? "")); // será ignorado no PUT body, mas ok no POST
+  // Dica: só no POST
+  if (!("cod_barras" in input) || (input as any)._method === "POST") {
+    fd.append("cod_barras", String((input as any).cod_barras ?? ""));
+  }
+
   fd.append("descricao", input.descricao.trim());
   fd.append("cod_categoria", String(input.cod_categoria));
 
   const preco = decimalToForm(input.preco_venda, 2);
-  if (preco) fd.append("preco_venda", preco);
+  if (preco !== undefined) fd.append("preco_venda", preco);
 
   const custo = decimalToForm(input.custo ?? undefined, 5);
   if (custo !== undefined) fd.append("custo", custo);
@@ -78,10 +118,18 @@ export function buildProdutoFormData(input: CreateProdutoInput | UpdateProdutoIn
     fd.append("vitrine_id", String(input.vitrine_id));
   }
 
+  if (input.data_cadastro) {
+    const iso = typeof input.data_cadastro === "string"
+      ? input.data_cadastro
+      : input.data_cadastro.toISOString().slice(0, 10);
+    fd.append("data_cadastro", iso);
+  }
+
   if (input.imagem) fd.append("imagem", input.imagem);
 
   return fd;
 }
+
 
 // ----- Queries -----
 export function useFetchCadProdDelivery(
@@ -125,21 +173,7 @@ export function useMutateProduto() {
     window.location.reload();
   };
 
-  
 
-  const create = useMutation({
-    mutationFn: async (input: CreateProdutoInput) => {
-      const fd = buildProdutoFormData(input);
-      // no POST o cod_barras vai no body (form)
-      const { data } = await apiAdmin.post(`${BASE}`, fd);
-      return data;
-    },
-    onSuccess: (_data, vars) => {
-      toast.success("Produto criado com sucesso!");
-      reloadPage(vars.cod_empresa);
-    },
-    onError: (err: any) => toast.error(errMsg(err, "Erro ao criar produto")),
-  });
 
   const update = useMutation({
     mutationFn: async (input: UpdateProdutoInput) => {
@@ -156,59 +190,6 @@ export function useMutateProduto() {
     onError: (err: any) => toast.error(errMsg(err, "Erro ao atualizar produto")),
   });
 
-  const remove = useMutation({
-    mutationFn: async ({ cod_barras, empresa_id }: { cod_barras: string; empresa_id: number }) => {
-      await apiAdmin.delete(
-        `${BASE}/${encodeURIComponent(cod_barras)}`,
-        { params: { empresa_id } }
-      );
-    },
-    onSuccess: (_d, vars) => {
-      toast.success("Produto removido com sucesso!");
-      reloadPage(vars?.empresa_id);
-    },
-    onError: (err: any) => toast.error(errMsg(err, "Erro ao remover produto")),
-  });
 
-  /** PATCH /disponibilidade – com opção de update otimista */
-  const toggleDisponibilidade = useMutation({
-    // params necessários pelo backend: empresa_id, disponivel
-    mutationFn: async (p: { cod_barras: string; empresa_id: number; disponivel: boolean }) => {
-      await apiAdmin.patch(`${BASE}/${encodeURIComponent(p.cod_barras)}/disponibilidade`, {
-        empresa_id: p.empresa_id,
-        disponivel: p.disponivel,
-      });
-      return p;
-    },
-    // Otimista (opcional): atualiza lista atual se presente no cache
-    onMutate: async (p) => {
-      const queries = qc.getQueryCache().findAll({ queryKey: ["produtos"] });
-      const snapshots: any[] = [];
-      for (const q of queries) {
-        const key = q.queryKey;
-        const data = qc.getQueryData<ProdutosPaginadosResponse>(key);
-        if (!data) continue;
-        snapshots.push({ key, data });
-        const newData: ProdutosPaginadosResponse = {
-          ...data,
-          data: data.data.map((item) =>
-            item.cod_barras === p.cod_barras ? { ...item, disponivel: p.disponivel } : item
-          ),
-        };
-        qc.setQueryData(key, newData);
-      }
-      return { snapshots };
-    },
-    onError: (err, _vars, ctx) => {
-      // rollback se falhar
-      if (ctx?.snapshots) {
-        for (const s of ctx.snapshots) qc.setQueryData(s.key, s.data);
-      }
-      toast.error(errMsg(err, "Erro ao alterar disponibilidade"));
-    },
-    onSuccess: () => toast.success("Disponibilidade atualizada!"),
-    onSettled: (_d, _e, vars) => invalidate(vars?.empresa_id),
-  });
-
-  return { create, update, remove, toggleDisponibilidade };
+  return { update };
 }

@@ -16,6 +16,7 @@ interface ModalCategoriaProps {
   onOpenChange: (open: boolean) => void;
   parentId?: number | null;
   empresaId: number;
+  categoriaId?: number; // 👈 se vier, é modo edição
 }
 
 export const ModalAdminAddCategoria = ({
@@ -23,42 +24,82 @@ export const ModalAdminAddCategoria = ({
   onOpenChange,
   parentId = null,
   empresaId,
+  categoriaId,
 }: ModalCategoriaProps) => {
   const [descricao, setDescricao] = useState("");
   const [imagem, setImagem] = useState<File | undefined>(undefined);
 
-  const { create, uploadImagem } = useMutateCategoria();
-  const isLoading = create.isPending || uploadImagem.isPending;
+  const { create, uploadImagem, update } = useMutateCategoria();
+  const isLoading =
+    create.isPending || uploadImagem.isPending || update.isPending;
 
   function handleSubmit() {
-    if (!descricao.trim()) return;
+    if (!descricao.trim() && !imagem) return;
 
-    create.mutate(
-      {
-        descricao,
-        cod_empresa: empresaId,
-        parent_id: parentId,
-        slug: descricao.toLowerCase().replace(/\s+/g, "-"), // opcional
-      },
-      {
-        onSuccess: (res) => {
-          // Se tiver imagem, chama o upload
-          if (imagem) {
-            uploadImagem.mutate({
-              id: res.data.id, // id retornado pelo backend
-              cod_empresa: empresaId,
-              imagem,
-            });
+    if (categoriaId) {
+      // 🟡 Modo edição
+      if (descricao.trim()) {
+        update.mutate(
+          {
+            id: categoriaId,
+            descricao,
+            cod_empresa: empresaId,
+            parent_id: parentId,
+            slug: descricao.toLowerCase().replace(/\s+/g, "-"),
+          },
+          {
+            onSuccess: () => {
+              if (imagem) {
+                uploadImagem.mutate({
+                  id: categoriaId,
+                  cod_empresa: empresaId,
+                  imagem,
+                });
+              }
+              closeModal();
+            },
           }
-          setDescricao("");
-          setImagem(undefined);
-          onOpenChange(false);
-        },
-        onError: (error) => {
-          console.error("Erro ao criar categoria:", error);
-        },
+        );
+      } else if (imagem) {
+        // Atualiza só imagem
+        uploadImagem.mutate(
+          {
+            id: categoriaId,
+            cod_empresa: empresaId,
+            imagem,
+          },
+          { onSuccess: closeModal }
+        );
       }
-    );
+    } else {
+      // 🟢 Modo criação
+      create.mutate(
+        {
+          descricao,
+          cod_empresa: empresaId,
+          parent_id: parentId,
+          slug: descricao.toLowerCase().replace(/\s+/g, "-"),
+        },
+        {
+          onSuccess: (res) => {
+            if (imagem) {
+              uploadImagem.mutate({
+                id: res.data.id,
+                cod_empresa: empresaId,
+                imagem,
+              });
+            }
+            closeModal();
+          },
+        }
+      );
+    }
+  }
+
+  function closeModal() {
+    setDescricao("");
+    setImagem(undefined);
+    onOpenChange(false);
   }
 
   useEffect(() => {
@@ -72,12 +113,14 @@ export const ModalAdminAddCategoria = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adicionar Categoria</DialogTitle>
+          <DialogTitle>
+            {categoriaId ? "Editar Categoria" : "Adicionar Categoria"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <Input
-            placeholder="Descrição da nova categoria"
+            placeholder="Descrição da categoria"
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
           />
@@ -92,7 +135,13 @@ export const ModalAdminAddCategoria = ({
           />
 
           <Button onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? "Criando..." : "Criar"}
+            {isLoading
+              ? categoriaId
+                ? "Salvando..."
+                : "Criando..."
+              : categoriaId
+              ? "Salvar alterações"
+              : "Criar"}
           </Button>
         </div>
       </DialogContent>

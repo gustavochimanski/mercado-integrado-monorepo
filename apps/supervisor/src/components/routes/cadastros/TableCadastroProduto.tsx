@@ -1,3 +1,4 @@
+// src/components/routes/cadastros/TableCadastroProdutos.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,10 +7,9 @@ import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import type { GridColDef } from "@mui/x-data-grid";
 
-import { useCategorias } from "@supervisor/hooks/routes/cadastros/useCategoriasDelivery";
-import { ModalNovoProduto } from "@supervisor/components/routes/cadastros/ModalAddProduto";
-import { useFetchCadProdDelivery, useMutateProduto } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
+import { useFetchCadProdMensura } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
 import { CirclePlus, Trash2 } from "lucide-react";
+import { ModalNovoProduto } from "./ModalAddProduto";
 
 interface Props {
   empresaId: number;
@@ -22,11 +22,9 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
     data: resp,
     isLoading: prodLoading,
     isError: prodError,
-  } = useFetchCadProdDelivery(empresaId, 1, 30);
+    error,
+  } = useFetchCadProdMensura(empresaId, 1, 30);
   const produtos = resp?.data ?? [];
-
-  const { data: categorias = [] } = useCategorias(empresaId);
-  const { update: updateProduto } = useMutateProduto();
 
   const columns: GridColDef[] = [
     { field: "cod_barras", headerName: "Código de Barras", flex: 1 },
@@ -36,8 +34,7 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
       headerName: "Preço",
       flex: 1,
       type: "number",
-      editable: true
-
+      editable: true,
     },
     {
       field: "custo",
@@ -49,18 +46,23 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
       field: "label_categoria",
       headerName: "Categoria",
       flex: 2,
+      // opcional: fallback pra vazio
+      valueGetter: (params: any) => params.row?.label_categoria ?? "",
     },
   ];
 
   return (
     <div className="flex flex-col flex-1 h-full">
+      <Card className="flex-1 flex flex-col">
         <CardHeader>
           <CardTitle>Produtos</CardTitle>
         </CardHeader>
 
         <CardContent className="flex-1 overflow-auto">
           {prodError ? (
-            <div className="text-red-500 p-4">Erro ao carregar produtos. {prodError}</div>
+            <div className="text-red-500 p-4">
+              Erro ao carregar produtos. {String((error as any)?.message ?? "")}
+            </div>
           ) : (
             <DataTableComponentMui
               rows={produtos}
@@ -71,15 +73,15 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
           )}
         </CardContent>
 
-      {/* Botão fora do Card, sempre abaixo */}
-      <CardFooter className="flex justify-start gap-4">
-        <Button onClick={() => setModalOpen(true)}>
-          <CirclePlus/> Novo Produto
-        </Button>
-        <Button variant={"destructive"}>
-          <Trash2/> Excluir Produto
-        </Button>
-      </CardFooter>
+        <CardFooter className="flex justify-start gap-4">
+          <Button onClick={() => setModalOpen(true)}>
+            <CirclePlus /> Novo Produto
+          </Button>
+          <Button variant={"destructive"}>
+            <Trash2 /> Excluir Produto
+          </Button>
+        </CardFooter>
+      </Card>
 
       <ModalNovoProduto
         open={modalOpen}

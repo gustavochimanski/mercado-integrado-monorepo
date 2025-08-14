@@ -3,6 +3,7 @@ import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CategoriaMini } from "./useQueryHome";
+import React from "react";
 
 interface CreateCategoriaBody {
   descricao: string;
@@ -22,6 +23,25 @@ interface UploadImagemBody {
   imagem: File;
 }
 
+/** 🔎 Tipo do resultado do endpoint /api/delivery/categorias/search */
+export interface CategoriaSearchItem {
+  id: number;
+  descricao: string;
+  slug: string;
+  parent_id: number | null;
+  slug_pai: string | null;
+  imagem?: string | null;
+}
+
+/** ⏳ debounce simples para evitar flood no servidor enquanto digita */
+function useDebounced<T>(value: T, delay = 300) {
+  const [debounced, setDebounced] = React.useState(value);
+  React.useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
 
 // ✅ Hook para buscar por ID
 export function useCategoriaById(catId: number) {
@@ -35,11 +55,34 @@ export function useCategoriaById(catId: number) {
   });
 }
 
+/** 🔎 Buscar TODAS as categorias (raiz + filhas) com filtro q (server-side) */
+export function useCategoriasSearch(q: string, limit = 30, offset = 0) {
+  const qDeb = useDebounced(q, 500);
+
+  return useQuery({
+    queryKey: ["categorias_search", qDeb, limit, offset],
+    queryFn: async () => {
+      const { data } = await apiAdmin.get<CategoriaSearchItem[]>("api/delivery/categorias/search", {
+        params: {
+          q: qDeb || undefined, // não envia q vazio
+          limit,
+          offset,
+        },
+      });
+      return data;
+    },
+    // Mesmo sem q, carrega as primeiras (ordenadas raiz primeiro no backend)
+    enabled: qDeb !== undefined,
+    staleTime: 60 * 10
+  });
+}
+
 export function useMutateCategoria() {
   const qc = useQueryClient();
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["categorias_planas"] });
     qc.invalidateQueries({ queryKey: ["categorias"] });
+    qc.invalidateQueries({ queryKey: ["categorias_search"] }); // 👈 invalida também o search
   };
 
   const reloadPage = () => {
@@ -53,7 +96,7 @@ export function useMutateCategoria() {
       toast.success("Categoria criada com sucesso!");
       reloadPage();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)), 
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const update = useMutation({
@@ -63,7 +106,7 @@ export function useMutateCategoria() {
       toast.success("Categoria atualizada com sucesso!");
       reloadPage();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)), 
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const uploadImagem = useMutation({
@@ -77,7 +120,7 @@ export function useMutateCategoria() {
       toast.success("Imagem atualizada!");
       reloadPage();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)), 
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const remove = useMutation({
@@ -86,7 +129,7 @@ export function useMutateCategoria() {
       toast.success("Categoria removida com sucesso!");
       reloadPage();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)), 
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const moveRight = useMutation({

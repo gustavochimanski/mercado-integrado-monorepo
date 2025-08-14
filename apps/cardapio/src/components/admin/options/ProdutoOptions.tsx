@@ -22,16 +22,12 @@ export function ProductOptions({
   empresa_id
 }: ProductOptionsProps) {
   const { isAdmin } = useUserContext();
-  const { remove } = useMutateProduto();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (!isAdmin) return null;
 
   function handleConfirmRemove() {
-    remove.mutate({
-      cod_barras: codBarras, 
-      empresa_id: empresa_id
-    });
+    window.alert("Função não implementada")
   }
 
   return (

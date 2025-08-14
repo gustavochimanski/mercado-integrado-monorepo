@@ -107,7 +107,7 @@ export default function RouteCategoryPage() {
           onOpenSheet={openSheet}
           sectionRefFactory={register}
           onMeta={setVitrinesMeta}
-          isHome={true}
+          isHome={false}
         />
 
         <CardAddVitrine

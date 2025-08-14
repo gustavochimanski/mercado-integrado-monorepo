@@ -47,7 +47,7 @@ const CategoryOptions = ({ categoryId, onEdit }: CategoryOptionsProps) => {
 
   return (
     <>
-      <div className="absolute top-0 right-7 z-10">
+      <div className="absolute top-0 right-5 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

@@ -20,7 +20,7 @@ export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id }
   const codBarras = produto.cod_barras;
   const price = Number(preco_venda) || 0;
 
-  const sizeClass = isHome ? "w-[100px] h-[200px]" : "w-[120px] h-[220px]";
+  const sizeClass = isHome ? "w-[90px] h-[180px]" : "w-[120px] h-[220px]";
 
   return (
     <div className="relative">

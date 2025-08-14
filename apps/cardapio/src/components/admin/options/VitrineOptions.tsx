@@ -70,7 +70,6 @@ const AdminVitrineOptions = ({
         open={openModalAddProduto}
         onOpenChange={setOpenModalAddProduto}
         empresaId={empresaId}
-        codCategoria={codCategoria}
         vitrineId={vitrineId}
       />
 

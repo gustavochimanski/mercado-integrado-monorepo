@@ -15,7 +15,7 @@ import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
-import VitrineDestaques from "@cardapio/components/Shared/VitrineDestaques";
+import VitrineDestaques from "@cardapio/components/Shared/vitrine/VitrineDestaques";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { CardHeader, CardTitle } from "../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
@@ -93,7 +93,7 @@ export default function HomePage() {
             <CardHeader>
               <CardTitle>Adicionar vitrine de Promoção</CardTitle>
             </CardHeader>
-            <CardAddVitrine is_home={true} cod_categoria={null} empresa_id={empresa_id} />
+            <CardAddVitrine is_home={true} cod_categoria={null} />
           </div>
         )}
       </main>

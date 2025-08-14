@@ -33,10 +33,7 @@ export default function ProductsVitrineSection({
   vitrineIsHome
 }: Props) {
   // ---- NOVO: só renderiza se isHome === vitrineIsHome ----
-  if (typeof vitrineIsHome === "boolean" && vitrineIsHome !== isHome) {
-    return null;
-  }
-
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);

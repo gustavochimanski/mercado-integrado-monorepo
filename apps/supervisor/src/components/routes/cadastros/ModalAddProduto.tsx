@@ -1,13 +1,7 @@
-// src/components/modals/ModalNovoProduto.tsx
 "use client";
 
 import { Button } from "@supervisor/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@supervisor/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/components/ui/dialog";
 import { Input } from "@supervisor/components/ui/input";
 import { Label } from "@supervisor/components/ui/label";
 import { useMutateProduto } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
@@ -19,28 +13,20 @@ interface Props {
   empresaId: number;
 }
 
-export const ModalNovoProduto = ({
-  open,
-  onOpenChange,
-  empresaId,          // 👈 não esqueça disso
-}: Props) => {
+export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
   const [form, setForm] = useState({
     cod_barras: "",
     descricao: "",
-    preco_venda: 0,
-    custo: 0,
+    preco_venda: "" as number | string, // deixa string para evitar NaN quando vazio
+    custo: "" as number | string,       // opcional
     imagem: undefined as File | undefined,
   });
 
-  // diretamente do hook, pois ele retorna UseMutationResult do create
   const { create: createProductMutate } = useMutateProduto();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "number" ? parseFloat(value) : value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: type === "number" ? value : value }));
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,26 +37,33 @@ export const ModalNovoProduto = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("cod_barras", form.cod_barras);
-    formData.append("descricao", form.descricao);
-    formData.append("cod_empresa", String(empresaId));
-    formData.append("preco_venda", String(form.preco_venda));
-    formData.append("custo", String(form.custo));
-    if (form.imagem) formData.append("imagem", form.imagem);
+    // validação mínima do preço
+    if (form.preco_venda === "" || isNaN(Number(form.preco_venda))) return;
 
-    createProductMutate.mutate({ formData }, {
-      onSuccess: () => {
-        onOpenChange(false);
-        setForm({
-          cod_barras: "",
-          descricao: "",
-          preco_venda: 0,
-          custo: 0,
-          imagem: undefined,
-        });
+    // ✅ Envia o objeto tipado que o hook espera (nada de FormData aqui)
+    createProductMutate.mutate(
+      {
+        cod_barras: String(form.cod_barras).trim(),
+        descricao: String(form.descricao).trim(),
+        cod_empresa: empresaId,
+        preco_venda: Number(form.preco_venda),
+        custo: form.custo === "" ? undefined : Number(form.custo),
+        imagem: form.imagem,
+        // data_cadastro: "2025-08-14" // se quiser enviar
       },
-    });
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          setForm({
+            cod_barras: "",
+            descricao: "",
+            preco_venda: "",
+            custo: "",
+            imagem: undefined,
+          });
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -78,8 +71,8 @@ export const ModalNovoProduto = ({
       setForm({
         cod_barras: "",
         descricao: "",
-        preco_venda: 0,
-        custo: 0,
+        preco_venda: "",
+        custo: "",
         imagem: undefined,
       });
     }
@@ -121,6 +114,8 @@ export const ModalNovoProduto = ({
               id="preco_venda"
               name="preco_venda"
               type="number"
+              inputMode="decimal"
+              step="0.01"
               value={form.preco_venda}
               onChange={handleChange}
               required
@@ -128,11 +123,13 @@ export const ModalNovoProduto = ({
           </div>
 
           <div>
-            <Label htmlFor="custo">Custo</Label>
+            <Label htmlFor="custo">Custo (opcional)</Label>
             <Input
               id="custo"
               name="custo"
               type="number"
+              inputMode="decimal"
+              step="0.01"
               value={form.custo}
               onChange={handleChange}
             />

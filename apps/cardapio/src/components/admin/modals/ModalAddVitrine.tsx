@@ -1,8 +1,7 @@
-// ModalAddVitrine.tsx
+// components/admin/modals/ModalVitrineCreateSimple.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import * as React from "react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import {
@@ -13,111 +12,68 @@ import {
 } from "@cardapio/components/Shared/ui/dialog";
 import { Label } from "@cardapio/components/Shared/ui/label";
 import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
-import { useHome } from "@cardapio/services/useQueryHome"; // para listar categorias
-import Image from "next/image";
 
-interface ModalAddVitrineProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  codCategoria?: number | null; // fallback quando NÃO estiver na home
-  is_home: boolean;
-  empresa_id: number;
+  codCategoria: number; // agora obrigatório
+  defaultOrder?: number;
 }
 
-type Categoria = {
-  id: number;
-  descricao: string;
-  imagem?: string | null;
-};
-
-export const ModalAddVitrine = ({
+export function ModalVitrineCreateSimple({
   open,
   onOpenChange,
   codCategoria,
-  is_home,
-  empresa_id,
-}: ModalAddVitrineProps) => {
-  const pathname = usePathname();
-  const isOnHome = pathname === "/" || pathname === ""; // segurança
-
-  const [titulo, setTitulo] = useState("");
-  const [ordem, setOrdem] = useState<number>(1);
-  const [busca, setBusca] = useState("");
-  const [selectedCategoriaId, setSelectedCategoriaId] = useState<number | null>(codCategoria ?? null);
-
-  // carrega categorias só se estiver na home (onde precisa escolher)
-  const { data: homeData } = useHome(isOnHome ? empresa_id : 0, true);
-  const categorias: Categoria[] = (homeData?.categorias ?? []) as any;
-
-  const categoriasFiltradas = useMemo(() => {
-    if (!Array.isArray(categorias)) return [];
-    const q = busca.trim().toLowerCase();
-    if (!q) return categorias;
-    return categorias.filter((c) =>
-      (c.descricao ?? "").toLowerCase().includes(q)
-    );
-  }, [busca, categorias]);
+  defaultOrder = 1,
+}: Props) {
+  // Dados da nova vitrine
+  const [titulo, setTitulo] = React.useState("");
+  const [ordem, setOrdem] = React.useState<number>(defaultOrder);
 
   const { create } = useMutateVitrine();
 
-  function handleSubmit() {
-    // Decide qual cod_categoria usar:
-    // - se estiver na home e is_home=true: precisa ter selecionado no grid
-    // - caso contrário: usa o codCategoria vindo por props
-    const finalCodCategoria =
-      isOnHome && is_home ? selectedCategoriaId : codCategoria ?? selectedCategoriaId;
-
-    if (!titulo.trim() || typeof finalCodCategoria !== "number") {
-      // validações simples de UX
-      return;
-    }
+  function handleCreate() {
+    if (!titulo.trim()) return;
 
     create.mutate(
       {
-        cod_categoria: finalCodCategoria,
-        titulo,
-        ordem,
-        is_home,
-        empresa_id, // será ignorado pelo hook ao enviar
+        cod_categoria: codCategoria,
+        titulo: titulo.trim(),
+        ordem: ordem || 1,
       },
       {
         onSuccess: () => {
-          setTitulo("");
-          setOrdem(1);
-          setBusca("");
+          reset();
           onOpenChange(false);
         },
-        onError: (err) => console.error("Erro ao criar Vitrine:", err),
       }
     );
   }
 
-  useEffect(() => {
-    if (!open) {
-      setTitulo("");
-      setOrdem(1);
-      setBusca("");
-      setSelectedCategoriaId(codCategoria ?? null);
-    }
-  }, [open, codCategoria]);
+  function reset() {
+    setTitulo("");
+    setOrdem(defaultOrder);
+  }
 
-  const canSubmit =
-    !!titulo.trim() &&
-    (isOnHome && is_home ? typeof selectedCategoriaId === "number" : typeof (codCategoria ?? selectedCategoriaId) === "number");
+  React.useEffect(() => {
+    if (!open) reset();
+  }, [open]); // eslint-disable-line
+
+  const canCreate = !!titulo.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Adicionar Vitrine</DialogTitle>
+          <DialogTitle>Criar nova vitrine</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {/* Campo título */}
           <div className="flex flex-col gap-2">
             <Label>Título</Label>
             <Input
-              placeholder="Título da nova Vitrine"
+              placeholder="Ex.: Ofertas da Semana"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
             />
@@ -128,75 +84,22 @@ export const ModalAddVitrine = ({
             <Label>Ordem</Label>
             <Input
               type="number"
-              placeholder="Ordem (ex: 1, 2, 3...)"
+              min={1}
               value={ordem}
-              onChange={(e) => setOrdem(Number(e.target.value))}
+              onChange={(e) => setOrdem(Number(e.target.value || 1))}
             />
           </div>
 
-          {/* Se estiver na home e a vitrine for destaque, permitir escolher a categoria */}
-          {isOnHome && is_home && (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2">
-                <Label>Selecionar categoria para esse destaque</Label>
-                <Input
-                  placeholder="Pesquisar categoria por nome..."
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                />
-              </div>
-
-              {/* Grade de categorias */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-72 overflow-auto pr-1">
-                {categoriasFiltradas.map((cat) => {
-                  const isSelected = selectedCategoriaId === cat.id;
-                  return (
-                    <div
-                      key={cat.id}
-                      className={`border rounded-xl p-2 flex flex-col gap-2 hover:shadow-sm transition ${
-                        isSelected ? "border-primary" : "border-muted"
-                      }`}
-                    >
-                      <div className="relative w-full h-24 bg-muted rounded-lg overflow-hidden">
-                        {cat.imagem ? (
-                          <Image
-                            src={cat.imagem}
-                            alt={cat.descricao}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                            Sem imagem
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-sm font-medium line-clamp-2">{cat.descricao}</div>
-                      <Button
-                        variant={isSelected ? "default" : "secondary"}
-                        onClick={() => setSelectedCategoriaId(cat.id)}
-                      >
-                        {isSelected ? "Selecionada" : "Selecionar"}
-                      </Button>
-                    </div>
-                  );
-                })}
-                {categoriasFiltradas.length === 0 && (
-                  <div className="col-span-full text-sm text-muted-foreground">
-                    Nenhuma categoria encontrada.
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="pt-1">
-            <Button onClick={handleSubmit} disabled={create.isPending || !canSubmit} className="w-full">
-              {create.isPending ? "Criando..." : "Criar"}
-            </Button>
-          </div>
+          {/* Botão criar */}
+          <Button
+            onClick={handleCreate}
+            disabled={create.isPending || !canCreate}
+            className="w-full"
+          >
+            {create.isPending ? "Criando..." : "Criar vitrine"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
-};
+}

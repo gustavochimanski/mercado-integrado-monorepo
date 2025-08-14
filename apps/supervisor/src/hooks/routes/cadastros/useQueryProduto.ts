@@ -4,16 +4,22 @@ import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-interface CreateProdutoBody {
-  formData: FormData;
-}
-
 interface UpdateProdutoBody {
   cod_barras: string;
   formData: FormData;
 }
 
-export function useFetchCadProdDelivery(
+export type CreateProdutoInput = {
+  cod_barras: string;
+  descricao: string;
+  cod_empresa: number;
+  preco_venda: number | string;
+  custo?: number | string;
+  imagem?: File;
+  data_cadastro?: string; // opcional (YYYY-MM-DD)
+};
+
+export function useFetchCadProdMensura(
   cod_empresa: number,
   page: number,
   limit = 30
@@ -22,7 +28,7 @@ export function useFetchCadProdDelivery(
     queryKey: ["produtos", cod_empresa, page, limit],
     queryFn: async () => {
       const res = await apiMensura.get(
-        `/api/delivery/produtos?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
+        `/api/mensura/produtos?cod_empresa=${cod_empresa}&page=${page}&limit=${limit}`
       );
       return res.data;
     },
@@ -33,19 +39,30 @@ export function useMutateProduto() {
   const qc = useQueryClient();
 
   const create = useMutation({
-    mutationFn: async ({ formData }: CreateProdutoBody) => {
+    // 🔧 Agora recebemos CreateProdutoInput
+    mutationFn: async (input: CreateProdutoInput) => {
+      const fd = new FormData();
+      fd.append("cod_barras", input.cod_barras.trim());
+      fd.append("descricao", input.descricao.trim());
+      fd.append("cod_empresa", String(input.cod_empresa));
+      fd.append("preco_venda", String(input.preco_venda));
+
+      if (input.custo !== undefined && input.custo !== "" && !isNaN(Number(input.custo))) {
+        fd.append("custo", String(input.custo));
+      }
+      if (input.data_cadastro) {
+        fd.append("data_cadastro", input.data_cadastro);
+      }
+      if (input.imagem) {
+        fd.append("imagem", input.imagem);
+      }
+
       try {
-        const { data } = await apiMensura.post(
-          "/api/delivery/produtos",
-          formData
-        );
+        const { data } = await apiMensura.post("/api/mensura/produtos", fd);
         toast.success("Produto criado com sucesso!");
         return data;
       } catch (err: any) {
-        const msg =
-          err.response?.data?.detail ||
-          err.message ||
-          "Erro ao criar produto";
+        const msg = err.response?.data?.detail || err.message || "Erro ao criar produto";
         toast.error(msg);
         throw err;
       }
@@ -59,7 +76,7 @@ export function useMutateProduto() {
     mutationFn: async ({ cod_barras, formData }: UpdateProdutoBody) => {
       try {
         const { data } = await apiMensura.put(
-          `/api/delivery/produtos/${cod_barras}`,
+          `/api/mensura/produtos/${cod_barras}`, // 🔧 rota corrigida
           formData
         );
         toast.success("Produto atualizado com sucesso!");
@@ -81,7 +98,7 @@ export function useMutateProduto() {
   const remove = useMutation({
     mutationFn: async (cod_barras: string) => {
       try {
-        await apiMensura.delete(`/api/delivery/produtos/${cod_barras}`);
+        await apiMensura.delete(`/api/mensura/produtos/${cod_barras}`); // 🔧 rota corrigida
         toast.success("Produto removido com sucesso!");
       } catch (err: any) {
         const msg =

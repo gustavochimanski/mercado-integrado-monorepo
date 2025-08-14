@@ -1,7 +1,7 @@
 // src/components/modals/ModalNovoProduto.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import * as React from "react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import {
   Dialog,
@@ -10,14 +10,14 @@ import {
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
 import { Input } from "@cardapio/components/Shared/ui/input";
-import { Label } from "@cardapio/components/Shared/ui/label";
-import { useMutateProduto } from "@cardapio/services/useQueryProduto";
+import { useSearchProdutos } from "@cardapio/services/useQueryProduto";
+import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import Image from "next/image";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   empresaId: number;
-  codCategoria: number;
   vitrineId: number;
 }
 
@@ -25,148 +25,116 @@ export const ModalNovoProduto = ({
   open,
   onOpenChange,
   empresaId,
-  codCategoria,
   vitrineId,
 }: Props) => {
-  // guarde números como string para evitar NaN enquanto digita
-  const [form, setForm] = useState({
-    cod_barras: "",
-    descricao: "",
-    preco_venda: "", // string
-    custo: "",       // string
-    imagem: undefined as File | undefined,
+  const [busca, setBusca] = React.useState("");
+  const [page, setPage] = React.useState(1);
+
+  const { data, isLoading, isFetching } = useSearchProdutos(empresaId, busca, {
+    page,
+    limit: 30,
+    apenas_disponiveis: false,
+    enabled: open,
   });
 
-  const { create: createProduct } = useMutateProduto();
+  const items = data?.data ?? [];
+  const hasMore = !!data?.has_more;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "file" ? prev[name as keyof typeof prev] : value,
-    }));
-  };
+  const { vincular } = useMutateVitrine();
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    setForm((prev) => ({ ...prev, imagem: file }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!form.cod_barras.trim() || !form.descricao.trim() || !form.preco_venda.trim()) return;
-
-    createProduct.mutate(
-      {
-        cod_empresa: empresaId,
-        cod_barras: form.cod_barras.trim(),
-        descricao: form.descricao.trim(),
-        cod_categoria: codCategoria,
-        vitrine_id: vitrineId,
-        preco_venda: form.preco_venda, // o hook converte para string decimal corretamente
-        custo: form.custo === "" ? undefined : form.custo,
-        imagem: form.imagem ?? null,
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-          setForm({
-            cod_barras: "",
-            descricao: "",
-            preco_venda: "",
-            custo: "",
-            imagem: undefined,
-          });
-        },
-      }
+  function handleAdd(cod_barras: string) {
+    vincular.mutate(
+      { vitrineId, empresa_id: empresaId, cod_barras },
+      { onSuccess: () => onOpenChange(false) }
     );
-  };
+  }
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!open) {
-      setForm({
-        cod_barras: "",
-        descricao: "",
-        preco_venda: "",
-        custo: "",
-        imagem: undefined,
-      });
+      setBusca("");
+      setPage(1);
     }
   }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-3xl h-[80%] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Novo Produto</DialogTitle>
+          <DialogTitle>Adicionar produtos existentes à vitrine</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <Label htmlFor="cod_barras">Código de barras</Label>
-            <Input
-              id="cod_barras"
-              name="cod_barras"
-              value={form.cod_barras}
-              onChange={handleChange}
-              required
-            />
+        <div className="flex flex-col gap-3">
+          <Input
+            placeholder="Buscar por nome ou código de barras..."
+            value={busca}
+            onChange={(e) => {
+              setBusca(e.target.value);
+              setPage(1);
+            }}
+            autoFocus
+          />
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3  overflow-auto pr-1">
+            {isLoading && (
+              <div className="col-span-full text-sm text-muted-foreground">
+                Carregando produtos...
+              </div>
+            )}
+
+            {!isLoading && items.length === 0 && (
+              <div className="col-span-full text-sm text-muted-foreground">
+                Nenhum produto encontrado.
+              </div>
+            )}
+
+            {items.map((p) => (
+              <div
+                key={p.cod_barras}
+                className="border rounded-lg p-2 flex flex-col gap-2 hover:shadow-sm transition"
+              >
+                <div className="relative w-full h-24 bg-muted rounded overflow-hidden">
+                  {p.imagem ? (
+                    <Image src={p.imagem} alt={p.descricao} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                      Sem imagem
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm font-medium line-clamp-2">{p.descricao}</div>
+                <div className="text-xs text-muted-foreground">{p.cod_barras}</div>
+                <div className="text-sm font-semibold">
+                  {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.preco_venda)}
+                </div>
+                <Button size="sm" onClick={() => handleAdd(p.cod_barras)} disabled={vincular.isPending}>
+                  {vincular.isPending ? "Adicionando..." : "Adicionar"}
+                </Button>
+              </div>
+            ))}
           </div>
 
-          <div>
-            <Label htmlFor="descricao">Descrição</Label>
-            <Input
-              id="descricao"
-              name="descricao"
-              value={form.descricao}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="preco_venda">Preço</Label>
-            <Input
-              id="preco_venda"
-              name="preco_venda"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              value={form.preco_venda}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="custo">Custo</Label>
-            <Input
-              id="custo"
-              name="custo"
-              type="number"
-              inputMode="decimal"
-              step="0.00001"
-              value={form.custo}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="imagem">Imagem</Label>
-            <Input
-              id="imagem"
-              name="imagem"
-              type="file"
-              accept="image/*"
-              onChange={handleFile}
-            />
-          </div>
-
-          <Button type="submit" disabled={createProduct.isPending}>
-            {createProduct.isPending ? "Salvando..." : "Salvar Produto"}
-          </Button>
-        </form>
+          {(items.length > 0 || page > 1) && (
+            <div className="flex items-center justify-between pt-1">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPage((n) => Math.max(1, n - 1))}
+                disabled={isFetching || page === 1}
+              >
+                Anterior
+              </Button>
+              <div className="text-xs text-muted-foreground">Página {page}</div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPage((n) => n + 1)}
+                disabled={isFetching || !hasMore}
+              >
+                Próxima
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

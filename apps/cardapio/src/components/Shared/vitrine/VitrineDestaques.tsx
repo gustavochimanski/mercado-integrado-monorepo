@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import { Button } from "./ui/button";
-import { ProductCard } from "./product/ProductCard";
-import { Card } from "./ui/card";
-import { CardAddProduto } from "../admin/card/CardAddProduto";
+import { Button } from "../ui/button";
+import { ProductCard } from "../product/ProductCard";
+import { Card } from "../ui/card";
+import { CardAddProduto } from "../../admin/card/CardAddProduto";
+import AdminVitrineOptions from "@cardapio/components/admin/options/VitrineOptions";
 
 type Props = {
   produtos: ProdutoEmpMini[];
@@ -31,13 +32,18 @@ export default function VitrineDestaques({
   is_home = true,
 }: Props) {
 
-  const lista = produtos.slice(0, 3);
+  const lista = produtos.slice(0, 4);
+  console.log(vitrineId, codCategoria, empresaId)
 
   return (
     <section className="mt-4">
-      <div className="flex items-center justify-between px-2">
-        <h2 className="text-base font-semibold">{titulo}</h2>
-        <Link href={verMaisHref} className="text-sm text-primary hover:underline">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold mx-2">{titulo}</h2>
+        <AdminVitrineOptions 
+          empresaId={empresaId} 
+          codCategoria={codCategoria} 
+          vitrineId={vitrineId}/>
+        <Link href={verMaisHref} className="inline-flex items-center px-3 py-0.5 rounded-full text-xs text-primary font-semibold bg-primary/20 ">
           Ver tudo
         </Link>
       </div>
@@ -54,13 +60,19 @@ export default function VitrineDestaques({
           />
         ))}
 
+        {/* Card "Adicionar Produto" (só para admin) */}
+        <CardAddProduto
+          empresaId={empresaId}
+          vitrineId={vitrineId}
+          is_home={is_home}
+        />
 
         {/* Card "Ver mais" no final */}
         <Link
           href={verMaisHref}
-          className="min-w-[100px] max-w-[100px] h-[200px] sm:w-full sm:max-w-none"
+          className=" sm:w-full sm:max-w-none"
         >
-          <Card className="w-[100px] h-[200px] sm:w-full flex flex-col items-center justify-center gap-2 cursor-pointer">
+          <Card className="w-[90px] h-[180px] sm:w-full flex flex-col items-center justify-center gap-2 cursor-pointer">
             <div className="flex flex-col items-center">
               <span className="text-sm font-medium">Ver mais</span>
               <ChevronRight className="w-5 h-5 mt-1" />
@@ -69,13 +81,6 @@ export default function VitrineDestaques({
           </Card>
         </Link>
         
-        {/* Card "Adicionar Produto" (só para admin) */}
-        <CardAddProduto
-          empresaId={empresaId}
-          codCategoria={codCategoria}
-          vitrineId={vitrineId}
-          is_home={is_home}
-        />
       </div>
     </section>
   );
