@@ -30,10 +30,12 @@ export default function RouteCategoryPage() {
   const { data, isLoading } = useHome(empresa_id || 0, false);
   const categorias = data?.categorias ?? [];
 
-  const categoriaAtual = useMemo(
-    () => categorias.find((cat) => cat.slug === slugAtual),
-    [categorias, slugAtual]
+const categoriaAtual = useMemo(() => {
+  return categorias.find(
+    (cat) => cat.slug.trim().toLowerCase() === slugAtual.trim().toLowerCase()
   );
+}, [categorias, slugAtual]);
+
 
   const subcategorias = useMemo(
     () => categorias.filter((cat) => cat.parent_id === categoriaAtual?.id),
@@ -66,21 +68,24 @@ export default function RouteCategoryPage() {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="p-6 w-full flex justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+// Se ainda está carregando ou data não chegou
+if (isLoading || !data) {
+  return (
+    <div className="p-6 w-full flex justify-center">
+      <LoadingSpinner />
+    </div>
+  );
+}
 
-  if (!categoriaAtual) {
-    return (
-      <div className="p-6 w-full text-center text-muted-foreground">
-        Categoria não encontrada.
-      </div>
-    );
-  }
+// Só mostra "não encontrada" se realmente não existe
+if (!categoriaAtual) {
+  return (
+    <div className="p-6 w-full text-center text-muted-foreground">
+      Categoria não encontrada.
+    </div>
+  );
+}
+
 
   return (
     <div className="min-h-screen flex flex-col gap-4">
