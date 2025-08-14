@@ -124,7 +124,6 @@ export default function ProductsVitrineSection({
 
             <CardAddProduto
               vitrineId={vitrineId}
-              codCategoria={codCategoria}
               empresaId={empresaId}
               is_home={isHome}
             />
