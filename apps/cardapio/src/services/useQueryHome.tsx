@@ -35,7 +35,7 @@ export interface HomeResponse {
 }
 
 // useQueryHome.ts
-export function useHome(empresa_id: number, isHome: boolean) {
+export function useHome(empresa_id: number | null, isHome: boolean) {
   return useQuery<HomeResponse, Error>({
     queryKey: ["home", empresa_id, { isHome }],
     enabled: !!empresa_id,

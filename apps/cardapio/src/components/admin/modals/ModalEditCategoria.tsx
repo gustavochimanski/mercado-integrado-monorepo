@@ -31,11 +31,11 @@ export const ModalEditCategoria = ({
   categoriaId,
 }: ModalEditCategoriaProps) => {
   // Busca a categoria pelo ID
-  const {
-    data: categoria,
-    isLoading,
-    isError,
-  } = useCategoriaById(categoriaId);
+const {
+  data: categoria,
+  isLoading,
+  isError,
+} = useCategoriaById(open ? categoriaId : null, { enabled: open });
 
   // Estados do form
   const [descricao, setDescricao] = useState("");

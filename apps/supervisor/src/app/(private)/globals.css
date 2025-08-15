@@ -43,6 +43,9 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
   --primary: 243.7 54.5% 41.4%;
+    --chart-green: 142.1 76.2% 36.3%;     /* verde */
+  --chart-yellow: 45 93% 47%;           /* amarelo */
+  --chart-red: 0 84.2% 60.2%;           /* vermelho */
   /* --primary: 244.5 57.9% 50.6%; */
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96.1%;

@@ -33,7 +33,6 @@ export default function VitrineDestaques({
 }: Props) {
 
   const lista = produtos.slice(0, 4);
-  console.log(vitrineId, codCategoria, empresaId)
 
   return (
     <section className="mt-4">

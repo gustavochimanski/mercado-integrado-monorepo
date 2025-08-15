@@ -32,7 +32,15 @@ export function ModalVitrineMarkHome({ open, onOpenChange, codCategoria }: Props
   // Seleção de categoria (para filtrar vitrines)
   const [buscaCat, setBuscaCat] = React.useState("");
   const [selectedCategoriaId, setSelectedCategoriaId] = React.useState<number | null>(codCategoria ?? null);
-  const { data: categorias = [], isLoading: loadingCats } = useCategoriasSearch(buscaCat, 30);
+  const { data: categorias = [], isLoading: loadingCats } =
+  useCategoriasSearch(buscaCat, {
+    enabled: open,     // só quando o modal está aberto
+    minLength: 2,      // evita chamadas com 0/1 caractere
+    debounceMs: 300,
+    limit: 30,
+    allowEmpty: false, // não liste sem termo
+  });
+
 
   // Seleção de vitrine
   const [buscaVitrine, setBuscaVitrine] = React.useState("");

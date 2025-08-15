@@ -10,12 +10,16 @@ import {
 } from "@supervisor/components/ui/dropdown-menu";
 import { ArrowLeft, ArrowRight, MoreVertical } from "lucide-react";
 
-const statusMap: Record<string, string> = {
-  P: "Pendente",
-  E: "Em preparo",
-  S: "Saiu para entrega",
-  F: "Finalizado",
+/** Agora o mapa traz label + headerClass (cor do cabeçalho) */
+type StatusMeta = { label: string; headerClass: string };
+
+const statusMap: Record<string, { label: string; headerClass: string }> = {
+  P: { label: "Pendente", headerClass: "bg-[hsl(var(--chart-red))] text-white" },
+  E: { label: "Em preparo", headerClass: "bg-[hsl(var(--chart-yellow))] text-white" },
+  S: { label: "Saiu para entrega", headerClass: "bg-[hsl(var(--primary))] text-white" },
+  F: { label: "Finalizado", headerClass: "bg-[hsl(var(--chart-green))] text-white" },
 };
+
 
 const pedidosIniciais = [
   { id: "001", cliente: "João", status: "P", valor: 28.9 },
@@ -52,7 +56,7 @@ const PedidoCard = React.memo(
     const proximo = statusKeys[index + 1];
 
     return (
-      <div className="bg-white border rounded-xl p-3 shadow-sm flex flex-col gap-2">
+      <div className="bg-background border rounded-xl p-3 shadow-sm flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <input
@@ -88,7 +92,7 @@ const PedidoCard = React.memo(
                   }
                 >
                   <ArrowLeft size={16} className="mr-2" />
-                  Mover para {statusMap[anterior]}
+                  Mover para {statusMap[anterior].label}
                 </DropdownMenuItem>
               )}
               {proximo && (
@@ -100,7 +104,7 @@ const PedidoCard = React.memo(
                   }
                 >
                   <ArrowRight size={16} className="mr-2" />
-                  Mover para {statusMap[proximo]}
+                  Mover para {statusMap[proximo].label}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -114,22 +118,27 @@ PedidoCard.displayName = "PedidoCard";
 
 const KanbanColuna = React.memo(
   ({
-    statusLabel,
+    statusMeta,
     pedidos,
     onMover,
     selecionados,
     onToggleSelecionado,
     onMoverSelecionadosPara,
   }: {
-    statusLabel: string;
+    statusMeta: StatusMeta;
     pedidos: typeof pedidosIniciais;
     onMover: (id: string, novoStatus: string) => void;
     selecionados: Set<string>;
     onToggleSelecionado: (id: string) => void;
     onMoverSelecionadosPara: (novoStatus: string) => void;
   }) => (
-    <div className="flex flex-col h-full flex-1 bg-gray-100 rounded shadow overflow-hidden min-w-[250px]">
-      <h2 className="text-center font-bold p-2 border-b">{statusLabel}</h2>
+    <div className="flex flex-col h-full flex-1 bg-muted rounded shadow overflow-hidden min-w-[250px]">
+      {/* Cabeçalho colorido conforme o status */}
+      <h2
+        className={`text-center font-bold p-2 border-b ${statusMeta.headerClass}`}
+      >
+        {statusMeta.label}
+      </h2>
       <ScrollArea className="flex-1 min-h-0">
         <div className="flex flex-col gap-2 p-2">
           {pedidos.length > 0 ? (
@@ -167,13 +176,15 @@ const KanbanPedidos = () => {
     });
   };
 
-  const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>(() => {
-    const visiveis: Record<string, boolean> = {};
-    Object.keys(statusMap).forEach((key) => {
-      visiveis[key] = true;
-    });
-    return visiveis;
-  });
+  const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>(
+    () => {
+      const visiveis: Record<string, boolean> = {};
+      Object.keys(statusMap).forEach((key) => {
+        visiveis[key] = true;
+      });
+      return visiveis;
+    }
+  );
 
   const pedidosPorStatus = useMemo(() => {
     const agrupados: Record<string, typeof pedidosIniciais> = {};
@@ -213,7 +224,7 @@ const KanbanPedidos = () => {
   return (
     <div className="h-[calc(100vh-100px)] flex flex-col p-4 space-y-4">
       <div className="flex flex-wrap gap-4 items-center">
-        {Object.entries(statusMap).map(([key, label]) => (
+        {Object.entries(statusMap).map(([key, meta]) => (
           <label key={key} className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -221,7 +232,7 @@ const KanbanPedidos = () => {
               onChange={() => handleToggleColuna(key)}
               className="accent-blue-500"
             />
-            {label}
+            {meta.label}
           </label>
         ))}
 
@@ -234,9 +245,9 @@ const KanbanPedidos = () => {
           }}
         >
           <option value="">Mover selecionados para...</option>
-          {Object.entries(statusMap).map(([key, label]) => (
+          {Object.entries(statusMap).map(([key, meta]) => (
             <option key={key} value={key}>
-              {label}
+              {meta.label}
             </option>
           ))}
         </select>
@@ -252,10 +263,10 @@ const KanbanPedidos = () => {
         <div className="flex gap-4 h-full">
           {Object.entries(statusMap)
             .filter(([key]) => colunasVisiveis[key])
-            .map(([statusKey, statusLabel]) => (
+            .map(([statusKey, meta]) => (
               <KanbanColuna
                 key={statusKey}
-                statusLabel={statusLabel}
+                statusMeta={meta}
                 pedidos={pedidosPorStatus[statusKey] || []}
                 onMover={handleMoverPedido}
                 selecionados={selecionados}

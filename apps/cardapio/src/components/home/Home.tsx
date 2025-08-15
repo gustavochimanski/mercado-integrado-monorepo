@@ -31,7 +31,7 @@ export default function HomePage() {
   useReceiveEmpresaFromQuery();
   const empresa_id = getEmpresaId();
 
-  const { data, isError } = useHome(empresa_id || 0, true);
+  const { data, isError } = useHome(empresa_id || null, true);
   const categorias = data?.categorias ?? [];
   const vitrines = data?.vitrines ?? [];
 
