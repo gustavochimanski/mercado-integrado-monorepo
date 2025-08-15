@@ -64,6 +64,14 @@ const columns: GridColDef[] = useMemo(
       valueFormatter: (value: any) => fmtBRL(value),
     },
     {
+      field: "preco_delivery",
+      headerName: "Preço Delivery",
+      flex: 1,
+      minWidth: 120,
+      editable: true,
+      valueFormatter: (value: any) => fmtBRL(value),
+    },
+    {
       field: "label_categoria",
       headerName: "Categoria",
       flex: 1.5,
