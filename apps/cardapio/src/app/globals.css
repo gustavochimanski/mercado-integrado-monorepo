@@ -120,6 +120,8 @@
   }
 }
 
+
+
 /* Ocultar scrollbar apenas no eixo x (horizontal) */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
@@ -128,3 +130,27 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none;    /* Firefox */
 }
+
+/* ===== Scrollbar transparente no geral ===== */
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* fundo transparente */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* cor da alça */
+  border-radius: 4px;
+}
+
+/* Firefox */
+* {
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  scrollbar-width: thin;
+}
+

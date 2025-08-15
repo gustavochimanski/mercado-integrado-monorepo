@@ -29,8 +29,7 @@ export default function ProductsVitrineSection({
   onOpenSheet,
   sectionRef,
   hrefCategoria,
-  isHome,
-  vitrineIsHome
+  isHome
 }: Props) {
   // ---- NOVO: só renderiza se isHome === vitrineIsHome ----
   
@@ -114,6 +113,7 @@ export default function ProductsVitrineSection({
                   onOpenSheet={() => onOpenSheet?.(produto)} 
                   empresa_id={empresaId}
                   isHome={isHome}
+                  vitrineId={vitrineId}
                   />
               </div>
             ))}

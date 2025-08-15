@@ -1,5 +1,5 @@
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { Pencil, Plus, Settings, Trash2 } from "lucide-react";
+import { Home, HomeIcon, Pencil, Plus, Settings, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,24 +16,31 @@ interface AdminVitrineOptionsProps {
   empresaId: number;
   codCategoria: number;
   vitrineId: number;
+  isHome?: boolean; // <---- NOVO
 }
 
 const AdminVitrineOptions = ({
   empresaId,
   codCategoria,
   vitrineId,
+  isHome = false, // default seguro
 }: AdminVitrineOptionsProps) => {
   const { isAdmin } = useUserContext();
 
   const [openModalAddProduto, setOpenModalAddProduto] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
-  const { remove } = useMutateVitrine();
+  const { remove, markHome } = useMutateVitrine();
 
   if (!isAdmin) return null;
 
   const handleDelete = () => {
     remove.mutate(vitrineId);
+  };
+
+  const handleToggleHome = () => {
+    // Alterna o estado atual
+    markHome.mutate({ id: vitrineId, is_home: !isHome });
   };
 
   return (
@@ -47,6 +54,20 @@ const AdminVitrineOptions = ({
           <DropdownMenuItem onSelect={() => setOpenModalAddProduto(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Adicionar Produto
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onSelect={handleToggleHome}>
+            {isHome ? (
+              <>
+                <HomeIcon className="mr-2 h-4 w-4" />
+                Remover da Home
+              </>
+            ) : (
+              <>
+                <Home className="mr-2 h-4 w-4" />
+                Colocar na Home
+              </>
+            )}
           </DropdownMenuItem>
 
           <DropdownMenuItem

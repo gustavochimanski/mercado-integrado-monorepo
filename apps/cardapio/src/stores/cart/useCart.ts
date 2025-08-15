@@ -37,9 +37,7 @@ const withLogger =
     const wrap =
       (name: keyof T, action: any) =>
       (...args: any[]) => {
-        console.log(`[Cart] Action "${String(name)}" called with:`, ...args);
         const result = action(...args);
-        console.log(`[Cart] New state after "${String(name)}":`, get());
         return result;
       };
 
@@ -135,10 +133,3 @@ export const useCart = create<CartState>()(
     }
   )
 );
-
-/* ---------- Log ao hidratar ---------- */
-if (typeof window !== "undefined") {
-  useCart.persist.onFinishHydration(() => {
-    console.log("[Cart] State restored from localStorage:", useCart.getState());
-  });
-}

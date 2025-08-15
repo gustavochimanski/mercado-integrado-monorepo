@@ -41,7 +41,9 @@ export default function VitrineDestaques({
         <AdminVitrineOptions 
           empresaId={empresaId} 
           codCategoria={codCategoria} 
-          vitrineId={vitrineId}/>
+          vitrineId={vitrineId}
+          isHome={is_home}
+          />
         <Link href={verMaisHref} className="inline-flex items-center px-3 py-0.5 rounded-full text-xs text-primary font-semibold bg-primary/20 ">
           Ver tudo
         </Link>
@@ -56,6 +58,7 @@ export default function VitrineDestaques({
             onOpenSheet={() => onSelectProduto?.(p)}
             onEdit={() => console.log("editar", p.cod_barras)}
             isHome={true}
+            vitrineId={vitrineId}
           />
         ))}
 

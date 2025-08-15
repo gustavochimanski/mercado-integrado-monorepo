@@ -3,6 +3,7 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { CategoriaMini } from "./useQueryHome";
 
 // Tipos alinhados ao backend
 export type VitrineOut = {
@@ -40,6 +41,8 @@ function useDebounced<T>(value: T, delay = 300) {
   }, [value, delay]);
   return debounced;
 }
+
+
 
 export function useVitrinesSearch(
   q: string,

@@ -9,25 +9,38 @@ import { Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@cardapio/components/Shared/ui/dropdown-menu";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
+import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { toast } from "sonner";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 interface ProductOptionsProps {
   codBarras: string;
   onEdit: () => void;
-  empresa_id: number
+  empresa_id: number;
+  vitrineId?: number; // opcional para não quebrar em listas sem vitrine
 }
 
-export function ProductOptions({
-  codBarras,
-  onEdit,
-  empresa_id
-}: ProductOptionsProps) {
+export function ProductOptions({ codBarras, onEdit, empresa_id, vitrineId }: ProductOptionsProps) {
   const { isAdmin } = useUserContext();
   const [confirmOpen, setConfirmOpen] = useState(false);
-
+  const { desvincular } = useMutateVitrine();
   if (!isAdmin) return null;
 
+  if (!empresa_id){
+    empresa_id = getEmpresaId()
+  }
+
+  console.log(empresa_id)
+
   function handleConfirmRemove() {
-    window.alert("Função não implementada")
+    if (typeof vitrineId !== "number") {
+      toast.error("Não foi possível identificar a vitrine para desvincular.");
+      return;
+    }
+    desvincular.mutate(
+      { vitrineId, empresa_id, cod_barras: codBarras },
+      { onSuccess: () => setConfirmOpen(false) }
+    );
   }
 
   return (

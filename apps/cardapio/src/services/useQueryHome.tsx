@@ -34,6 +34,29 @@ export interface HomeResponse {
   vitrines: VitrineComProdutosResponse[];
 }
 
+export type CategoryPageResponse = {
+  categoria: CategoriaMini;
+  subcategorias: CategoriaMini[];
+  vitrines: VitrineComProdutosResponse[];
+};
+
+export function useCategoriaPage(empresa_id: number | null, slug: string | null) {
+  return useQuery<CategoryPageResponse, Error>({
+    queryKey: ["categoria_page", empresa_id, slug],
+    enabled: !!empresa_id && !!slug,
+    queryFn: async () => {
+      const { data } = await api.get<CategoryPageResponse>("/api/delivery/home/categoria", {
+        params: { empresa_id, slug },
+      });
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    placeholderData: (old) => old,
+  });
+}
+
 // useQueryHome.ts
 export function useHome(empresa_id: number | null, isHome: boolean) {
   return useQuery<HomeResponse, Error>({

@@ -63,7 +63,6 @@ export default function ProductsSection({
           isHome={isHome}
           vitrineIsHome={vitrine.is_home}   
         />
-
       ))}
     </>
   );
