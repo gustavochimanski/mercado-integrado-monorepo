@@ -37,56 +37,51 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
   // ✅ Memo nos dados
   const produtos = useMemo(() => resp?.data ?? [], [resp?.data]);
 
-  // ✅ Formatação de moeda mais robusta
-  const currencyBR = (v: unknown) => {
-    if (v === null || v === undefined || v === "") return "—";
-    const normalized = typeof v === "string" ? v.replace(",", ".") : v;
-    const num = Number(normalized);
-    if (!Number.isFinite(num)) return "—";
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(num);
-  };
 
-  // ✅ Memo nas colunas (com formatters defensivos)
-  const columns: GridColDef[] = useMemo(
-    () => [
-      { field: "cod_barras", headerName: "Código de Barras", flex: 1, minWidth: 160 },
-      { field: "descricao", headerName: "Descrição", flex: 2, minWidth: 220 },
+// helper simples
+const fmtBRL = (v: unknown) =>
+  v === null || v === undefined || v === "" ? "—" : `R$ ${v}`;
 
-      {
-        field: "custo",
-        headerName: "Custo",
-        flex: 1,
-        minWidth: 120,
-        type: "number",
-        valueFormatter: (params: any) => currencyBR(params?.value),
-      },
-      {
-        field: "preco_venda",
-        headerName: "Preço",
-        flex: 1,
-        minWidth: 120,
-        type: "number",
-        editable: true,
-        valueFormatter: (params: any) => currencyBR(params?.value),
-      },
-      {
-        field: "label_categoria",
-        headerName: "Categoria",
-        flex: 1.5,
-        minWidth: 160,
-      },
-      {
-        field: "exibir_delivery",
-        headerName: "Delivery",
-        flex: 0.8,
-        minWidth: 120,
-        type: "boolean",
-        // evita null/undefined na coluna booleana
-        valueGetter: (params: any) => Boolean(params?.value),
-      },
-    ],
-    [] // columns estável
-  );
+// colunas
+const columns: GridColDef[] = useMemo(
+  () => [
+    { field: "cod_barras", headerName: "Código de Barras", flex: 1, minWidth: 160 },
+    { field: "descricao", headerName: "Descrição", flex: 2, minWidth: 220 },
+
+    {
+      field: "custo",
+      headerName: "Custo",
+      flex: 1,
+      minWidth: 120,
+      valueFormatter: (value: any) => fmtBRL(value),
+    },
+    {
+      field: "preco_venda",
+      headerName: "Preço",
+      flex: 1,
+      minWidth: 120,
+      editable: true,
+      valueFormatter: (value: any) => fmtBRL(value),
+    },
+    {
+      field: "label_categoria",
+      headerName: "Categoria",
+      flex: 1.5,
+      minWidth: 160,
+    },
+    {
+      field: "exibir_delivery",
+      headerName: "Delivery",
+      flex: 0.8,
+      minWidth: 120,
+      type: "boolean",
+      valueGetter: (value: any, row: any) => Boolean(value ?? row?.exibir_delivery),
+    },
+  ],
+  []
+);
+
+
 
   // ✅ Callbacks memorizados
   const openModal = useCallback(() => setModalOpen(true), []);
