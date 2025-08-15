@@ -21,7 +21,7 @@ export function CategoryCard({ id, label, image, href, empresaId }: CategoryCard
   return (
     <div className="relative">
       <Link href={href} className="block group">
-        <div className="flex flex-col items-center w-16 gap-1 rounded-lg  bg-muted/30 hover:bg-muted/50 transition-colors">
+        <div className="flex flex-col items-center w-16 gap-1 rounded-lg bg-background hover:bg-muted/50 transition-colors">
           <div className="relative w-full aspect-square rounded-full  overflow-hidden bg-background flex items-center justify-center">
             <Image
               src={src}

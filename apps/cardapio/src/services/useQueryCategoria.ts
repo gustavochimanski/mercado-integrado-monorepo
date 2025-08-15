@@ -23,6 +23,7 @@ interface UploadImagemBody {
   imagem: File;
 }
 
+
 /** 🔎 Tipo do resultado do endpoint /api/delivery/categorias/search */
 export interface CategoriaSearchItem {
   id: number;

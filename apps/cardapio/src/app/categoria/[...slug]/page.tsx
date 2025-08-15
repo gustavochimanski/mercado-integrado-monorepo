@@ -1,7 +1,6 @@
 "use client";
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useHome } from "@cardapio/services/useQueryHome";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CircleArrowLeft } from "lucide-react";
@@ -15,6 +14,7 @@ import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
+import { useCategoriaPorSlug } from "@cardapio/services/useQueryHome";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -23,32 +23,22 @@ export default function RouteCategoryPage() {
 
   const empresa_id = getEmpresaId();
   const params = useParams<{ slug?: string | string[] }>();
-  const slugAtual = Array.isArray(params.slug)
-    ? params.slug[params.slug.length - 1]
-    : (params.slug ?? "");
+  const slugAtual = useMemo(() => {
+    const raw = Array.isArray(params.slug) ? params.slug.at(-1) : params.slug;
+    return (raw ?? "").trim().toLowerCase();
+  }, [params.slug]);
 
-  const { data, isLoading } = useHome(empresa_id || 0, false);
-  const categorias = data?.categorias ?? [];
+  // ⬇️ usa o endpoint novo
+  const { data, isLoading } = useCategoriaPorSlug(empresa_id, slugAtual);
+  const categoriaAtual = data?.categoria ?? null;
+  const subcategorias = data?.subcategorias ?? [];
 
-const categoriaAtual = useMemo(() => {
-  return categorias.find(
-    (cat) => cat.slug.trim().toLowerCase() === slugAtual.trim().toLowerCase()
-  );
-}, [categorias, slugAtual]);
-
-
-  const subcategorias = useMemo(
-    () => categorias.filter((cat) => cat.parent_id === categoriaAtual?.id),
-    [categorias, categoriaAtual]
-  );
-
-  // abre o sheet
-  const openSheet = useCallback((produto: ProdutoEmpMini) => {
-    setProdutoSelecionado(produto);
+  // Sheet
+  const openSheet = useCallback((p: ProdutoEmpMini) => {
+    setProdutoSelecionado(p);
     setSheetOpen(true);
   }, []);
 
-  // adiciona no carrinho
   const add = useCart((s) => s.add);
   const handleAdd = useCallback(
     (produto: ProdutoEmpMini, quantity: number) => {
@@ -61,31 +51,21 @@ const categoriaAtual = useMemo(() => {
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
   const [vitrinesMeta, setVitrinesMeta] = useState<{ id: number; titulo: string }[]>([]);
-
   const scrollToSection = useCallback((id: number) => {
-    document
-      .getElementById(`secao-${id}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-// Se ainda está carregando ou data não chegou
-if (isLoading || !data) {
-  return (
-    <div className="p-6 w-full flex justify-center">
-      <LoadingSpinner />
-    </div>
-  );
-}
+  if (isLoading) {
+    return (
+      <div className="p-6 w-full min-h-screen flex justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
-// Só mostra "não encontrada" se realmente não existe
-if (!categoriaAtual) {
-  return (
-    <div className="p-6 w-full text-center text-muted-foreground">
-      Categoria não encontrada.
-    </div>
-  );
-}
-
+  if (!categoriaAtual) {
+    return <div className="p-6 w-full text-center text-muted-foreground">Categoria não encontrada.</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col gap-4">
@@ -94,31 +74,24 @@ if (!categoriaAtual) {
       </Button>
 
       <main className="flex-1 p-2">
-        <HorizontalSpy
-          items={vitrinesMeta}
-          activeId={activeId}
-          onClickItem={scrollToSection}
-        />
+        <HorizontalSpy items={vitrinesMeta} activeId={activeId} onClickItem={scrollToSection} />
 
         <CategoryScrollSection
           categorias={subcategorias}
           parentId={categoriaAtual.id}
-          empresaId={empresa_id}
+          empresaId={empresa_id!}
         />
 
         <ProductsSection
           codCategoria={categoriaAtual.id}
-          empresaId={empresa_id}
-          onOpenSheet={openSheet}
-          sectionRefFactory={register}
-          onMeta={setVitrinesMeta}
+          empresaId={empresa_id!}
           isHome={false}
+          onOpenSheet={openSheet}
+          onMeta={setVitrinesMeta}
+          sectionRefFactory={register}
         />
 
-        <CardAddVitrine
-          cod_categoria={categoriaAtual.id}
-          is_home={false}
-        />
+        <CardAddVitrine cod_categoria={categoriaAtual.id} is_home={false} />
       </main>
 
       {produtoSelecionado && (

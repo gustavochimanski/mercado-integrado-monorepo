@@ -5,19 +5,6 @@ import { api } from "../app/api/api";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { extractErrorMessage } from "../lib/extractErrorMessage";
 
-// ====== TIPOS ALINHADOS AO BACK ======
-export interface CategoriaMini {
-  id: number;
-  slug: string;
-  parent_id?: number | null;
-  descricao: string;
-  posicao: number;
-  imagem?: string | null;
-  label: string;
-  href: string;
-  slug_pai: string | null; // sempre string|null
-}
-
 export interface VitrineComProdutosResponse {
   id: number;
   titulo: string;
@@ -40,20 +27,42 @@ export type CategoryPageResponse = {
   vitrines: VitrineComProdutosResponse[];
 };
 
-export function useCategoriaPage(empresa_id: number | null, slug: string | null) {
-  return useQuery<CategoryPageResponse, Error>({
-    queryKey: ["categoria_page", empresa_id, slug],
-    enabled: !!empresa_id && !!slug,
+export type CategoriaMini = {
+  id: number;
+  slug: string;
+  parent_id: number | null;
+  descricao: string;
+  posicao: number;
+  imagem: string | null;
+  label: string;
+  href: string;
+  slug_pai: string | null;
+};
+
+export type Vitrine = {
+  id: number;
+  titulo: string;
+  is_home: boolean;
+  produtos: any[]; // tipar conforme seu ProdutoEmpMini
+};
+
+type CategoriaPorSlugResponse = {
+  categoria: CategoriaMini | null;
+  subcategorias: CategoriaMini[];
+  vitrines: Vitrine[]; // hoje vem [], mas já deixo tipado p/ futuro
+};
+
+export function useCategoriaPorSlug(empresaId?: number | null, slug?: string | null) {
+  return useQuery<CategoriaPorSlugResponse>({
+    queryKey: ["categoria-por-slug", empresaId, slug],
     queryFn: async () => {
-      const { data } = await api.get<CategoryPageResponse>("/api/delivery/home/categoria", {
-        params: { empresa_id, slug },
+      const { data } = await api.get("/api/delivery/home/categoria", {
+        params: { empresa_id: empresaId, slug },
       });
       return data;
     },
+    enabled: !!empresaId && !!slug,
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    placeholderData: (old) => old,
   });
 }
 
@@ -68,6 +77,7 @@ export function useHome(empresa_id: number | null, isHome: boolean) {
       const { data } = await api.get<HomeResponse>("/api/delivery/home", { params });
       return data;
     },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -83,5 +93,6 @@ export function useProdutosVitrinePorCategoria(
       const { data } = await api.get<VitrineComProdutosResponse[]>("/api/delivery/home/vitrine-por-categoria", { params });
       return data;
     },
+    staleTime: 5 * 60 * 1000,
   });
 }
