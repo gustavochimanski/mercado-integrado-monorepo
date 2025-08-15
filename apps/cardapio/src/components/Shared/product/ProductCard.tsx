@@ -13,7 +13,7 @@ type Props = {
   onEdit?: (codBarras: string) => void;
   isHome?: boolean
   empresa_id?: number
-  vitrineId: number
+  vitrineId?: number
 };
 
 export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id, vitrineId }: Props) {
