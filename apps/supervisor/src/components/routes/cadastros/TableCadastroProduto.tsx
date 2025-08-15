@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@supervisor/components/ui/card";
 import { Button } from "@supervisor/components/ui/button";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef} from "@mui/x-data-grid";
 import { CirclePlus, Trash2 } from "lucide-react";
 
 import { useFetchCadProdMensura } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
@@ -34,54 +34,58 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
   const { data: resp, isLoading: prodLoading, isError: prodError, error } =
     useFetchCadProdMensura(empresaId, 1, 30);
 
-  // ✅ Memo nos dados (evita identity nova a cada render)
+  // ✅ Memo nos dados
   const produtos = useMemo(() => resp?.data ?? [], [resp?.data]);
 
-  const currencyBR = (v: unknown) =>
-  v == null || v === "" ? "—" :
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
-    .format(Number(v));
+  // ✅ Formatação de moeda mais robusta
+  const currencyBR = (v: unknown) => {
+    if (v === null || v === undefined || v === "") return "—";
+    const normalized = typeof v === "string" ? v.replace(",", ".") : v;
+    const num = Number(normalized);
+    if (!Number.isFinite(num)) return "—";
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(num);
+  };
 
-  // ✅ Memo nas colunas (não recriar toda hora)
+  // ✅ Memo nas colunas (com formatters defensivos)
   const columns: GridColDef[] = useMemo(
     () => [
-    { field: "cod_barras", headerName: "Código de Barras", flex: 1, minWidth: 160 },
-    { field: "descricao", headerName: "Descrição", flex: 2, minWidth: 220 },
+      { field: "cod_barras", headerName: "Código de Barras", flex: 1, minWidth: 160 },
+      { field: "descricao", headerName: "Descrição", flex: 2, minWidth: 220 },
 
-    {
-      field: "custo",
-      headerName: "Custo",
-      flex: 1,
-      minWidth: 120,
-      type: "number",
-      // já lê row.custo direto; só formata visualmente:
-      valueFormatter: ({ value }) => currencyBR(value),
-    },
-    {
-      field: "preco_venda",
-      headerName: "Preço",
-      flex: 1,
-      minWidth: 120,
-      type: "number",
-      editable: true,
-      valueFormatter: ({ value }) => currencyBR(value),
-    },
-    {
-      field: "label_categoria",
-      headerName: "Categoria",
-      flex: 1.5,
-      minWidth: 160,
-      // sem getter: o grid já usa row.label_categoria
-    },
-    {
-      field: "exibir_delivery",
-      headerName: "Delivery",
-      flex: 0.8,
-      minWidth: 120,
-      type: "boolean",
-    },
-  ],
-    []
+      {
+        field: "custo",
+        headerName: "Custo",
+        flex: 1,
+        minWidth: 120,
+        type: "number",
+        valueFormatter: (params: any) => currencyBR(params?.value),
+      },
+      {
+        field: "preco_venda",
+        headerName: "Preço",
+        flex: 1,
+        minWidth: 120,
+        type: "number",
+        editable: true,
+        valueFormatter: (params: any) => currencyBR(params?.value),
+      },
+      {
+        field: "label_categoria",
+        headerName: "Categoria",
+        flex: 1.5,
+        minWidth: 160,
+      },
+      {
+        field: "exibir_delivery",
+        headerName: "Delivery",
+        flex: 0.8,
+        minWidth: 120,
+        type: "boolean",
+        // evita null/undefined na coluna booleana
+        valueGetter: (params: any) => Boolean(params?.value),
+      },
+    ],
+    [] // columns estável
   );
 
   // ✅ Callbacks memorizados
@@ -111,9 +115,7 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
               disableColumnMenu
               disableColumnFilter
               disableColumnSelector
-              // Virtualização mais suave
               scrollbarSize={8}
-              // Se o wrapper expõe paginationModel/initialState:
               initialState={{
                 pagination: { paginationModel: { pageSize: 30, page: 0 } },
               }}
@@ -126,7 +128,6 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
           <Button onClick={openModal}>
             <CirclePlus /> Novo Produto
           </Button>
-          {/* se não implementou remoção múltipla, desabilite para evitar JS desnecessário */}
           <Button variant="destructive" disabled>
             <Trash2 /> Excluir Produto
           </Button>
