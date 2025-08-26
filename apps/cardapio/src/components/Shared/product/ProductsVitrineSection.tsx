@@ -112,7 +112,6 @@ export default function ProductsVitrineSection({
                   produto={produto}
                   onOpenSheet={() => onOpenSheet?.(produto)} 
                   empresa_id={empresaId}
-                  isHome={isHome}
                   vitrineId={vitrineId}
                   />
               </div>
@@ -125,7 +124,6 @@ export default function ProductsVitrineSection({
             <CardAddProduto
               vitrineId={vitrineId}
               empresaId={empresaId}
-              is_home={isHome}
             />
           </div>
         </div>

@@ -11,29 +11,26 @@ import { ModalNovoProduto } from "../modals/ModalAddProduto";
 interface Props {
   empresaId: number;
   vitrineId: number;
-  is_home?: boolean
 }
 
 export const CardAddProduto = ({
   empresaId,
   vitrineId,
-  is_home
 }: Props) => {
   const { isAdmin } = useUserContext();
   const [modalOpen, setModalOpen] = useState(false);
 
   if (!isAdmin) return null;
 
-  const baseSize = is_home ? "min-w-[90px] max-w-[90px] h-[180px]" : "min-w-[120px] max-w-[120px] h-[220px]";
 
   return (
     <>
       <Card
         onClick={() => setModalOpen(true)}
-        className={`${baseSize}  snap-start flex flex-col justify-between overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-colors cursor-pointer`}
+        className={`min-w-[90px] max-w-[90px] h-[180px] snap-start flex flex-col justify-between overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-colors cursor-pointer`}
       >
         <div className="flex flex-col items-center gap-2 px-3 pt-3 flex-grow justify-center">
-          <PlusCircle className="w-8 h-8 text-muted-foreground" />
+          <PlusCircle className="w-8 h-8 text-primary" />
           <div className="text-sm font-medium text-center line-clamp-1 w-full">
             Adicionar
           </div>
@@ -43,7 +40,7 @@ export const CardAddProduto = ({
         <CardFooter className="p-0">
           <Button
             size="sm"
-            className="w-full rounded-none text-sm"
+            className="w-full rounded-none text-background bg-primary text-sm"
             variant="secondary"
             onClick={() => setModalOpen(true)}
           >

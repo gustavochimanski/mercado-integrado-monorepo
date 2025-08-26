@@ -13,7 +13,7 @@ import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 // Ajuste aqui seus links de ambiente
 const LINK_PROD = "https://mi-cardapio.vercel.app";
 const LINK_DEV = "http://localhost:3000";
-const IS_DEV = false;
+const IS_DEV = true;
 
 // Coerção segura: se vier "001" => 1; se vier number => mantém
 function toIntId(value: unknown): number | null {

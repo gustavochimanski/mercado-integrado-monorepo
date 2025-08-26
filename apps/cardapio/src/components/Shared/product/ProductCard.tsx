@@ -11,17 +11,15 @@ type Props = {
   produto: ProdutoEmpMini;
   onOpenSheet?: () => void;
   onEdit?: (codBarras: string) => void;
-  isHome?: boolean
   empresa_id?: number
   vitrineId?: number
 };
 
-export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id, vitrineId }: Props) {
+export function ProductCard({ produto, onOpenSheet, onEdit, empresa_id, vitrineId }: Props) {
   const { produto: produtoBase, preco_venda } = produto;
   const codBarras = produto.cod_barras;
   const price = Number(preco_venda) || 0;
 
-  const sizeClass = isHome ? "w-[90px] h-[180px]" : "w-[100px] h-[200px]";
 
   return (
     <div className="relative">
