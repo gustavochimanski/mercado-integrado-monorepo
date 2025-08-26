@@ -112,7 +112,11 @@ export function useMutateVitrine() {
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
     qc.invalidateQueries({ queryKey: ["vitrines_search"], exact: false });
-    // acrescente outras chaves relacionadas (ex.: ["home"], etc.) se necessário
+  };
+
+    const reloadPage = () => {
+    invalidateAll();
+    window.location.reload();
   };
 
   const create = useMutation({
@@ -128,7 +132,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Vitrine criada com sucesso!");
-      invalidateAll();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao criar vitrine";
@@ -149,7 +153,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Vitrine atualizada!");
-      invalidateAll();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao atualizar vitrine";
@@ -163,7 +167,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Vitrine removida com sucesso!");
-      invalidateAll();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao remover vitrine";
@@ -180,7 +184,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Produto vinculado!");
-      invalidateAll();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao vincular produto";
@@ -197,7 +201,7 @@ export function useMutateVitrine() {
     },
     onSuccess: () => {
       toast.success("Produto desvinculado!");
-      invalidateAll();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao desvincular produto";
@@ -212,7 +216,7 @@ export function useMutateVitrine() {
     },
     onSuccess: (v) => {
       toast.success(v.is_home ? "Vitrine marcada como destaque da Home!" : "Vitrine removida da Home.");
-      invalidateAll();
+      reloadPage();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.detail || err?.message || "Erro ao atualizar destaque da vitrine";

@@ -46,17 +46,18 @@ export type Vitrine = {
   produtos: any[]; // tipar conforme seu ProdutoEmpMini
 };
 
-type CategoriaPorSlugResponse = {
+export type CategoriaPorSlugResponse = {
   categoria: CategoriaMini | null;
   subcategorias: CategoriaMini[];
-  vitrines: Vitrine[]; // hoje vem [], mas já deixo tipado p/ futuro
+  vitrines: VitrineComProdutosResponse[];        // vitrines da própria categoria
+  vitrines_filho: VitrineComProdutosResponse[];  // vitrine "primeira" de cada subcategoria
 };
 
 export function useCategoriaPorSlug(empresaId?: number | null, slug?: string | null) {
   return useQuery<CategoriaPorSlugResponse>({
     queryKey: ["categoria-por-slug", empresaId, slug],
     queryFn: async () => {
-      const { data } = await api.get("/api/delivery/home/categoria", {
+      const { data } = await api.get<CategoriaPorSlugResponse>("/api/delivery/home/categoria", {
         params: { empresa_id: empresaId, slug },
       });
       return data;
@@ -65,6 +66,7 @@ export function useCategoriaPorSlug(empresaId?: number | null, slug?: string | n
     staleTime: 5 * 60 * 1000,
   });
 }
+
 
 // useQueryHome.ts
 export function useHome(empresa_id: number | null, isHome: boolean) {

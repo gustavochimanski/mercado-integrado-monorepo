@@ -173,8 +173,6 @@ export function useMutateProduto() {
     window.location.reload();
   };
 
-
-
   const update = useMutation({
     mutationFn: async (input: UpdateProdutoInput) => {
       const { cod_barras } = input;

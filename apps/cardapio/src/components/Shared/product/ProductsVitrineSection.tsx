@@ -75,7 +75,7 @@ export default function ProductsVitrineSection({
     <section
       id={`secao-${vitrineId}`}
       ref={sectionRef}
-      className="relative p-4 bg-muted rounded-xl scroll-mt-20"
+      className="relative p-2 bg-muted rounded-xl scroll-mt-20"
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
@@ -105,9 +105,9 @@ export default function ProductsVitrineSection({
         )}
 
         <div className="relative">
-          <div ref={scrollRef} className="flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
+          <div ref={scrollRef} className="flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth">
             {produtos.map((produto) => (
-              <div key={produto.cod_barras} className="shrink-0 w-[120px]">
+              <div key={produto.cod_barras} className="shrink-0 w-[90px] h-[200px]">
                 <ProductCard
                   produto={produto}
                   onOpenSheet={() => onOpenSheet?.(produto)} 

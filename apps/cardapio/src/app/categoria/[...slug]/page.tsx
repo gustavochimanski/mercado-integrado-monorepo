@@ -15,6 +15,7 @@ import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 import { useCategoriaPorSlug } from "@cardapio/services/useQueryHome";
+import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -90,6 +91,21 @@ export default function RouteCategoryPage() {
           onMeta={setVitrinesMeta}
           sectionRefFactory={register}
         />
+
+        {subcategorias && data?.vitrines_filho?.map((vit) => (
+          <ProductsVitrineSection
+            key={vit.id}
+            vitrineId={vit.id}
+            titulo={vit.titulo}
+            produtos={vit.produtos}
+            codCategoria={vit.cod_categoria}
+            empresaId={empresa_id!}
+            onOpenSheet={openSheet}
+            hrefCategoria={vit.href_categoria}
+            isHome={true}  // se não for contexto da home
+          />
+        ))}
+
 
         <CardAddVitrine cod_categoria={categoriaAtual.id} is_home={false} />
       </main>

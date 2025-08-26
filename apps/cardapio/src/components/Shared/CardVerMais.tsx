@@ -15,7 +15,7 @@ export const CardVerMais = ({ href }: Props) => {
   return (
     <Card
       onClick={() => router.push(href)}
-      className="min-w-[120px] w-[120px] h-[220px] snap-start flex flex-col justify-between overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-colors cursor-pointer"
+      className="min-w-[100px] w-[100px] h-[180px] snap-start flex flex-col justify-between overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-colors cursor-pointer"
     >
       <div className="flex flex-col items-center gap-2 px-3 pt-3 flex-grow justify-center ">
         <ArrowRightCircle className="w-8 h-8 text-muted-foreground" />

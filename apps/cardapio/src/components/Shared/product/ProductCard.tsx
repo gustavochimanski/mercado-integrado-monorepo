@@ -21,7 +21,7 @@ export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id, 
   const codBarras = produto.cod_barras;
   const price = Number(preco_venda) || 0;
 
-  const sizeClass = isHome ? "w-[90px] h-[180px]" : "w-[120px] h-[220px]";
+  const sizeClass = isHome ? "w-[90px] h-[180px]" : "w-[100px] h-[200px]";
 
   return (
     <div className="relative">
@@ -33,7 +33,7 @@ export function ProductCard({ produto, onOpenSheet, onEdit, isHome, empresa_id, 
         />
 
       <Card
-        className={`${sizeClass} flex flex-col justify-between overflow-hidden p-0 gap-0 cursor-pointer`}
+        className={`w-[90px] h-[180px] flex flex-col justify-between overflow-hidden p-0 gap-0 cursor-pointer`}
         onClick={onOpenSheet}
       >
         <div className="flex flex-col items-start gap-2 flex-grow">

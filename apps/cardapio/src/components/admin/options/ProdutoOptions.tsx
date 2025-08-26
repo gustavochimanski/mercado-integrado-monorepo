@@ -61,7 +61,7 @@ export function ProductOptions({ codBarras, onEdit, empresa_id, vitrineId }: Pro
               <Pencil className="mr-2 w-4 h-4" /> Editar
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setConfirmOpen(true)}>
-              <Trash2 className="mr-2 w-4 h-4" /> Remover
+              <Trash2 className="mr-2 w-4 h-4" /> Desvincular
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -71,8 +71,8 @@ export function ProductOptions({ codBarras, onEdit, empresa_id, vitrineId }: Pro
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Confirmar remoção"
-        description="Tem certeza que deseja remover este produto? Esta ação é irreversível."
-        confirmText="Sim, remover"
+        description="Tem certeza que deseja Desvincular este produto? "
+        confirmText="Sim, Desvincular"
         cancelText="Cancelar"
         onConfirm={handleConfirmRemove}
         onCancel={() => setConfirmOpen(false)}

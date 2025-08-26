@@ -97,8 +97,8 @@ const AdminVitrineOptions = ({
       <ConfirmDialog
         open={openConfirmDelete}
         onOpenChange={setOpenConfirmDelete}
-        title="Excluir Subcategoria"
-        description="Tem certeza que deseja excluir esta subcategoria? Esta ação não pode ser desfeita."
+        title="Excluir vitrine"
+        description="Tem certeza que deseja excluir esta vitrine? Esta ação não pode ser desfeita."
         confirmText="Excluir"
         onConfirm={handleDelete}
       />
