@@ -83,13 +83,12 @@ export default function VitrineDestaques({
             produto={p}
             onOpenSheet={() => onSelectProduto?.(p)}
             onEdit={() => console.log("editar", p.cod_barras)}
-            isHome
             vitrineId={vitrineId}
           />
         ))}
 
         {/* Card "Adicionar Produto" (só para admin) */}
-        <CardAddProduto empresaId={empresaId} vitrineId={vitrineId} is_home={is_home} />
+        <CardAddProduto empresaId={empresaId} vitrineId={vitrineId}  />
 
         {/* Card "Ver mais" no final */}
         {hasHref ? (
