@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-
 import { setTelefoneCliente } from "@cardapio/stores/client/PhoneStore";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import { useMutateCliente } from "@cardapio/services/useQueryCliente";
 
 interface Props {
   open: boolean;
@@ -19,6 +19,8 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: 
   const [telefone, setTelefone] = useState("");
   const [erro, setErro] = useState("");
 
+  const { create } = useMutateCliente(); // hook para criar cliente
+
   function handleConfirmar() {
     const telefoneLimpo = telefone.replace(/\D/g, "");
 
@@ -30,12 +32,23 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: 
       return setErro("Digite um telefone válido (com DDD).");
     }
 
-    localStorage.setItem("nomeCliente", nome);
-    setTelefoneCliente(telefoneLimpo);
+    // 🔥 Cria cliente na API
+    create.mutate(
+      { nome, telefone: telefoneLimpo }, // 👈 email fake só se for obrigatório
+      {
+        onSuccess: (cliente: any) => {
+          // guarda nome e telefone (store)
+          setTelefoneCliente(telefoneLimpo);
 
-    setErro("");
-    onConfirm?.(); // opcional, se quiser fazer algo depois
-    onClose();
+          setErro("");
+          onConfirm?.();
+          onClose();
+        },
+        onError: () => {
+          setErro("Erro ao criar cliente. Tente novamente.");
+        },
+      }
+    );
   }
 
   return (
@@ -71,7 +84,9 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: 
         </div>
 
         <DialogFooter className="mt-4">
-          <Button onClick={handleConfirmar}>Confirmar</Button>
+          <Button onClick={handleConfirmar} disabled={create.isPending}>
+            {create.isPending ? "Salvando..." : "Confirmar"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
