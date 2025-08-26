@@ -23,17 +23,16 @@ export default function SubcategoryVitrineSection({
   return (
     <>
       {vitrinesFilho.map((vit) => (
-            <ProductsSection
-            key={vit.id}
-            codCategoria={vit.cod_categoria}
-            empresaId={empresaId}
-            isHome={false}
-            produtos={vit.produtos}
-            sectionRefFactory={sectionRefFactory} // já é do tipo correto
-            onOpenSheet={onOpenSheet}
-            onMeta={onMeta}
-            />
-
+        <ProductsSection
+          key={vit.id}
+          codCategoria={vit.cod_categoria}
+          empresaId={empresaId}
+          isHome={false}
+          produtos={vit.produtos}
+          sectionRefFactory={sectionRefFactory} // já é do tipo correto
+          onOpenSheet={onOpenSheet}
+          onMeta={onMeta}
+          />
       ))}
     </>
   );
