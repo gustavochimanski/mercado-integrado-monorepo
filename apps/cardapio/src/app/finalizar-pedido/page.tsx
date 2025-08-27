@@ -21,36 +21,46 @@ import EnderecoStep from "@cardapio/components/Shared/finalizar-pedido/EnderecoS
 import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/PagamentoStep";
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
 
-
 export default function FinalizarPedidoPage() {
   const { items, totalPrice, clear, observacao } = useCart();
   const { finalizarPedido, loading } = useFinalizarPedido();
   const router = useRouter();
 
-  if (items.length === 0){
-    router.push("/")
-  }
+  // --- CLIENTE E PREFERÊNCIAS ---
+  const [cliente, setCliente] = useState<any>(null);
+  const [enderecoId, setEnderecoId] = useState<number | null>(null);
+  const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
 
-  const cliente = getCliente();
   const [currentTab, setCurrentTab] = useState<"endereco" | "pagamento" | "revisao">("endereco");
-
-  const enderecoId = getEnderecoPadraoId();
-  const meioPagamentoId = getMeioPagamentoId();
-
-  const { data: enderecos = [] } = useQueryEnderecos(cliente.tokenCliente, { enabled: !!cliente.tokenCliente });
-  const { create, update, remove } = useMutateEndereco(cliente.tokenCliente ?? "");
-
   const [showClienteModal, setShowClienteModal] = useState(false);
 
+  useEffect(() => {
+    // só roda no client
+    const c = getCliente();
+    if (!c?.tokenCliente) {
+      setShowClienteModal(true);
+    } else {
+      setCliente(c);
+      setEnderecoId(getEnderecoPadraoId());
+      setPagamentoId(getMeioPagamentoId());
+    }
+
+    // redireciona se o carrinho estiver vazio
+    if (items.length === 0) {
+      router.push("/");
+    }
+  }, [items, router]);
+
+  // --- ENDEREÇOS ---
+  const { data: enderecos = [] } = useQueryEnderecos(cliente?.tokenCliente, { enabled: !!cliente?.tokenCliente });
+  const { create, update, remove } = useMutateEndereco(cliente?.tokenCliente ?? "");
+
+  // --- MEIOS DE PAGAMENTO ---
   const meiosPagamento = [
     { id: 1, nome: "Dinheiro" },
     { id: 2, nome: "Cartão de Crédito" },
     { id: 3, nome: "PIX" },
   ];
-
-  useEffect(() => {
-    if (!cliente?.tokenCliente) setShowClienteModal(true);
-  }, [cliente]);
 
   const handleFinalizar = async () => {
     try {
@@ -96,8 +106,11 @@ export default function FinalizarPedidoPage() {
     }
   };
 
+  // --- RENDER ---
+  if (!cliente) return <div>Carregando...</div>; // espera o client
+
   return (
-    <div className=" w-full flex flex-col gap-4 p-4">
+    <div className="w-full flex flex-col gap-4 p-4">
       <ClienteIdentificacaoModal
         open={showClienteModal}
         onClose={() => setShowClienteModal(false)}
@@ -121,7 +134,7 @@ export default function FinalizarPedidoPage() {
                   <EnderecoStep
                     enderecos={enderecos}
                     enderecoId={enderecoId}
-                    onSelect={(id: number) => setEnderecoPadraoId(id)}
+                    onSelect={(id: number) => { setEnderecoPadraoId(id); setEnderecoId(id); }}
                     onAdd={(novo: EnderecoCreate) => create.mutate(novo)}
                     onUpdate={(atualizado: any) => update.mutate(atualizado)}
                     onDelete={(id: number) => remove.mutate(id)}
@@ -135,7 +148,7 @@ export default function FinalizarPedidoPage() {
                   <PagamentoStep
                     meios={meiosPagamento}
                     selecionado={meioPagamentoId}
-                    onSelect={(id: number) => setMeioPagamentoId(id)}
+                    onSelect={(id: number) => { setMeioPagamentoId(id); setPagamentoId(id); }}
                   />
                 ),
               },
@@ -146,9 +159,9 @@ export default function FinalizarPedidoPage() {
                   <RevisaoStep
                     items={items}
                     observacao={observacao}
-                    endereco={enderecos.find((e) => e.id === enderecoId)}
-                    pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId)}
-                    total={totalPrice()}
+                    endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
+                    pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
+                    total={totalPrice() || 0}
                   />
                 ),
               },
@@ -156,9 +169,7 @@ export default function FinalizarPedidoPage() {
           />
         </CardContent>
 
-        <CardFooter className="w-full">
-          {renderFooterButton()}
-        </CardFooter>
+        <CardFooter className="w-full">{renderFooterButton()}</CardFooter>
       </Card>
     </div>
   );
