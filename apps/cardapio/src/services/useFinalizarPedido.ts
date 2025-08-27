@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import { FinalizarPedidoPayload } from "@cardapio/types/pedido";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import {
   getTelefoneCliente,
   getEnderecoPadraoId,
-  getMeioPagamentoId,
 } from "@cardapio/stores/client/ClientStore";
 import { api } from "@cardapio/app/api/api";
+import { FinalizarPedidoRequest } from "@cardapio/types/pedido";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
@@ -27,24 +26,22 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
       return;
     }
 
-    const empresaId = getEmpresaId();
-    const telefoneCliente = getTelefoneCliente();
-    const enderecoEntregaId = getEnderecoPadraoId();
-    const meioPagamentoId = getMeioPagamentoId();
+    const empresa_id = getEmpresaId();
+    const telefone_cliente = getTelefoneCliente();
+    const endereco_id = getEnderecoPadraoId();
 
-    if (!empresaId || !telefoneCliente || !enderecoEntregaId) {
+    if (!empresa_id || !telefone_cliente || !endereco_id) {
       toast.error("Informações do cliente incompletas.");
       return;
     }
 
-    const payload: FinalizarPedidoPayload = {
-      telefoneCliente,
-      empresaId,
-      enderecoEntregaId: String(enderecoEntregaId),
-      meioPagamentoId: meioPagamentoId ? String(meioPagamentoId) : undefined,
-      observacaoGeral: observacao,
+    const payload: FinalizarPedidoRequest = {
+      telefone_cliente,
+      empresa_id,
+      endereco_id,
+      observacao_geral: observacao,
       itens: items.map((i) => ({
-        codigoProduto: i.cod_barras, // ⚡ agora bate com ItemPedido
+        produto_cod_barras: i.cod_barras,
         quantidade: i.quantity,
         observacao: i.observacao,
       })),

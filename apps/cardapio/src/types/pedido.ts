@@ -1,16 +1,19 @@
 // Representa um item do pedido
-export interface ItemPedido {
-  codigoProduto: string; // ⚡ obrigatório e camelCase
+export interface ItemPedidoRequest {
+  produto_cod_barras: string;
   quantidade: number;
   observacao?: string;
 }
 
 // Payload enviado para finalizar um pedido
-export interface FinalizarPedidoPayload {
-  telefoneCliente: string;
-  empresaId: number;
-  meioPagamentoId?: string;
-  enderecoEntregaId?: string;
-  observacaoGeral?: string;
-  itens: ItemPedido[];
+export interface FinalizarPedidoRequest {
+  telefone_cliente?: string;
+  empresa_id: number;
+  endereco_id?: number;
+  tipo_entrega?: "DELIVERY" | "RETIRADA"; // TipoEntregaEnum
+  origem?: "WEB" | "APP"; // OrigemPedidoEnum
+  observacao_geral?: string;
+  cupom_id?: number;
+  troco_para?: number;
+  itens: ItemPedidoRequest[];
 }

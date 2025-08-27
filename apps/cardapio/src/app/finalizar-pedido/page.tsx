@@ -14,35 +14,31 @@ import EnderecoModal from "@cardapio/components/Shared/finalizar-pedido/Endereco
 import MeioPagamentoModal from "@cardapio/components/Shared/finalizar-pedido/MeioPagamentoModal";
 import { useFinalizarPedido } from "@cardapio/services/useFinalizarPedido";
 import { Button } from "@cardapio/components/Shared/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@cardapio/components/Shared/ui/card";
 
 export default function FinalizarPedidoPage() {
-  const { items, totalPrice, clear } = useCart();
+  const { items, totalPrice, clear, observacao } = useCart();
   const { finalizarPedido, loading } = useFinalizarPedido();
   const router = useRouter();
 
-  const [loaded, setLoaded] = useState(false); // garante que cliente do storage foi carregado
+  const [loaded, setLoaded] = useState(false);
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [showEnderecoModal, setShowEnderecoModal] = useState(false);
   const [showPagamentoModal, setShowPagamentoModal] = useState(false);
 
-  // Carrega cliente do store e define modais iniciais
-  useEffect(() => {
-    const cliente = getCliente();
-    const enderecoId = getEnderecoPadraoId();
-    const meioPagamentoId = getMeioPagamentoId();
+  // Dados do cliente
+  const cliente = getCliente();
+  const enderecoId = getEnderecoPadraoId();
+  const meioPagamentoId = getMeioPagamentoId();
 
+  useEffect(() => {
     setShowClienteModal(!cliente.telefone);
     setShowEnderecoModal(!!cliente.telefone && !enderecoId);
     setShowPagamentoModal(!!cliente.telefone && !!enderecoId && !meioPagamentoId);
-
     setLoaded(true);
   }, []);
 
   const proximoModal = () => {
-    const cliente = getCliente();
-    const enderecoId = getEnderecoPadraoId();
-    const meioPagamentoId = getMeioPagamentoId();
-
     if (!cliente.telefone) setShowClienteModal(true);
     else if (!enderecoId) setShowEnderecoModal(true);
     else if (!meioPagamentoId) setShowPagamentoModal(true);
@@ -56,14 +52,15 @@ export default function FinalizarPedidoPage() {
       clear();
       router.push("/pedido-confirmado");
     } catch (err) {
-      console.error("Erro ao finalizar pedido:", err);
+      console.error("Erro ao finalizar pedido");
     }
   };
 
-  if (!loaded) return null; // evita render antes de carregar o store
+  if (!loaded) return null;
 
   return (
     <>
+      {/* ---- Modais ---- */}
       <ClienteIdentificacaoModal
         open={!!showClienteModal}
         onClose={() => setShowClienteModal(false)}
@@ -91,15 +88,40 @@ export default function FinalizarPedidoPage() {
         }}
       />
 
-      {/* Resumo do pedido */}
-      <div className="max-w-lg mx-auto p-4 space-y-4">
-        <h1 className="text-2xl font-bold">Finalizar Pedido</h1>
-        <p>Itens no carrinho: {items.length}</p>
-        <p>Total: R$ {totalPrice().toFixed(2)}</p>
+      {/* ---- Resumo do Pedido ---- */}
+      <div className="min-h-screen w-full flex flex-col gap-4 p-2">
+        <Card className="p-2">
+          <CardHeader>
+            <h1 className="text-2xl font-bold">Finalizar Pedido</h1>
+          </CardHeader>
 
-        <Button onClick={handleFinalizar} disabled={loading}>
-          {loading ? "Enviando..." : "Finalizar Pedido"}
-        </Button>
+          <CardContent className="space-y-3">
+            <h2 className="text-lg font-semibold">Itens</h2>
+            <ul className="list-disc list-inside">
+              {items.map((item) => (
+                <li key={item.cod_barras}>
+                  {item.quantity}x {item.nome} – R$ {(item.preco * item.quantity).toFixed(2)}
+                  {item.observacao && (
+                    <p className="text-sm text-gray-500">Obs: {item.observacao}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-2">
+              <p><strong>Observação do pedido:</strong> {observacao || "Nenhuma"}</p>
+              <p><strong>Endereço escolhido:</strong> {enderecoId ? `#${enderecoId}` : "Não informado"}</p>
+              <p><strong>Forma de pagamento:</strong> {meioPagamentoId ? `#${meioPagamentoId}` : "Não informado"}</p>
+              <p><strong>Total:</strong> R$ {totalPrice().toFixed(2)}</p>
+            </div>
+          </CardContent>
+
+          <CardFooter className="w-full">
+            <Button onClick={handleFinalizar} disabled={loading}>
+              {loading ? "Enviando..." : "Finalizar Pedido"}
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     </>
   );
