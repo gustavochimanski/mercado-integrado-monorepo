@@ -7,7 +7,7 @@ import { getCookie } from "cookies-next";
 
 import { Button } from "@supervisor/components/ui/button";
 import { Card, CardContent } from "@supervisor/components/ui/card";
-import { useEmpresas } from "@supervisor/services/global/useGetEmpresasMensura";
+import { useEmpresas } from "@supervisor/services/global/useQueryEmpresasMensura";
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 
 // Ajuste aqui seus links de ambiente
