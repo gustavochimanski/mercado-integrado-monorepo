@@ -6,8 +6,6 @@ import { persist, createJSONStorage } from "zustand/middleware";
 /* ---------- Types ---------- */
 export interface CartItem {
   cod_barras: string;
-  nome: string;
-  preco: number;
   quantity: number;
   empresaId: number;
   imagem?: string | null;
@@ -37,7 +35,11 @@ const withLogger =
     const wrap =
       (name: keyof T, action: any) =>
       (...args: any[]) => {
+        console.group(`CartStore Action: ${String(name)}`);
+        console.log("Args:", args);
         const result = action(...args);
+        console.log("State after:", get());
+        console.groupEnd();
         return result;
       };
 
@@ -59,9 +61,7 @@ export const useCart = create<CartState>()(
       items: [],
       observacao: "",
 
-      setObservacao: (texto) => {
-        set({ observacao: texto });
-      },
+      setObservacao: (texto) => set({ observacao: texto }),
 
       add: (item) => {
         const items = get().items;
@@ -84,9 +84,7 @@ export const useCart = create<CartState>()(
       inc: (cod_barras, step = 1) =>
         set({
           items: get().items.map((p: { cod_barras: string; quantity: number; }) =>
-            p.cod_barras === cod_barras
-              ? { ...p, quantity: p.quantity + step }
-              : p
+            p.cod_barras === cod_barras ? { ...p, quantity: p.quantity + step } : p
           ),
         }),
 
@@ -94,9 +92,7 @@ export const useCart = create<CartState>()(
         set({
           items: get().items
             .map((p: { cod_barras: string; quantity: number; }) =>
-              p.cod_barras === cod_barras
-                ? { ...p, quantity: p.quantity - step }
-                : p
+              p.cod_barras === cod_barras ? { ...p, quantity: p.quantity - step } : p
             )
             .filter((p: { quantity: number; }) => p.quantity > 0),
         }),
@@ -104,9 +100,7 @@ export const useCart = create<CartState>()(
       updateObservacaoItem: (cod_barras, texto) =>
         set({
           items: get().items.map((item: { cod_barras: string; }) =>
-            item.cod_barras === cod_barras
-              ? { ...item, observacao: texto }
-              : item
+            item.cod_barras === cod_barras ? { ...item, observacao: texto } : item
           ),
         }),
 

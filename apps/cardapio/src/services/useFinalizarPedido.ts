@@ -5,11 +5,12 @@ import { toast } from "sonner";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import {
-  getTelefoneCliente,
+  getTokenCliente,
   getEnderecoPadraoId,
+  getMeioPagamentoId,
 } from "@cardapio/stores/client/ClientStore";
-import { api } from "@cardapio/app/api/api";
 import { FinalizarPedidoRequest } from "@cardapio/types/pedido";
+import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
@@ -27,10 +28,11 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
     }
 
     const empresa_id = getEmpresaId();
-    const telefone_cliente = getTelefoneCliente();
+    const telefone_cliente = getTokenCliente();
     const endereco_id = getEnderecoPadraoId();
+    const meio_pagamento_id = getMeioPagamentoId();
 
-    if (!empresa_id || !telefone_cliente || !endereco_id) {
+    if (!empresa_id || !telefone_cliente || !endereco_id || !meio_pagamento_id) {
       toast.error("Informações do cliente incompletas.");
       return;
     }
@@ -39,7 +41,12 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
       telefone_cliente,
       empresa_id,
       endereco_id,
-      observacao_geral: observacao,
+      meio_pagamento_id,
+      tipo_entrega: "DELIVERY", // default
+      origem: "WEB",            // default
+      observacao_geral: observacao || undefined,
+      cupom_id: undefined,
+      troco_para: undefined,
       itens: items.map((i) => ({
         produto_cod_barras: i.cod_barras,
         quantidade: i.quantity,
@@ -49,7 +56,7 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
 
     try {
       setLoading(true);
-      await api.post("/delivery/pedidos/checkout", payload);
+      await apiClienteAdmin.post("/delivery/pedidos/checkout", payload);
       toast.success("Pedido finalizado!");
       clear();
     } catch (err: any) {

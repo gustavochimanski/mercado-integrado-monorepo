@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { useMutateCliente } from "@cardapio/services/useQueryCliente";
-import { setCliente, setTelefoneCliente } from "@cardapio/stores/client/ClientStore";
+import { setCliente } from "@cardapio/stores/client/ClientStore";
 
 interface Props {
   open: boolean;
@@ -40,7 +40,6 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: 
         // salva nome e telefone no store
         setCliente({
           nome,
-          telefone: telefoneLimpo
         });
 
         setErro("");

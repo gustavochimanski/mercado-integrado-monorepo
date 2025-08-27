@@ -15,5 +15,6 @@ export interface FinalizarPedidoRequest {
   observacao_geral?: string;
   cupom_id?: number;
   troco_para?: number;
+  meio_pagamento_id: number
   itens: ItemPedidoRequest[];
 }

@@ -1,4 +1,5 @@
 import { api } from "@cardapio/app/api/api";
+import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -6,7 +7,7 @@ import { toast } from "sonner";
 /** 🎯 Tipos */
 export interface EnderecoOut {
   id: number;
-  cliente_telefone: string;
+  token_cliente: string;
   logradouro: string;
   numero?: string;
   complemento?: string;
@@ -20,7 +21,7 @@ export interface EnderecoOut {
 }
 
 export interface EnderecoCreate {
-  cliente_telefone: string;
+  token_cliente: string;
   logradouro: string;
   numero?: string;
   complemento?: string;
@@ -33,15 +34,15 @@ export interface EnderecoCreate {
 export interface EnderecoUpdate extends Partial<EnderecoCreate> {}
 
 /** 🔎 Buscar endereços do cliente */
-export function useQueryEnderecos(clienteId?: string, opts?: { enabled?: boolean }) {
+export function useQueryEnderecos(token_cliente?: string, opts?: { enabled?: boolean }) {
   return useQuery({
-    queryKey: ["enderecos", clienteId],
+    queryKey: ["enderecos", token_cliente],
     queryFn: async () => {
-      if (!clienteId) return [];
-      const { data } = await api.get<EnderecoOut[]>(`api/delivery/enderecos?cliente_id=${clienteId}`);
+      if (!token_cliente) return [];
+      const { data } = await apiClienteAdmin.get<EnderecoOut[]>(`/delivery/enderecos?cliente=${token_cliente}`);
       return data;
     },
-    enabled: opts?.enabled ?? !!clienteId,
+    enabled: opts?.enabled ?? !!token_cliente,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -51,16 +52,16 @@ export function useQueryEnderecos(clienteId?: string, opts?: { enabled?: boolean
 }
 
 /** 🛠️ Criar / Atualizar / Deletar endereços */
-export function useMutateEndereco(clienteId: string) {
+export function useMutateEndereco(token_cliente: string) {
   const qc = useQueryClient();
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["enderecos", clienteId] });
+    qc.invalidateQueries({ queryKey: ["enderecos", token_cliente] });
   };
 
   const create = useMutation({
     mutationFn: (body: EnderecoCreate) =>
-      api.post<EnderecoOut>("/delivery/enderecos", body),
+      apiClienteAdmin.post<EnderecoOut>("/delivery/enderecos", body),
     onSuccess: () => {
       toast.success("Endereço criado com sucesso!");
       invalidate();
@@ -70,7 +71,7 @@ export function useMutateEndereco(clienteId: string) {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number } & EnderecoUpdate) =>
-      api.put<EnderecoOut>(`/delivery/enderecos/${id}`, body),
+      apiClienteAdmin.put<EnderecoOut>(`/delivery/enderecos/${id}`, body),
     onSuccess: () => {
       toast.success("Endereço atualizado com sucesso!");
       invalidate();
@@ -80,7 +81,7 @@ export function useMutateEndereco(clienteId: string) {
 
   const remove = useMutation({
     mutationFn: (id: number) =>
-      api.delete<void>(`/delivery/enderecos/${id}`),
+      apiClienteAdmin.delete<void>(`/delivery/enderecos/${id}`),
     onSuccess: () => {
       toast.success("Endereço removido!");
       invalidate();

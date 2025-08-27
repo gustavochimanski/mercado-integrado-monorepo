@@ -1,17 +1,16 @@
 // ClientStore.ts
 export interface ClienteStore {
-  id?: number;              // id do cliente (quando vem da API)
+  id?: number;               // id do cliente (quando vem da API)
   nome?: string;
-  telefone?: string;
   email?: string;
-  cpf_cnpj?: string;
+  cpf_cnpj?: string | null;
 
+  tokenCliente?: string;     // super token do cliente
   enderecoPadraoId?: number; // último endereço usado/salvo
   meioPagamentoId?: number;  // último meio de pagamento escolhido
 }
 
 let clienteCache: ClienteStore = {}; // cache em memória
-
 const STORAGE_KEY = "clienteStore";
 
 // 🔎 Carrega do localStorage ao iniciar
@@ -53,15 +52,16 @@ export function clearCliente() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// Helpers individuais
-export function getTelefoneCliente(): string {
-  return getCliente().telefone ?? "";
+// Helpers individuais para super token
+export function getTokenCliente(): string {
+  return getCliente().tokenCliente ?? "";
 }
-export function setTelefoneCliente(telefone: string) {
-  if (!telefone || telefone.trim().length < 8) return;
-  setCliente({ telefone });
+export function setTokenCliente(token: string) {
+  if (!token || token.trim().length < 8) return;
+  setCliente({ tokenCliente: token });
 }
 
+// Helpers para endereço/meio de pagamento continuam iguais
 export function getEnderecoPadraoId(): number | null {
   return getCliente().enderecoPadraoId ?? null;
 }
