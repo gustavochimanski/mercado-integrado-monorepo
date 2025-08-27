@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const BASE = "api/delivery/produtos";
+const BASE = "/delivery/produtos";
 
 // ----- Tipos (espelham seu backend) -----
 export type ProdutoListItem = {

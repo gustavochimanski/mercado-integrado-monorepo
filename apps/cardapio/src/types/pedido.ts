@@ -1,15 +1,16 @@
-// types/pedido.ts
+// Representa um item do pedido
 export interface ItemPedido {
-  produto_cod_barras: string;
+  codigoProduto: string; // ⚡ obrigatório e camelCase
   quantidade: number;
   observacao?: string;
 }
 
+// Payload enviado para finalizar um pedido
 export interface FinalizarPedidoPayload {
-  telefone_cliente: string;
-  empresa_id: number;
-  meio_pagamento_id?: string;
-  endereco_entrega_id?: string;
-  observacao_geral?: string;
+  telefoneCliente: string;
+  empresaId: number;
+  meioPagamentoId?: string;
+  enderecoEntregaId?: string;
+  observacaoGeral?: string;
   itens: ItemPedido[];
 }

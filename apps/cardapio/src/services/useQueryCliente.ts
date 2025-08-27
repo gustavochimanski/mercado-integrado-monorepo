@@ -28,7 +28,7 @@ export function useQueryCliente(opts?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["cliente", "current"],
     queryFn: async () => {
-      const { data } = await api.get<ClienteOut>("api/delivery/cliente");
+      const { data } = await api.get<ClienteOut>("/delivery/cliente");
       return data;
     },
     enabled: opts?.enabled ?? true, // permite desabilitar manualmente
@@ -50,7 +50,7 @@ export function useMutateCliente() {
 
   const create = useMutation({
     mutationFn: (body: ClienteCreate) =>
-      api.post<ClienteOut>("api/delivery/cliente/", body),
+      api.post<ClienteOut>("/delivery/cliente/", body),
     onSuccess: () => {
       toast.success("Cliente criado com sucesso!");
       invalidate();
@@ -60,7 +60,7 @@ export function useMutateCliente() {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number } & ClienteUpdate) =>
-      api.put<ClienteOut>(`api/delivery/cliente/${id}`, body),
+      api.put<ClienteOut>(`/delivery/cliente/${id}`, body),
     onSuccess: () => {
       toast.success("Cliente atualizado com sucesso!");
       invalidate();

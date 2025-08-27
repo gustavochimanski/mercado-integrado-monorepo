@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { setTelefoneCliente } from "@cardapio/stores/client/PhoneStore";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Button } from "../ui/button";
 import { useMutateCliente } from "@cardapio/services/useQueryCliente";
+import { setCliente, setTelefoneCliente } from "@cardapio/stores/client/ClientStore";
 
 interface Props {
   open: boolean;
@@ -33,22 +33,27 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: 
     }
 
     // 🔥 Cria cliente na API
-    create.mutate(
-      { nome, telefone: telefoneLimpo }, // 👈 email fake só se for obrigatório
-      {
-        onSuccess: (cliente: any) => {
-          // guarda nome e telefone (store)
-          setTelefoneCliente(telefoneLimpo);
+  create.mutate(
+    { nome, telefone: telefoneLimpo },
+    {
+      onSuccess: () => {
+        // salva nome e telefone no store
+        setCliente({
+          nome,
+          telefone: telefoneLimpo
+        });
 
-          setErro("");
-          onConfirm?.();
-          onClose();
-        },
-        onError: () => {
-          setErro("Erro ao criar cliente. Tente novamente.");
-        },
-      }
-    );
+        setErro("");
+        onConfirm?.();
+        onClose();
+      },
+      onError: () => {
+        setErro("Erro ao criar cliente. Tente novamente.");
+      },
+    }
+  );
+
+
   }
 
   return (

@@ -137,7 +137,7 @@ export function useMutateCategoria() {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: UpdateCategoriaBody) =>
-      apiAdmin.put(`api/delivery/categorias/${id}`, body),
+      apiAdmin.put(`/delivery/categorias/${id}`, body),
     onSuccess: () => {
       toast.success("Categoria atualizada com sucesso!");
       reloadPage();
@@ -150,7 +150,7 @@ export function useMutateCategoria() {
       const fd = new FormData();
       fd.append("cod_empresa", String(cod_empresa));
       fd.append("imagem", imagem);
-      return apiAdmin.patch(`api/delivery/categorias/${id}/imagem`, fd);
+      return apiAdmin.patch(`/delivery/categorias/${id}/imagem`, fd);
     },
     onSuccess: () => {
       toast.success("Imagem atualizada!");
@@ -160,7 +160,7 @@ export function useMutateCategoria() {
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiAdmin.delete(`api/delivery/categorias/${id}`),
+    mutationFn: (id: number) => apiAdmin.delete(`/delivery/categorias/${id}`),
     onSuccess: () => {
       toast.success("Categoria removida com sucesso!");
       reloadPage();
@@ -169,7 +169,7 @@ export function useMutateCategoria() {
   });
 
   const moveRight = useMutation({
-    mutationFn: (id: number) => apiAdmin.post(`api/delivery/categorias/${id}/move-right`),
+    mutationFn: (id: number) => apiAdmin.post(`/delivery/categorias/${id}/move-right`),
     onSuccess: () => {
       toast.success("Categoria movida para a direita!");
       reloadPage();
@@ -178,7 +178,7 @@ export function useMutateCategoria() {
   });
 
   const moveLeft = useMutation({
-    mutationFn: (id: number) => apiAdmin.post(`api/delivery/categorias/${id}/move-left`),
+    mutationFn: (id: number) => apiAdmin.post(`/delivery/categorias/${id}/move-left`),
     onSuccess: () => {
       toast.success("Categoria movida para a esquerda!");
       reloadPage();
