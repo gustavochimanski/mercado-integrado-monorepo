@@ -8,8 +8,8 @@ export type ProdutoListItem = {
     imagem?: (string | null);
     preco_venda: number;
     custo?: (number | null);
-    cod_categoria: number;
-    label_categoria: string;
+    cod_categoria?: (number | null);
+    label_categoria?: (string | null);
     disponivel: boolean;
     exibir_delivery?: boolean;
 };

@@ -9,7 +9,7 @@ import type { TipoEntregaEnum } from './TipoEntregaEnum';
 export type PedidoResponse = {
     id: number;
     status: PedidoStatusEnum;
-    cliente_id: (number | null);
+    telefone_cliente?: (string | null);
     empresa_id: number;
     entregador_id: (number | null);
     endereco_id: (number | null);

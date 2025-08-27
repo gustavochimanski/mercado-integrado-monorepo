@@ -2,31 +2,66 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AtualizarVitrineRequest } from '../models/AtualizarVitrineRequest';
 import type { CriarVitrineRequest } from '../models/CriarVitrineRequest';
-import type { CriarVitrineResponse } from '../models/CriarVitrineResponse';
+import type { ToggleHomeRequest } from '../models/ToggleHomeRequest';
 import type { VinculoRequest } from '../models/VinculoRequest';
+import type { VitrineOut } from '../models/VitrineOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DeliveryVitrinesService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * Listar Vitrines
-     * @param empresaId ID da empresa
-     * @param codCategoria Filtrar por ID da categoria
-     * @returns CriarVitrineResponse Successful Response
+     * Search Vitrines
+     * @param q Busca por título/slug
+     * @param codCategoria Filtra por categoria vinculada
+     * @param isHome Filtra por destaque da home
+     * @param limit
+     * @param offset
+     * @returns VitrineOut Successful Response
      * @throws ApiError
      */
-    public listarVitrinesApiDeliveryVitrinesGet(
-        empresaId: number,
+    public searchVitrinesApiDeliveryVitrinesSearchGet(
+        q?: (string | null),
         codCategoria?: (number | null),
-    ): CancelablePromise<Array<CriarVitrineResponse>> {
+        isHome?: (boolean | null),
+        limit: number = 30,
+        offset?: number,
+    ): CancelablePromise<Array<VitrineOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/vitrines',
+            url: '/api/delivery/vitrines/search',
             query: {
-                'empresa_id': empresaId,
+                'q': q,
                 'cod_categoria': codCategoria,
+                'is_home': isHome,
+                'limit': limit,
+                'offset': offset,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Toggle Home Vitrine
+     * @param vitrineId ID da vitrine
+     * @param requestBody
+     * @returns VitrineOut Successful Response
+     * @throws ApiError
+     */
+    public toggleHomeVitrineApiDeliveryVitrinesVitrineIdHomePatch(
+        vitrineId: number,
+        requestBody: ToggleHomeRequest,
+    ): CancelablePromise<VitrineOut> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/api/delivery/vitrines/{vitrine_id}/home',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
@@ -35,12 +70,12 @@ export class DeliveryVitrinesService {
     /**
      * Criar Vitrine
      * @param requestBody
-     * @returns CriarVitrineResponse Successful Response
+     * @returns VitrineOut Successful Response
      * @throws ApiError
      */
     public criarVitrineApiDeliveryVitrinesPost(
         requestBody: CriarVitrineRequest,
-    ): CancelablePromise<CriarVitrineResponse> {
+    ): CancelablePromise<VitrineOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/delivery/vitrines',
@@ -52,8 +87,32 @@ export class DeliveryVitrinesService {
         });
     }
     /**
+     * Atualizar Vitrine
+     * @param vitrineId ID da vitrine
+     * @param requestBody
+     * @returns VitrineOut Successful Response
+     * @throws ApiError
+     */
+    public atualizarVitrineApiDeliveryVitrinesVitrineIdPut(
+        vitrineId: number,
+        requestBody: AtualizarVitrineRequest,
+    ): CancelablePromise<VitrineOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/delivery/vitrines/{vitrine_id}',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Deletar Vitrine
-     * @param vitrineId
+     * @param vitrineId ID da vitrine
      * @returns void
      * @throws ApiError
      */
@@ -73,8 +132,7 @@ export class DeliveryVitrinesService {
     }
     /**
      * Vincular Produto
-     * Vincula um produto (empresa x cod_barras) à vitrine.
-     * @param vitrineId
+     * @param vitrineId ID da vitrine
      * @param requestBody
      * @returns void
      * @throws ApiError
@@ -98,10 +156,9 @@ export class DeliveryVitrinesService {
     }
     /**
      * Desvincular Produto
-     * Desvincula um produto (empresa x cod_barras) da vitrine.
-     * @param vitrineId
-     * @param codBarras
-     * @param empresaId
+     * @param vitrineId ID da vitrine
+     * @param codBarras Código de barras do produto
+     * @param empresaId Empresa do vínculo
      * @returns void
      * @throws ApiError
      */

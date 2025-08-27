@@ -15,12 +15,12 @@ export class AuthService {
      * @returns TokenResponse Successful Response
      * @throws ApiError
      */
-    public loginUsuarioAuthTokenPost(
+    public loginUsuarioApiAuthTokenPost(
         requestBody: LoginRequest,
     ): CancelablePromise<TokenResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/auth/token',
+            url: '/api/auth/token',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -34,10 +34,10 @@ export class AuthService {
      * @returns UserResponse Successful Response
      * @throws ApiError
      */
-    public obterUsuarioAtualAuthMeGet(): CancelablePromise<UserResponse> {
+    public obterUsuarioAtualApiAuthMeGet(): CancelablePromise<UserResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/auth/me',
+            url: '/api/auth/me',
         });
     }
 }

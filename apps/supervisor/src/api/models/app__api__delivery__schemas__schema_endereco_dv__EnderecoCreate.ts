@@ -2,8 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type app__api__delivery__schemas__endereco_dv_schema__EnderecoCreate = {
-    cliente_id: number;
+export type app__api__delivery__schemas__schema_endereco_dv__EnderecoCreate = {
     cep?: (string | null);
     logradouro?: (string | null);
     numero?: (string | null);

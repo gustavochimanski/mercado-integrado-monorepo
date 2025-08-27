@@ -2,10 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CriarVitrineRequest = {
-    cod_categoria: number;
-    titulo: string;
-    ordem?: number;
-    is_home?: boolean;
+export type Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch = {
+    cod_empresa: number;
+    imagem: Blob;
 };
 

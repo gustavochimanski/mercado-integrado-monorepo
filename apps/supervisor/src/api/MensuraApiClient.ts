@@ -7,7 +7,6 @@ import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
 import { AuthService } from './services/AuthService';
 import { BiService } from './services/BiService';
-import { CardPioService } from './services/CardPioService';
 import { ClienteService } from './services/ClienteService';
 import { ComprasService } from './services/ComprasService';
 import { DashboardService } from './services/DashboardService';
@@ -18,6 +17,7 @@ import { DeliveryEntregadoresService } from './services/DeliveryEntregadoresServ
 import { DeliveryVitrinesService } from './services/DeliveryVitrinesService';
 import { EmpresasService } from './services/EmpresasService';
 import { EnderecosService } from './services/EnderecosService';
+import { HomeService } from './services/HomeService';
 import { MetasService } from './services/MetasService';
 import { PedidosService } from './services/PedidosService';
 import { ProdutosDeliveryService } from './services/ProdutosDeliveryService';
@@ -28,7 +28,6 @@ type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class MensuraApiClient {
     public readonly auth: AuthService;
     public readonly bi: BiService;
-    public readonly cardPio: CardPioService;
     public readonly cliente: ClienteService;
     public readonly compras: ComprasService;
     public readonly dashboard: DashboardService;
@@ -39,6 +38,7 @@ export class MensuraApiClient {
     public readonly deliveryVitrines: DeliveryVitrinesService;
     public readonly empresas: EmpresasService;
     public readonly enderecos: EnderecosService;
+    public readonly home: HomeService;
     public readonly metas: MetasService;
     public readonly pedidos: PedidosService;
     public readonly produtosDelivery: ProdutosDeliveryService;
@@ -60,7 +60,6 @@ export class MensuraApiClient {
         });
         this.auth = new AuthService(this.request);
         this.bi = new BiService(this.request);
-        this.cardPio = new CardPioService(this.request);
         this.cliente = new ClienteService(this.request);
         this.compras = new ComprasService(this.request);
         this.dashboard = new DashboardService(this.request);
@@ -71,6 +70,7 @@ export class MensuraApiClient {
         this.deliveryVitrines = new DeliveryVitrinesService(this.request);
         this.empresas = new EmpresasService(this.request);
         this.enderecos = new EnderecosService(this.request);
+        this.home = new HomeService(this.request);
         this.metas = new MetasService(this.request);
         this.pedidos = new PedidosService(this.request);
         this.produtosDelivery = new ProdutosDeliveryService(this.request);

@@ -6,9 +6,10 @@ import type { ItemPedidoRequest } from './ItemPedidoRequest';
 import type { OrigemPedidoEnum } from './OrigemPedidoEnum';
 import type { TipoEntregaEnum } from './TipoEntregaEnum';
 export type FinalizarPedidoRequest = {
-    cliente_id?: (number | null);
     empresa_id: number;
-    endereco_id?: (number | null);
+    telefone_cliente?: (string | null);
+    endereco_id: number;
+    meio_pagamento_id: number;
     tipo_entrega?: TipoEntregaEnum;
     origem?: OrigemPedidoEnum;
     observacao_geral?: (string | null);

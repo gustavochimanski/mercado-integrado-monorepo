@@ -16,7 +16,7 @@ export async function loginService(
   password: string
 ): Promise<TokenResponse> {
 
-  const data = await mensuraApi.auth.loginUsuarioAuthTokenPost({
+  const data = await mensuraApi.auth.loginUsuarioApiAuthTokenPost({
     username,
     password
   } satisfies LoginRequest)

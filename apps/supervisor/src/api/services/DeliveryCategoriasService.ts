@@ -2,47 +2,35 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_criar_categoria_api_delivery_categorias_post } from '../models/Body_criar_categoria_api_delivery_categorias_post';
-import type { Body_editar_categoria_api_delivery_categorias__cat_id__put } from '../models/Body_editar_categoria_api_delivery_categorias__cat_id__put';
+import type { Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch } from '../models/Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch';
+import type { CategoriaDeliveryIn } from '../models/CategoriaDeliveryIn';
 import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
+import type { CategoriaSearchOut } from '../models/CategoriaSearchOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DeliveryCategoriasService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * List Categorias
-     * @param parentId Filtra por pai (subcategorias)
-     * @returns CategoriaDeliveryOut Successful Response
+     * Search Categorias
+     * @param q Termo de busca por descrição/slug
+     * @param limit
+     * @param offset
+     * @returns CategoriaSearchOut Successful Response
      * @throws ApiError
      */
-    public listCategoriasApiDeliveryCategoriasGet(
-        parentId?: (number | null),
-    ): CancelablePromise<Array<CategoriaDeliveryOut>> {
+    public searchCategoriasApiDeliveryCategoriasSearchGet(
+        q?: (string | null),
+        limit: number = 30,
+        offset?: number,
+    ): CancelablePromise<Array<CategoriaSearchOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/categorias',
+            url: '/api/delivery/categorias/search',
             query: {
-                'parent_id': parentId,
+                'q': q,
+                'limit': limit,
+                'offset': offset,
             },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Criar Categoria
-     * @param formData
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public criarCategoriaApiDeliveryCategoriasPost(
-        formData: Body_criar_categoria_api_delivery_categorias_post,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/delivery/categorias',
-            formData: formData,
-            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },
@@ -71,13 +59,13 @@ export class DeliveryCategoriasService {
     /**
      * Editar Categoria
      * @param catId
-     * @param formData
+     * @param requestBody
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public editarCategoriaApiDeliveryCategoriasCatIdPut(
         catId: number,
-        formData: Body_editar_categoria_api_delivery_categorias__cat_id__put,
+        requestBody: CategoriaDeliveryIn,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'PUT',
@@ -85,8 +73,8 @@ export class DeliveryCategoriasService {
             path: {
                 'cat_id': catId,
             },
-            formData: formData,
-            mediaType: 'multipart/form-data',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
@@ -107,6 +95,25 @@ export class DeliveryCategoriasService {
             path: {
                 'cat_id': catId,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Criar Categoria
+     * @param requestBody
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public criarCategoriaApiDeliveryCategoriasPost(
+        requestBody: CategoriaDeliveryIn,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/delivery/categorias',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
@@ -153,21 +160,24 @@ export class DeliveryCategoriasService {
         });
     }
     /**
-     * Toggle Home
-     * Alterna `tipo_exibicao` para exibir na Home (valor 'P') ou remover.
+     * Upload Imagem Categoria
      * @param catId
+     * @param formData
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public toggleHomeApiDeliveryCategoriasCatIdToggleHomePost(
+    public uploadImagemCategoriaApiDeliveryCategoriasCatIdImagemPatch(
         catId: number,
+        formData: Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/delivery/categorias/{cat_id}/toggle-home',
+            method: 'PATCH',
+            url: '/api/delivery/categorias/{cat_id}/imagem',
             path: {
                 'cat_id': catId,
             },
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },

@@ -2,12 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Body_editar_categoria_api_delivery_categorias__cat_id__put = {
-    cod_empresa: number;
+export type CategoriaDeliveryIn = {
     descricao: string;
     slug: string;
     parent_id?: (number | null);
+    imagem?: (string | null);
     posicao?: (number | null);
-    imagem?: (Blob | null);
 };
 

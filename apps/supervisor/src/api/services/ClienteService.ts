@@ -10,17 +10,6 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ClienteService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * Read Current Cliente
-     * @returns ClienteOut Successful Response
-     * @throws ApiError
-     */
-    public readCurrentClienteApiDeliveryClienteGet(): CancelablePromise<ClienteOut> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/delivery/cliente/',
-        });
-    }
-    /**
      * Create New Cliente
      * @param requestBody
      * @returns ClienteOut Successful Response
@@ -40,21 +29,41 @@ export class ClienteService {
         });
     }
     /**
-     * Update Existing Cliente
-     * @param clienteId
+     * Read Current Cliente
+     * @param xSuperToken
+     * @returns ClienteOut Successful Response
+     * @throws ApiError
+     */
+    public readCurrentClienteApiDeliveryClienteMeGet(
+        xSuperToken: string,
+    ): CancelablePromise<ClienteOut> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/delivery/cliente/me',
+            headers: {
+                'x-super-token': xSuperToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Update Current Cliente
+     * @param xSuperToken
      * @param requestBody
      * @returns ClienteOut Successful Response
      * @throws ApiError
      */
-    public updateExistingClienteApiDeliveryClienteClienteIdPut(
-        clienteId: number,
+    public updateCurrentClienteApiDeliveryClienteMePut(
+        xSuperToken: string,
         requestBody: ClienteUpdate,
     ): CancelablePromise<ClienteOut> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/cliente/{cliente_id}',
-            path: {
-                'cliente_id': clienteId,
+            url: '/api/delivery/cliente/me',
+            headers: {
+                'x-super-token': xSuperToken,
             },
             body: requestBody,
             mediaType: 'application/json',

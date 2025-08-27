@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type EnderecoOut = {
-    cliente_id: number;
     cep?: (string | null);
     logradouro?: (string | null);
     numero?: (string | null);

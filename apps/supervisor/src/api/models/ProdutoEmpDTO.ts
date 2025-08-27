@@ -10,6 +10,7 @@ export type ProdutoEmpDTO = {
     vitrine_id?: (number | null);
     sku_empresa?: (string | null);
     disponivel: boolean;
+    exibir_delivery: boolean;
     created_at: string;
     updated_at: string;
 };

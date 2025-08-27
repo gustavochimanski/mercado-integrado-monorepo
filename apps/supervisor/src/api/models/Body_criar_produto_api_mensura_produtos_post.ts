@@ -2,13 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Body_atualizar_produto_api_delivery_produtos_delivery__cod_barras__put = {
+export type Body_criar_produto_api_mensura_produtos_post = {
     cod_empresa: number;
+    cod_barras: string;
     descricao: string;
-    cod_categoria: number;
-    vitrine_id?: (number | null);
     preco_venda: (number | string);
-    custo: (number | string);
+    custo?: (number | string | null);
     data_cadastro?: (string | null);
     imagem?: (Blob | null);
 };

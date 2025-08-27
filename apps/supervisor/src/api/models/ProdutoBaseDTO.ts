@@ -6,7 +6,7 @@ export type ProdutoBaseDTO = {
     cod_barras: string;
     descricao: string;
     imagem?: (string | null);
-    cod_categoria: number;
+    cod_categoria?: (number | null);
     ativo: boolean;
     unidade_medida?: (string | null);
     exibir_delivery?: boolean;

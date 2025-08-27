@@ -2,15 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ProdutoEmpMiniDTO } from './ProdutoEmpMiniDTO';
-export type VitrineComProdutosResponse = {
+export type VitrineOut = {
     id: number;
+    cod_categoria: number;
     titulo: string;
     slug: string;
     ordem: number;
-    produtos: Array<ProdutoEmpMiniDTO>;
     is_home: boolean;
-    cod_categoria?: (number | null);
-    href_categoria?: (string | null);
 };
 

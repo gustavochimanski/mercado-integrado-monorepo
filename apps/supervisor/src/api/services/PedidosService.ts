@@ -12,16 +12,21 @@ export class PedidosService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Checkout
+     * @param xSuperToken
      * @param requestBody
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
     public checkoutApiDeliveryPedidosCheckoutPost(
+        xSuperToken: string,
         requestBody: FinalizarPedidoRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/delivery/pedidos/checkout',
+            headers: {
+                'x-super-token': xSuperToken,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -39,8 +44,8 @@ export class PedidosService {
      */
     public confirmarPagamentoApiDeliveryPedidosPedidoIdConfirmarPagamentoPost(
         pedidoId: number,
-        metodo?: PagamentoMetodoEnum,
-        gateway?: PagamentoGatewayEnum,
+        metodo: PagamentoMetodoEnum = 'PIX',
+        gateway: PagamentoGatewayEnum = 'PIX_INTERNO',
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',

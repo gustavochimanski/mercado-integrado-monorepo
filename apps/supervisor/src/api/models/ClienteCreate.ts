@@ -5,7 +5,7 @@
 export type ClienteCreate = {
     nome: string;
     cpf?: (string | null);
-    telefone?: (string | null);
+    telefone: string;
     email?: (string | null);
     data_nascimento?: (string | null);
 };
