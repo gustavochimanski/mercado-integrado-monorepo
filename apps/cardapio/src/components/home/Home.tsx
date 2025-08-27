@@ -54,7 +54,7 @@ export default function HomePage() {
   if (isError) return null;
 
   return (
-    <div className="min-h-screen flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <LoginWrapper />
       <HeaderComponent />
 

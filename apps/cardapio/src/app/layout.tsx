@@ -52,7 +52,9 @@ export default function RootLayout({
                 "--destructive-border": "#dc2626",
               } as React.CSSProperties}
             />
-            {children}
+            <div className="min-h-screen">
+              {children}
+            </div>
             <CartGlobalClient />
           </UserProvider>
         </ReactQueryProvider>

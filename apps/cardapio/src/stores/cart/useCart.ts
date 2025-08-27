@@ -6,6 +6,8 @@ import { persist, createJSONStorage } from "zustand/middleware";
 /* ---------- Types ---------- */
 export interface CartItem {
   cod_barras: string;
+  nome: string;
+  preco: number;
   quantity: number;
   empresaId: number;
   imagem?: string | null;
