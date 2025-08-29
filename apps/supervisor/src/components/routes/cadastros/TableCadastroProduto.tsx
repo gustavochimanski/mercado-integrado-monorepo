@@ -8,7 +8,7 @@ import { Button } from "@supervisor/components/ui/button";
 import type { GridColDef} from "@mui/x-data-grid";
 import { CirclePlus, Trash2 } from "lucide-react";
 
-import { useFetchCadProdMensura } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
+import { useFetchCadProdMensura } from "@supervisor/services/useQueryProduto";
 
 // ⬇️ Lazy-load do DataGrid wrapper (só no client)
 const DataTableComponentMui = dynamic(

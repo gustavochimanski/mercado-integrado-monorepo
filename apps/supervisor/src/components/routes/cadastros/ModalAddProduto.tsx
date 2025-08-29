@@ -4,7 +4,7 @@ import { Button } from "@supervisor/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/components/ui/dialog";
 import { Input } from "@supervisor/components/ui/input";
 import { Label } from "@supervisor/components/ui/label";
-import { useMutateProduto } from "@supervisor/hooks/routes/cadastros/useQueryProduto";
+import { useMutateProduto } from "@supervisor/services/useQueryProduto";
 import { useEffect, useState } from "react";
 
 interface Props {

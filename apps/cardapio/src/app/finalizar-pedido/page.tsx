@@ -10,7 +10,7 @@ import {
   setEnderecoPadraoId,
   setMeioPagamentoId,
 } from "@cardapio/stores/client/ClientStore";
-import { useFinalizarPedido } from "@cardapio/services/useFinalizarPedido";
+import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
 import { useQueryEnderecos, useMutateEndereco, EnderecoCreate } from "@cardapio/services/useQueryEndereco";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@cardapio/components/Shared/ui/card";
@@ -64,7 +64,7 @@ export default function FinalizarPedidoPage() {
   const handleFinalizar = async () => {
     try {
       await finalizarPedido();
-      router.push("/pedido-confirmado");
+      // router.push("/pedido-confirmado");
     } catch (err) {
       console.error("Erro ao finalizar pedido", err);
     }

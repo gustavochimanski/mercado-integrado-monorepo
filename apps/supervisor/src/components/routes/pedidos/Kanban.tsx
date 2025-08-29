@@ -8,32 +8,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@supervisor/components/ui/dropdown-menu";
-import { ArrowLeft, ArrowRight, MoreVertical } from "lucide-react";
+import { ArrowLeft, ArrowRight, MoreVertical, Trash2 } from "lucide-react";
+import { PedidoKanban, PedidoStatus } from "@supervisor/types/pedido";
+import {  useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
 
-/** Agora o mapa traz label + headerClass (cor do cabeçalho) */
+// ---------------- Status Map completo ----------------
 type StatusMeta = { label: string; headerClass: string };
-
-const statusMap: Record<string, { label: string; headerClass: string }> = {
-  P: { label: "Pendente", headerClass: "bg-[hsl(var(--chart-red))] text-white" },
-  E: { label: "Em preparo", headerClass: "bg-[hsl(var(--chart-yellow))] text-white" },
+const statusMap: Record<PedidoStatus, StatusMeta> = {
+  P: { label: "Pendente", headerClass: "bg-yellow-500 text-white" },
+  R: { label: "Em preparo", headerClass: "bg-purple-600 text-white" },
   S: { label: "Saiu para entrega", headerClass: "bg-[hsl(var(--primary))] text-white" },
-  F: { label: "Finalizado", headerClass: "bg-[hsl(var(--chart-green))] text-white" },
+  E: { label: "Entregue", headerClass: "bg-green-600 text-white" },
+  C: { label: "Cancelados", headerClass: "bg-red-600 text-white" },
 };
 
-
-const pedidosIniciais = [
-  { id: "001", cliente: "João", status: "P", valor: 28.9 },
-  { id: "002", cliente: "Maria", status: "P", valor: 42.5 },
-  { id: "003", cliente: "Carlos", status: "E", valor: 19.0 },
-  { id: "004", cliente: "Ana", status: "P", valor: 39.9 },
-  { id: "005", cliente: "Paula", status: "P", valor: 51.2 },
-  { id: "006", cliente: "João", status: "P", valor: 28.9 },
-  { id: "007", cliente: "João", status: "P", valor: 28.9 },
-  { id: "008", cliente: "João", status: "P", valor: 28.9 },
-  { id: "009", cliente: "João", status: "P", valor: 28.9 },
-  { id: "010", cliente: "Carlos", status: "E", valor: 19.0 },
-];
-
+// ---------------- PedidoCard ----------------
 const PedidoCard = React.memo(
   ({
     pedido,
@@ -43,14 +32,14 @@ const PedidoCard = React.memo(
     onMoverSelecionadosPara,
     temSelecionados,
   }: {
-    pedido: typeof pedidosIniciais[0];
-    onMover: (id: string, novoStatus: string) => void;
+    pedido: PedidoKanban;
+    onMover: (id: number, novoStatus: PedidoStatus) => void;
     selecionado: boolean;
-    onToggleSelecionado: (id: string) => void;
-    onMoverSelecionadosPara: (novoStatus: string) => void;
+    onToggleSelecionado: (id: number) => void;
+    onMoverSelecionadosPara: (novoStatus: PedidoStatus) => void;
     temSelecionados: boolean;
   }) => {
-    const statusKeys = Object.keys(statusMap);
+    const statusKeys = Object.keys(statusMap) as PedidoStatus[];
     const index = statusKeys.indexOf(pedido.status);
     const anterior = statusKeys[index - 1];
     const proximo = statusKeys[index + 1];
@@ -68,10 +57,10 @@ const PedidoCard = React.memo(
             <div className="text-sm">
               <p className="font-semibold text-primary">#{pedido.id}</p>
               <p className="text-muted-foreground text-xs">
-                Cliente: {pedido.cliente}
+                Cliente: {pedido.telefone_cliente || "—"}
               </p>
               <p className="text-green-600 font-bold text-sm">
-                R$ {pedido.valor.toFixed(2)}
+                R$ {pedido.valor_total.toFixed(2)}
               </p>
             </div>
           </div>
@@ -108,6 +97,10 @@ const PedidoCard = React.memo(
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
+
+            <DropdownMenuItem>
+              <Trash2 />
+            </DropdownMenuItem>
           </DropdownMenu>
         </div>
       </div>
@@ -116,6 +109,7 @@ const PedidoCard = React.memo(
 );
 PedidoCard.displayName = "PedidoCard";
 
+// ---------------- KanbanColuna ----------------
 const KanbanColuna = React.memo(
   ({
     statusMeta,
@@ -126,25 +120,22 @@ const KanbanColuna = React.memo(
     onMoverSelecionadosPara,
   }: {
     statusMeta: StatusMeta;
-    pedidos: typeof pedidosIniciais;
-    onMover: (id: string, novoStatus: string) => void;
-    selecionados: Set<string>;
-    onToggleSelecionado: (id: string) => void;
-    onMoverSelecionadosPara: (novoStatus: string) => void;
+    pedidos: PedidoKanban[];
+    onMover: (id: number, novoStatus: PedidoStatus) => void;
+    selecionados: Set<number>;
+    onToggleSelecionado: (id: number) => void;
+    onMoverSelecionadosPara: (novoStatus: PedidoStatus) => void;
   }) => (
     <div className="flex flex-col h-full flex-1 bg-muted rounded shadow overflow-hidden min-w-[250px]">
-      {/* Cabeçalho colorido conforme o status */}
-      <h2
-        className={`text-center font-bold p-2 border-b ${statusMeta.headerClass}`}
-      >
+      <h2 className={`text-center font-bold p-2 border-b ${statusMeta.headerClass}`}>
         {statusMeta.label}
       </h2>
       <ScrollArea className="flex-1 min-h-0">
         <div className="flex flex-col gap-2 p-2">
           {pedidos.length > 0 ? (
-            pedidos.map((pedido, i) => (
+            pedidos.map((pedido) => (
               <PedidoCard
-                key={`${pedido.id}-${i}`}
+                key={pedido.id}
                 pedido={pedido}
                 onMover={onMover}
                 selecionado={selecionados.has(pedido.id)}
@@ -164,11 +155,27 @@ const KanbanColuna = React.memo(
 );
 KanbanColuna.displayName = "KanbanColuna";
 
+// ---------------- KanbanPedidos principal ----------------
 const KanbanPedidos = () => {
-  const [pedidos, setPedidos] = useState(pedidosIniciais);
-  const [selecionados, setSelecionados] = useState<Set<string>>(new Set());
+  const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
+  const [colunasVisiveis, setColunasVisiveis] = useState<Record<PedidoStatus, boolean>>(() =>
+    Object.keys(statusMap).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<PedidoStatus, boolean>)
+  );
 
-  const toggleSelecionado = (id: string) => {
+  const { data: pedidos = [], isLoading } = useFetchPedidosAdminKanban();
+  const { atualizarStatus } = useMutatePedidoAdmin();
+
+  // ---------------- Agrupando pedidos por status ----------------
+  const pedidosPorStatus = useMemo(() => {
+    const agrupados: Record<PedidoStatus, PedidoKanban[]> = {} as Record<PedidoStatus, PedidoKanban[]>;
+    (Object.keys(statusMap) as PedidoStatus[]).forEach((s) => (agrupados[s] = []));
+    pedidos.forEach((pedido) => {
+      agrupados[pedido.status]?.push(pedido);
+    });
+    return agrupados;
+  }, [pedidos]);
+
+  const toggleSelecionado = (id: number) => {
     setSelecionados((prev) => {
       const novo = new Set(prev);
       novo.has(id) ? novo.delete(id) : novo.add(id);
@@ -176,50 +183,20 @@ const KanbanPedidos = () => {
     });
   };
 
-  const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>(
-    () => {
-      const visiveis: Record<string, boolean> = {};
-      Object.keys(statusMap).forEach((key) => {
-        visiveis[key] = true;
-      });
-      return visiveis;
-    }
-  );
-
-  const pedidosPorStatus = useMemo(() => {
-    const agrupados: Record<string, typeof pedidosIniciais> = {};
-    for (const key of Object.keys(statusMap)) {
-      agrupados[key] = [];
-    }
-    for (const pedido of pedidos) {
-      agrupados[pedido.status]?.push(pedido);
-    }
-    return agrupados;
-  }, [pedidos]);
-
-  const handleToggleColuna = (key: string) => {
-    setColunasVisiveis((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  const handleToggleColuna = (key: PedidoStatus) => {
+    setColunasVisiveis((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleMoverPedido = (id: string, novoStatus: string) => {
-    setPedidos((prev) =>
-      prev.map((pedido) =>
-        pedido.id === id ? { ...pedido, status: novoStatus } : pedido
-      )
-    );
+  const handleMoverPedido = (id: number, novoStatus: PedidoStatus) => {
+    atualizarStatus.mutate({ id, status: novoStatus });
   };
 
-  const handleMoverSelecionados = (novoStatus: string) => {
-    setPedidos((prev) =>
-      prev.map((pedido) =>
-        selecionados.has(pedido.id) ? { ...pedido, status: novoStatus } : pedido
-      )
-    );
+  const handleMoverSelecionados = (novoStatus: PedidoStatus) => {
+    selecionados.forEach((id) => atualizarStatus.mutate({ id, status: novoStatus }));
     setSelecionados(new Set());
   };
+
+  if (isLoading) return <p>Carregando pedidos...</p>;
 
   return (
     <div className="h-[calc(100vh-100px)] flex flex-col p-4 space-y-4">
@@ -228,8 +205,8 @@ const KanbanPedidos = () => {
           <label key={key} className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              checked={colunasVisiveis[key]}
-              onChange={() => handleToggleColuna(key)}
+              checked={colunasVisiveis[key as PedidoStatus]}
+              onChange={() => handleToggleColuna(key as PedidoStatus)}
               className="accent-blue-500"
             />
             {meta.label}
@@ -241,7 +218,7 @@ const KanbanPedidos = () => {
           value=""
           onChange={(e) => {
             if (!e.target.value) return;
-            handleMoverSelecionados(e.target.value);
+            handleMoverSelecionados(e.target.value as PedidoStatus);
           }}
         >
           <option value="">Mover selecionados para...</option>
@@ -253,21 +230,19 @@ const KanbanPedidos = () => {
         </select>
 
         {selecionados.size > 0 && (
-          <span className="text-sm text-muted-foreground">
-            {selecionados.size} selecionado(s)
-          </span>
+          <span className="text-sm text-muted-foreground">{selecionados.size} selecionado(s)</span>
         )}
       </div>
 
       <div className="flex-1 overflow-x-auto">
         <div className="flex gap-4 h-full">
           {Object.entries(statusMap)
-            .filter(([key]) => colunasVisiveis[key])
+            .filter(([key]) => colunasVisiveis[key as PedidoStatus])
             .map(([statusKey, meta]) => (
               <KanbanColuna
                 key={statusKey}
                 statusMeta={meta}
-                pedidos={pedidosPorStatus[statusKey] || []}
+                pedidos={pedidosPorStatus[statusKey as PedidoStatus] || []}
                 onMover={handleMoverPedido}
                 selecionados={selecionados}
                 onToggleSelecionado={toggleSelecionado}
