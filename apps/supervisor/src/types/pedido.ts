@@ -5,11 +5,12 @@ export type OrigemPedido = "WEB" | "APP" | "PDV";
 export type PagamentoMetodo = "DINHEIRO" | "CARTAO" | "PIX";
 export type PagamentoGateway = "PIX_INTERNO" | "PAGSEGURO" | "STRIPE";
 
-// types/pedidoKanban.ts
 export type PedidoKanban = {
   id: number;
-  status: "P" | "R" | "S" | "E" | "C"; // PedidoStatus
+  status: "P" | "R" | "S" | "E" | "C";
   telefone_cliente?: string | null;
+  nome_cliente?: string | null;   // novo campo
   valor_total: number;
   data_criacao: string;
+  endereco_cliente?: string | null;     // novo campo
 };

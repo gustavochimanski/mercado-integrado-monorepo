@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@supervisor/components/ui/dropdown-menu";
-import { ArrowLeft, ArrowRight, MoreVertical, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleX, MoreVertical, Trash2 } from "lucide-react";
 import { PedidoKanban, PedidoStatus } from "@supervisor/types/pedido";
 import {  useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
 
@@ -45,8 +45,9 @@ const PedidoCard = React.memo(
     const proximo = statusKeys[index + 1];
 
     return (
-      <div className="bg-background border rounded-xl p-3 shadow-sm flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-3">
+      <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2">
+        {/* Header */}
+        <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -54,14 +55,11 @@ const PedidoCard = React.memo(
               onChange={() => onToggleSelecionado(pedido.id)}
               className="accent-primary"
             />
-            <div className="text-sm">
-              <p className="font-semibold text-primary">#{pedido.id}</p>
-              <p className="text-muted-foreground text-xs">
-                Cliente: {pedido.telefone_cliente || "—"}
-              </p>
-              <p className="text-green-600 font-bold text-sm">
-                R$ {pedido.valor_total.toFixed(2)}
-              </p>
+            <div>
+              <p className="font-semibold text-primary text-base">#{pedido.id}</p>
+              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[pedido.status].headerClass}`}>
+                {statusMap[pedido.status].label}
+              </span>
             </div>
           </div>
 
@@ -81,7 +79,7 @@ const PedidoCard = React.memo(
                   }
                 >
                   <ArrowLeft size={16} className="mr-2" />
-                  Mover para {statusMap[anterior].label}
+                  {statusMap[anterior].label}
                 </DropdownMenuItem>
               )}
               {proximo && (
@@ -93,21 +91,36 @@ const PedidoCard = React.memo(
                   }
                 >
                   <ArrowRight size={16} className="mr-2" />
-                  Mover para {statusMap[proximo].label}
+                  {statusMap[proximo].label}
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={() => onMover(pedido.id, "C")}>
+                <CircleX size={16} className="mr-2" /> Cancelar
+              </DropdownMenuItem>
             </DropdownMenuContent>
-
-            <DropdownMenuItem>
-              <Trash2 />
-            </DropdownMenuItem>
           </DropdownMenu>
+        </div>
+
+        {/* Informações do cliente */}
+        <div className="text-sm text-muted-foreground flex flex-col gap-1">
+          <span><strong>Cliente:</strong> {pedido.nome_cliente || "—"}</span>
+          <span><strong>Telefone:</strong> {pedido.telefone_cliente || "—"}</span>
+          {pedido.endereco_cliente && (
+            <span className="truncate"><strong>Endereço:</strong> {pedido.endereco_cliente}</span>
+          )}
+        </div>
+
+        {/* Valor total */}
+        <div className="mt-1 flex justify-end font-bold text-foreground">
+          R$ {pedido.valor_total.toFixed(2)}
         </div>
       </div>
     );
   }
 );
+
 PedidoCard.displayName = "PedidoCard";
+
 
 // ---------------- KanbanColuna ----------------
 const KanbanColuna = React.memo(

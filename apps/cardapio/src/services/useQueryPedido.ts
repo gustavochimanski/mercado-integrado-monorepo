@@ -2,7 +2,6 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import React from "react";
 import { Pedido } from "@cardapio/types/pedido";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 
@@ -13,16 +12,6 @@ export interface PedidoItem {
   status: string;
   valor_total: number;
   data_criacao: string;
-}
-
-/** ⏳ debounce simples para evitar flood no servidor enquanto digita */
-function useDebounced<T>(value: T, delay = 300) {
-  const [debounced, setDebounced] = React.useState(value);
-  React.useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
 }
 
 // ==========================================================================
@@ -63,50 +52,6 @@ export function usePedidoById(pedidoId: number | null, opts?: { enabled?: boolea
   });
 }
 
-// ==========================================================================
-// =========== Buscar pedidos com filtro q (server-side) ====================
-// ==========================================================================
-export function usePedidosSearch(
-  q: string,
-  opts: {
-    limit?: number;
-    offset?: number;
-    enabled?: boolean;
-    minLength?: number;
-    debounceMs?: number;
-    allowEmpty?: boolean;
-  } = {}
-) {
-  const {
-    limit = 30,
-    offset = 0,
-    enabled = true,
-    minLength = 2,
-    debounceMs = 300,
-    allowEmpty = false,
-  } = opts;
-
-  const qDeb = useDebounced(q ?? "", debounceMs);
-  const hasTerm = qDeb.trim().length >= minLength;
-  const canRun = enabled && (allowEmpty || hasTerm);
-
-  return useQuery({
-    queryKey: ["pedidos_search", allowEmpty ? qDeb : hasTerm ? qDeb : "", limit, offset],
-    queryFn: async () => {
-      const params: Record<string, any> = { limit, offset };
-      if (allowEmpty || hasTerm) params.q = qDeb.trim();
-      const { data } = await apiAdmin.get<PedidoItem[]>("/delivery/pedidos/search", { params });
-      return data;
-    },
-    enabled: canRun,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
-    placeholderData: (old) => old,
-  });
-}
 
 
 // ==========================================================================
@@ -120,35 +65,31 @@ export function useMutatePedido() {
     qc.invalidateQueries({ queryKey: ["pedidos_search"] });
   };
 
-  const reloadPage = () => {
-    invalidate();
-    window.location.reload();
-  };
-
   const create = useMutation({
     mutationFn: (body: Partial<PedidoItem>) => apiAdmin.post("/delivery/pedidos", body),
     onSuccess: () => {
       toast.success("Pedido criado com sucesso!");
-      reloadPage();
+      invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const updateStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
-      apiAdmin.patch(`api/delivery/pedidos/${id}/status`, { status }),
+      apiAdmin.patch(`/delivery/pedidos/${id}/status`, { status }),
     onSuccess: () => {
       toast.success("Status do pedido atualizado!");
-      invalidate();
+      invalidate(); 
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
+
 
   const remove = useMutation({
     mutationFn: (id: number) => apiAdmin.delete(`/delivery/pedidos/${id}`),
     onSuccess: () => {
       toast.success("Pedido removido!");
-      reloadPage();
+      invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
