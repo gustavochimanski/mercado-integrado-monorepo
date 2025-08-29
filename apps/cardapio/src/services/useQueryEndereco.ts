@@ -51,6 +51,11 @@ export function useQueryEnderecos(token_cliente?: string, opts?: { enabled?: boo
   });
 }
 
+export function useGetEnderecoById(token_cliente?: string, opts?: { enabled?: boolean }) {
+  
+}
+
+
 /** 🛠️ Criar / Atualizar / Deletar endereços */
 export function useMutateEndereco(token_cliente: string) {
   const qc = useQueryClient();

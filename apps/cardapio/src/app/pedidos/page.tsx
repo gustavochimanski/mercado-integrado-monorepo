@@ -127,6 +127,7 @@ export default function RoutePedidos() {
                           <div className="flex justify-between font-bold text-emerald-600">
                             <span>Total</span>
                             <span>R$ {order.valor_total.toFixed(2)}</span>
+                            
                           </div>
                         </div>
                       </AccordionContent>
