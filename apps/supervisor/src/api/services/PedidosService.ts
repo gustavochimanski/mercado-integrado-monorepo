@@ -84,8 +84,6 @@ export class PedidosService {
      */
     public confirmarPagamentoApiDeliveryPedidosPedidoIdConfirmarPagamentoPost(
         pedidoId: number,
-        metodo: PagamentoMetodoEnum = 'PIX',
-        gateway: PagamentoGatewayEnum = 'PIX_INTERNO',
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',
@@ -94,8 +92,6 @@ export class PedidosService {
                 'pedido_id': pedidoId,
             },
             query: {
-                'metodo': metodo,
-                'gateway': gateway,
             },
             errors: {
                 422: `Validation Error`,
