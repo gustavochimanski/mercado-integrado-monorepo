@@ -162,6 +162,7 @@ const KanbanColuna = React.memo(
           )}
         </div>
         <ScrollBar orientation="vertical" />
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   )
