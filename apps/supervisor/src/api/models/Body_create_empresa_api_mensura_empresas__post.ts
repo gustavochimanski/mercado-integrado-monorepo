@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type EmpresaUpdate = {
-    nome?: (string | null);
+export type Body_create_empresa_api_mensura_empresas__post = {
+    nome: string;
     cnpj?: (string | null);
-    slug?: (string | null);
-    logo?: (string | null);
-    endereco_id?: (number | null);
+    slug: string;
+    endereco: string;
+    logo?: (Blob | null);
 };
 

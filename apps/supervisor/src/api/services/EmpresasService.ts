@@ -2,27 +2,27 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EmpresaCreate } from '../models/EmpresaCreate';
+import type { Body_create_empresa_api_mensura_empresas__post } from '../models/Body_create_empresa_api_mensura_empresas__post';
+import type { Body_update_empresa_api_mensura_empresas__id__put } from '../models/Body_update_empresa_api_mensura_empresas__id__put';
 import type { EmpresaResponse } from '../models/EmpresaResponse';
-import type { EmpresaUpdate } from '../models/EmpresaUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class EmpresasService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Create Empresa
-     * @param requestBody
+     * @param formData
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
     public createEmpresaApiMensuraEmpresasPost(
-        requestBody: EmpresaCreate,
+        formData: Body_create_empresa_api_mensura_empresas__post,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/mensura/empresas/',
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },
@@ -52,6 +52,30 @@ export class EmpresasService {
         });
     }
     /**
+     * Update Empresa
+     * @param id
+     * @param formData
+     * @returns EmpresaResponse Successful Response
+     * @throws ApiError
+     */
+    public updateEmpresaApiMensuraEmpresasIdPut(
+        id: number,
+        formData?: Body_update_empresa_api_mensura_empresas__id__put,
+    ): CancelablePromise<EmpresaResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/mensura/empresas/{id}',
+            path: {
+                'id': id,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Get Empresa
      * @param id
      * @returns EmpresaResponse Successful Response
@@ -66,30 +90,6 @@ export class EmpresasService {
             path: {
                 'id': id,
             },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Update Empresa
-     * @param id
-     * @param requestBody
-     * @returns EmpresaResponse Successful Response
-     * @throws ApiError
-     */
-    public updateEmpresaApiMensuraEmpresasIdPut(
-        id: number,
-        requestBody: EmpresaUpdate,
-    ): CancelablePromise<EmpresaResponse> {
-        return this.httpRequest.request({
-            method: 'PUT',
-            url: '/api/mensura/empresas/{id}',
-            path: {
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
