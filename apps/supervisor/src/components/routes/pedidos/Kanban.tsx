@@ -70,33 +70,66 @@ const PedidoCard = React.memo(
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {anterior && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    temSelecionados
-                      ? onMoverSelecionadosPara(anterior)
-                      : onMover(pedido.id, anterior)
-                  }
-                >
-                  <ArrowLeft size={16} className="mr-2" />
-                  {statusMap[anterior].label}
-                </DropdownMenuItem>
-              )}
-              {proximo && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    temSelecionados
-                      ? onMoverSelecionadosPara(proximo)
-                      : onMover(pedido.id, proximo)
-                  }
-                >
-                  <ArrowRight size={16} className="mr-2" />
-                  {statusMap[proximo].label}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => onMover(pedido.id, "C")}>
-                <CircleX size={16} className="mr-2" /> Cancelar
-              </DropdownMenuItem>
+<DropdownMenuContent align="end">
+  {anterior && (
+    <DropdownMenuItem
+      onClick={() =>
+        temSelecionados
+          ? onMoverSelecionadosPara(anterior)
+          : onMover(pedido.id, anterior)
+      }
+      className="flex items-center justify-between"
+    >
+      <div className="flex items-center gap-2">
+        <ArrowLeft size={16} />
+        Mover para
+      </div>
+      <span
+        className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[anterior].headerClass}`}
+      >
+        {statusMap[anterior].label}
+      </span>
+    </DropdownMenuItem>
+  )}
+
+  {proximo && (
+    <DropdownMenuItem
+      onClick={() =>
+        temSelecionados
+          ? onMoverSelecionadosPara(proximo)
+          : onMover(pedido.id, proximo)
+      }
+      className="flex items-center justify-between"
+    >
+      <div className="flex items-center gap-2">
+        <ArrowRight size={16} />
+        Mover para
+      </div>
+      <span
+        className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[proximo].headerClass}`}
+      >
+        {statusMap[proximo].label}
+      </span>
+    </DropdownMenuItem>
+  )}
+
+  <DropdownMenuItem
+    onClick={() => onMover(pedido.id, "C")}
+    className="flex items-center justify-between"
+  >
+    <div className="flex items-center gap-2">
+      <CircleX size={16} />
+      Mover para
+    </div>
+    <span
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap["C"].headerClass}`}
+    >
+      {statusMap["C"].label}
+    </span>
+  </DropdownMenuItem>
+</DropdownMenuContent>""
+
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
