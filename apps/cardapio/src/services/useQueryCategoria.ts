@@ -97,7 +97,7 @@ export function useCategoriasSearch(
       const params: Record<string, any> = { limit, offset };
       if (allowEmpty || hasTerm) params.q = qDeb.trim(); // não manda q vazio
       const { data } = await apiAdmin.get<CategoriaSearchItem[]>(
-        "api/delivery/categorias/search",
+        "/delivery/categorias/search",
         { params }
       );
       return data;
@@ -127,7 +127,7 @@ export function useMutateCategoria() {
   };
 
   const create = useMutation({
-    mutationFn: (body: CreateCategoriaBody) => apiAdmin.post("api/delivery/categorias", body),
+    mutationFn: (body: CreateCategoriaBody) => apiAdmin.post("/delivery/categorias", body),
     onSuccess: () => {
       toast.success("Categoria criada com sucesso!");
       reloadPage();
