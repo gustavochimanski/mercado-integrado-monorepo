@@ -106,7 +106,7 @@ const PedidoCard = React.memo(
           <span><strong>Cliente:</strong> {pedido.nome_cliente || "—"}</span>
           <span><strong>Telefone:</strong> {pedido.telefone_cliente || "—"}</span>
           {pedido.endereco_cliente && (
-            <span className="truncate"><strong>Endereço:</strong> {pedido.endereco_cliente}</span>
+            <span ><strong>Endereço:</strong> {pedido.endereco_cliente}</span>
           )}
         </div>
 
