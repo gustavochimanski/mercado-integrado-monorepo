@@ -12,6 +12,16 @@ import { ArrowLeft, ArrowRight, CircleX, MoreVertical, Trash2 } from "lucide-rea
 import { PedidoKanban, PedidoStatus } from "@supervisor/types/pedido";
 import {  useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@supervisor/components/ui/select";
+
+// ...
+
 // ---------------- Status Map completo ----------------
 type StatusMeta = { label: string; headerClass: string };
 const statusMap: Record<PedidoStatus, StatusMeta> = {
@@ -69,68 +79,66 @@ const PedidoCard = React.memo(
                 <MoreVertical size={18} />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-<DropdownMenuContent align="end">
-  {anterior && (
-    <DropdownMenuItem
-      onClick={() =>
-        temSelecionados
-          ? onMoverSelecionadosPara(anterior)
-          : onMover(pedido.id, anterior)
-      }
-      className="flex items-center justify-between"
-    >
-      <div className="flex items-center gap-2">
-        <ArrowLeft size={16} />
-        Mover para
-      </div>
-      <span
-        className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[anterior].headerClass}`}
-      >
-        {statusMap[anterior].label}
-      </span>
-    </DropdownMenuItem>
-  )}
+              <DropdownMenuContent align="end">
+                {anterior && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      temSelecionados
+                        ? onMoverSelecionadosPara(anterior)
+                        : onMover(pedido.id, anterior)
+                    }
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ArrowLeft size={16} />
+                      Mover para
+                    </div>
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[anterior].headerClass}`}
+                    >
+                      {statusMap[anterior].label}
+                    </span>
+                  </DropdownMenuItem>
+                )}
 
-  {proximo && (
-    <DropdownMenuItem
-      onClick={() =>
-        temSelecionados
-          ? onMoverSelecionadosPara(proximo)
-          : onMover(pedido.id, proximo)
-      }
-      className="flex items-center justify-between"
-    >
-      <div className="flex items-center gap-2">
-        <ArrowRight size={16} />
-        Mover para
-      </div>
-      <span
-        className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[proximo].headerClass}`}
-      >
-        {statusMap[proximo].label}
-      </span>
-    </DropdownMenuItem>
-  )}
+                {proximo && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      temSelecionados
+                        ? onMoverSelecionadosPara(proximo)
+                        : onMover(pedido.id, proximo)
+                    }
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ArrowRight size={16} />
+                      Mover para
+                    </div>
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[proximo].headerClass}`}
+                    >
+                      {statusMap[proximo].label}
+                    </span>
+                  </DropdownMenuItem>
+                )}
 
-  <DropdownMenuItem
-    onClick={() => onMover(pedido.id, "C")}
-    className="flex items-center justify-between"
-  >
-    <div className="flex items-center gap-2">
-      <CircleX size={16} />
-      Mover para
-    </div>
-    <span
-      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap["C"].headerClass}`}
-    >
-      {statusMap["C"].label}
-    </span>
-  </DropdownMenuItem>
-</DropdownMenuContent>""
+                <DropdownMenuItem
+                  onClick={() => onMover(pedido.id, "C")}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <CircleX size={16} />
+                    Mover para
+                  </div>
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap["C"].headerClass}`}
+                  >
+                    {statusMap["C"].label}
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
 
 
-            </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
@@ -260,21 +268,24 @@ const KanbanPedidos = () => {
           </label>
         ))}
 
-        <select
-          className="border rounded px-2 py-1 text-sm"
-          value=""
-          onChange={(e) => {
-            if (!e.target.value) return;
-            handleMoverSelecionados(e.target.value as PedidoStatus);
-          }}
-        >
-          <option value="">Mover selecionados para...</option>
-          {Object.entries(statusMap).map(([key, meta]) => (
-            <option key={key} value={key}>
-              {meta.label}
-            </option>
-          ))}
-        </select>
+
+        <Select onValueChange={(value) => handleMoverSelecionados(value as PedidoStatus)}>
+          <SelectTrigger className="w-[220px] text-sm">
+            <SelectValue placeholder="Mover selecionados para..." />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(statusMap).map(([key, meta]) => (
+              <SelectItem key={key} value={key}>
+                <span
+                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${meta.headerClass}`}
+                >
+                  {meta.label}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
 
         {selecionados.size > 0 && (
           <span className="text-sm text-muted-foreground">{selecionados.size} selecionado(s)</span>
