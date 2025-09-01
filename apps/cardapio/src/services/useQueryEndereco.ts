@@ -1,4 +1,4 @@
-import { api } from "@cardapio/app/api/api";
+
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

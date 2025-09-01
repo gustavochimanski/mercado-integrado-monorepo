@@ -2,6 +2,8 @@ import { api } from "@cardapio/app/api/api";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { setCliente } from "@cardapio/stores/client/ClientStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { toast } from "sonner";
 
 /** Tipos vindos do backend */
 export interface ClienteOut {
@@ -51,6 +53,10 @@ export function useMutateCliente() {
         tokenCliente: data.super_token,
       });
       invalidate();
+      toast.success("Cliente criado com sucesso!"); // 👈 feedback positivo
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error)); // 👈 toast de erro
     },
   });
 
@@ -65,6 +71,10 @@ export function useMutateCliente() {
         tokenCliente: data.super_token,
       });
       invalidate();
+      toast.success("Cliente atualizado com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
     },
   });
 
@@ -72,6 +82,12 @@ export function useMutateCliente() {
   const enviarCodigoNovoDispositivo = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
       api.post("/delivery/cliente/novo-dispositivo", body),
+    onSuccess: () => {
+      toast.success("Código enviado com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
+    },
   });
 
   /** Confirmar código OTP e receber token */
@@ -85,6 +101,10 @@ export function useMutateCliente() {
         tokenCliente: data.super_token,
       });
       invalidate();
+      toast.success("Código confirmado com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
     },
   });
 

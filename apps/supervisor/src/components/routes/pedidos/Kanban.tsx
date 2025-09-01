@@ -60,6 +60,9 @@ const PedidoCard = React.memo(
               <strong>Endereço:</strong> {pedido.endereco_cliente}
             </span>
           )}
+          <span>
+            <strong>Meio de Pagamento:</strong> {pedido.meio_pagamento_descricao || "—"}
+          </span>
         </div>
 
         {/* Valor total */}
