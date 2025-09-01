@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { ScrollArea, ScrollBar } from "@supervisor/components/ui/scroll-area";
 import { PedidoKanban, PedidoStatus } from "@supervisor/types/pedido";
 import { useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
+import { Checkbox } from "@supervisor/components/ui/checkbox";
 
 // ---------------- Status Map completo ----------------
 type StatusMeta = { label: string; headerClass: string };
@@ -207,14 +208,15 @@ const KanbanPedidos = () => {
     <div className="h-[calc(100vh-100px)] flex flex-col p-4 space-y-4">
       <div className="flex flex-wrap gap-4 items-center">
         {Object.entries(statusMap).map(([key, meta]) => (
-          <label key={key} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
+          <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
+            <Checkbox
               checked={colunasVisiveis[key as PedidoStatus]}
-              onChange={() => handleToggleColuna(key as PedidoStatus)}
-              className="accent-blue-500"
+              onCheckedChange={() => handleToggleColuna(key as PedidoStatus)}
+        
             />
-            {meta.label}
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold bg-slate-200 text-primary`}>
+              {meta.label}
+            </span>
           </label>
         ))}
       </div>
