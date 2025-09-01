@@ -7,7 +7,7 @@ import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
 import { useMutateParceiro, useParceiros } from "@supervisor/services/useQueryParceiros";
-import ParceiroModal from "./ParceiroModal";
+import ParceiroBannersModal from "./ParceiroBannerModal";
 
 export default function ParceirosTable() {
   const { data: parceiros = [], isLoading, refetch } = useParceiros();
@@ -108,17 +108,15 @@ export default function ParceirosTable() {
             rows={parceiros}
             columns={columns}
             getRowId={(row) => row.id}
-            autoHeight={false} // mantém a altura do container
             sx={{ height: "100%", width: "100%" }}
           />
         )}
       </div>
 
-      <ParceiroModal
+      <ParceiroBannersModal
         open={modalOpen}
         onOpenChange={setModalOpen}
         parceiro={selected}
-        onSaved={() => refetch()}
       />
 
       <ConfirmModal

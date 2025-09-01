@@ -17,6 +17,7 @@ import VitrineDestaques from "@cardapio/components/Shared/vitrine/VitrineDestaqu
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { CardHeader, CardTitle } from "../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useBanners } from "@cardapio/services/useQueryBanners";
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -45,6 +46,7 @@ export default function HomePage() {
 
   const categorias = data?.categorias ?? [];
   const vitrines = data?.vitrines ?? [];
+  const { data: data_banners } = useBanners()
 
   const add = useCart((s) => s.add);
   const handleAdd = useCallback(
@@ -88,6 +90,27 @@ export default function HomePage() {
           titulo="Categorias"
           empresaId={empresa_id}
         />
+
+        {data_banners && data_banners.length > 0 && (
+          <div className="overflow-x-auto">
+            <div className="flex flex-nowrap gap-4">
+              {data_banners.map((banner) => (
+                <div
+                  key={banner.id}
+                  className="flex-shrink-0 basis-1/4 aspect-[1/2] rounded-lg overflow-hidden shadow-md"
+                >
+                  <img
+                    src={banner.imagem}
+                    alt={banner.nome}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
 
         {/* Vitrines marcadas como is_home */}
         {vitrines
