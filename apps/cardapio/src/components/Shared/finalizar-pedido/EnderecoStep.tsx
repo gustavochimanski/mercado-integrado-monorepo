@@ -10,22 +10,33 @@ import { Pen, Trash2 } from "lucide-react";
 export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, onUpdate, onDelete }: any) {
   const [selected, setSelected] = useState(String(enderecoId ?? ""));
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [novo, setNovo] = useState({ logradouro: "", numero: "", cidade: "", estado: "", cep: "" });
 
   useEffect(() => setSelected(String(enderecoId ?? "")), [enderecoId]);
 
   const startEdit = (e: any) => {
     setEditingId(e.id);
+    setIsAddingNew(false);
     setNovo({ logradouro: e.logradouro, numero: e.numero || "", cidade: e.cidade, estado: e.estado, cep: e.cep });
   };
 
+  const startAddNew = () => {
+    setEditingId(null);
+    setIsAddingNew(true);
+    setNovo({ logradouro: "", numero: "", cidade: "", estado: "", cep: "" });
+  };
+
   const handleSave = () => {
-    if (editingId) onUpdate({ id: editingId, ...novo });
+    if (editingId !== null) onUpdate({ id: editingId, ...novo });
     else onAdd(novo);
 
     setEditingId(null);
+    setIsAddingNew(false);
     setNovo({ logradouro: "", numero: "", cidade: "", estado: "", cep: "" });
   };
+
+  const showForm = editingId !== null || isAddingNew || (!enderecos.length);
 
   return (
     <div className="space-y-3">
@@ -46,7 +57,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
         ))}
       </RadioGroup>
 
-      {(editingId !== null || editingId === null && !enderecos.length) && (
+      {showForm && (
         <div className="space-y-2 border p-3 rounded-md mt-2">
           <Input placeholder="Rua" value={novo.logradouro} onChange={(e) => setNovo({ ...novo, logradouro: e.target.value })} />
           <Input placeholder="Número" value={novo.numero} onChange={(e) => setNovo({ ...novo, numero: e.target.value })} />
@@ -55,14 +66,14 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
           <Input placeholder="CEP" value={novo.cep} onChange={(e) => setNovo({ ...novo, cep: e.target.value })} />
 
           <div className="flex gap-2 mt-2">
-            <Button onClick={handleSave}>{editingId ? "Salvar Alterações" : "Salvar Endereço"}</Button>
-            {editingId && <Button variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>}
+            <Button onClick={handleSave}>{editingId !== null ? "Salvar Alterações" : "Salvar Endereço"}</Button>
+            {(editingId !== null || isAddingNew) && <Button variant="outline" onClick={() => { setEditingId(null); setIsAddingNew(false); }}>Cancelar</Button>}
           </div>
         </div>
       )}
 
-      {!editingId && (
-        <Button variant="outline" onClick={() => setEditingId(null)}>+ Adicionar novo endereço</Button>
+      {!showForm && (
+        <Button variant="outline" onClick={startAddNew}>+ Adicionar novo endereço</Button>
       )}
     </div>
   );

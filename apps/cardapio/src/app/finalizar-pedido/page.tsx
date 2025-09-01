@@ -20,6 +20,7 @@ import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-ped
 import EnderecoStep from "@cardapio/components/Shared/finalizar-pedido/EnderecoStep";
 import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/PagamentoStep";
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
+import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
 
 export default function FinalizarPedidoPage() {
   const { items, totalPrice, clear, observacao } = useCart();
@@ -52,13 +53,7 @@ export default function FinalizarPedidoPage() {
   // --- ENDEREÇOS ---
   const { data: enderecos = [] } = useQueryEnderecos(cliente?.tokenCliente, { enabled: !!cliente?.tokenCliente });
   const { create, update, remove } = useMutateEndereco(cliente?.tokenCliente ?? "");
-
-  // --- MEIOS DE PAGAMENTO ---
-  const meiosPagamento = [
-    { id: 1, nome: "Dinheiro" },
-    { id: 2, nome: "Cartão de Crédito" },
-    { id: 3, nome: "PIX" },
-  ];
+  const { data: meiosPagamento = [] } = useMeiosPagamento(!!cliente?.tokenCliente);
 
   // --- FINALIZAR PEDIDO ---
   const handleFinalizar = async () => {
@@ -75,7 +70,7 @@ export default function FinalizarPedidoPage() {
     switch (currentTab) {
       case "endereco":
         return (
-          <Button className="w-full text-lg p-6 bg-yellow-600" onClick={() => setCurrentTab("pagamento")}>
+          <Button className="w-full text-lg p-6 bg-yellow-500" onClick={() => setCurrentTab("pagamento")}>
             Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
           </Button>
         );

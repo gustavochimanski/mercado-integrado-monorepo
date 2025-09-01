@@ -1,11 +1,9 @@
 import { api } from "@cardapio/app/api/api";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
-import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { setCliente } from "@cardapio/stores/client/ClientStore";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-/** 🎯 Tipos vindos do backend */
+/** Tipos vindos do backend */
 export interface ClienteOut {
   id: number;
   nome: string;
@@ -26,7 +24,15 @@ export interface ClienteCreate {
 
 export interface ClienteUpdate extends Partial<ClienteCreate> {}
 
-/** 🔎 Criar / Atualizar cliente */
+export interface NovoDispositivoRequest {
+  telefone: string;
+}
+
+export interface ConfirmacaoCodigoRequest {
+  telefone: string;
+  codigo: string;
+}
+
 export function useMutateCliente() {
   const qc = useQueryClient();
 
@@ -34,41 +40,53 @@ export function useMutateCliente() {
     qc.invalidateQueries({ queryKey: ["cliente", "current"] });
   };
 
+  /** Criar cliente novo */
   const create = useMutation({
     mutationFn: (body: ClienteCreate) =>
       api.post<ClienteOut>("/delivery/cliente/", body),
     onSuccess: (response) => {
-      toast.success("Cliente criado com sucesso!");
-
       const data = response.data;
-
-      // 🔑 salva o token e normaliza campos para o store
       setCliente({
         nome: data.nome,
         tokenCliente: data.super_token,
       });
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
+  /** Atualizar cliente */
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number } & ClienteUpdate) =>
       apiClienteAdmin.put<ClienteOut>(`/delivery/cliente/${id}`, body),
     onSuccess: (response) => {
-      toast.success("Cliente atualizado com sucesso!");
-
       const data = response.data;
-
       setCliente({
         nome: data.nome,
         tokenCliente: data.super_token,
       });
-
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
-  return { create, update };
+  /** Enviar código OTP para telefone existente */
+  const enviarCodigoNovoDispositivo = useMutation({
+    mutationFn: (body: NovoDispositivoRequest) =>
+      api.post("/delivery/cliente/novo-dispositivo", body),
+  });
+
+  /** Confirmar código OTP e receber token */
+  const confirmarCodigo = useMutation({
+    mutationFn: (body: ConfirmacaoCodigoRequest) =>
+      api.post<ClienteOut>("/delivery/cliente/confirmar-codigo", body),
+    onSuccess: (response) => {
+      const data = response.data;
+      setCliente({
+        nome: data.nome,
+        tokenCliente: data.super_token,
+      });
+      invalidate();
+    },
+  });
+
+  return { create, update, enviarCodigoNovoDispositivo, confirmarCodigo };
 }

@@ -2,25 +2,9 @@
 
 import React, { useMemo, useState } from "react";
 import { ScrollArea, ScrollBar } from "@supervisor/components/ui/scroll-area";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@supervisor/components/ui/dropdown-menu";
-import { ArrowLeft, ArrowRight, CircleX, MoreVertical, Trash2 } from "lucide-react";
 import { PedidoKanban, PedidoStatus } from "@supervisor/types/pedido";
-import {  useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@supervisor/components/ui/select";
-
-// ...
+import { useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
+import { Button } from "@supervisor/components/ui/button";
 
 // ---------------- Status Map completo ----------------
 type StatusMeta = { label: string; headerClass: string };
@@ -29,125 +13,52 @@ const statusMap: Record<PedidoStatus, StatusMeta> = {
   R: { label: "Em preparo", headerClass: "bg-purple-600 text-white" },
   S: { label: "Saiu para entrega", headerClass: "bg-[hsl(var(--primary))] text-white" },
   E: { label: "Entregue", headerClass: "bg-green-600 text-white" },
-  C: { label: "Cancelados", headerClass: "bg-red-600 text-white" },
+  C: { label: "Cancelado", headerClass: "bg-red-600 text-white" },
 };
 
 // ---------------- PedidoCard ----------------
 const PedidoCard = React.memo(
   ({
     pedido,
-    onMover,
     selecionado,
     onToggleSelecionado,
-    onMoverSelecionadosPara,
-    temSelecionados,
   }: {
     pedido: PedidoKanban;
-    onMover: (id: number, novoStatus: PedidoStatus) => void;
     selecionado: boolean;
     onToggleSelecionado: (id: number) => void;
-    onMoverSelecionadosPara: (novoStatus: PedidoStatus) => void;
-    temSelecionados: boolean;
   }) => {
-    const statusKeys = Object.keys(statusMap) as PedidoStatus[];
-    const index = statusKeys.indexOf(pedido.status);
-    const anterior = statusKeys[index - 1];
-    const proximo = statusKeys[index + 1];
-
     return (
       <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2">
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={selecionado}
-              onChange={() => onToggleSelecionado(pedido.id)}
-              className="accent-primary"
-            />
-            <div>
-              <p className="font-semibold text-primary text-base">#{pedido.id}</p>
-              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[pedido.status].headerClass}`}>
-                {statusMap[pedido.status].label}
-              </span>
-            </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={selecionado}
+            onChange={() => onToggleSelecionado(pedido.id)}
+            className="accent-primary"
+          />
+          <div>
+            <p className="font-semibold text-primary text-base">#{pedido.id}</p>
+            <span
+              className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[pedido.status].headerClass}`}
+            >
+              {statusMap[pedido.status].label}
+            </span>
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="text-muted-foreground hover:text-primary transition">
-                <MoreVertical size={18} />
-              </button>
-            </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {anterior && (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      temSelecionados
-                        ? onMoverSelecionadosPara(anterior)
-                        : onMover(pedido.id, anterior)
-                    }
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ArrowLeft size={16} />
-                      Mover para
-                    </div>
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[anterior].headerClass}`}
-                    >
-                      {statusMap[anterior].label}
-                    </span>
-                  </DropdownMenuItem>
-                )}
-
-                {proximo && (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      temSelecionados
-                        ? onMoverSelecionadosPara(proximo)
-                        : onMover(pedido.id, proximo)
-                    }
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ArrowRight size={16} />
-                      Mover para
-                    </div>
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[proximo].headerClass}`}
-                    >
-                      {statusMap[proximo].label}
-                    </span>
-                  </DropdownMenuItem>
-                )}
-
-                <DropdownMenuItem
-                  onClick={() => onMover(pedido.id, "C")}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <CircleX size={16} />
-                    Mover para
-                  </div>
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap["C"].headerClass}`}
-                  >
-                    {statusMap["C"].label}
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-
-
-          </DropdownMenu>
         </div>
 
         {/* Informações do cliente */}
         <div className="text-sm text-muted-foreground flex flex-col gap-1">
-          <span><strong>Cliente:</strong> {pedido.nome_cliente || "—"}</span>
-          <span><strong>Telefone:</strong> {pedido.telefone_cliente || "—"}</span>
+          <span>
+            <strong>Cliente:</strong> {pedido.nome_cliente || "—"}
+          </span>
+          <span>
+            <strong>Telefone:</strong> {pedido.telefone_cliente || "—"}
+          </span>
           {pedido.endereco_cliente && (
-            <span ><strong>Endereço:</strong> {pedido.endereco_cliente}</span>
+            <span>
+              <strong>Endereço:</strong> {pedido.endereco_cliente}
+            </span>
           )}
         </div>
 
@@ -162,23 +73,18 @@ const PedidoCard = React.memo(
 
 PedidoCard.displayName = "PedidoCard";
 
-
 // ---------------- KanbanColuna ----------------
 const KanbanColuna = React.memo(
   ({
     statusMeta,
     pedidos,
-    onMover,
     selecionados,
     onToggleSelecionado,
-    onMoverSelecionadosPara,
   }: {
     statusMeta: StatusMeta;
     pedidos: PedidoKanban[];
-    onMover: (id: number, novoStatus: PedidoStatus) => void;
     selecionados: Set<number>;
     onToggleSelecionado: (id: number) => void;
-    onMoverSelecionadosPara: (novoStatus: PedidoStatus) => void;
   }) => (
     <div className="flex flex-col h-full flex-1 bg-muted rounded shadow overflow-hidden min-w-[250px]">
       <h2 className={`text-center font-bold p-2 border-b ${statusMeta.headerClass}`}>
@@ -191,11 +97,8 @@ const KanbanColuna = React.memo(
               <PedidoCard
                 key={pedido.id}
                 pedido={pedido}
-                onMover={onMover}
                 selecionado={selecionados.has(pedido.id)}
                 onToggleSelecionado={onToggleSelecionado}
-                onMoverSelecionadosPara={onMoverSelecionadosPara}
-                temSelecionados={selecionados.size > 0}
               />
             ))
           ) : (
@@ -209,6 +112,55 @@ const KanbanColuna = React.memo(
   )
 );
 KanbanColuna.displayName = "KanbanColuna";
+
+// ---------------- FooterSelecionados com transition ----------------
+const FooterSelecionados = ({
+  count,
+  onMoverSelecionados,
+  onCancelar,
+  visivel,
+}: {
+  count: number;
+  onMoverSelecionados: (novoStatus: PedidoStatus) => void;
+  onCancelar: () => void;
+  visivel: boolean;
+}) => {
+  return (
+    <div
+      className={`
+        fixed bottom-4 left-1/2 -translate-x-1/2 bg-white shadow-lg rounded-xl px-4 py-3 flex flex-col gap-3 items-center z-50 border h-24
+        transition-all duration-300 ease-in-out
+        ${visivel ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"}
+      `}
+    >
+      {/* Botão X no canto superior direito */}
+      <button
+        onClick={onCancelar}
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        aria-label="Cancelar Edição"
+      >
+        ✕
+      </button>
+
+      <span className="font-semibold">{count} selecionado(s)</span>
+      
+      <div className="flex gap-3">
+        {Object.entries(statusMap).map(([statusKey, meta]) => (
+          <button
+            key={statusKey}
+            onClick={() => onMoverSelecionados(statusKey as PedidoStatus)}
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${meta.headerClass} hover:opacity-80 transition`}
+          >
+            {meta.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+
 
 // ---------------- KanbanPedidos principal ----------------
 const KanbanPedidos = () => {
@@ -242,14 +194,13 @@ const KanbanPedidos = () => {
     setColunasVisiveis((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleMoverPedido = (id: number, novoStatus: PedidoStatus) => {
-    atualizarStatus.mutate({ id, status: novoStatus });
-  };
-
   const handleMoverSelecionados = (novoStatus: PedidoStatus) => {
     selecionados.forEach((id) => atualizarStatus.mutate({ id, status: novoStatus }));
     setSelecionados(new Set());
   };
+
+  const handleCancelarSelecionados = () => setSelecionados(new Set());
+
 
   if (isLoading) return <p>Carregando pedidos...</p>;
 
@@ -267,29 +218,6 @@ const KanbanPedidos = () => {
             {meta.label}
           </label>
         ))}
-
-
-        <Select onValueChange={(value) => handleMoverSelecionados(value as PedidoStatus)}>
-          <SelectTrigger className="w-[220px] text-sm">
-            <SelectValue placeholder="Mover selecionados para..." />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(statusMap).map(([key, meta]) => (
-              <SelectItem key={key} value={key}>
-                <span
-                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${meta.headerClass}`}
-                >
-                  {meta.label}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-
-        {selecionados.size > 0 && (
-          <span className="text-sm text-muted-foreground">{selecionados.size} selecionado(s)</span>
-        )}
       </div>
 
       <div className="flex-1 overflow-x-auto">
@@ -301,14 +229,21 @@ const KanbanPedidos = () => {
                 key={statusKey}
                 statusMeta={meta}
                 pedidos={pedidosPorStatus[statusKey as PedidoStatus] || []}
-                onMover={handleMoverPedido}
                 selecionados={selecionados}
                 onToggleSelecionado={toggleSelecionado}
-                onMoverSelecionadosPara={handleMoverSelecionados}
               />
             ))}
         </div>
       </div>
+
+      {selecionados.size > 0 && (
+      <FooterSelecionados
+        count={selecionados.size}
+        onMoverSelecionados={handleMoverSelecionados}
+        onCancelar={handleCancelarSelecionados}
+        visivel={selecionados.size > 0}
+      />
+      )}
     </div>
   );
 };
