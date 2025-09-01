@@ -1,7 +1,6 @@
-// HomePage.tsx (ajustado)
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 import { useHome } from "@cardapio/services/useQueryHome";
 import { useCart } from "@cardapio/stores/cart/useCart";
@@ -27,13 +26,22 @@ export default function HomePage() {
 
   const { isAdmin } = useUserContext();
 
-  // seta empresa_id via query param
-  useReceiveEmpresaFromQuery(() => setReady(true));
+  // Pega empresa do store
+  let empresa_id = getEmpresaId();
 
-  const empresa_id = getEmpresaId();
+  // Se não tiver, tenta pegar da query e seta no store
+  useReceiveEmpresaFromQuery(() => {
+    empresa_id = getEmpresaId(); // atualiza depois que setou via query
+    setReady(true);
+  });
 
-  // ✅ só dispara a query depois que ready=true e empresa_id existe
-  const { data, isError, isLoading } = useHome(empresa_id, true);
+  // Se já tiver no store, marca ready imediatamente
+  useEffect(() => {
+    if (empresa_id) setReady(true);
+  }, [empresa_id]);
+
+  // Hook para buscar dados da home
+  const { data, isError } = useHome(empresa_id ?? null, true);
 
   const categorias = data?.categorias ?? [];
   const vitrines = data?.vitrines ?? [];
@@ -47,8 +55,8 @@ export default function HomePage() {
     [add]
   );
 
-  // fallback enquanto ainda não temos empresa
-  if (!ready || !empresa_id || isLoading) {
+  // Render fallback enquanto não tem empresa
+  if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
         Carregando empresa...
@@ -66,7 +74,7 @@ export default function HomePage() {
     );
   }
 
-  if (isError) return <p>Erro ao carregar dados da empresa.</p>;
+  if (isError) return null;
 
   return (
     <div className="flex flex-col gap-4">
