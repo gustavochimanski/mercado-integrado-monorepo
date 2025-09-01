@@ -2,7 +2,8 @@
 import { TypeCadProdDeliveryResponse } from "@supervisor/types/routes/cadastros/cadProdDeliveryType";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toastSucess, toastErro } from "@supervisor/lib/toast";
+import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 
 interface UpdateProdutoBody {
   cod_barras: string;
@@ -39,7 +40,6 @@ export function useMutateProduto() {
   const qc = useQueryClient();
 
   const create = useMutation({
-    // 🔧 Agora recebemos CreateProdutoInput
     mutationFn: async (input: CreateProdutoInput) => {
       const fd = new FormData();
       fd.append("cod_barras", input.cod_barras.trim());
@@ -59,11 +59,10 @@ export function useMutateProduto() {
 
       try {
         const { data } = await apiMensura.post("/api/mensura/produtos", fd);
-        toast.success("Produto criado com sucesso!");
+        toastSucess("Produto criado com sucesso!");
         return data;
       } catch (err: any) {
-        const msg = err.response?.data?.detail || err.message || "Erro ao criar produto";
-        toast.error(msg);
+        toastErro(extractErrorMessage(err));
         throw err;
       }
     },
@@ -75,18 +74,11 @@ export function useMutateProduto() {
   const update = useMutation({
     mutationFn: async ({ cod_barras, formData }: UpdateProdutoBody) => {
       try {
-        const { data } = await apiMensura.put(
-          `/api/mensura/produtos/${cod_barras}`, // 🔧 rota corrigida
-          formData
-        );
-        toast.success("Produto atualizado com sucesso!");
+        const { data } = await apiMensura.put(`/api/mensura/produtos/${cod_barras}`, formData);
+        toastSucess("Produto atualizado com sucesso!");
         return data;
       } catch (err: any) {
-        const msg =
-          err.response?.data?.detail ||
-          err.message ||
-          "Erro ao atualizar produto";
-        toast.error(msg);
+        toastErro(extractErrorMessage(err));
         throw err;
       }
     },
@@ -98,12 +90,10 @@ export function useMutateProduto() {
   const remove = useMutation({
     mutationFn: async (cod_barras: string) => {
       try {
-        await apiMensura.delete(`/api/mensura/produtos/${cod_barras}`); // 🔧 rota corrigida
-        toast.success("Produto removido com sucesso!");
+        await apiMensura.delete(`/api/mensura/produtos/${cod_barras}`);
+        toastSucess("Produto removido com sucesso!");
       } catch (err: any) {
-        const msg =
-          err.response?.data?.detail || err.message || "Erro ao remover produto";
-        toast.error(msg);
+        toastErro(extractErrorMessage(err));
         throw err;
       }
     },

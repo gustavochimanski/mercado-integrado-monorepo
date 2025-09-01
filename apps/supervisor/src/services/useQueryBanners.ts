@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+import { toastSucess, toastErro } from "@supervisor/lib/toast";
 
 // 🔎 Tipo do banner
 export interface Banner {
@@ -11,7 +11,7 @@ export interface Banner {
   parceiro_id: number;
   parceiro_nome: string;
   tipo_banner: "V" | "H";
-  ativo: boolean
+  ativo: boolean;
   imagem: string;
   created_at: string;
   updated_at: string;
@@ -51,32 +51,44 @@ export function useMutateBanner() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["banners"] });
 
   const create = useMutation({
-    mutationFn: (body: Omit<Banner, "id" | "created_at" | "updated_at" | "parceiro_nome">) =>
-      apiMensura.post("/api/delivery/banners", body),
+    // ⚠️ agora aceitamos FormData
+    mutationFn: (body: FormData) =>
+      apiMensura.post("/api/delivery/banners", body, {
+        headers: { "Content-Type": "multipart/form-data" },
+      }),
     onSuccess: () => {
-      toast.success("Banner criado!");
+      toastSucess("Banner criado!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => {
+      toastErro(extractErrorMessage(err));
+    },
   });
 
+
   const update = useMutation({
-    mutationFn: ({ id, ...body }: Partial<Banner> & { id: number }) =>
-      apiMensura.put(`/api/delivery/banners/${id}`, body),
+    mutationFn: ({ id, body }: { id: number; body: FormData }) =>
+      apiMensura.put(`/api/delivery/banners/${id}`, body, {
+        headers: { "Content-Type": "multipart/form-data" },
+      }),
     onSuccess: () => {
-      toast.success("Banner atualizado!");
+      toastSucess("Banner atualizado!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => {
+      toastErro(extractErrorMessage(err));
+    },
   });
 
   const remove = useMutation({
     mutationFn: (id: number) => apiMensura.delete(`/api/delivery/banners/${id}`),
     onSuccess: () => {
-      toast.success("Banner removido!");
+      toastSucess("Banner removido!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => {
+      toastErro(extractErrorMessage(err));
+    },
   });
 
   return { create, update, remove };

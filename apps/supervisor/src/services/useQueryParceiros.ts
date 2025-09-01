@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+import { toastSucess, toastErro } from "@supervisor/lib/toast";
 
 // 🔎 Tipo do parceiro
 export interface Parceiro {
   id: number;
   nome: string;
-  ativo: boolean
+  ativo: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -50,29 +50,29 @@ export function useMutateParceiro() {
     mutationFn: (body: Omit<Parceiro, "id" | "created_at" | "updated_at">) =>
       apiMensura.post("/api/delivery/parceiros", body),
     onSuccess: () => {
-      toast.success("Parceiro criado!");
+      toastSucess("Parceiro criado!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => toastErro(extractErrorMessage(err)),
   });
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<Parceiro> & { id: number }) =>
       apiMensura.put(`/api/delivery/parceiros/${id}`, body),
     onSuccess: () => {
-      toast.success("Parceiro atualizado!");
+      toastSucess("Parceiro atualizado!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => toastErro(extractErrorMessage(err)),
   });
 
   const remove = useMutation({
     mutationFn: (id: number) => apiMensura.delete(`/api/delivery/parceiros/${id}`),
     onSuccess: () => {
-      toast.success("Parceiro removido!");
+      toastSucess("Parceiro removido!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => toastErro(extractErrorMessage(err)),
   });
 
   return { create, update, remove };

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 import { GridColDef } from "@mui/x-data-grid";
-import { Pen, Trash2 } from "lucide-react";
+import { Pen, Trash2, Plus } from "lucide-react";
 import { useEmpresas } from "@supervisor/services/global/useQueryEmpresasMensura";
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
@@ -17,7 +17,7 @@ export default function EmpresasTable() {
   const [selected, setSelected] = useState<EmpresaMensura | null>(null);
   const [open, setOpen] = useState(false);
 
-  // Para controlar o modal de confirmação
+  // Modal de confirmação
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [empresaToDelete, setEmpresaToDelete] = useState<EmpresaMensura | null>(null);
 
@@ -25,7 +25,7 @@ export default function EmpresasTable() {
     try {
       await apiMensura.delete(`/api/mensura/empresas/${id}`);
       toastSucess("Empresa removida com sucesso!");
-      refetch(); // atualiza a tabela
+      refetch();
     } catch (err) {
       console.error(err);
       toastErro("Erro ao remover empresa");
@@ -66,7 +66,7 @@ export default function EmpresasTable() {
                   setDeleteModalOpen(true);
                 }}
               >
-                <Trash2 className="w-4 h-4" /> 
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           );
@@ -77,22 +77,37 @@ export default function EmpresasTable() {
   );
 
   return (
-    <>
-      {isLoading ? (
-        <p>Carregando...</p>
-      ) : (
-        <DataTableComponentMui
-          rows={empresas}
-          columns={columns}
-          getRowId={(row) => row.id}
-        />
-      )}
+    <div className="flex flex-col h-full">
+      {/* Botão de adicionar */}
+      <div className="flex justify-end mb-4">
+        <Button
+          size="sm"
+          onClick={() => {
+            setSelected(null);
+            setOpen(true);
+          }}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Adicionar Empresa
+        </Button>
+      </div>
 
-      <EmpresaModal
-        open={open}
-        onOpenChange={setOpen}
-        empresa={selected}
-      />
+      {/* Container da tabela com scroll */}
+      <div className="flex-1 min-h-0">
+        {isLoading ? (
+          <p>Carregando empresas...</p>
+        ) : (
+          <DataTableComponentMui
+            rows={empresas}
+            columns={columns}
+            getRowId={(row) => row.id}
+            autoHeight={false} // importante para respeitar altura do container
+            sx={{ height: "100%", width: "100%" }}
+          />
+        )}
+      </div>
+
+      <EmpresaModal open={open} onOpenChange={setOpen} empresa={selected} />
 
       <ConfirmModal
         isOpen={deleteModalOpen}
@@ -106,6 +121,6 @@ export default function EmpresasTable() {
         confirmLabel="Remover"
         cancelLabel="Cancelar"
       />
-    </>
+    </div>
   );
 }

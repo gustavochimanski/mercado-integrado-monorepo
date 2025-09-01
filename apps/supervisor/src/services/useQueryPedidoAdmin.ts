@@ -7,15 +7,9 @@ import {
   PagamentoGateway,
 } from "@supervisor/types/pedido";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toastSucess, toastErro } from "@supervisor/lib/toast";
+import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 
-interface ListPedidosAdminParams {
-  page?: number;
-  limit?: number;
-  status?: PedidoStatus;
-}
-
-// ---------------- Fetch: lista de pedidos (admin) ----------------
 export function useFetchPedidosAdminKanban() {
   return useQuery<PedidoKanban[]>({
     queryKey: ["pedidosAdminKanban"],
@@ -23,30 +17,29 @@ export function useFetchPedidosAdminKanban() {
       const { data } = await apiMensura.get("/api/delivery/pedidos/admin/kanban");
       return data;
     },
-    refetchInterval: 15000
+    refetchInterval: 15000,
   });
 }
 
-// ---------------- Mutations: ações em pedidos específicos ----------------
 export function useMutatePedidoAdmin() {
   const qc = useQueryClient();
 
-  // Atualiza status de um pedido (não usar /admin aqui!)
   const atualizarStatus = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: PedidoStatus }) => {
-      const { data } = await apiMensura.put(`/api/delivery/pedidos/status/${id}?status=${status}`);
+      const { data } = await apiMensura.put(
+        `/api/delivery/pedidos/status/${id}?status=${status}`
+      );
       return data;
     },
     onSuccess: () => {
-      toast.success("Pedido atualizado com sucesso!");
+      toastSucess("Pedido atualizado com sucesso!");
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.detail || "Erro ao atualizar pedido");
+      toastErro(extractErrorMessage(err));
     },
   });
 
-  // Confirma pagamento de um pedido
   const confirmarPagamento = useMutation({
     mutationFn: async ({
       id,
@@ -64,11 +57,11 @@ export function useMutatePedidoAdmin() {
       return data;
     },
     onSuccess: () => {
-      toast.success("Pagamento confirmado!");
+      toastSucess("Pagamento confirmado!");
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.detail || "Erro ao confirmar pagamento");
+      toastErro(extractErrorMessage(err));
     },
   });
 

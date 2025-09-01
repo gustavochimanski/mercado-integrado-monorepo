@@ -1,3 +1,4 @@
+// HomePage.tsx (ajustado)
 "use client";
 
 import { useState, useCallback } from "react";
@@ -31,8 +32,8 @@ export default function HomePage() {
 
   const empresa_id = getEmpresaId();
 
-  // ✅ Hooks sempre chamados na mesma ordem
-  const { data, isError } = useHome(empresa_id ?? null, true);
+  // ✅ só dispara a query depois que ready=true e empresa_id existe
+  const { data, isError, isLoading } = useHome(empresa_id, true);
 
   const categorias = data?.categorias ?? [];
   const vitrines = data?.vitrines ?? [];
@@ -46,8 +47,8 @@ export default function HomePage() {
     [add]
   );
 
-  // render fallback enquanto o hook ainda não aplicou a empresa
-  if (!ready) {
+  // fallback enquanto ainda não temos empresa
+  if (!ready || !empresa_id || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
         Carregando empresa...
@@ -65,7 +66,7 @@ export default function HomePage() {
     );
   }
 
-  if (isError) return null;
+  if (isError) return <p>Erro ao carregar dados da empresa.</p>;
 
   return (
     <div className="flex flex-col gap-4">

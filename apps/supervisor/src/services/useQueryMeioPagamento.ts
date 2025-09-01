@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+import { toastErro, toastSucess } from "@supervisor/lib/toast";
 
 // 🔎 Tipo do resultado do endpoint /api/delivery/meios-pagamento
 export interface MeioPagamento {
@@ -51,31 +51,31 @@ export function useMutateMeioPagamento() {
 
   const create = useMutation({
     mutationFn: (body: Omit<MeioPagamento, "id" | "created_at" | "updated_at">) =>
-      apiMensura.post("/api/delivery/meios-pagamento", body),
+      apiMensura.post("/api/delivery/meios-pagamento/", body),
     onSuccess: () => {
-      toast.success("Meio de pagamento criado!");
+      toastSucess("Meio de pagamento criado!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => toastErro(extractErrorMessage(err)),
   });
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<MeioPagamento> & { id: number }) =>
       apiMensura.put(`/api/delivery/meios-pagamento/${id}`, body),
     onSuccess: () => {
-      toast.success("Meio de pagamento atualizado!");
+      toastSucess("Meio de pagamento atualizado!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => toastErro(extractErrorMessage(err)),
   });
 
   const remove = useMutation({
     mutationFn: (id: number) => apiMensura.delete(`/api/delivery/meios-pagamento/${id}`),
     onSuccess: () => {
-      toast.success("Meio de pagamento removido!");
+      toastSucess("Meio de pagamento removido!");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
+    onError: (err) => toastErro(extractErrorMessage(err)),
   });
 
   return { create, update, remove };
