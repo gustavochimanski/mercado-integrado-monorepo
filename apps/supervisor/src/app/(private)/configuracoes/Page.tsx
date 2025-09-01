@@ -4,6 +4,7 @@ import { Monitor } from "lucide-react";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import EmpresasTable from "@supervisor/components/routes/configuracoes/empresa/CadastroEmpresaTable";
 import MeiosPagamentoTable from "@supervisor/components/routes/configuracoes/meioPagamento/MeioPagamentoTable";
+import ParceirosTable from "@supervisor/components/routes/configuracoes/parceiros/ParceirosTable";
 
 const ComponentConfiguracoes: React.FC = () => {
     const nestedTabItems = [
@@ -24,6 +25,15 @@ const ComponentConfiguracoes: React.FC = () => {
           </span>
         ),
         Component: () => <MeiosPagamentoTable />
+      },
+      {
+        value: "parceiros",
+        label: (
+          <span className="flex items-center gap-2">
+            <Monitor size={14} /> Parceiros
+          </span>
+        ),
+        Component: () => <ParceirosTable />
       }
     ];
   

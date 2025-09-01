@@ -153,7 +153,7 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex ">
             <Button type="submit" disabled={loading} className="bg-green-600 w-full md:w-auto">
               {loading ? "Salvando..." : empresa ? "Salvar Alterações" : "Cadastrar Empresa"}
             </Button>

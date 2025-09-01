@@ -4,12 +4,11 @@ import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 
-// 🔎 Tipo do resultado do endpoint /api/delivery/meios-pagamento
-export interface MeioPagamento {
+// 🔎 Tipo do parceiro
+export interface Parceiro {
   id: number;
   nome: string;
-  tipo: "CARTAO_ENTREGA" | "PIX_ENTREGA" | "DINHEIRO" | "CARTAO_ONLINE" | "PIX_ONLINE";
-  ativo: boolean;
+  ativo: boolean
   created_at: string;
   updated_at: string;
 }
@@ -24,13 +23,13 @@ function useDebounced<T>(value: T, delay = 300) {
   return debounced;
 }
 
-// ✅ Buscar todos os meios de pagamento
-export function useMeiosPagamento(enabled = true) {
+// ✅ Buscar todos os parceiros
+export function useParceiros(enabled = true) {
   const qc = useQueryClient();
-  return useQuery<MeioPagamento[]>({
-    queryKey: ["meios_pagamento"],
+  return useQuery<Parceiro[]>({
+    queryKey: ["parceiros"],
     queryFn: async () => {
-      const { data } = await apiMensura.get<MeioPagamento[]>("/api/delivery/meios-pagamento/admin");
+      const { data } = await apiMensura.get<Parceiro[]>("/api/delivery/parceiros");
       return data;
     },
     enabled,
@@ -41,38 +40,36 @@ export function useMeiosPagamento(enabled = true) {
   });
 }
 
-// ✅ Mutations para criar, atualizar, deletar
-export function useMutateMeioPagamento() {
+// ✅ Mutations para criar, atualizar, deletar parceiro
+export function useMutateParceiro() {
   const qc = useQueryClient();
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["meios_pagamento"] });
-  };
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["parceiros"] });
 
   const create = useMutation({
-    mutationFn: (body: Omit<MeioPagamento, "id" | "created_at" | "updated_at">) =>
-      apiMensura.post("/api/delivery/meios-pagamento", body),
+    mutationFn: (body: Omit<Parceiro, "id" | "created_at" | "updated_at">) =>
+      apiMensura.post("/api/delivery/parceiros", body),
     onSuccess: () => {
-      toast.success("Meio de pagamento criado!");
+      toast.success("Parceiro criado!");
       invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const update = useMutation({
-    mutationFn: ({ id, ...body }: Partial<MeioPagamento> & { id: number }) =>
-      apiMensura.put(`/api/delivery/meios-pagamento/${id}`, body),
+    mutationFn: ({ id, ...body }: Partial<Parceiro> & { id: number }) =>
+      apiMensura.put(`/api/delivery/parceiros/${id}`, body),
     onSuccess: () => {
-      toast.success("Meio de pagamento atualizado!");
+      toast.success("Parceiro atualizado!");
       invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/meios-pagamento/${id}`),
+    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/parceiros/${id}`),
     onSuccess: () => {
-      toast.success("Meio de pagamento removido!");
+      toast.success("Parceiro removido!");
       invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),

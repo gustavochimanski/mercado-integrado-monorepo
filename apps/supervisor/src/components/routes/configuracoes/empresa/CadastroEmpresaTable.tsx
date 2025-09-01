@@ -7,7 +7,7 @@ import { Pen, Trash2 } from "lucide-react";
 import { useEmpresas } from "@supervisor/services/global/useQueryEmpresasMensura";
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
-import EmpresaModal from "./CadastroEmpresa";
+import EmpresaModal from "./CadastroEmpresaModal";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { toastSucess, toastErro } from "@supervisor/lib/toast";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";

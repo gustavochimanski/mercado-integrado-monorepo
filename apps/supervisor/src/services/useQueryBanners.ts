@@ -4,12 +4,15 @@ import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 
-// 🔎 Tipo do resultado do endpoint /api/delivery/meios-pagamento
-export interface MeioPagamento {
+// 🔎 Tipo do banner
+export interface Banner {
   id: number;
   nome: string;
-  tipo: "CARTAO_ENTREGA" | "PIX_ENTREGA" | "DINHEIRO" | "CARTAO_ONLINE" | "PIX_ONLINE";
-  ativo: boolean;
+  parceiro_id: number;
+  parceiro_nome: string;
+  tipo_banner: "V" | "H";
+  ativo: boolean
+  imagem: string;
   created_at: string;
   updated_at: string;
 }
@@ -24,13 +27,13 @@ function useDebounced<T>(value: T, delay = 300) {
   return debounced;
 }
 
-// ✅ Buscar todos os meios de pagamento
-export function useMeiosPagamento(enabled = true) {
+// ✅ Buscar todos os banners
+export function useBanners(enabled = true) {
   const qc = useQueryClient();
-  return useQuery<MeioPagamento[]>({
-    queryKey: ["meios_pagamento"],
+  return useQuery<Banner[]>({
+    queryKey: ["banners"],
     queryFn: async () => {
-      const { data } = await apiMensura.get<MeioPagamento[]>("/api/delivery/meios-pagamento/admin");
+      const { data } = await apiMensura.get<Banner[]>("/api/delivery/banners");
       return data;
     },
     enabled,
@@ -41,38 +44,36 @@ export function useMeiosPagamento(enabled = true) {
   });
 }
 
-// ✅ Mutations para criar, atualizar, deletar
-export function useMutateMeioPagamento() {
+// ✅ Mutations para criar, atualizar, deletar banner
+export function useMutateBanner() {
   const qc = useQueryClient();
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["meios_pagamento"] });
-  };
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["banners"] });
 
   const create = useMutation({
-    mutationFn: (body: Omit<MeioPagamento, "id" | "created_at" | "updated_at">) =>
-      apiMensura.post("/api/delivery/meios-pagamento", body),
+    mutationFn: (body: Omit<Banner, "id" | "created_at" | "updated_at" | "parceiro_nome">) =>
+      apiMensura.post("/api/delivery/banners", body),
     onSuccess: () => {
-      toast.success("Meio de pagamento criado!");
+      toast.success("Banner criado!");
       invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const update = useMutation({
-    mutationFn: ({ id, ...body }: Partial<MeioPagamento> & { id: number }) =>
-      apiMensura.put(`/api/delivery/meios-pagamento/${id}`, body),
+    mutationFn: ({ id, ...body }: Partial<Banner> & { id: number }) =>
+      apiMensura.put(`/api/delivery/banners/${id}`, body),
     onSuccess: () => {
-      toast.success("Meio de pagamento atualizado!");
+      toast.success("Banner atualizado!");
       invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/meios-pagamento/${id}`),
+    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/banners/${id}`),
     onSuccess: () => {
-      toast.success("Meio de pagamento removido!");
+      toast.success("Banner removido!");
       invalidate();
     },
     onError: (err) => toast.error(extractErrorMessage(err)),

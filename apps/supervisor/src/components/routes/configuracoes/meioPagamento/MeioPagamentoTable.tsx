@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { GridColDef } from "@mui/x-data-grid";
-import { Pen, Trash2 } from "lucide-react";
+import { Pen, Trash2, Plus } from "lucide-react"; // Importa o ícone de adicionar
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
@@ -37,7 +37,15 @@ export default function MeiosPagamentoTable() {
         field: "ativo",
         headerName: "Ativo",
         flex: 1,
-        renderCell: (params) => (params.value ? "Sim" : "Não"),
+        headerAlign: "center",
+        align: "center",
+        renderCell: (params) => (
+            <div className="w-full h-full flex items-center justify-center">
+            <span
+                className={`w-3 h-3 rounded-full ${params.value ? "bg-green-500" : "bg-red-500"}`}
+            />
+            </div>
+        ),
       },
       {
         field: "actions",
@@ -79,15 +87,37 @@ export default function MeiosPagamentoTable() {
 
   return (
     <>
-      {isLoading ? (
-        <p>Carregando meios de pagamento...</p>
-      ) : (
-        <DataTableComponentMui
-          rows={meios}
-          columns={columns}
-          getRowId={(row) => row.id}
-        />
-      )}
+<div className="flex flex-col h-full">
+  {/* Botão de adicionar */}
+  <div className="flex justify-end mb-4">
+    <Button
+      size="sm"
+      onClick={() => {
+        setSelected(null);
+        setModalOpen(true);
+      }}
+    >
+      <Plus className="w-4 h-4 mr-1" />
+      Novo Meio de Pagamento
+    </Button>
+  </div>
+
+  {/* Container da tabela com scroll */}
+  <div className="flex-1 min-h-0">
+    {isLoading ? (
+      <p>Carregando meios de pagamento...</p>
+    ) : (
+      <DataTableComponentMui
+        rows={meios}
+        columns={columns}
+        getRowId={(row) => row.id}
+        autoHeight={false} // importante para respeitar altura do container
+        sx={{ height: '100%', width: '100%' }}
+      />
+    )}
+  </div>
+</div>
+
 
       <MeioPagamentoModal
         open={modalOpen}

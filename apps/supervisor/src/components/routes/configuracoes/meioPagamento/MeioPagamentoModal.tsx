@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Input } from "@supervisor/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/components/ui/dialog";
 import { Label } from "@supervisor/components/ui/label";
 import { Button } from "@supervisor/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@supervisor/components/ui/select";
 import { MeioPagamento, useMutateMeioPagamento } from "@supervisor/services/useQueryMeioPagamento";
 
 interface MeioPagamentoForm {
@@ -24,7 +25,7 @@ export default function MeioPagamentoModal({ open, onOpenChange, meioPagamento }
   const [loading, setLoading] = useState(false);
   const { create, update } = useMutateMeioPagamento();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<MeioPagamentoForm>({
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<MeioPagamentoForm>({
     defaultValues: {
       nome: "",
       tipo: "DINHEIRO",
@@ -80,13 +81,27 @@ export default function MeioPagamentoModal({ open, onOpenChange, meioPagamento }
 
           <div className="flex flex-col gap-1">
             <Label>Tipo</Label>
-            <select {...register("tipo", { required: true })} className="input">
-              <option value="CARTAO_ENTREGA">Cartão na entrega</option>
-              <option value="PIX_ENTREGA">PIX na entrega</option>
-              <option value="DINHEIRO">Dinheiro</option>
-              <option value="CARTAO_ONLINE">Cartão online</option>
-              <option value="PIX_ONLINE">PIX online</option>
-            </select>
+              <Controller
+                control={control}
+                name="tipo"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}                  // valor atual do form
+                    onValueChange={field.onChange}       // atualiza RHF
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CARTAO_ENTREGA">Cartão na entrega</SelectItem>
+                      <SelectItem value="PIX_ENTREGA">PIX na entrega</SelectItem>
+                      <SelectItem value="DINHEIRO">Dinheiro</SelectItem>
+                      <SelectItem value="CARTAO_ONLINE">Cartão online</SelectItem>
+                      <SelectItem value="PIX_ONLINE">PIX online</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
           </div>
 
           <div className="flex items-center gap-2 mt-2">
