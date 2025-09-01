@@ -9,6 +9,7 @@ export interface Banner {
   parceiro_nome: string;
   tipo_banner: "V" | "H";
   ativo: boolean;
+  href_destino: string | null
   imagem: string;
   created_at: string;
   updated_at: string;

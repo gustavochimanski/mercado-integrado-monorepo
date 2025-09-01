@@ -1,9 +1,7 @@
 // src/services/useQueryHome.ts
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { api } from "../app/api/api";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import { extractErrorMessage } from "../lib/extractErrorMessage";
 
 export interface VitrineComProdutosResponse {
   id: number;

@@ -18,6 +18,9 @@ import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { CardHeader, CardTitle } from "../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import { useBanners } from "@cardapio/services/useQueryBanners";
+import Image from "next/image";
+import Link from "next/link";
+
 
 export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -93,18 +96,22 @@ export default function HomePage() {
 
         {data_banners && data_banners.length > 0 && (
           <div className="overflow-x-auto">
-            <div className="flex flex-nowrap gap-4">
+            <div className="flex flex-nowrap gap-3">
               {data_banners.map((banner) => (
-                <div
+                <Link
                   key={banner.id}
-                  className="flex-shrink-0 basis-1/4 aspect-[1/2] rounded-lg overflow-hidden shadow-md"
+                  href={banner.href_destino ?? "/"} // "/" como fallback
+                  className="flex-shrink-0 basis-1/4 aspect-[1/2] rounded-lg overflow-hidden shadow-md hover:scale-105 transition-transform relative"
                 >
-                  <img
+                  <Image
                     src={banner.imagem}
                     alt={banner.nome}
-                    className="w-full h-full object-cover"
+                    fill
+                    style={{ objectFit: "cover" }}
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    priority={false}
                   />
-                </div>
+                </Link>
               ))}
             </div>
           </div>

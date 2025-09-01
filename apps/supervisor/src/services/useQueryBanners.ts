@@ -11,6 +11,7 @@ export interface Banner {
   parceiro_id: number;
   parceiro_nome: string;
   tipo_banner: "V" | "H";
+  categoria_destino: number
   ativo: boolean;
   imagem: string;
   created_at: string;
