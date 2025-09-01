@@ -4,7 +4,6 @@ import React, { useMemo, useState } from "react";
 import { ScrollArea, ScrollBar } from "@supervisor/components/ui/scroll-area";
 import { PedidoKanban, PedidoStatus } from "@supervisor/types/pedido";
 import { useFetchPedidosAdminKanban, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
-import { Button } from "@supervisor/components/ui/button";
 
 // ---------------- Status Map completo ----------------
 type StatusMeta = { label: string; headerClass: string };
