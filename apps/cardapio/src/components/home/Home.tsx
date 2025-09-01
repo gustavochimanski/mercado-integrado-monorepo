@@ -22,22 +22,38 @@ export default function HomePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const { isAdmin } = useUserContext();
 
-  // ✅ Seta o ID da empresa via query param
-  useReceiveEmpresaFromQuery();
+  // seta empresa_id via query param
+  useReceiveEmpresaFromQuery(() => setReady(true));
+
   const empresa_id = getEmpresaId();
 
-  const { data, isError } = useHome(empresa_id || null, true);
+  // ✅ Hooks sempre chamados na mesma ordem
+  const { data, isError } = useHome(empresa_id ?? null, true);
+
   const categorias = data?.categorias ?? [];
   const vitrines = data?.vitrines ?? [];
 
   const add = useCart((s) => s.add);
-  const handleAdd = useCallback((produto: ProdutoEmpMini, quantity: number) => {
-    add(mapProdutoToCartItem(produto, quantity));
-    setSheetOpen(false);
-  }, [add]);
+  const handleAdd = useCallback(
+    (produto: ProdutoEmpMini, quantity: number) => {
+      add(mapProdutoToCartItem(produto, quantity));
+      setSheetOpen(false);
+    },
+    [add]
+  );
+
+  // render fallback enquanto o hook ainda não aplicou a empresa
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
+        Carregando empresa...
+      </div>
+    );
+  }
 
   if (!empresa_id) {
     return (
@@ -64,7 +80,7 @@ export default function HomePage() {
           empresaId={empresa_id}
         />
 
-        {/* Vitrines marcadas como is_home no backend */}
+        {/* Vitrines marcadas como is_home */}
         {vitrines
           .filter((v) => v.is_home)
           .map((v) => (
@@ -83,8 +99,6 @@ export default function HomePage() {
               }}
             />
           ))}
-
-
 
         {isAdmin && (
           <div className="mt-4">
