@@ -30,7 +30,7 @@ export function useLoginForm() {
     try {
       await login(data); // ✅ usar os dados, não o form controller
     } catch (err) {
-      const msg = getErrorMessage(err, "Usuário ou senha inválidos.");
+      const msg = getErrorMessage(err);
       toast({
         variant: "destructive",
         title: "Login falhou",
