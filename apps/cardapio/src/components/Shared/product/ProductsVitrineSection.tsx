@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
 import { CardVerMais } from "../CardVerMais";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 interface Props {
   vitrineId: number;
@@ -71,6 +72,8 @@ export default function ProductsVitrineSection({
     el.scrollTo({ left: Math.min(Math.max(0, target), max), behavior: "smooth" });
   };
 
+  const { isAdmin } = useUserContext()
+
   return (
     <section
       id={`secao-${vitrineId}`}
@@ -105,7 +108,7 @@ export default function ProductsVitrineSection({
         )}
 
         <div className="relative">
-          <div ref={scrollRef} className="flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth">
+          <div ref={scrollRef} className={`flex gap-2 overflow-x-auto ${isAdmin ? "": "hide-scrollbar"} `}>
             {produtos.map((produto) => (
               <div key={produto.cod_barras} className="shrink-0 w-[90px] h-[200px]">
                 <ProductCard

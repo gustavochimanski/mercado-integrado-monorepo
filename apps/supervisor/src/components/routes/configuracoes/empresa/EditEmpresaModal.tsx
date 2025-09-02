@@ -18,11 +18,23 @@ interface EditEmpresaModalProps {
   onSuccess?: () => void;
 }
 
-export default function EditEmpresaModal({ open, onOpenChange, empresa, onSuccess }: EditEmpresaModalProps) {
+export default function EditEmpresaModal({
+  open,
+  onOpenChange,
+  empresa,
+  onSuccess,
+}: EditEmpresaModalProps) {
   const [loading, setLoading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(empresa.logo ?? null);
 
-  const { register, handleSubmit, reset, watch, control, formState: { errors } } = useForm<EmpresaForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<EmpresaForm>({
     defaultValues: {
       nome: empresa.nome,
       cnpj: empresa.cnpj ?? "",
@@ -42,7 +54,7 @@ export default function EditEmpresaModal({ open, onOpenChange, empresa, onSucces
   const logoFile = watch("logo");
   const updateEmpresa = useUpdateEmpresa();
 
-  // Reset form se empresa mudar
+  // Reset form quando empresa mudar
   useEffect(() => {
     reset({
       nome: empresa.nome,
@@ -61,12 +73,27 @@ export default function EditEmpresaModal({ open, onOpenChange, empresa, onSucces
     setLogoPreview(empresa.logo ?? null);
   }, [empresa, reset]);
 
-  // Preview de logo
+  // Preview de logo otimizado (sem base64)
   useEffect(() => {
     if (logoFile && logoFile.length > 0) {
-      const reader = new FileReader();
-      reader.onloadend = () => setLogoPreview(reader.result as string);
-      reader.readAsDataURL(logoFile[0]);
+      const file = logoFile[0];
+
+      // Validação simples
+      if (!file.type.startsWith("image/")) {
+        console.warn("Arquivo inválido: não é imagem");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        // > 2MB
+        alert("A imagem deve ter no máximo 2MB");
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      setLogoPreview(objectUrl);
+
+      // Cleanup do objectURL quando mudar/destroi
+      return () => URL.revokeObjectURL(objectUrl);
     }
   }, [logoFile]);
 
@@ -106,7 +133,9 @@ export default function EditEmpresaModal({ open, onOpenChange, empresa, onSucces
             <div className="flex flex-col w-full gap-1">
               <Label>Nome da Empresa</Label>
               <Input {...register("nome", { required: true })} />
-              {errors.nome && <span className="text-red-500 text-sm">Nome é obrigatório</span>}
+              {errors.nome && (
+                <span className="text-red-500 text-sm">Nome é obrigatório</span>
+              )}
             </div>
             <div className="flex flex-col w-full gap-1">
               <Label>CNPJ</Label>
@@ -117,24 +146,35 @@ export default function EditEmpresaModal({ open, onOpenChange, empresa, onSucces
           <div className="flex flex-col gap-2">
             <Label>Logo</Label>
             <Input type="file" {...register("logo")} accept="image/*" />
-            {logoPreview && <img src={logoPreview} alt="Preview da logo" className="w-32 h-32 object-contain rounded border border-gray-300 mt-2" />}
+            {logoPreview && (
+              <img
+                src={logoPreview}
+                alt="Preview da logo"
+                className="w-32 h-32 object-contain rounded border border-gray-300 mt-2"
+                loading="lazy"
+              />
+            )}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Link do Cardápio</Label>
-            <Input {...register("cardapio_link")} />
-          </div>
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-2 w-full">
+              <Label>Link do Cardápio</Label>
+              <Input className="w-full" {...register("cardapio_link")} />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Tema do Cardápio</Label>
-            <CardapioTemaSelect control={control} name="cardapio_tema" />
+            <div className="flex flex-col gap-2">
+              <Label>Tema do Cardápio</Label>
+              <CardapioTemaSelect control={control} name="cardapio_tema" />
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Controller
               name="aceita_pedido_automatico"
               control={control}
-              render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
+              render={({ field }) => (
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              )}
             />
             <Label>Aceita pedido automático</Label>
           </div>
@@ -169,7 +209,11 @@ export default function EditEmpresaModal({ open, onOpenChange, empresa, onSucces
           </div>
 
           <div className="flex">
-            <Button type="submit" disabled={loading} className="bg-green-600 w-full md:w-auto">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-green-600 w-full md:w-auto"
+            >
               {loading ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </div>

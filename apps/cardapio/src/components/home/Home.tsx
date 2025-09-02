@@ -20,6 +20,7 @@ import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import { useBanners } from "@cardapio/services/useQueryBanners";
 import Image from "next/image";
 import Link from "next/link";
+import { BannersVerticalScroll } from "../Shared/parceiros/BannersVertical";
 
 
 export default function HomePage() {
@@ -93,30 +94,11 @@ export default function HomePage() {
           empresaId={empresa_id}
         />
 
-        {data_banners && data_banners.length > 0 && (
-          <div className="overflow-x-auto my-6">
-            <div className="flex flex-nowrap gap-2">
-              {data_banners.map((banner) => (
-                <Link
-                  key={banner.id}
-                  href={banner.href_destino ?? "/"} // "/" como fallback
-                  className="flex-shrink-0 basis-1/4 aspect-[1/2] rounded-lg overflow-hidden shadow-md relative"
-                >
-                  <Image
-                    src={banner.imagem}
-                    alt={banner.nome}
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    priority={false}
-                  />
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-
+        {data_banners && 
+          <BannersVerticalScroll 
+            data_banners={data_banners} 
+            isAdmin={isAdmin} 
+        />}
 
         {/* Vitrines marcadas como is_home */}
         <Card className="my-6 p-0 ">
@@ -140,6 +122,7 @@ export default function HomePage() {
                 />
               ))}
         </Card>
+
         {isAdmin && (
           <div className="mt-4">
             <CardHeader>

@@ -4,6 +4,7 @@ import React from "react";
 import CardAdminAddCategoria from "@cardapio/components/admin/card/CardAdminAddCategoria";
 import { CategoryCard } from "@cardapio/components/Shared/category/CategoryCard";
 import type { CategoriaMini } from "@cardapio/services/useQueryHome";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 interface Props {
   categorias: CategoriaMini[];
@@ -16,6 +17,8 @@ export default function CategoryScrollSection({
   parentId = null,
   empresaId,
 }: Props) {
+
+  const {isAdmin} = useUserContext()
   return (
     <section className="mb-4  rounded-xl">
       {categorias.length > 1 && (
@@ -29,7 +32,7 @@ export default function CategoryScrollSection({
       <div className="relative  border-2 border-primary/20 rounded-b-xl">
         {/* Linha colorida no topo */}
 
-        <div className="relative flex overflow-x-auto gap-4 pb-2 hide-scrollbar rounded-xl z-20 px-4 py-2">
+        <div className={`relative flex overflow-x-auto gap-4 pb-2 rounded-xl z-20 px-4 py-2 ${isAdmin ? "": "hide-scrollbar"}`}>
           {categorias.map((cat) => (
             <CategoryCard
               key={cat.id}

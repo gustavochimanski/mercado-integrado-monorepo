@@ -5,7 +5,6 @@ import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CircleArrowLeft } from "lucide-react";
 import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
-import { HorizontalSpy } from "@cardapio/components/Shared/HorizontalScrollSpy";
 import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import ProductsSection from "@cardapio/components/Shared/product/ProductsSection";
@@ -16,6 +15,7 @@ import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 import { useCategoriaPorSlug } from "@cardapio/services/useQueryHome";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
+import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);

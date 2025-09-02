@@ -5,9 +5,8 @@ import { getCookie } from "cookies-next";
 import { Card, CardContent } from "@supervisor/components/ui/card";
 import { useEmpresaById } from "@supervisor/services/useQueryEmpresasMensura";
 
-const LINK_PROD = "https://mi-cardapio.vercel.app";
 const LINK_DEV = "http://localhost:3000";
-const IS_DEV = false;
+const IS_DEV = true;
 
 interface PreviewAdminCardapioProps {
   empresaId: number | null;
@@ -16,17 +15,19 @@ interface PreviewAdminCardapioProps {
 export default function PreviewAdminCardapio({ empresaId }: PreviewAdminCardapioProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const { data: data_empresa_atual} = useEmpresaById(empresaId ?? undefined)
+  const { data: data_empresa_atual } = useEmpresaById(empresaId ?? undefined);
 
   const iframeUrl = useMemo(() => {
     if (!empresaId) return "";
+
+    // 🔹 Regra: usa dev se IS_DEV for true, senão usa o link do banco.
+    // Se não tiver link no banco, fallback para LINK_DEV.
     const base = IS_DEV
       ? LINK_DEV
-      : data_empresa_atual?.cardapio_link ?? LINK_PROD; // fallback para produção
+      : data_empresa_atual?.cardapio_link ?? LINK_DEV;
+
     return `${base}/?via=supervisor&empresa=${empresaId}`;
   }, [empresaId, data_empresa_atual]);
-
-
 
   useEffect(() => {
     const token = getCookie("access_token") as string | undefined;
@@ -36,7 +37,15 @@ export default function PreviewAdminCardapio({ empresaId }: PreviewAdminCardapio
       if (!iframeRef.current || !token) return;
 
       const src = iframeRef.current.getAttribute("src");
-      const targetOrigin = src ? new URL(src).origin : "*";
+      let targetOrigin = "*";
+
+      if (src) {
+        try {
+          targetOrigin = new URL(src).origin;
+        } catch {
+          console.warn("⚠️ URL inválida no iframe src:", src);
+        }
+      }
 
       iframeRef.current.contentWindow?.postMessage(
         { type: "auth_token", token },
@@ -49,7 +58,16 @@ export default function PreviewAdminCardapio({ empresaId }: PreviewAdminCardapio
     // 🔹 Se já houver iframe, envia token imediatamente
     if (iframeRef.current && token) {
       const src = iframeRef.current.getAttribute("src");
-      const targetOrigin = src ? new URL(src).origin : "*";
+      let targetOrigin = "*";
+
+      if (src) {
+        try {
+          targetOrigin = new URL(src).origin;
+        } catch {
+          console.warn("⚠️ URL inválida no iframe src:", src);
+        }
+      }
+
       iframeRef.current.contentWindow?.postMessage(
         { type: "auth_token", token },
         targetOrigin
@@ -57,7 +75,7 @@ export default function PreviewAdminCardapio({ empresaId }: PreviewAdminCardapio
     }
 
     return () => window.removeEventListener("message", listener);
-  }, [iframeUrl]); // ⚠️ Dependência agora é iframeUrl
+  }, [iframeUrl]);
 
   return (
     <Card className="h-full flex flex-col">
