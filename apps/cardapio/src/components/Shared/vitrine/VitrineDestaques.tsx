@@ -45,7 +45,7 @@ export default function VitrineDestaques({
     toast("Esta vitrine não está vinculada a uma categoria.");
 
   return (
-    <section className="">
+    <section>
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold mx-2">{titulo}</h2>
 

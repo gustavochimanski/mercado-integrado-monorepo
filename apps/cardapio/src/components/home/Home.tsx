@@ -86,7 +86,7 @@ export default function HomePage() {
       <LoginWrapper />
       <HeaderComponent />
 
-      <main className="flex-1 p-2 gap-2">
+      <main className="flex-1 p-2 gap-2 mb-6">
         {/* Categorias raiz */}
         <CategoryScrollSection
           categorias={categorias}
@@ -94,7 +94,7 @@ export default function HomePage() {
         />
 
         {data_banners && data_banners.length > 0 && (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto my-6">
             <div className="flex flex-nowrap gap-2">
               {data_banners.map((banner) => (
                 <Link
@@ -119,7 +119,7 @@ export default function HomePage() {
 
 
         {/* Vitrines marcadas como is_home */}
-        <Card className="my-2 p-0">
+        <Card className="my-6 p-0 ">
           <CardTitle className="bg-primary text-background p-2 rounded-t-md" >Queridinhos</CardTitle>
           {vitrines
             .filter((v) => v.is_home)
