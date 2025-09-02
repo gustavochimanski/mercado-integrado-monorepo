@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@supervisor/services/Auth/useAuth";
 import { useToast } from "@supervisor/hooks/use-toast";
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
 // ✅ esquema de validação com zod
 export const loginSchema = z.object({
@@ -30,7 +30,7 @@ export function useLoginForm() {
     try {
       await login(data); // ✅ usar os dados, não o form controller
     } catch (err) {
-      const msg = extractErrorMessage(err, "Usuário ou senha inválidos.");
+      const msg = getErrorMessage(err, "Usuário ou senha inválidos.");
       toast({
         variant: "destructive",
         title: "Login falhou",
