@@ -36,7 +36,6 @@ import { logoutService } from "@supervisor/services/Auth/authenticate";
     { title: "Home", url: "/home", icon: Home },
     { title: "Dashboard", url: "/", icon: PieChart },
     { title: "Pedidos", url: "/pedidos", icon: Scroll},
-    { title: "Cardápio", url: "/cardapio", icon: Utensils },
     { title: "Relatórios", url: "/relatorios", icon: FileText },
     { title: "Metas", url: "/metas", icon: Target },
     { title: "Cadastros", url: "/cadastros", icon: CircleUser },
