@@ -14,4 +14,5 @@ export type PedidoKanban = {
   data_criacao: string;
   endereco_cliente?: string | null;     // novo campo
   meio_pagamento_descricao: string | null
+  observacao_geral: string | null
 };
