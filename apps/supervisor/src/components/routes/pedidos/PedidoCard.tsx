@@ -2,6 +2,7 @@ import { PedidoKanban } from "@supervisor/types/pedido";
 import React from "react";
 import { statusMap } from "./Kanban";
 import TempoPedidoBadge from "./TempoPedidoBasge";
+import { Checkbox } from "@supervisor/components/ui/checkbox";
 
 export const PedidoCard = React.memo(
   ({
@@ -17,11 +18,9 @@ export const PedidoCard = React.memo(
       <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={selecionado}
-            onChange={() => onToggleSelecionado(pedido.id)}
-            className="accent-primary"
+            onCheckedChange={() => onToggleSelecionado(pedido.id)}
           />
           <div>
             <p className="font-semibold text-primary text-base">#{pedido.id}</p>
@@ -31,9 +30,11 @@ export const PedidoCard = React.memo(
               {statusMap[pedido.status].label}
             </span>
           </div>
-          <div className="flex mt-auto gap-2 ">
-            <TempoPedidoBadge dataCriacao={pedido.data_criacao} limiteMinutos={30} />
-        </div>
+          <div className="flex mt-auto gap-2">
+            {pedido.status !== "C" && pedido.status !== "E" && (
+              <TempoPedidoBadge dataCriacao={pedido.data_criacao} limiteMinutos={30} />
+            )}
+          </div>
         </div>
 
         {/* Informações do cliente */}
