@@ -8,6 +8,7 @@ export type EnderecoResponse = {
   bairro?: string | null;
   cidade?: string | null;
   estado?: string | null;
+  aceita_pedido_automatico: boolean
 };
 
 export type EmpresaMensura = {
@@ -19,5 +20,6 @@ export type EmpresaMensura = {
   endereco?: EnderecoResponse | null;
   cardapio_link?: string | null
   cardapio_tema?: string | null
+  aceita_pedido_automatico: boolean
 
 };

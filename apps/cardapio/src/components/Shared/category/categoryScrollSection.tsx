@@ -17,16 +17,16 @@ export default function CategoryScrollSection({
   empresaId,
 }: Props) {
   return (
-    <section className="mb-4 shadow-md rounded-xl">
+    <section className="mb-4  rounded-xl">
       {categorias.length > 1 && (
         <div className="flex justify-between items-center px-2 bg-primary rounded-t-xl">
-          <h2 className="text-xl font-bold my-1 text-background">
+          <h2 className="text-base font-semibold my-1 text-background">
             Categorias
           </h2>
         </div>
       )}
 
-      <div className="relative  border-2 border-primary rounded-b-xl">
+      <div className="relative  border-2 border-primary/20 rounded-b-xl">
         {/* Linha colorida no topo */}
 
         <div className="relative flex overflow-x-auto gap-4 pb-2 hide-scrollbar rounded-xl z-20 px-4 py-2">

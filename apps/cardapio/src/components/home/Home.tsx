@@ -100,7 +100,7 @@ export default function HomePage() {
                 <Link
                   key={banner.id}
                   href={banner.href_destino ?? "/"} // "/" como fallback
-                  className="flex-shrink-0 basis-1/4 aspect-[1/2] rounded-lg overflow-hidden shadow-md hover:scale-105 transition-transform relative"
+                  className="flex-shrink-0 basis-1/4 aspect-[1/2] rounded-lg overflow-hidden shadow-md relative"
                 >
                   <Image
                     src={banner.imagem}

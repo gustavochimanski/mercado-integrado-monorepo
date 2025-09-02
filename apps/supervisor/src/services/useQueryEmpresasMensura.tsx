@@ -12,7 +12,7 @@ export interface EmpresaForm {
   nome: string
   cnpj?: string
   logo?: FileList
-  endereco?: {
+  endereco: {
     logradouro?: string
     numero?: string
     bairro?: string
@@ -21,6 +21,7 @@ export interface EmpresaForm {
   }
   cardapio_link?: string
   cardapio_tema?: string
+   aceita_pedido_automatico?: boolean 
 }
 
 // --- utilitário para FormData
@@ -35,12 +36,31 @@ const buildFormData = (data: EmpresaForm, oldLogo?: string) => {
     formData.append("logo_antiga", oldLogo)
   }
 
-  formData.append("endereco", JSON.stringify(data.endereco))
+  formData.append("endereco", JSON.stringify({
+    logradouro: data.endereco?.logradouro ?? "",
+    numero: data.endereco?.numero ?? "",
+    bairro: data.endereco?.bairro ?? "",
+    cidade: data.endereco?.cidade ?? "",
+    cep: data.endereco?.cep ?? "",
+  }))
+
   if (data.cardapio_link) formData.append("cardapio_link", data.cardapio_link)
   if (data.cardapio_tema) formData.append("cardapio_tema", data.cardapio_tema)
 
+  // Aceita pedido automático
+  const aceitaPedido = (data as any).aceita_pedido_automatico ? "true" : "false"
+  formData.append("aceita_pedido_automatico", aceitaPedido)
+
+  // 🔎 Log para debug
+  console.log("💾 FormData enviado:")
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value)
+  }
+
   return formData
 }
+
+
 
 // --- Queries
 export function useEmpresas({ skip = 0, limit = 100 }: ListParams = {}) {
