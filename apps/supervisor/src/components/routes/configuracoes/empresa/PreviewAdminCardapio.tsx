@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useRef } from "react";
 import { getCookie } from "cookies-next";
 import { Card, CardContent } from "@supervisor/components/ui/card";
+import { useEmpresaById } from "@supervisor/services/useQueryEmpresasMensura";
 
 const LINK_PROD = "https://mi-cardapio.vercel.app";
 const LINK_DEV = "http://localhost:3000";
-const IS_DEV = true;
+const IS_DEV = false;
 
 interface PreviewAdminCardapioProps {
   empresaId: number | null;
@@ -15,11 +16,17 @@ interface PreviewAdminCardapioProps {
 export default function PreviewAdminCardapio({ empresaId }: PreviewAdminCardapioProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  const { data: data_empresa_atual} = useEmpresaById(empresaId ?? undefined)
+
   const iframeUrl = useMemo(() => {
     if (!empresaId) return "";
-    const base = IS_DEV ? LINK_DEV : LINK_PROD;
+    const base = IS_DEV
+      ? LINK_DEV
+      : data_empresa_atual?.cardapio_link ?? LINK_PROD; // fallback para produção
     return `${base}/?via=supervisor&empresa=${empresaId}`;
-  }, [empresaId]);
+  }, [empresaId, data_empresa_atual]);
+
+
 
   useEffect(() => {
     const token = getCookie("access_token") as string | undefined;

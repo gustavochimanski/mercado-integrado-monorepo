@@ -74,7 +74,7 @@ export function useEmpresas({ skip = 0, limit = 100 }: ListParams = {}) {
   })
 }
 
-export function useEmpresa(id?: number) {
+export function useEmpresaById(id?: number) {
   return useQuery<EmpresaMensura, Error>({
     queryKey: ["empresa", id],
     enabled: !!id,
