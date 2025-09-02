@@ -1,37 +1,57 @@
-// @supervisor/services/mensura/useEmpresas.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import apiMensura from "@supervisor/lib/api/apiMensura";
-import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
-import { toastErro, toastSucess } from "@supervisor/lib/toast"; // <- seus helpers
+"use client"
 
-type ListParams = { skip?: number; limit?: number };
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import apiMensura from "@supervisor/lib/api/apiMensura"
+import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura"
+import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage"
+import { useToast } from "@supervisor/hooks/use-toast"
+
+type ListParams = { skip?: number; limit?: number }
 
 export interface EmpresaForm {
-  nome: string;
-  cnpj?: string;
-  slug: string;
-  logo?: FileList;
-  endereco: {
-    logradouro: string;
-    numero: string;
-    bairro?: string;
-    cidade?: string;
-    cep?: string;
-  };
+  nome: string
+  cnpj?: string
+  logo?: FileList
+  endereco?: {
+    logradouro?: string
+    numero?: string
+    bairro?: string
+    cidade?: string
+    cep?: string
+  }
+  cardapio_link?: string
+  cardapio_tema?: string
 }
 
-// -- Queries existentes
+// --- utilitário para FormData
+const buildFormData = (data: EmpresaForm, oldLogo?: string) => {
+  const formData = new FormData()
+  formData.append("nome", data.nome)
+  formData.append("cnpj", data.cnpj ?? "")
+
+  if (data.logo && data.logo[0]) {
+    formData.append("logo", data.logo[0])
+  } else if (oldLogo) {
+    formData.append("logo_antiga", oldLogo)
+  }
+
+  formData.append("endereco", JSON.stringify(data.endereco))
+  if (data.cardapio_link) formData.append("cardapio_link", data.cardapio_link)
+  if (data.cardapio_tema) formData.append("cardapio_tema", data.cardapio_tema)
+
+  return formData
+}
+
+// --- Queries
 export function useEmpresas({ skip = 0, limit = 100 }: ListParams = {}) {
   return useQuery<EmpresaMensura[], Error>({
     queryKey: ["empresas", skip, limit],
     queryFn: async () => {
-      const { data } = await apiMensura.get("api/mensura/empresas/", {
-        params: { skip, limit },
-      });
-      return data;
+      const { data } = await apiMensura.get("api/mensura/empresas/", { params: { skip, limit } })
+      return data
     },
     staleTime: 60_000,
-  });
+  })
 }
 
 export function useEmpresa(id?: number) {
@@ -39,67 +59,56 @@ export function useEmpresa(id?: number) {
     queryKey: ["empresa", id],
     enabled: !!id,
     queryFn: async () => {
-      const { data } = await apiMensura.get(`api/mensura/empresas/${id}`);
-      return data;
+      const { data } = await apiMensura.get(`api/mensura/empresas/${id}`)
+      return data
     },
-  });
+  })
 }
 
-// -- Função utilitária para montar FormData
-const buildFormData = (data: EmpresaForm) => {
-  const formData = new FormData();
-  formData.append("nome", data.nome);
-  formData.append("cnpj", data.cnpj ?? "");
-  formData.append("slug", data.slug);
-  if (data.logo && data.logo[0]) {
-    formData.append("logo", data.logo[0]);
-  }
-  formData.append("endereco", JSON.stringify(data.endereco));
-  return formData;
-};
-
-// -- Mutations com toast
+// --- Mutations
 export function useCreateEmpresa() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: async (data: EmpresaForm) => {
-      const formData = buildFormData(data);
+      const formData = buildFormData(data)
       const { data: response } = await apiMensura.post("/api/mensura/empresas/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      });
-      return response;
+      })
+      return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["empresas"] });
-      toastSucess("Empresa cadastrada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["empresas"] })
+      toast({ title: "Empresa cadastrada!", description: "Empresa cadastrada com sucesso!" })
     },
     onError: (err) => {
-      console.error(err);
-      toastErro("Erro ao cadastrar empresa");
+      const msg = extractErrorMessage(err)
+      toast({ title: "Erro ao cadastrar empresa", description: msg, variant: "destructive"  })
     },
-  });
+  })
 }
 
 export function useUpdateEmpresa() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: EmpresaForm }) => {
-      const formData = buildFormData(data);
+      const formData = buildFormData(data)
       const { data: response } = await apiMensura.put(`/api/mensura/empresas/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      });
-      return response;
+      })
+      return response
     },
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["empresas"] });
-      queryClient.invalidateQueries({ queryKey: ["empresa", id] });
-      toastSucess("Empresa atualizada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["empresas"] })
+      queryClient.invalidateQueries({ queryKey: ["empresa", id] })
+      toast({ title: "Empresa atualizada!", description: "Empresa atualizada com sucesso!" })
     },
     onError: (err) => {
-      console.error(err);
-      toastErro("Erro ao atualizar empresa");
+      const msg = extractErrorMessage(err)
+      toast({ title: "Erro ao atualizar empresa", description: msg, variant: "destructive"  })
     },
-  });
+  })
 }

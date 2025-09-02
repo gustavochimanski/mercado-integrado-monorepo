@@ -17,4 +17,7 @@ export type EmpresaMensura = {
   slug: string;
   logo?: string | null;
   endereco?: EnderecoResponse | null;
+  cardapio_link?: string | null
+  cardapio_tema?: string | null
+
 };

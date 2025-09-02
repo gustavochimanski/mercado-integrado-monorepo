@@ -6,6 +6,7 @@ import { Input } from "@supervisor/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/components/ui/dialog";
 import { Label } from "@supervisor/components/ui/label";
 import { Button } from "@supervisor/components/ui/button";
+import { Select, SelectContent, SelectItem } from "@supervisor/components/ui/select";
 import { useUpdateEmpresa, EmpresaForm, useCreateEmpresa } from "@supervisor/services/global/useQueryEmpresasMensura";
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 
@@ -23,13 +24,13 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
     defaultValues: {
       nome: "",
       cnpj: "",
-      slug: "",
       endereco: { logradouro: "", numero: "", bairro: "", cidade: "", cep: "" },
+      cardapio_link: "",
+      cardapio_tema: "claro",
     },
   });
 
   const logoFile = watch("logo");
-
   const createEmpresa = useCreateEmpresa();
   const updateEmpresa = useUpdateEmpresa();
 
@@ -39,7 +40,6 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
       reset({
         nome: empresa.nome,
         cnpj: empresa.cnpj ?? "",
-        slug: empresa.slug,
         endereco: {
           logradouro: empresa.endereco?.logradouro ?? "",
           numero: empresa.endereco?.numero ?? "",
@@ -47,6 +47,8 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
           cidade: empresa.endereco?.cidade ?? "",
           cep: empresa.endereco?.cep ?? "",
         },
+        cardapio_link: empresa.cardapio_link ?? "",
+        cardapio_tema: empresa.cardapio_tema ?? "claro",
       });
       setLogoPreview(empresa.logo ?? null);
     } else {
@@ -64,7 +66,6 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
     }
   }, [logoFile]);
 
-  // Submit
   const onSubmit = async (data: EmpresaForm) => {
     setLoading(true);
     try {
@@ -106,12 +107,6 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="slug">Slug (URL)</Label>
-            <Input {...register("slug", { required: true })} placeholder="supermercado-xyz" />
-            {errors.slug && <span className="text-red-500 text-sm">Slug é obrigatório</span>}
-          </div>
-
           <div className="flex flex-col gap-2">
             <Label htmlFor="logo">Logo</Label>
             <Input type="file" {...register("logo")} accept="image/*" />
@@ -124,16 +119,31 @@ export default function EmpresaModal({ open, onOpenChange, empresa }: EmpresaMod
             )}
           </div>
 
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cardapio_link">Link do Cardápio</Label>
+            <Input {...register("cardapio_link")} placeholder="https://..." />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cardapio_tema">Tema do Cardápio</Label>
+            <Select {...register("cardapio_tema")}>
+              <SelectContent>
+                <SelectItem value="claro">Claro</SelectItem>
+                <SelectItem value="escuro">Escuro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex flex-col gap-3">
             <h3 className="text-lg font-semibold">Endereço</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
                 <Label>Logradouro</Label>
-                <Input {...register("endereco.logradouro", { required: true })} />
+                <Input {...register("endereco.logradouro" )} />
               </div>
               <div className="flex flex-col gap-1">
                 <Label>Número</Label>
-                <Input {...register("endereco.numero", { required: true })} />
+                <Input {...register("endereco.numero")} />
               </div>
             </div>
 

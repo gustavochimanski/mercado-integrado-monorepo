@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
-import { toastSucess, toastErro } from "@supervisor/lib/toast";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 // 🔎 Tipo do parceiro
 export interface Parceiro {
@@ -25,7 +25,6 @@ function useDebounced<T>(value: T, delay = 300) {
 
 // ✅ Buscar todos os parceiros
 export function useParceiros(enabled = true) {
-  const qc = useQueryClient();
   return useQuery<Parceiro[]>({
     queryKey: ["parceiros"],
     queryFn: async () => {
@@ -43,6 +42,7 @@ export function useParceiros(enabled = true) {
 // ✅ Mutations para criar, atualizar, deletar parceiro
 export function useMutateParceiro() {
   const qc = useQueryClient();
+  const { toast } = useToast();
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["parceiros"] });
 
@@ -50,29 +50,32 @@ export function useMutateParceiro() {
     mutationFn: (body: Omit<Parceiro, "id" | "created_at" | "updated_at">) =>
       apiMensura.post("/api/delivery/parceiros", body),
     onSuccess: () => {
-      toastSucess("Parceiro criado!");
+      toast({ title: "Parceiro criado!", description: "O parceiro foi criado com sucesso." });
       invalidate();
     },
-    onError: (err) => toastErro(extractErrorMessage(err)),
+    onError: (err) =>
+      toast({ title: "Erro ao criar parceiro", description: extractErrorMessage(err), variant: "destructive"  }),
   });
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<Parceiro> & { id: number }) =>
       apiMensura.put(`/api/delivery/parceiros/${id}`, body),
     onSuccess: () => {
-      toastSucess("Parceiro atualizado!");
+      toast({ title: "Parceiro atualizado!", description: "O parceiro foi atualizado com sucesso." });
       invalidate();
     },
-    onError: (err) => toastErro(extractErrorMessage(err)),
+    onError: (err) =>
+      toast({ title: "Erro ao atualizar parceiro", description: extractErrorMessage(err), variant: "destructive"  }),
   });
 
   const remove = useMutation({
     mutationFn: (id: number) => apiMensura.delete(`/api/delivery/parceiros/${id}`),
     onSuccess: () => {
-      toastSucess("Parceiro removido!");
+      toast({ title: "Parceiro removido!", description: "O parceiro foi removido com sucesso." });
       invalidate();
     },
-    onError: (err) => toastErro(extractErrorMessage(err)),
+    onError: (err) =>
+      toast({ title: "Erro ao remover parceiro", description: extractErrorMessage(err), variant: "destructive"  }),
   });
 
   return { create, update, remove };

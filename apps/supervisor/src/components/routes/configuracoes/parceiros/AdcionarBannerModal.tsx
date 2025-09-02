@@ -6,11 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@supervisor/components/ui/button";
 import { Banner, useMutateBanner } from "@supervisor/services/useQueryBanners";
 import { BannerForm } from "./BannerForm";
-import { toastSucess, toastErro } from "@supervisor/lib/toast";
-import { useCategoriasSearch } from "@supervisor/services/useQueryCategoria";
+import { useCategoriasSearch } from "@supervisor/services/useSearchCategoria";
 import Image from "next/image";
 import { Label } from "@supervisor/components/ui/label";
 import { Input } from "@supervisor/components/ui/input";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 interface AdicionarBannerModalProps {
   open: boolean;
@@ -28,6 +28,7 @@ export default function AdicionarBannerModal({
   onSaved
 }: AdicionarBannerModalProps) {
   const { create, update } = useMutateBanner();
+  const { toast } = useToast();
 
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<"V" | "H">("V");
@@ -61,8 +62,14 @@ export default function AdicionarBannerModal({
   }, [bannerEdit]);
 
   const handleSave = async () => {
-    if (!nome.trim()) { toastErro("Nome do banner é obrigatório."); return; }
-    if (!selectedCategoriaId) { toastErro("Selecione uma categoria."); return; }
+    if (!nome.trim()) { 
+      toast({ title: "Erro", description: "Nome do banner é obrigatório." }); 
+      return; 
+    }
+    if (!selectedCategoriaId) { 
+      toast({ title: "Erro", description: "Selecione uma categoria." }); 
+      return; 
+    }
 
     try {
       const formData = new FormData();
@@ -75,23 +82,22 @@ export default function AdicionarBannerModal({
 
       if (bannerEdit) {
         await update.mutateAsync({ id: bannerEdit.id, body: formData });
-        toastSucess("Banner atualizado!");
+        toast({ title: "Banner atualizado", description: "Banner atualizado com sucesso." });
       } else {
         await create.mutateAsync(formData);
-        toastSucess("Banner criado!");
+        toast({ title: "Banner criado", description: "Banner criado com sucesso." });
       }
 
       onOpenChange(false);
       onSaved();
-    } catch (err) {
-      toastErro("Erro ao salvar banner.");
-      console.error(err);
+    } catch (err: any) {
+      toast({ title: "Erro ao salvar banner", description: err?.message || "Ocorreu um erro inesperado." });
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[95vh]"> {/* modal maior para cards */}
+      <DialogContent className="max-w-5xl h-[95vh]">
         <DialogHeader>
           <DialogTitle>{bannerEdit ? "Editar Banner" : "Adicionar Banner"}</DialogTitle>
         </DialogHeader>

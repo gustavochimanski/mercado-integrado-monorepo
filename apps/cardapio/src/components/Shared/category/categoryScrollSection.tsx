@@ -7,30 +7,27 @@ import type { CategoriaMini } from "@cardapio/services/useQueryHome";
 
 interface Props {
   categorias: CategoriaMini[];
-  titulo?: string;
   parentId?: number | null;
   empresaId: number;
 }
 
 export default function CategoryScrollSection({
   categorias,
-  titulo,
   parentId = null,
   empresaId,
 }: Props) {
   return (
-    <section className="mb-4">
+    <section className="mb-4 shadow-md rounded-xl">
       {categorias.length > 1 && (
-        <div className="flex justify-between items-center px-2">
-          <h2 className="text-xl font-bold mb-2">
-            {titulo ?? "Categorias"}
+        <div className="flex justify-between items-center px-2 bg-primary rounded-t-xl">
+          <h2 className="text-xl font-bold my-1 text-background">
+            Categorias
           </h2>
         </div>
       )}
 
-      <div className="relative">
+      <div className="relative  border-2 border-primary rounded-b-xl">
         {/* Linha colorida no topo */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/20 to-primary rounded-t-xl z-10" />
 
         <div className="relative flex overflow-x-auto gap-4 pb-2 hide-scrollbar rounded-xl z-20 px-4 py-2">
           {categorias.map((cat) => (

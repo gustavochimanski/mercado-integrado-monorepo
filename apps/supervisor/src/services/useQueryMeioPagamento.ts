@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
-import { toastErro, toastSucess } from "@supervisor/lib/toast";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 // 🔎 Tipo do resultado do endpoint /api/delivery/meios-pagamento
 export interface MeioPagamento {
@@ -26,7 +26,6 @@ function useDebounced<T>(value: T, delay = 300) {
 
 // ✅ Buscar todos os meios de pagamento
 export function useMeiosPagamento(enabled = true) {
-  const qc = useQueryClient();
   return useQuery<MeioPagamento[]>({
     queryKey: ["meios_pagamento"],
     queryFn: async () => {
@@ -44,6 +43,7 @@ export function useMeiosPagamento(enabled = true) {
 // ✅ Mutations para criar, atualizar, deletar
 export function useMutateMeioPagamento() {
   const qc = useQueryClient();
+  const { toast } = useToast();
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["meios_pagamento"] });
@@ -53,29 +53,32 @@ export function useMutateMeioPagamento() {
     mutationFn: (body: Omit<MeioPagamento, "id" | "created_at" | "updated_at">) =>
       apiMensura.post("/api/delivery/meios-pagamento/", body),
     onSuccess: () => {
-      toastSucess("Meio de pagamento criado!");
+      toast({ title: "Meio de pagamento criado!", description: "O meio de pagamento foi criado com sucesso." });
       invalidate();
     },
-    onError: (err) => toastErro(extractErrorMessage(err)),
+    onError: (err) =>
+      toast({ title: "Erro ao criar meio de pagamento", description: extractErrorMessage(err), variant: "destructive" }),
   });
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<MeioPagamento> & { id: number }) =>
       apiMensura.put(`/api/delivery/meios-pagamento/${id}`, body),
     onSuccess: () => {
-      toastSucess("Meio de pagamento atualizado!");
+      toast({ title: "Meio de pagamento atualizado!", description: "O meio de pagamento foi atualizado com sucesso." });
       invalidate();
     },
-    onError: (err) => toastErro(extractErrorMessage(err)),
+    onError: (err) =>
+      toast({ title: "Erro ao atualizar meio de pagamento", description: extractErrorMessage(err), variant: "destructive" }),
   });
 
   const remove = useMutation({
     mutationFn: (id: number) => apiMensura.delete(`/api/delivery/meios-pagamento/${id}`),
     onSuccess: () => {
-      toastSucess("Meio de pagamento removido!");
+      toast({ title: "Meio de pagamento removido!", description: "O meio de pagamento foi removido com sucesso."});
       invalidate();
     },
-    onError: (err) => toastErro(extractErrorMessage(err)),
+    onError: (err) =>
+      toast({ title: "Erro ao remover meio de pagamento", description: extractErrorMessage(err) , variant: "destructive" }),
   });
 
   return { create, update, remove };

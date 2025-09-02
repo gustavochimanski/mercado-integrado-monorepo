@@ -9,26 +9,27 @@ import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import EmpresaModal from "./CadastroEmpresaModal";
 import apiMensura from "@supervisor/lib/api/apiMensura";
-import { toastSucess, toastErro } from "@supervisor/lib/toast";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 export default function EmpresasTable() {
   const { data: empresas = [], isLoading, refetch } = useEmpresas();
   const [selected, setSelected] = useState<EmpresaMensura | null>(null);
   const [open, setOpen] = useState(false);
 
-  // Modal de confirmação
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [empresaToDelete, setEmpresaToDelete] = useState<EmpresaMensura | null>(null);
+
+  const toast = useToast();
 
   const handleDelete = async (id: number) => {
     try {
       await apiMensura.delete(`/api/mensura/empresas/${id}`);
-      toastSucess("Empresa removida com sucesso!");
+      toast.toast({ title: "Empresa removida com sucesso!", open: true });
       refetch();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toastErro("Erro ao remover empresa");
+      toast.toast({ title: "Erro ao remover empresa", description: err?.message || "", open: true });
     }
   };
 
@@ -78,7 +79,6 @@ export default function EmpresasTable() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Botão de adicionar */}
       <div className="flex justify-end mb-4">
         <Button
           size="sm"
@@ -92,7 +92,6 @@ export default function EmpresasTable() {
         </Button>
       </div>
 
-      {/* Container da tabela com scroll */}
       <div className="flex-1 min-h-0">
         {isLoading ? (
           <p>Carregando empresas...</p>
@@ -101,7 +100,7 @@ export default function EmpresasTable() {
             rows={empresas}
             columns={columns}
             getRowId={(row) => row.id}
-            autoHeight={false} // importante para respeitar altura do container
+            autoHeight={false}
             sx={{ height: "100%", width: "100%" }}
           />
         )}

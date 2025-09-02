@@ -7,8 +7,8 @@ import {
   PagamentoGateway,
 } from "@supervisor/types/pedido";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toastSucess, toastErro } from "@supervisor/lib/toast";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 export function useFetchPedidosAdminKanban() {
   return useQuery<PedidoKanban[]>({
@@ -23,6 +23,10 @@ export function useFetchPedidosAdminKanban() {
 
 export function useMutatePedidoAdmin() {
   const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false });
 
   const atualizarStatus = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: PedidoStatus }) => {
@@ -32,11 +36,11 @@ export function useMutatePedidoAdmin() {
       return data;
     },
     onSuccess: () => {
-      toastSucess("Pedido atualizado com sucesso!");
-      qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false });
+      toast({ title: "Pedido atualizado", description: "O status do pedido foi atualizado com sucesso." });
+      invalidate();
     },
     onError: (err: any) => {
-      toastErro(extractErrorMessage(err));
+      toast({ title: "Erro ao atualizar pedido", description: extractErrorMessage(err), variant: "destructive"  });
     },
   });
 
@@ -57,11 +61,11 @@ export function useMutatePedidoAdmin() {
       return data;
     },
     onSuccess: () => {
-      toastSucess("Pagamento confirmado!");
-      qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false });
+      toast({ title: "Pagamento confirmado", description: "O pagamento do pedido foi confirmado com sucesso." });
+      invalidate();
     },
     onError: (err: any) => {
-      toastErro(extractErrorMessage(err));
+      toast({ title: "Erro ao confirmar pagamento", description: extractErrorMessage(err), variant: "destructive"  });
     },
   });
 

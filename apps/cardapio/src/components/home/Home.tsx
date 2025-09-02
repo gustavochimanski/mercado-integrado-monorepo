@@ -15,7 +15,7 @@ import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/Sheet
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 import VitrineDestaques from "@cardapio/components/Shared/vitrine/VitrineDestaques";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
-import { CardHeader, CardTitle } from "../Shared/ui/card";
+import { Card, CardHeader, CardTitle } from "../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import { useBanners } from "@cardapio/services/useQueryBanners";
 import Image from "next/image";
@@ -90,13 +90,12 @@ export default function HomePage() {
         {/* Categorias raiz */}
         <CategoryScrollSection
           categorias={categorias}
-          titulo="Categorias"
           empresaId={empresa_id}
         />
 
         {data_banners && data_banners.length > 0 && (
           <div className="overflow-x-auto">
-            <div className="flex flex-nowrap gap-3">
+            <div className="flex flex-nowrap gap-2">
               {data_banners.map((banner) => (
                 <Link
                   key={banner.id}
@@ -120,25 +119,27 @@ export default function HomePage() {
 
 
         {/* Vitrines marcadas como is_home */}
-        {vitrines
-          .filter((v) => v.is_home)
-          .map((v) => (
-            <VitrineDestaques
+        <Card className="my-2 p-0">
+          <CardTitle className="bg-primary text-background p-2 rounded-t-md" >Queridinhos</CardTitle>
+          {vitrines
+            .filter((v) => v.is_home)
+            .map((v) => (
+              <VitrineDestaques
               key={v.id}
-              titulo={v.titulo}
-              produtos={v.produtos}
-              verMaisHref={v.href_categoria}
-              empresaId={empresa_id}
-              codCategoria={v.cod_categoria}
-              vitrineId={v.id}
-              is_home={v.is_home}
-              onSelectProduto={(p) => {
-                setProdutoSelecionado(p);
-                setSheetOpen(true);
-              }}
-            />
-          ))}
-
+                titulo={v.titulo}
+                produtos={v.produtos}
+                verMaisHref={v.href_categoria}
+                empresaId={empresa_id}
+                codCategoria={v.cod_categoria}
+                vitrineId={v.id}
+                is_home={v.is_home}
+                onSelectProduto={(p) => {
+                  setProdutoSelecionado(p);
+                  setSheetOpen(true);
+                }}
+                />
+              ))}
+        </Card>
         {isAdmin && (
           <div className="mt-4">
             <CardHeader>

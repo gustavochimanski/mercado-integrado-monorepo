@@ -2,8 +2,8 @@
 import { TypeCadProdDeliveryResponse } from "@supervisor/types/routes/cadastros/cadProdDeliveryType";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toastSucess, toastErro } from "@supervisor/lib/toast";
 import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 interface UpdateProdutoBody {
   cod_barras: string;
@@ -38,6 +38,7 @@ export function useFetchCadProdMensura(
 
 export function useMutateProduto() {
   const qc = useQueryClient();
+  const { toast } = useToast();
 
   const create = useMutation({
     mutationFn: async (input: CreateProdutoInput) => {
@@ -59,10 +60,10 @@ export function useMutateProduto() {
 
       try {
         const { data } = await apiMensura.post("/api/mensura/produtos", fd);
-        toastSucess("Produto criado com sucesso!");
+        toast({ title: "Produto criado", description: "O produto foi criado com sucesso." });
         return data;
       } catch (err: any) {
-        toastErro(extractErrorMessage(err));
+        toast({ title: "Erro ao criar produto", description: extractErrorMessage(err), variant: "destructive"  });
         throw err;
       }
     },
@@ -75,10 +76,10 @@ export function useMutateProduto() {
     mutationFn: async ({ cod_barras, formData }: UpdateProdutoBody) => {
       try {
         const { data } = await apiMensura.put(`/api/mensura/produtos/${cod_barras}`, formData);
-        toastSucess("Produto atualizado com sucesso!");
+        toast({ title: "Produto atualizado", description: "O produto foi atualizado com sucesso." });
         return data;
       } catch (err: any) {
-        toastErro(extractErrorMessage(err));
+        toast({ title: "Erro ao atualizar produto", description: extractErrorMessage(err), variant: "destructive"  });
         throw err;
       }
     },
@@ -91,9 +92,9 @@ export function useMutateProduto() {
     mutationFn: async (cod_barras: string) => {
       try {
         await apiMensura.delete(`/api/mensura/produtos/${cod_barras}`);
-        toastSucess("Produto removido com sucesso!");
+        toast({ title: "Produto removido", description: "O produto foi removido com sucesso." });
       } catch (err: any) {
-        toastErro(extractErrorMessage(err));
+        toast({ title: "Erro ao remover produto", description: extractErrorMessage(err), variant: "destructive"  });
         throw err;
       }
     },
