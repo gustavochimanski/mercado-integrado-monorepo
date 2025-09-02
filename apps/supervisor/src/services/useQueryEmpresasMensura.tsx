@@ -3,8 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import apiMensura from "@supervisor/lib/api/apiMensura"
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura"
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage"
 import { useToast } from "@supervisor/hooks/use-toast"
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon"
 
 type ListParams = { skip?: number; limit?: number }
 
@@ -103,7 +103,7 @@ export function useCreateEmpresa() {
       toast({ title: "Empresa cadastrada!", description: "Empresa cadastrada com sucesso!" })
     },
     onError: (err) => {
-      const msg = extractErrorMessage(err)
+      const msg = getErrorMessage(err)
       toast({ title: "Erro ao cadastrar empresa", description: msg, variant: "destructive"  })
     },
   })
@@ -127,7 +127,7 @@ export function useUpdateEmpresa() {
       toast({ title: "Empresa atualizada!", description: "Empresa atualizada com sucesso!" })
     },
     onError: (err) => {
-      const msg = extractErrorMessage(err)
+      const msg = getErrorMessage(err)
       toast({ title: "Erro ao atualizar empresa", description: msg, variant: "destructive"  })
     },
   })

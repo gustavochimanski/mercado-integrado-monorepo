@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 import { useToast } from "@supervisor/hooks/use-toast";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
 // 🔎 Tipo do banner
 export interface Banner {
@@ -61,7 +61,7 @@ export function useMutateBanner() {
       invalidate();
     },
     onError: (err) => {
-      toast({ title: "Erro ao criar banner", description: extractErrorMessage(err), variant: "destructive"  });
+      toast({ title: "Erro ao criar banner", description: getErrorMessage(err), variant: "destructive"  });
     },
   });
 
@@ -75,7 +75,7 @@ export function useMutateBanner() {
       invalidate();
     },
     onError: (err) => {
-      toast({ title: "Erro ao atualizar banner", description: extractErrorMessage(err), variant: "destructive"  });
+      toast({ title: "Erro ao atualizar banner", description: getErrorMessage(err), variant: "destructive"  });
     },
   });
 
@@ -86,7 +86,7 @@ export function useMutateBanner() {
       invalidate();
     },
     onError: (err) => {
-      toast({ title: "Erro ao remover banner", description: extractErrorMessage(err), variant: "destructive"  });
+      toast({ title: "Erro ao remover banner", description: getErrorMessage(err), variant: "destructive"  });
     },
   });
 

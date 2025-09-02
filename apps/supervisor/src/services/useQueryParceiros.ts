@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 import { useToast } from "@supervisor/hooks/use-toast";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
 // 🔎 Tipo do parceiro
 export interface Parceiro {
@@ -54,7 +54,7 @@ export function useMutateParceiro() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao criar parceiro", description: extractErrorMessage(err), variant: "destructive"  }),
+      toast({ title: "Erro ao criar parceiro", description: getErrorMessage(err), variant: "destructive"  }),
   });
 
   const update = useMutation({
@@ -65,7 +65,7 @@ export function useMutateParceiro() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao atualizar parceiro", description: extractErrorMessage(err), variant: "destructive"  }),
+      toast({ title: "Erro ao atualizar parceiro", description: getErrorMessage(err), variant: "destructive"  }),
   });
 
   const remove = useMutation({
@@ -75,7 +75,7 @@ export function useMutateParceiro() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao remover parceiro", description: extractErrorMessage(err), variant: "destructive"  }),
+      toast({ title: "Erro ao remover parceiro", description: getErrorMessage(err), variant: "destructive"  }),
   });
 
   return { create, update, remove };

@@ -7,8 +7,8 @@ import {
   PagamentoGateway,
 } from "@supervisor/types/pedido";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 import { useToast } from "@supervisor/hooks/use-toast";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
 export function useFetchPedidosAdminKanban() {
   return useQuery<PedidoKanban[]>({
@@ -40,7 +40,7 @@ export function useMutatePedidoAdmin() {
       invalidate();
     },
     onError: (err: any) => {
-      toast({ title: "Erro ao atualizar pedido", description: extractErrorMessage(err), variant: "destructive"  });
+      toast({ title: "Erro ao atualizar pedido", description: getErrorMessage(err), variant: "destructive"  });
     },
   });
 
@@ -65,7 +65,7 @@ export function useMutatePedidoAdmin() {
       invalidate();
     },
     onError: (err: any) => {
-      toast({ title: "Erro ao confirmar pagamento", description: extractErrorMessage(err), variant: "destructive"  });
+      toast({ title: "Erro ao confirmar pagamento", description: getErrorMessage(err), variant: "destructive"  });
     },
   });
 

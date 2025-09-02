@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
+
 import { useToast } from "@supervisor/hooks/use-toast";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
 // 🔎 Tipo do resultado do endpoint /api/delivery/meios-pagamento
 export interface MeioPagamento {
@@ -57,7 +58,7 @@ export function useMutateMeioPagamento() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao criar meio de pagamento", description: extractErrorMessage(err), variant: "destructive" }),
+      toast({ title: "Erro ao criar meio de pagamento", description: getErrorMessage(err), variant: "destructive" }),
   });
 
   const update = useMutation({
@@ -68,7 +69,7 @@ export function useMutateMeioPagamento() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao atualizar meio de pagamento", description: extractErrorMessage(err), variant: "destructive" }),
+      toast({ title: "Erro ao atualizar meio de pagamento", description: getErrorMessage(err), variant: "destructive" }),
   });
 
   const remove = useMutation({
@@ -78,7 +79,7 @@ export function useMutateMeioPagamento() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao remover meio de pagamento", description: extractErrorMessage(err) , variant: "destructive" }),
+      toast({ title: "Erro ao remover meio de pagamento", description: getErrorMessage(err) , variant: "destructive" }),
   });
 
   return { create, update, remove };

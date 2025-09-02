@@ -2,8 +2,8 @@
 import { TypeCadProdDeliveryResponse } from "@supervisor/types/routes/cadastros/cadProdDeliveryType";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { extractErrorMessage } from "@supervisor/lib/extractErrorMessage";
 import { useToast } from "@supervisor/hooks/use-toast";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
 interface UpdateProdutoBody {
   cod_barras: string;
@@ -63,7 +63,7 @@ export function useMutateProduto() {
         toast({ title: "Produto criado", description: "O produto foi criado com sucesso." });
         return data;
       } catch (err: any) {
-        toast({ title: "Erro ao criar produto", description: extractErrorMessage(err), variant: "destructive"  });
+        toast({ title: "Erro ao criar produto", description: getErrorMessage(err), variant: "destructive"  });
         throw err;
       }
     },
@@ -79,7 +79,7 @@ export function useMutateProduto() {
         toast({ title: "Produto atualizado", description: "O produto foi atualizado com sucesso." });
         return data;
       } catch (err: any) {
-        toast({ title: "Erro ao atualizar produto", description: extractErrorMessage(err), variant: "destructive"  });
+        toast({ title: "Erro ao atualizar produto", description: getErrorMessage(err), variant: "destructive"  });
         throw err;
       }
     },
@@ -94,7 +94,7 @@ export function useMutateProduto() {
         await apiMensura.delete(`/api/mensura/produtos/${cod_barras}`);
         toast({ title: "Produto removido", description: "O produto foi removido com sucesso." });
       } catch (err: any) {
-        toast({ title: "Erro ao remover produto", description: extractErrorMessage(err), variant: "destructive"  });
+        toast({ title: "Erro ao remover produto", description: getErrorMessage(err), variant: "destructive"  });
         throw err;
       }
     },
