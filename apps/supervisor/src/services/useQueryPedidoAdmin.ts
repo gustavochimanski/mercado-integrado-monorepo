@@ -10,11 +10,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@supervisor/hooks/use-toast";
 import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
-export function useFetchPedidosAdminKanban() {
+export function useFetchPedidosAdminKanban(date: string) {
   return useQuery<PedidoKanban[]>({
-    queryKey: ["pedidosAdminKanban"],
+    queryKey: ["pedidosAdminKanban", date], // 👈 cache separado por dia
     queryFn: async () => {
-      const { data } = await apiMensura.get("/api/delivery/pedidos/admin/kanban");
+      const { data } = await apiMensura.get(
+        `/api/delivery/pedidos/admin/kanban?date_filter=${date}`
+      );
       return data;
     },
     refetchInterval: 15000,

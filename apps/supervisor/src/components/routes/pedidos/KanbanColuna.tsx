@@ -11,14 +11,18 @@ export const KanbanColuna = React.memo(
     pedidos,
     selecionados,
     onToggleSelecionado,
+    selectedDate, // <- nova prop
   }: {
     statusMeta: StatusMeta;
     pedidos: PedidoKanban[];
     selecionados: Set<number>;
     onToggleSelecionado: (id: number) => void;
+    selectedDate: string; // <- formato "yyyy-MM-dd"
   }) => (
     <div className="flex flex-col h-full flex-1 bg-muted rounded shadow overflow-hidden min-w-[250px]">
-      <h2 className={`text-center font-bold p-2 border-b ${statusMeta.headerClass}`}>
+      <h2
+        className={`text-center font-bold p-2 border-b ${statusMeta.headerClass}`}
+      >
         {statusMeta.label}
       </h2>
       <ScrollArea className="flex-1 min-h-0">
@@ -30,6 +34,7 @@ export const KanbanColuna = React.memo(
                 pedido={pedido}
                 selecionado={selecionados.has(pedido.id)}
                 onToggleSelecionado={onToggleSelecionado}
+                selectedDate={selectedDate} // <- passa aqui
               />
             ))
           ) : (
@@ -42,4 +47,5 @@ export const KanbanColuna = React.memo(
     </div>
   )
 );
+
 KanbanColuna.displayName = "KanbanColuna";

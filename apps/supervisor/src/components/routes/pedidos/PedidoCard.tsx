@@ -3,17 +3,25 @@ import React from "react";
 import { statusMap } from "./Kanban";
 import TempoPedidoBadge from "./TempoPedidoBasge";
 import { Checkbox } from "@supervisor/components/ui/checkbox";
+import { isToday, parseISO } from "date-fns";
 
 export const PedidoCard = React.memo(
   ({
     pedido,
     selecionado,
     onToggleSelecionado,
+    selectedDate, // <- adicionamos aqui
   }: {
     pedido: PedidoKanban;
     selecionado: boolean;
     onToggleSelecionado: (id: number) => void;
+    selectedDate: string; // formato "yyyy-MM-dd"
   }) => {
+    const mostrarTempoBadge =
+      pedido.status !== "C" &&
+      pedido.status !== "E" &&
+      isToday(parseISO(selectedDate));
+
     return (
       <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2">
         {/* Header */}
@@ -31,8 +39,11 @@ export const PedidoCard = React.memo(
             </span>
           </div>
           <div className="flex mt-auto gap-2">
-            {pedido.status !== "C" && pedido.status !== "E" && (
-              <TempoPedidoBadge dataCriacao={pedido.data_criacao} limiteMinutos={30} />
+            {mostrarTempoBadge && (
+              <TempoPedidoBadge
+                dataCriacao={pedido.data_criacao}
+                limiteMinutos={30}
+              />
             )}
           </div>
         </div>
@@ -51,7 +62,8 @@ export const PedidoCard = React.memo(
             </span>
           )}
           <span>
-            <strong>Meio de Pagamento:</strong> {pedido.meio_pagamento_descricao || "—"}
+            <strong>Meio de Pagamento:</strong>{" "}
+            {pedido.meio_pagamento_descricao || "—"}
           </span>
           <span>
             <strong>Observação Geral:</strong> {pedido.observacao_geral || "—"}
