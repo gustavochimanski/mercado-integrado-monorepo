@@ -1,10 +1,11 @@
 "use client";
 
-import { Monitor } from "lucide-react";
+import { Banknote, Handshake, Monitor, Truck } from "lucide-react";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import MeiosPagamentoTable from "@supervisor/components/routes/configuracoes/meioPagamento/MeioPagamentoTable";
 import ParceirosTable from "@supervisor/components/routes/configuracoes/parceiros/ParceirosTable";
 import EmpresaTabWrapper from "@supervisor/components/routes/configuracoes/empresa/TabWrapperEmpresa";
+import EntregadoresTable from "@supervisor/components/routes/configuracoes/entregadores/EntregadoresTable";
 
 const ComponentConfiguracoes: React.FC = () => {
     const nestedTabItems = [
@@ -21,7 +22,7 @@ const ComponentConfiguracoes: React.FC = () => {
         value: "meio-pagamento",
         label: (
           <span className="flex items-center gap-2">
-            <Monitor size={14} /> Meios de Pagamento
+            <Banknote size={14} /> Meios de Pagamento
           </span>
         ),
         Component: () => <MeiosPagamentoTable />
@@ -30,10 +31,19 @@ const ComponentConfiguracoes: React.FC = () => {
         value: "parceiros",
         label: (
           <span className="flex items-center gap-2">
-            <Monitor size={14} /> Parceiros
+            <Handshake size={14} /> Parceiros
           </span>
         ),
         Component: () => <ParceirosTable />
+      },
+      {
+        value: "entregadores",
+        label: (
+          <span className="flex items-center gap-2">
+            <Truck size={14} /> Entregadores
+          </span>
+        ),
+        Component: () => <EntregadoresTable />
       }
     ];
   
