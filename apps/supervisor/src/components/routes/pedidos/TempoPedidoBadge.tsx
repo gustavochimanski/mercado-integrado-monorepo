@@ -34,9 +34,10 @@ const TempoPedidoBadge: React.FC<TempoPedidoBadgeProps> = ({
   );
 
   const corBadge = useMemo(() => {
-    if (percentual < 50) return "bg-green-500 text-white";
-    if (percentual < 80) return "bg-yellow-500 text-black";
-    return "bg-red-600 text-white";
+    if (percentual < 50) return "bg-emerald-200 text-emerald-500";
+    if (percentual < 70) return "bg-yellow-200 text-yellow-600";
+    if (percentual < 80) return "bg-orange-200 text-orange-600";
+    return "bg-rose-200 text-rose-500";
   }, [percentual]);
 
   return (

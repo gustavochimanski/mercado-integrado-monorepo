@@ -1,7 +1,7 @@
 import { PedidoKanban } from "@supervisor/types/pedido";
 import React from "react";
 import { statusMap } from "./Kanban";
-import TempoPedidoBadge from "./TempoPedidoBasge";
+import TempoPedidoBadge from "./TempoPedidoBadge";
 import { Checkbox } from "@supervisor/components/ui/checkbox";
 import { isToday, parseISO } from "date-fns";
 

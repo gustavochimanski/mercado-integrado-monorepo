@@ -22,7 +22,7 @@ export const statusMap: Record<PedidoStatus, StatusMeta> = {
     label: "Saiu para entrega",
     headerClass: "bg-[hsl(var(--primary))] text-white",
   },
-  E: { label: "Entregue", headerClass: "bg-green-600 text-white" },
+  E: { label: "Entregue", headerClass: "bg-green-600 text-white" }, 
   C: { label: "Cancelado", headerClass: "bg-red-600 text-white" },
 };
 
