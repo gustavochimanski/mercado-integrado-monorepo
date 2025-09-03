@@ -9,7 +9,6 @@ import { Button } from "@supervisor/components/ui/button";
 import { Switch } from "@supervisor/components/ui/switch";
 import { useMutateEntregador, Entregador } from "@supervisor/services/useQueryEntregadores";
 import { useEmpresas } from "@supervisor/services/useQueryEmpresasMensura";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface EntregadorForm {
   nome: string;
@@ -30,7 +29,6 @@ export default function EntregadorModal({ open, onOpenChange, entregador }: Entr
   const [loading, setLoading] = useState(false);
   const { create, update, vincularEmpresa, desvincularEmpresa } = useMutateEntregador();
   const { data: empresas } = useEmpresas();
-  const queryClient = useQueryClient();
 
   const [empresasSelecionadas, setEmpresasSelecionadas] = useState<number[]>([]);
 
@@ -63,7 +61,6 @@ export default function EntregadorModal({ open, onOpenChange, entregador }: Entr
     }
   }, [entregador, reset]);
 
-  // Toggle local do switch
   const handleToggleEmpresa = (empresaId: number) => {
     setEmpresasSelecionadas((prev) =>
       prev.includes(empresaId) ? prev.filter((id) => id !== empresaId) : [...prev, empresaId]
@@ -97,10 +94,6 @@ export default function EntregadorModal({ open, onOpenChange, entregador }: Entr
         // Criação
         await create.mutateAsync({ ...data, ativo: true, empresa_id: empresasSelecionadas[0] || 0 });
       }
-
-      // Força refetch para pegar estado atualizado
-      queryClient.invalidateQueries(["entregadores"]);
-      queryClient.invalidateQueries(["empresas"]);
 
       onOpenChange(false);
       reset();
@@ -167,14 +160,16 @@ export default function EntregadorModal({ open, onOpenChange, entregador }: Entr
                 {empresas.map((e) => (
                   <div key={e.id} className="flex items-center justify-between">
                     <span>{e.nome}</span>
-                    <Switch
-                      checked={empresasSelecionadas.includes(e.id)}
-                      onCheckedChange={(checked: boolean) => {
-                        setEmpresasSelecionadas((prev) =>
-                          checked ? [...prev, e.id] : prev.filter((id) => id !== e.id)
-                        );
-                      }}
-                    />
+                        <Switch
+                        checked={empresasSelecionadas.includes(e.id)}
+                        onCheckedChange={(checked: boolean) => {
+                            setEmpresasSelecionadas((prev) =>
+                            checked
+                                ? [...prev, e.id]       // marcar
+                                : prev.filter((id) => id !== e.id) // desmarcar
+                            )
+                        }}
+                        />
                   </div>
                 ))}
               </div>
