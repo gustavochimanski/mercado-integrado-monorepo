@@ -19,11 +19,11 @@ import { Pedido } from "@cardapio/types/pedido";
 import { usePedidos } from "@cardapio/services/useQueryPedido";
 
 const statusClasses: Record<Pedido["status"], string> = {
-  P: "bg-yellow-100 text-yellow-800",
-  R: "bg-purple-100 text-purple-800",
-  S: "bg-blue-100 text-blue-800",
-  E: "bg-green-100 text-green-800",
-  C: "bg-red-100 text-red-800"
+  P: "bg-yellow-100 text-yellow-600",
+  R: "bg-purple-100 text-purple-600",
+  S: "bg-blue-100 text-blue-600",
+  E: "bg-green-100 text-green-600",
+  C: "bg-red-100 text-red-600"
 };
 
 const statusLabels: Record<Pedido["status"], string> = {

@@ -14,7 +14,6 @@ const TempoPedidoBadge: React.FC<TempoPedidoBadgeProps> = ({
   const [tempoSegundos, setTempoSegundos] = useState<number>(0);
 
   useEffect(() => {
-    // Força UTC: adiciona 'Z' se não existir
     const isoUTC = dataCriacao.endsWith("Z") ? dataCriacao : dataCriacao + "Z";
     const criado = Date.parse(isoUTC);
 
@@ -28,21 +27,25 @@ const TempoPedidoBadge: React.FC<TempoPedidoBadgeProps> = ({
   }, [dataCriacao]);
 
   const minutosPassados = useMemo(() => Math.floor(tempoSegundos / 60), [tempoSegundos]);
+
   const percentual = useMemo(
     () => Math.min(100, (minutosPassados / limiteMinutos) * 100),
     [minutosPassados, limiteMinutos]
   );
 
-  const corBadge = useMemo(() => {
-    if (percentual < 50) return "bg-emerald-200 text-emerald-500";
-    if (percentual < 70) return "bg-yellow-200 text-yellow-600";
-    if (percentual < 80) return "bg-orange-200 text-orange-600";
-    return "bg-rose-200 text-rose-500";
+  // Define a cor e se deve piscar
+  const { corBadge, devePiscar } = useMemo(() => {
+    if (percentual < 50) return { corBadge: "bg-emerald-100 text-emerald-600", devePiscar: false };
+    if (percentual < 70) return { corBadge: "bg-yellow-100 text-yellow-600", devePiscar: false };
+    if (percentual < 80) return { corBadge: "bg-orange-100 text-orange-600", devePiscar: false };
+    return { corBadge: "bg-rose-100 text-rose-600", devePiscar: true }; // crítico, vai piscar
   }, [percentual]);
 
   return (
     <span
-      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${corBadge}`}
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${corBadge} ${
+        devePiscar ? "animate-bounce" : ""
+      }`}
       title={`Pedido feito há ${minutosPassados} minuto(s)`}
     >
       {minutosPassados} min
