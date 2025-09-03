@@ -64,7 +64,7 @@ export default function RoutePedidos() {
   const groupedOrders = groupOrdersByDate(pedidos);
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-6">
+    <div className="h-full flex flex-col gap-6 p-6">
       {isLoading ? (
         <div>Carregando pedidos...</div>
       ) : groupedOrders.size === 0 ? (
