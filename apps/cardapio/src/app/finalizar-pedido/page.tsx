@@ -55,6 +55,14 @@ export default function FinalizarPedidoPage() {
   const { create, update, remove } = useMutateEndereco(cliente?.tokenCliente ?? "");
   const { data: meiosPagamento = [] } = useMeiosPagamento(!!cliente?.tokenCliente);
 
+  // dentro do componente FinalizarPedidoPage
+  const tabTitles: Record<typeof currentTab, string> = {
+    endereco: "Escolha seu Endereço",
+    pagamento: "Escolha a forma de Pagamento",
+    revisao: "Revise seu Pedido",
+  };
+
+
   // --- FINALIZAR PEDIDO ---
   const handleFinalizar = async () => {
     try {
@@ -117,7 +125,7 @@ export default function FinalizarPedidoPage() {
 
   // --- RENDER ---
   return (
-    <div className="w-full flex flex-col gap-4 p-4">
+    <div className="w-full flex flex-col gap-0 p-0">
       <ClienteIdentificacaoModal
         open={showClienteModal}
         onClose={() => setShowClienteModal(false)}
@@ -125,12 +133,10 @@ export default function FinalizarPedidoPage() {
       />
 
       {cliente && (
-        <Card className="p-2 shadow-md h-[80vh] flex flex-col">
-          <CardHeader>
-            <h1 className="text-2xl font-bold">Finalizar Pedido</h1>
-          </CardHeader>
-
-          <CardContent className="flex-1">
+        <div className=" h-[80vh] flex flex-col">
+            <h1 className="text-xl p-4 font-bold">{tabTitles[currentTab]}</h1>
+          {/* CardContent scrollável */}
+          <CardContent className="flex-1 overflow-auto p-0">
             <Tabs
               value={currentTab}
               onValueChange={(v) => setCurrentTab(v as any)}
@@ -138,53 +144,49 @@ export default function FinalizarPedidoPage() {
                 {
                   value: "endereco",
                   label: "Endereço",
-                  Component: () => (
-                    <EnderecoStep
-                      enderecos={enderecos}
-                      enderecoId={enderecoId}
-                      onSelect={(id: number) => {
-                        setEnderecoPadraoId(id);
-                        setEnderecoId(id);
-                      }}
-                      onAdd={(novo: EnderecoCreate) => create.mutate(novo)}
-                      onUpdate={(atualizado: any) => update.mutate(atualizado)}
-                      onDelete={(id: number) => remove.mutate(id)}
-                    />
-                  ),
+                  Component: () => <EnderecoStep
+                    enderecos={enderecos}
+                    enderecoId={enderecoId}
+                    onSelect={(id: number) => { setEnderecoPadraoId(id); setEnderecoId(id); }}
+                    onAdd={(novo: EnderecoCreate) => create.mutate(novo)}
+                    onUpdate={(atualizado: any) => update.mutate(atualizado)}
+                    onDelete={(id: number) => remove.mutate(id)}
+                  />
                 },
                 {
                   value: "pagamento",
                   label: "Pagamento",
-                  Component: () => (
-                    <PagamentoStep
-                      meios={meiosPagamento}
-                      selecionado={meioPagamentoId}
-                      onSelect={(id: number) => {
-                        setMeioPagamentoId(id);
-                        setPagamentoId(id);
-                      }}
-                    />
-                  ),
+                  Component: () => <PagamentoStep
+                    meios={meiosPagamento}
+                    selecionado={meioPagamentoId}
+                    onSelect={(id: number) => { setMeioPagamentoId(id); setPagamentoId(id); }}
+                  />
                 },
                 {
                   value: "revisao",
                   label: "Revisão",
-                  Component: () => (
-                    <RevisaoStep
-                      items={items}
-                      observacao={observacao}
-                      endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
-                      pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
-                      total={totalPrice() || 0}
-                    />
-                  ),
+                  Component: () => <RevisaoStep
+                    items={items}
+                    observacao={observacao}
+                    endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
+                    pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
+                    total={totalPrice() || 0}
+                  />
                 },
               ]}
             />
           </CardContent>
 
+          {/* TOTAL */}
+            <div className="flex font-semibold bg-muted text-end gap-2 my-2 p-2 ">
+                <span className="ml-auto">Total:</span>
+                <span>R$ {totalPrice().toFixed(2)}</span>
+            </div>
+
+          {/* Botão final (sempre fixo) */}
           <CardFooter className="w-full">{renderFooterButton()}</CardFooter>
-        </Card>
+        </div>
+
       )}
     </div>
   );

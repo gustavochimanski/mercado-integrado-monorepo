@@ -29,8 +29,8 @@ const statusClasses: Record<Pedido["status"], string> = {
 const statusLabels: Record<Pedido["status"], string> = {
   P: "Pendente",
   R: "Em preparo",
-  E: "Entregue",
   S: "Saiu para Entrega",
+  E: "Entregue",
   C: "Cancelado"
 };
 
@@ -59,24 +59,26 @@ function sortGroups(groups: Map<string, Pedido[]>) {
 }
 
 export default function RoutePedidos() {
-  const { data: pedidos = [], isLoading } = usePedidos(); // pega todos os pedidos
+  const { data: pedidos = [], isLoading } = usePedidos();
 
   const groupedOrders = groupOrdersByDate(pedidos);
 
   return (
-    <div className="h-full flex flex-col gap-6 p-6">
+    <div className="h-full flex flex-col gap-6 p-6 overflow-auto">
       {isLoading ? (
         <div>Carregando pedidos...</div>
       ) : groupedOrders.size === 0 ? (
         <div>Nenhum pedido encontrado.</div>
       ) : (
         sortGroups(groupedOrders).map(([group, orders]) => (
-          <Card key={group} className="w-full p-0 gap-0">
-            <CardHeader className="p-4 bg-primary h-12 items-center rounded-t-xl text-background">
+          <Card key={group} className="w-full flex flex-col p-0 gap-0 rounded-xl shadow">
+            {/* Header do card */}
+            <CardHeader className="p-4 bg-primary h-12 flex items-center rounded-t-xl text-background">
               <CardTitle>{group}</CardTitle>
             </CardHeader>
 
-            <CardContent className="p-0">
+            {/* Conteúdo do card com scroll interno */}
+            <CardContent className="p-0 max-h-[500px] overflow-auto">
               <Accordion type="single" collapsible className="w-full">
                 {orders.map((order) => {
                   const date = new Date(order.data_criacao);
@@ -86,15 +88,17 @@ export default function RoutePedidos() {
 
                   return (
                     <AccordionItem key={order.id} value={String(order.id)}>
-                      <AccordionTrigger className="flex justify-between items-center px-4">
-                        <div className="flex flex-col gap-2 text-left flex-1">
-                          <span className="font-semibold text-foreground">Pedido #{order.id}</span>
+                      <AccordionTrigger className="flex justify-between items-center px-4 py-2">
+                        <div className="flex flex-col gap-1 text-left flex-1">
+                          <span className="font-semibold text-foreground">
+                            Pedido #{order.id}
+                          </span>
                           <span className="text-xs text-muted-foreground">
                             {formattedDate} • {order.itens.length} itens
                           </span>
                         </div>
 
-                        <div className="flex gap-2 items-start flex-col mt-1 mb-3">
+                        <div className="flex gap-2 items-start flex-col mt-1 mb-1">
                           <span className="text-sm font-bold text-foreground">
                             R$ {order.valor_total.toFixed(2)}
                           </span>
@@ -104,13 +108,16 @@ export default function RoutePedidos() {
                         </div>
                       </AccordionTrigger>
 
-                      <AccordionContent className="border-t p-3">
+                      <AccordionContent className="border-t p-3 max-h-64 overflow-auto">
+                        {/* Lista de itens do pedido */}
                         <ul className="divide-y divide-muted [&>li:nth-child(even)]:bg-muted">
                           {order.itens.map((item) => (
                             <li key={item.id} className="p-2 flex items-center gap-4 rounded">
                               <div className="flex-1">
                                 <p className="font-medium text-foreground">{item.produto_descricao_snapshot}</p>
-                                {item.observacao && <p className="text-xs text-muted-foreground">{item.observacao}</p>}
+                                {item.observacao && (
+                                  <p className="text-xs text-muted-foreground">{item.observacao}</p>
+                                )}
                               </div>
                               <div className="text-sm text-muted-foreground text-right">
                                 {item.quantidade} × R$ {item.preco_unitario.toFixed(2)}
@@ -119,6 +126,7 @@ export default function RoutePedidos() {
                           ))}
                         </ul>
 
+                        {/* Totais */}
                         <div className="mt-4 space-y-1 text-sm text-foreground">
                           <div className="flex justify-between">
                             <span>Taxa de entrega</span>
@@ -127,7 +135,6 @@ export default function RoutePedidos() {
                           <div className="flex justify-between font-bold text-emerald-600">
                             <span>Total</span>
                             <span>R$ {order.valor_total.toFixed(2)}</span>
-                            
                           </div>
                         </div>
                       </AccordionContent>
