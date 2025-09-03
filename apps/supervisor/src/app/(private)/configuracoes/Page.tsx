@@ -7,7 +7,7 @@ import ParceirosTable from "@supervisor/components/routes/configuracoes/parceiro
 import EmpresaTabWrapper from "@supervisor/components/routes/configuracoes/empresa/TabWrapperEmpresa";
 import EntregadoresTable from "@supervisor/components/routes/configuracoes/entregadores/EntregadoresTable";
 
-const ComponentConfiguracoes: React.FC = () => {
+export function ComponentConfiguracoes () {
     const nestedTabItems = [
       {
         value: "empresa",
@@ -53,5 +53,3 @@ const ComponentConfiguracoes: React.FC = () => {
       </div>
     );
   };
-
-  export default ComponentConfiguracoes
