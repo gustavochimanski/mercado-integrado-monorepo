@@ -40,7 +40,7 @@ import { logoutService } from "@supervisor/services/Auth/authenticate";
     { title: "Metas", url: "/metas", icon: Target },
     { title: "Cadastros", url: "/cadastros", icon: CircleUser },
     { title: "Processos", url: "/processos", icon: Atom },
-    { title: "Configurações", url: "/configuracoes", icon: Settings },
+    { title: "Configurações", url: "/config", icon: Settings },
   ];
 
 
