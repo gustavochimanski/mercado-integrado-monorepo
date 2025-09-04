@@ -26,7 +26,7 @@ export const KanbanColuna = React.memo(
         {statusMeta.label}
       </h2>
       <ScrollArea className="flex-1 min-h-0">
-        <div className="flex flex-col gap-2 p-2">
+        <div className="flex flex-col gap-1 p-2">
           {pedidos.length > 0 ? (
             pedidos.map((pedido) => (
               <PedidoCard

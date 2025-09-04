@@ -4,6 +4,8 @@ import { statusMap } from "./Kanban";
 import TempoPedidoBadge from "./TempoPedidoBadge";
 import { Checkbox } from "@supervisor/components/ui/checkbox";
 import { isToday, parseISO } from "date-fns";
+import { Button } from "@supervisor/components/ui/button";
+import { ChevronRight, CircleArrowRight, Eye, Printer } from "lucide-react";
 
 export const PedidoCard = React.memo(
   ({
@@ -23,36 +25,31 @@ export const PedidoCard = React.memo(
       isToday(parseISO(selectedDate));
 
     return (
-      <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2">
+      <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2 text-sm">
         {/* Header */}
         <div className="flex items-center gap-2">
           <Checkbox
             checked={selecionado}
             onCheckedChange={() => onToggleSelecionado(pedido.id)}
           />
-          <div className="flex gap-2">
-            <p className="font-semibold text-primary text-base">#{pedido.id}</p>
-            <span
-              className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[pedido.status].headerClass}`}
-            >
-              {statusMap[pedido.status].label}
-            </span>
-          </div>
-          <div className="flex mt-auto gap-2">
-            {mostrarTempoBadge && (
-              <TempoPedidoBadge
-                dataCriacao={pedido.data_criacao}
-                limiteMinutos={30}
-              />
-            )}
+          <div className="flex justify-between w-full">
+            <div className="flex gap-2">
+              <p className="font-semibold text-primary ">#{pedido.id}</p>
+              <p className="text-muted-foreground">{pedido.nome_cliente || "—"}</p>
+            </div>
+            <div className="flex mt-auto gap-2">
+              {mostrarTempoBadge && (
+                <TempoPedidoBadge
+                  dataCriacao={pedido.data_criacao}
+                  limiteMinutos={30}
+                  />
+                )}
+            </div>
           </div>
         </div>
 
         {/* Informações do cliente */}
         <div className="text-sm text-muted-foreground flex flex-col gap-1">
-          <span>
-            <strong>Cliente:</strong> {pedido.nome_cliente || "—"}
-          </span>
           <span>
             <strong>Telefone:</strong> {pedido.telefone_cliente || "—"}
           </span>
@@ -68,8 +65,19 @@ export const PedidoCard = React.memo(
         </div>
 
         {/* Valor total */}
-        <div className="mt-1 flex justify-end font-bold text-foreground">
+        <div className=" flex justify-between font-bold text-foreground">
           R$ {pedido.valor_total.toFixed(2)}
+          <div className="flex gap-1">
+            <button className="bg-primary/20 text-primary rounded-full d px-2">
+              <Eye size={15} />
+            </button>
+            <button className="bg-primary/20 text-primary rounded-full px-2">
+              <Printer size={15} />
+            </button>
+            <button className="bg-primary/20 text-primary rounded-full px-2">
+              <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
       </div>
     );
