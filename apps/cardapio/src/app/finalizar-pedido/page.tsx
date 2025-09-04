@@ -61,7 +61,10 @@ export default function FinalizarPedidoPage() {
   const handleFinalizar = async () => {
     try {
       await finalizarPedido();
-      // router.push("/pedido-confirmado");
+      // Espera 2 segundos antes de redirecionar
+      setTimeout(() => {
+        router.push("/pedidos");
+      }, 2000); // 2000ms = 2s
     } catch (err) {
       console.error("Erro ao finalizar pedido", err);
     }
@@ -175,20 +178,23 @@ export default function FinalizarPedidoPage() {
                 {
                   value: "revisao",
                   label: "Revisão",
-                  Component: () => <RevisaoStep
-                    items={items}
-                    observacao={observacao}
-                    endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
-                    pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
-                    total={totalPrice() || 0}
-                  />
+                    Component: () => <RevisaoStep
+                      items={items}
+                      observacao={observacao}
+                      endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
+                      pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
+                      total={totalPrice() || 0}
+                      inc={useCart.getState().inc}
+                      dec={useCart.getState().dec}
+                      remove={useCart.getState().remove}
+                    />
                 }
               ]}
             />
           </CardContent>
 
           {/* TOTAL */}
-            <div className="flex font-semibold bg-muted text-end gap-2 m-2 p-2 ">
+            <div className="flex font-bold bg-muted text-end text-primary gap-2 m-2 p-2 ">
                 <span className="ml-auto">Total:</span>
                 <span>R$ {totalPrice().toFixed(2)}</span>
             </div>

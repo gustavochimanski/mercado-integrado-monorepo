@@ -85,7 +85,7 @@ const Tabs: React.FC<TabsProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUp}
         className={cn(
-          "flex w-full overflow-x-auto flex-nowrap scrollbar-hide bg-muted text-muted-foreground rounded-xl",
+          "flex w-full overflow-x-auto flex-nowrap scrollbar-hide bg-muted text-muted-foreground rounded-xl hide-scrollbar",
           triggerClassName
         )}
         style={{ cursor: moved.current ? "grabbing" : "grab" }}
