@@ -13,7 +13,7 @@ import {
 import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
 import { useQueryEnderecos, useMutateEndereco, EnderecoCreate } from "@cardapio/services/useQueryEndereco";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@cardapio/components/Shared/ui/card";
+import { Card, CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
 import { CircleArrowRight, CircleCheck, Loader2 } from "lucide-react";
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-pedido/ClienteIdentificacaoModal";
@@ -21,6 +21,7 @@ import EnderecoStep from "@cardapio/components/Shared/finalizar-pedido/EnderecoS
 import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/PagamentoStep";
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
+import ObservacaoStep from "@cardapio/components/Shared/finalizar-pedido/ObservacaoStep";
 
 export default function FinalizarPedidoPage() {
   const { items, totalPrice, clear, observacao } = useCart();
@@ -33,7 +34,7 @@ export default function FinalizarPedidoPage() {
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
   const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
 
-  const [currentTab, setCurrentTab] = useState<"endereco" | "pagamento" | "revisao">("endereco");
+  const [currentTab, setCurrentTab] = useState<"endereco" | "pagamento" | "revisao" | "observacao">("endereco");
 
   useEffect(() => {
     // verifica cliente
@@ -76,6 +77,12 @@ export default function FinalizarPedidoPage() {
           </Button>
         );
       case "pagamento":
+        return (
+          <Button className="w-full text-lg p-6 bg-amber-600" onClick={() => setCurrentTab("observacao")}>
+            Continuar <CircleArrowRight strokeWidth={3} />
+          </Button>
+        );
+      case "observacao":
         return (
           <Button className="w-full text-lg p-6 bg-indigo-800" onClick={() => setCurrentTab("revisao")}>
             Revisar Pedido <CircleArrowRight strokeWidth={3} />
@@ -156,6 +163,16 @@ export default function FinalizarPedidoPage() {
                   />
                 },
                 {
+                  value: "observacao",
+                  label: "Observação",
+                  Component: () => (
+                    <ObservacaoStep
+                      observacao={observacao}
+                      onChange={(texto) => useCart.getState().setObservacao(texto)}
+                    />
+                  ),
+                },
+                {
                   value: "revisao",
                   label: "Revisão",
                   Component: () => <RevisaoStep
@@ -165,13 +182,13 @@ export default function FinalizarPedidoPage() {
                     pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
                     total={totalPrice() || 0}
                   />
-                },
+                }
               ]}
             />
           </CardContent>
 
           {/* TOTAL */}
-            <div className="flex font-semibold bg-muted text-end gap-2 my-2 p-2 ">
+            <div className="flex font-semibold bg-muted text-end gap-2 m-2 p-2 ">
                 <span className="ml-auto">Total:</span>
                 <span>R$ {totalPrice().toFixed(2)}</span>
             </div>

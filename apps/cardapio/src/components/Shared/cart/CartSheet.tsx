@@ -7,6 +7,7 @@ import { Separator } from "../ui/separator";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { useRouter } from "next/navigation";
+import { CardDescription } from "../ui/card";
 
 export function CartSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, totalPrice, clear, inc, dec, remove, observacao, setObservacao } = useCart();
@@ -20,16 +21,16 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="max-w-full p-2 h-[70%]">
+      <SheetContent side="bottom" className="max-w-full p-2 gap-0 h-[80%]">
         <SheetHeader>
           <SheetTitle>Meu carrinho</SheetTitle>
         </SheetHeader>
 
-        <main className="p-2 overflow-y-auto space-y-4">
+        <main className="p-2 overflow-y-auto space-y-2">
           {items.length === 0 && <p className="text-sm text-muted-foreground">Carrinho vazio</p>}
 
           {items.map((i) => (
-            <div key={i.cod_barras}>
+            <div key={i.cod_barras} className="space-y-2">
               <div className="flex justify-between items-center gap-2">
                 <div className="flex-1">
                   <p className="font-medium text-sm">{i.nome}</p>
@@ -62,20 +63,11 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
           ))}
         </main>
 
-        <div className="px-2 py-4">
-          <Label htmlFor="obs_geral">Observação do pedido</Label>
-          <Textarea
-            id="obs_geral"
-            value={observacao}
-            onChange={(e) => setObservacao(e.target.value)}
-            placeholder="Ex: Sem cebola, sem maionese..."
-            className="w-full"
-            maxLength={200}
-          />
-        </div>
 
-        <div className="mt-4 border-t pt-4 flex justify-between text-sm">
-          <span>Total</span>
+        <div className=" border-t pt-1 mt-auto flex justify-between text-sm">
+          <strong>
+            <span>Total</span>
+          </strong>
           <span className="font-semibold">R$ {totalPrice().toFixed(2)}</span>
         </div>
 

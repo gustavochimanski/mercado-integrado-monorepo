@@ -22,42 +22,77 @@ interface RevisaoStepProps {
   total: number;
 }
 
-export default function RevisaoStep({ items, observacao, endereco, pagamento, total }: RevisaoStepProps) {
+export default function RevisaoStep({
+  items,
+  observacao,
+  endereco,
+  pagamento,
+  total,
+}: RevisaoStepProps) {
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Revisão</h2>
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-center">Revisão do Pedido</h2>
+        {/* Endereço */}
+        <div className="rounded-2xl bg-white p-4 shadow-sm">
+          <h3 className="mb-1 font-semibold text-base">Endereço</h3>
+          <p className="text-sm text-gray-700">
+            {endereco
+              ? `${endereco.logradouro || ""}${
+                  endereco.numero ? `, ${endereco.numero}` : ""
+                }${endereco.bairro ? ` - ${endereco.bairro}` : ""}${
+                  endereco.cidade ? ` (${endereco.cidade})` : ""
+                }`
+              : "Não informado"}
+          </p>
+        </div>
+
+      {/* Pagamento */}
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <h3 className="mb-1 font-semibold text-base">Pagamento</h3>
+        <p className="text-sm text-gray-700">
+          {pagamento?.nome || "Não informado"}
+        </p>
+      </div>
+
+      {/* Observação */}
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <h3 className="mb-1 font-semibold text-base">Observação</h3>
+        <p className="text-sm text-gray-700">
+          {observacao?.trim() || "Nenhuma"}
+        </p>
+      </div>
+
+      {/* Total */}
+      <div className="rounded-2xl bg-gray-100 p-4 shadow-inner">
+        <div className="flex justify-between text-lg font-bold">
+          <span>Total</span>
+          <span className="text-green-600">R$ {total.toFixed(2)}</span>
+        </div>
+      </div>
 
       {/* Itens do pedido */}
-      <div>
-        <h3 className="font-semibold">Itens:</h3>
-        <ul className="space-y-1">
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <h3 className="mb-2 font-semibold text-base">Itens</h3>
+        <ul className="divide-y divide-gray-200">
           {items.map((item) => (
-            <li key={item.cod_barras}>
-              {item.quantity}x {item.nome} – R$ {(item.preco * item.quantity).toFixed(2)}
+            <li
+              key={item.cod_barras}
+              className="flex flex-col py-2 text-sm"
+            >
+              <span >
+                <strong>{item.quantity} x</strong>  {item.nome}
+              </span>
+              <span className="font-medium text-end text-gray-800">
+                R$ {(item.preco * item.quantity).toFixed(2)}
+              </span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Observação */}
-      <p><strong>Observação:</strong> {observacao || "Nenhuma"}</p>
 
-      {/* Endereço */}
-      <p>
-        <strong>Endereço:</strong>{" "}
-        {endereco
-          ? `${endereco.logradouro || ""}${endereco.numero ? `, ${endereco.numero}` : ""}${endereco.bairro ? ` - ${endereco.bairro}` : ""}${endereco.cidade ? ` (${endereco.cidade})` : ""}`
-          : "Não informado"}
-      </p>
 
-      {/* Pagamento */}
-      <p><strong>Pagamento:</strong> {pagamento?.nome || "Não informado"}</p>
 
-      {/* Total */}
-      <div className="bg-gray-100 p-3 rounded-lg text-lg font-bold flex justify-between">
-        <span>Total:</span>
-        <span>R$ {total.toFixed(2)}</span>
-      </div>
     </div>
   );
 }

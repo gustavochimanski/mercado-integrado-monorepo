@@ -62,9 +62,9 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
           >
             <div className="flex items-center gap-2">
               <RadioGroupItem value={String(e.id)} id={`end-${e.id}`} />
-              <Label htmlFor={`end-${e.id}`} className="cursor-pointer text-sm  flex flex-col">
-                <span className="font-medium mr-auto">{e.logradouro}, {e.numero}</span>
-                <span className="text-muted-foreground"> – {e.bairro}, {e.cidade}</span>
+              <Label htmlFor={`end-${e.id}`} className="cursor-pointer text-sm gap-0 flex flex-col">
+                <span className="font-medium">{e.logradouro}, {e.numero}</span>
+                <span className="text-muted-foreground"> {e.bairro} - {e.cidade}</span>
               </Label>
             </div>
             <div className="flex gap-1 sm:gap-2">
