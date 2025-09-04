@@ -111,7 +111,7 @@ export default function AdicionarBannerModal({
         />
 
         {/* Seleção de Categoria */}
-        <div className="mt-6">
+        <div >
           <Label className="block text-sm font-medium mb-1">Categoria Destino</Label>
           <Input
             type="text"
@@ -120,7 +120,7 @@ export default function AdicionarBannerModal({
             onChange={(e) => setBuscaCat(e.target.value)}
             className="mb-4 w-full border rounded px-2 py-1"
           />
-          <div className="grid grid-cols-4 gap-4 max-h-72 overflow-auto">
+          <div className="grid grid-cols-6 gap-4 max-h-72 overflow-auto">
             {loadingCats && <div className="col-span-full text-sm text-muted-foreground">Carregando categorias...</div>}
             {categorias.map(cat => {
               const isSelected = selectedCategoriaId === cat.id;
