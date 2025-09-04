@@ -30,7 +30,7 @@ export const PedidoCard = React.memo(
             checked={selecionado}
             onCheckedChange={() => onToggleSelecionado(pedido.id)}
           />
-          <div>
+          <div className="flex gap-2">
             <p className="font-semibold text-primary text-base">#{pedido.id}</p>
             <span
               className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${statusMap[pedido.status].headerClass}`}
@@ -64,9 +64,6 @@ export const PedidoCard = React.memo(
           <span>
             <strong>Meio de Pagamento:</strong>{" "}
             {pedido.meio_pagamento_descricao || "—"}
-          </span>
-          <span>
-            <strong>Observação Geral:</strong> {pedido.observacao_geral || "—"}
           </span>
         </div>
 
