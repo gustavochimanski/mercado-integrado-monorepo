@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -8,8 +8,7 @@ import {
   CardTitle,
 } from "@cardapio/components/Shared/ui/card";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import { Separator } from "@cardapio/components/Shared/ui/separator";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 
 interface Item {
   cod_barras: string;
@@ -31,8 +30,6 @@ interface RevisaoStepProps {
     nome?: string;
   };
   total: number;
-
-  // funções para modificar os itens
   inc?: (cod_barras: string) => void;
   dec?: (cod_barras: string) => void;
   remove?: (cod_barras: string) => void;
@@ -48,8 +45,17 @@ export default function RevisaoStep({
   dec,
   remove,
 }: RevisaoStepProps) {
+  // Estado para controlar a seta
+  const [showArrow, setShowArrow] = useState(true);
+
+  useEffect(() => {
+    // Desaparece após 6 segundos
+    const timer = setTimeout(() => setShowArrow(false), 6000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       <h2 className="text-xl font-bold text-center">Revisão do Pedido</h2>
 
       {/* Endereço */}
@@ -90,7 +96,7 @@ export default function RevisaoStep({
 
       {/* Itens do pedido */}
       <Card className="gap-0">
-          <CardTitle className="text-base mx-3">Itens</CardTitle>
+        <CardTitle className="text-base mx-3">Itens</CardTitle>
         <CardContent className="p-0">
           <ul className="divide-y divide-border">
             {items.map((item) => (
@@ -101,23 +107,36 @@ export default function RevisaoStep({
                 <span>
                   <strong>{item.quantity} x</strong> {item.nome}
                 </span>
-                  
+
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-800">
                     R$ {(item.preco * item.quantity).toFixed(2)}
                   </span>
-                  {/* Botões de incremento/decremento */}
                   {inc && dec && remove && (
                     <div className="flex gap-2">
-                      <Button size="icon" variant="outline" onClick={() => dec(item.cod_barras)}>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => dec(item.cod_barras)}
+                      >
                         -
                       </Button>
-                      <span className="flex-1 text-center my-auto">{item.quantity}</span>
-                      <Button size="icon" variant="outline" onClick={() => inc(item.cod_barras)}>
+                      <span className="flex-1 text-center my-auto">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => inc(item.cod_barras)}
+                      >
                         +
                       </Button>
-                      <Button size="icon" variant="destructive" onClick={() => remove(item.cod_barras)}>
-                        <Trash2/>
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => remove(item.cod_barras)}
+                      >
+                        <Trash2 />
                       </Button>
                     </div>
                   )}
@@ -135,6 +154,14 @@ export default function RevisaoStep({
           <span className="text-green-600">R$ {total.toFixed(2)}</span>
         </CardContent>
       </Card>
+
+      {/* SETA FLUTUANTE */}
+{showArrow && (
+  <div className="absolute top-12 left-1/2 -translate-x-1/2 text-primary animate-bounce">
+    <ChevronDown size={30} />
+  </div>
+)}
+
     </div>
   );
 }

@@ -14,7 +14,7 @@ import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
 import { useQueryEnderecos, useMutateEndereco, EnderecoCreate } from "@cardapio/services/useQueryEndereco";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Card, CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
-import { CircleArrowRight, CircleCheck, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronRight, CircleArrowRight, CircleCheck, Loader2 } from "lucide-react";
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-pedido/ClienteIdentificacaoModal";
 import EnderecoStep from "@cardapio/components/Shared/finalizar-pedido/EnderecoStep";
@@ -136,7 +136,7 @@ export default function FinalizarPedidoPage() {
       />
 
       {cliente && (
-        <div className=" h-[80vh] flex flex-col">
+          <div className="relative h-[80vh] flex flex-col">
           {/* CardContent scrollável */}
           <CardContent className="flex-1 overflow-auto p-0">
             <Tabs
@@ -198,6 +198,7 @@ export default function FinalizarPedidoPage() {
                 <span className="ml-auto">Total:</span>
                 <span>R$ {totalPrice().toFixed(2)}</span>
             </div>
+
 
           {/* Botão final (sempre fixo) */}
           <CardFooter className="w-full">{renderFooterButton()}</CardFooter>
