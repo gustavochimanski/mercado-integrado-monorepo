@@ -55,13 +55,6 @@ export default function FinalizarPedidoPage() {
   const { create, update, remove } = useMutateEndereco(cliente?.tokenCliente ?? "");
   const { data: meiosPagamento = [] } = useMeiosPagamento(!!cliente?.tokenCliente);
 
-  // dentro do componente FinalizarPedidoPage
-  const tabTitles: Record<typeof currentTab, string> = {
-    endereco: "Escolha seu Endereço",
-    pagamento: "Escolha a forma de Pagamento",
-    revisao: "Revise seu Pedido",
-  };
-
 
   // --- FINALIZAR PEDIDO ---
   const handleFinalizar = async () => {
@@ -134,12 +127,12 @@ export default function FinalizarPedidoPage() {
 
       {cliente && (
         <div className=" h-[80vh] flex flex-col">
-            <h1 className="text-xl p-4 font-bold">{tabTitles[currentTab]}</h1>
           {/* CardContent scrollável */}
           <CardContent className="flex-1 overflow-auto p-0">
             <Tabs
               value={currentTab}
               onValueChange={(v) => setCurrentTab(v as any)}
+              triggerClassName="rounded-b-none"
               items={[
                 {
                   value: "endereco",

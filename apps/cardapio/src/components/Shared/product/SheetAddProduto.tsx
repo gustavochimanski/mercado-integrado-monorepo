@@ -76,6 +76,7 @@ export function SheetAdicionarProduto({
 
   function onSubmit(data: FormData) {
     onAdd?.(produto, data.quantity, data.observacao);
+    setValue("quantity", 1);
     onClose();
   }
 

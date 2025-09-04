@@ -71,7 +71,7 @@ export function ProductOptions({ codBarras, onEdit, empresa_id, vitrineId }: Pro
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Confirmar remoção"
-        description="Tem certeza que deseja Desvincular este produto? "
+        description="Tem certeza que deseja Desvincular este produto? Ele nao vai aais aparecer nessa vitrine "
         confirmText="Sim, Desvincular"
         cancelText="Cancelar"
         onConfirm={handleConfirmRemove}
