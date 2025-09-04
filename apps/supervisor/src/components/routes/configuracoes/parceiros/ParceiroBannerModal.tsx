@@ -52,6 +52,7 @@ export default function ParceiroBannersModal({
     }
   };
 
+  console.log(parceiro)
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,19 +75,19 @@ export default function ParceiroBannersModal({
           </div>
 
           {/* GRID DE BANNERS */}
-{/* GRID DE BANNERS - agora em linha horizontal rolável */}
-<div className="overflow-x-auto py-2">
-  <div className="flex gap-4">
-    {bannersParceiro.map((b) => (
-      <BannerCard
-        key={b.id}
-        banner={b}
-        onEdit={(banner) => setBannerEdit(banner)}
-        onRemove={handleRemove}
-      />
-    ))}
-  </div>
-</div>
+          {/* GRID DE BANNERS - agora em linha horizontal rolável */}
+          <div className="overflow-x-auto py-2">
+            <div className="flex gap-4">
+              {bannersParceiro.map((b) => (
+                <BannerCard
+                  key={b.id}
+                  banner={b}
+                  onEdit={(banner) => setBannerEdit(banner)}
+                  onRemove={handleRemove}
+                />
+              ))}
+            </div>
+          </div>
 
 
           <DialogFooter className="mt-4 flex justify-end gap-2">

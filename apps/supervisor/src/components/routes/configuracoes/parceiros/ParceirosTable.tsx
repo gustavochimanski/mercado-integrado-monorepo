@@ -8,6 +8,7 @@ import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
 import { useMutateParceiro, useParceiros } from "@supervisor/services/useQueryParceiros";
 import ParceiroBannersModal from "./ParceiroBannerModal";
+import AdicionarParceiroModal from "./AdcionarParceiroModal";
 
 export default function ParceirosTable() {
   const { data: parceiros = [], isLoading, refetch } = useParceiros();
@@ -15,8 +16,10 @@ export default function ParceirosTable() {
 
   const [selected, setSelected] = useState<any | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalAddParceiro, seModalAddParceiro] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [parceiroToDelete, setParceiroToDelete] = useState<any | null>(null);
+
 
   const handleDelete = async (id: number) => {
     try {
@@ -91,7 +94,7 @@ export default function ParceirosTable() {
           size="sm"
           onClick={() => {
             setSelected(null);
-            setModalOpen(true);
+            seModalAddParceiro(true);
           }}
         >
           <Plus className="w-4 h-4 mr-1" />
@@ -118,6 +121,13 @@ export default function ParceirosTable() {
         onOpenChange={setModalOpen}
         parceiro={selected}
       />
+
+      <AdicionarParceiroModal
+        open={modalAddParceiro}
+        onOpenChange={seModalAddParceiro}
+        onSaved={() => refetch()}
+      />
+
 
       <ConfirmModal
         isOpen={deleteModalOpen}

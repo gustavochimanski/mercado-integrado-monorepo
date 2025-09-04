@@ -6,6 +6,7 @@ import MeiosPagamentoTable from "@supervisor/components/routes/configuracoes/mei
 import ParceirosTable from "@supervisor/components/routes/configuracoes/parceiros/ParceirosTable";
 import EmpresaTabWrapper from "@supervisor/components/routes/configuracoes/empresa/TabWrapperEmpresa";
 import EntregadoresTable from "@supervisor/components/routes/configuracoes/entregadores/EntregadoresTable";
+import TableCupons from "@supervisor/components/routes/configuracoes/cupons/TableCupons";
 
 const ComponentConfiguracoes = () => {
     const nestedTabItems = [
@@ -44,6 +45,15 @@ const ComponentConfiguracoes = () => {
           </span>
         ),
         Component: () => <EntregadoresTable />
+      },
+      {
+        value: "cupons",
+        label: (
+          <span className="flex items-center gap-2">
+            <Truck size={14} /> Cupons
+          </span>
+        ),
+        Component: () => <TableCupons />
       }
     ];
   
