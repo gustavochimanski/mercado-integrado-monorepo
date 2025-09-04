@@ -156,12 +156,11 @@ export default function RevisaoStep({
       </Card>
 
       {/* SETA FLUTUANTE */}
-{showArrow && (
-  <div className="absolute top-12 left-1/2 -translate-x-1/2 text-primary animate-bounce">
-    <ChevronDown size={30} />
-  </div>
-)}
-
+      {showArrow && (
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 text-primary animate-bounce">
+          <ChevronDown size={30} />
+        </div>
+      )}
     </div>
   );
 }
