@@ -43,19 +43,19 @@ export function HorizontalSpy({ items, activeId, onClickItem }: HorizontalSpyPro
   }, [activeId]);
 
   return (
-    <nav className="sticky top-0 z-30 bg-background/80 backdrop-blur p-4 border-b">
+    <nav className="sticky top-0  bg-background/80 backdrop-blur p-4 z-33 border-b">
       <ul
         ref={listRef}
-        className="flex flex-nowrap gap-2 whitespace-nowrap overflow-x-auto hide-scrollbar scroll-smooth"
+        className="flex flex-nowrap gap-2 whitespace-nowrap overflow-x-auto hide-scrollbar scroll-smooth "
       >
         {items.map((item) => {
           const isActive = activeId === item.id;
           return (
-            <li key={item.id} className="shrink-0">
+            <li key={item.id} className="shrink-0 ">
               <button
                 ref={setItemRef(item.id)}
                 onClick={() => onClickItem?.(item.id)}
-                className={`px-3 py-1 rounded-full text-sm transition border whitespace-nowrap
+                className={`px-3 py-1 rounded-full text-sm transition border   whitespace-nowrap
                   ${isActive ? "bg-primary text-background border-primary" : "bg-muted hover:bg-muted/80 border-transparent"}
                 `}
               >

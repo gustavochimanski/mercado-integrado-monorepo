@@ -46,7 +46,7 @@ const HeaderComponent = () => {
   }
 
   return (
-    <header className="w-full flex flex-col items-center shadow sticky top-0 z-50 bg-background rounded-b-lg p-2 pb-4 gap-2">
+    <header className="w-full flex flex-col items-center shadow sticky h-22 top-0 z-50 bg-background rounded-b-lg p-2 pb-4 gap-2">
       {/* ENDEREÇO */}
       <p
         onClick={() => window.alert("Aqui vai abrir um modal de endereços")}

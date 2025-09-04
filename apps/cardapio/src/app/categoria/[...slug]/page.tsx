@@ -56,14 +56,6 @@ export default function RouteCategoryPage() {
     document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="p-6 w-full min-h-screen flex justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   if (!categoriaAtual) {
     return <div className="p-6 w-full text-center text-muted-foreground">Categoria não encontrada.</div>;
   }
