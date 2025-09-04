@@ -113,25 +113,34 @@ export default function AdicionarCupomModal({
 
           {/* 🟢 Grid de parceiros */}
           {monetizado && (
-            <Card className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2 h-64">
-              {parceirosLoading ? (
-                <p>Carregando parceiros...</p>
-              ) : (
-                parceiros.map((p) => (
-                  <Card
-                    key={p.id}
-                    className={`p-2 border rounded flex items-center justify-between cursor-pointer ${
-                      parceirosIds.includes(p.id) ? "border-blue-500 bg-blue-50" : "border-gray-200"
-                    }`}
-                    onClick={() => toggleParceiro(p.id)}
-                  >
-                    <span className="text-sm">{p.nome}</span>
-                    <Checkbox checked={parceirosIds.includes(p.id)} onCheckedChange={() => toggleParceiro(p.id)} />
-                  </Card>
-                ))
-              )}
-            </Card>
+            <div className="mt-4">
+              <label className="block mb-2 text-sm font-medium">Selecione os parceiros:</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-64 overflow-y-auto">
+                {parceirosLoading ? (
+                  <p className="col-span-full text-sm text-muted-foreground">Carregando parceiros...</p>
+                ) : (
+                  parceiros.map((p) => {
+                    const isSelected = parceirosIds.includes(p.id);
+                    return (
+                      <div
+                        key={p.id}
+                        className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all duration-200
+                          ${isSelected ? "bg-blue-50 border-blue-500 shadow-sm" : "bg-white border-gray-200 hover:shadow-sm"}`}
+                        onClick={() => toggleParceiro(p.id)}
+                      >
+                        <span className="text-sm font-medium">{p.nome}</span>
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleParceiro(p.id)}
+                        />
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
           )}
+
         </div>
 
         <DialogFooter className="mt-4 flex justify-end gap-2">
