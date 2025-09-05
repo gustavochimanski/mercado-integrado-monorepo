@@ -16,6 +16,7 @@ import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem
 import { useCategoriaPorSlug } from "@cardapio/services/useQueryHome";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
+import HeaderComponent from "@cardapio/components/Shared/Header";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -57,14 +58,12 @@ export default function RouteCategoryPage() {
   }, []);
 
   if (!categoriaAtual) {
-    return <div className="p-6 w-full text-center text-muted-foreground">Categoria não encontrada.</div>;
+    return <div className="p-6 w-full h-min-scren text-center text-muted-foreground"></div>;
   }
 
   return (
     <div className="min-h-screen flex flex-col gap-4">
-      <Button onClick={router.back} variant="link" className="mr-auto">
-        <CircleArrowLeft /> Voltar
-      </Button>
+      <HeaderComponent/>
 
       <main className="flex-1 p-2">
         <HorizontalSpy items={vitrinesMeta} activeId={activeId} onClickItem={scrollToSection} />
