@@ -101,8 +101,7 @@ export default function HomePage() {
         />}
 
         {/* Vitrines marcadas como is_home */}
-        <Card className="my-6 p-0 ">
-          <CardTitle className="bg-primary text-background p-2 rounded-t-md" >Queridinhos</CardTitle>
+        <div className="my-6 p-0  space-y-4">
           {vitrines
             .filter((v) => v.is_home)
             .map((v) => (
@@ -121,7 +120,7 @@ export default function HomePage() {
                 }}
                 />
               ))}
-        </Card>
+        </div>
 
         {isAdmin && (
           <div className="mt-4">

@@ -47,7 +47,7 @@ export default function VitrineDestaques({
   return (
     <section>
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold mx-2">{titulo}</h2>
+        <h2 className="text-base font-semibold text-muted-foreground mx-2">{titulo}</h2>
 
         <AdminVitrineOptions
           empresaId={empresaId}
@@ -76,7 +76,7 @@ export default function VitrineDestaques({
       </div>
 
       {/* Linha rolável no mobile */}
-      <div className="flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth px-2">
+      <div className="flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth px-2 py-1">
         {lista.map((p) => (
           <ProductCard
             key={p.cod_barras}

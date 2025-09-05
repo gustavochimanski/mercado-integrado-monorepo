@@ -2,7 +2,6 @@
 
 import { Home, Tag, ClipboardPen, CircleUser, Search } from "lucide-react";
 import Link from "next/link";
-import { Button } from "./ui/button";
 
 const FooterComponent = () => {
   return (
@@ -24,16 +23,14 @@ const FooterComponent = () => {
         <Tag size={20} />
         <span className="text-[11px]">Promoções</span>
       </Link>
-
-      {/* Botão central */}
-      <div className="relative -top-7 z-50">
-        <Button
-          className="w-14 h-14 bg-primary text-white rounded-full shadow-md flex flex-col items-center justify-center transition hover:brightness-110"
-        >
-          <Search size={20} />
-          <span className="text-[10px] font-medium leading-none">Buscar</span>
-        </Button>
-      </div>
+      {/* Promoções */}
+      <Link
+        href="/promocoes"
+        className="flex flex-col items-center gap-1 hover:text-primary transition"
+      >
+        <Search size={20} />
+        <span className="text-[11px]">Buscar</span>
+      </Link>
 
       {/* Pedidos */}
       <Link
