@@ -2,7 +2,6 @@
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 
 interface Props {
   onOpen: () => void;
