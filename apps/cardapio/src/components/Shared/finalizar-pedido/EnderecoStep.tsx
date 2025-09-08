@@ -2,29 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import { RadioGroup, RadioGroupItem } from "@cardapio/components/Shared/ui/radio-group";
 import { Label } from "@cardapio/components/Shared/ui/label";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
 import { Pen, Trash2, Plus } from "lucide-react";
 
 export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, onUpdate, onDelete }: any) {
-  const [selected, setSelected] = useState(String(enderecoId ?? ""));
+  const [selected, setSelected] = useState<number | null>(enderecoId ?? null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [novo, setNovo] = useState({ logradouro: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
   const [open, setOpen] = useState(false);
 
-  useEffect(() => setSelected(String(enderecoId ?? "")), [enderecoId]);
+  useEffect(() => setSelected(enderecoId ?? null), [enderecoId]);
 
   const startEdit = (e: any) => {
     setEditingId(e.id);
-    setNovo({ 
-      logradouro: e.logradouro, 
-      numero: e.numero || "", 
-      bairro: e.bairro || "", 
-      cidade: e.cidade, 
-      estado: e.estado, 
-      cep: e.cep 
+    setNovo({
+      logradouro: e.logradouro,
+      numero: e.numero || "",
+      bairro: e.bairro || "",
+      cidade: e.cidade,
+      estado: e.estado,
+      cep: e.cep
     });
     setOpen(true);
   };
@@ -48,44 +47,76 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     <div className="space-y-4">
       <h2 className="text-base font-semibold">Escolha o Endereço</h2>
 
-      <RadioGroup
-        value={selected}
-        onValueChange={(id) => {
-          setSelected(id);
-          onSelect(Number(id));
-        }}
-      >
-        {enderecos.map((e: any) => (
-          <div
-            key={e.id}
-            className="flex items-center justify-between rounded-lg border p-2 sm:p-3 hover:bg-muted/30 transition"
-          >
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value={String(e.id)} id={`end-${e.id}`} />
-              <Label htmlFor={`end-${e.id}`} className="cursor-pointer text-sm gap-0 flex flex-col">
-                <span className="font-medium">{e.logradouro}, {e.numero}</span>
-                <span className="text-muted-foreground"> {e.bairro} - {e.cidade}</span>
-              </Label>
+      <div className="grid gap-3">
+        {enderecos.map((e: any) => {
+          const isSelected = selected === e.id;
+          return (
+            <div
+              key={e.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                setSelected(e.id);
+                onSelect(e.id);
+              }}
+              className={`relative rounded-xl border p-3 sm:p-4 cursor-pointer transition
+                ${isSelected ? "border-primary ring-2 ring-primary/30 bg-primary/5" : "border-muted hover:bg-muted/30"}
+              `}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col">
+                  <span className="font-medium text-sm sm:text-base">
+                    {e.logradouro}, {e.numero}
+                  </span>
+                  <span className="text-xs sm:text-sm text-muted-foreground">
+                    {e.bairro} - {e.cidade}/{e.estado} • {e.cep}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      startEdit(e);
+                    }}
+                  >
+                    <Pen className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Editar</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      onDelete(e.id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Excluir</span>
+                  </Button>
+                </div>
+              </div>
+              {isSelected && (
+                <span className="absolute bottom-2 right-2 text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                  Selecionado
+                </span>
+              )}
             </div>
-            <div className="flex gap-1 sm:gap-2">
-              {/* Ícones apenas no mobile, texto aparece em telas maiores */}
-              <Button size="sm" variant="outline" onClick={() => startEdit(e)}>
-                <Pen className="h-4 w-4 sm:mr-1" /> 
-                <span className="hidden sm:inline">Editar</span>
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => onDelete(e.id)}>
-                <Trash2 className="h-4 w-4 sm:mr-1" /> 
-                <span className="hidden sm:inline">Excluir</span>
-              </Button>
-            </div>
-          </div>
-        ))}
-      </RadioGroup>
+          );
+        })}
 
-      <Button variant="secondary" onClick={startAddNew} className="w-full sm:w-auto">
-        <Plus className="h-4 w-4 mr-1" /> 
-        <span className="sm:inline">Novo Endereço</span>
-      </Button>
+        {/* Card para adicionar novo */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={startAddNew}
+          className="w-full rounded-xl border-2 border-dashed border-muted-foreground/60 flex items-center justify-center gap-2 py-4"
+        >
+          <Plus className="h-5 w-5 text-muted-foreground/60" />
+          <span className="text-muted-foreground/60">Adicionar Novo Endereço</span>
+        </div>
+      </div>
 
       {/* Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -104,7 +135,6 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
               />
             </div>
 
-            {/* No mobile: 1 coluna, no desktop: 2 colunas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Número</Label>

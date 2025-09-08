@@ -1,25 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RadioGroup, RadioGroupItem } from "@cardapio/components/Shared/ui/radio-group";
-import { Label } from "@cardapio/components/Shared/ui/label";
 
 export default function PagamentoStep({ meios, selecionado, onSelect }: any) {
-  const [selected, setSelected] = useState(String(selecionado ?? ""));
+  const [selected, setSelected] = useState<number | null>(selecionado ?? null);
 
-  useEffect(() => setSelected(String(selecionado ?? "")), [selecionado]);
+  useEffect(() => setSelected(selecionado ?? null), [selecionado]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <h2 className="text-lg font-semibold">Forma de Pagamento</h2>
-      <RadioGroup value={selected} onValueChange={(id) => { setSelected(id); onSelect(Number(id)); }}>
-        {meios.map((m: any) => (
-          <div key={m.id} className="flex items-center gap-2">
-            <RadioGroupItem value={String(m.id)} id={`pg-${m.id}`} />
-            <Label htmlFor={`pg-${m.id}`}>{m.nome}</Label>
-          </div>
-        ))}
-      </RadioGroup>
+
+      <div className="grid gap-3">
+        {meios.map((m: any) => {
+          const isSelected = selected === m.id;
+          return (
+            <div
+              key={m.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                setSelected(m.id);
+                onSelect(m.id);
+              }}
+              className={`relative rounded-xl border p-3 sm:p-4 cursor-pointer 
+                ${isSelected ? "border-primary ring-2 ring-primary/30 bg-primary/5" : "border-muted-foreground/20 "}
+              `}
+            >
+              <span className="font-medium">{m.nome}</span>
+              {isSelected && (
+                <span className="absolute top-3 right-2 text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                  Selecionado
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

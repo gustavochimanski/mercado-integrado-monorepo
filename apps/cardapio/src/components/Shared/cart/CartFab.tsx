@@ -23,13 +23,13 @@ export function CartFab({ onOpen }: Props) {
   if (total === 0 || pathname === "/menu") return null;
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 z-50 flex justify-center px-4">
+    <div className="fixed bottom-20 left-0 right-0 z-50 px-4 flex justify-center">
       <Button
         onClick={onOpen}
-        className="relative w-full max-w-md flex items-center justify-between gap-3 rounded-full px-5 py-5 shadow-xl bg-primary text-background"
+        className="relative w-full max-w-md flex items-center justify-between gap-3 p-0 rounded-full shadow-xl bg-primary text-background"
       >
         {/* Ícone */}
-        <div className="relative">
+        <div className="relative mx-4">
           <ShoppingCart className="w-6 h-6" />
         </div>
 
@@ -39,7 +39,7 @@ export function CartFab({ onOpen }: Props) {
         </span>
 
         {/* Valor */}
-        <span className="text-sm font-bold">
+        <span className="text-sm text-primary h-full py-2 px-3 rounded-full font-bold bg-background">
           R$ {totalPrice.toFixed(2)}
         </span>
       </Button>
