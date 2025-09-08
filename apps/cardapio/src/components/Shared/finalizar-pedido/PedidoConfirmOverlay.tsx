@@ -43,7 +43,7 @@ export default function PedidoConfirmOverlay({ show }: { show: boolean }) {
               strokeDashoffset={157}
               initial={{ strokeDashoffset: 157 }}
               animate={{ strokeDashoffset: 0 }}
-              transition={{ delay: 0.9, duration: 0.6, ease: "easeInOut" }}
+              transition={{ delay: 0.8, duration: 0.6, ease: "easeInOut" }}
             />
             {/* Check */}
             <motion.path
@@ -56,7 +56,7 @@ export default function PedidoConfirmOverlay({ show }: { show: boolean }) {
               strokeDashoffset={40}
               initial={{ strokeDashoffset: 40 }}
               animate={{ strokeDashoffset: 0 }}
-              transition={{ delay: 1.3, duration: 1, ease: "easeInOut" }}
+              transition={{ delay: 1.2, duration: 0.8, ease: "easeInOut" }}
             />
           </motion.svg>
         </motion.div>
