@@ -69,7 +69,10 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
                     {e.logradouro}, {e.numero}
                   </span>
                   <span className="text-xs sm:text-sm text-muted-foreground">
-                    {e.bairro} - {e.cidade}/{e.estado} • {e.cep}
+                    • {e.bairro} - {e.cidade}/{e.estado}
+                  </span>
+                  <span className="text-xs sm:text-sm text-muted-foreground">
+                      • {e.cep}
                   </span>
                 </div>
                 <div className="flex gap-2">
