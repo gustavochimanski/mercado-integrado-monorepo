@@ -16,9 +16,9 @@ const buttonVariants = cva(
         secondaryDestructive:
           "bg-background border border-input text-destructive shadow-sm hover:bg-foreground/10",
         outline:
-          "bg-background border border-input text-secondary-foreground shadow-sm hover:bg-foreground/10",
+          "bg-background border border-input text-secondary-foreground shadow-sm hover:bg-foreground/10 ",
         secondary:
-          "bg-background border border-input text-primary shadow-sm hover:bg-foreground/10",
+          "bg-primary/10 border border-primary/10  text-primary shadow-sm hover:bg-background",
           sidebarTrigger:
           " bg-background py-[25px] rounded-[50%] border-none border-0 hover:text-accent-foreground text-primary ",
         ghost: "hover:bg-accent hover:text-accent-foreground",

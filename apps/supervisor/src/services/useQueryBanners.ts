@@ -49,7 +49,11 @@ export function useMutateBanner() {
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["banners"] });
+  const invalidate = () => {
+  qc.invalidateQueries({ queryKey: ["parceiro-full"], exact: false });
+  qc.invalidateQueries({ queryKey: ["banners"], exact: false });
+};
+
 
   const create = useMutation({
     mutationFn: (body: FormData) =>

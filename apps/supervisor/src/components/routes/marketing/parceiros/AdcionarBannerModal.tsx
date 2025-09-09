@@ -5,12 +5,12 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@supervisor/components/ui/dialog";
 import { Button } from "@supervisor/components/ui/button";
 import { Banner, useMutateBanner } from "@supervisor/services/useQueryBanners";
-import { BannerForm } from "./BannerForm";
 import { useCategoriasSearch } from "@supervisor/services/useSearchCategoria";
 import Image from "next/image";
 import { Label } from "@supervisor/components/ui/label";
 import { Input } from "@supervisor/components/ui/input";
 import { useToast } from "@supervisor/hooks/use-toast";
+import { BannerForm } from "./BannerForm";
 
 interface AdicionarBannerModalProps {
   open: boolean;

@@ -82,7 +82,7 @@ export default function ParceiroBannersModal({
             <div className="mt-4  flex justify-end gap-2 bg-background">
 
               <Button
-              variant={"outline"}
+              variant={"secondary"}
                 onClick={() => {
                   setBannerEdit(null);
                   setOpenAdicionar(true);

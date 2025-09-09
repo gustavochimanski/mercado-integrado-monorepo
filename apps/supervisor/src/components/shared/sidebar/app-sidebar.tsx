@@ -18,10 +18,9 @@ import {
     CircleUser,
     Atom,
     Target,
-    Bot,
     FileText,
-    Utensils,
     Scroll,
+    MegaphoneIcon,
   } from "lucide-react";
 
 
@@ -40,6 +39,7 @@ import { logoutService } from "@supervisor/services/Auth/authenticate";
     { title: "Metas", url: "/metas", icon: Target },
     { title: "Cadastros", url: "/cadastros", icon: CircleUser },
     { title: "Processos", url: "/processos", icon: Atom },
+    { title: "Marketing", url: "/marketing", icon: MegaphoneIcon },
     { title: "Configurações", url: "/config", icon: Settings },
   ];
 

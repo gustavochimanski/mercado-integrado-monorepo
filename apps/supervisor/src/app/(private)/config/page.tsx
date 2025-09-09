@@ -3,10 +3,9 @@
 import { Banknote, Handshake, Monitor, Truck } from "lucide-react";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import MeiosPagamentoTable from "@supervisor/components/routes/configuracoes/meioPagamento/MeioPagamentoTable";
-import ParceirosTable from "@supervisor/components/routes/configuracoes/parceiros/ParceirosTable";
 import EmpresaTabWrapper from "@supervisor/components/routes/configuracoes/empresa/TabWrapperEmpresa";
 import EntregadoresTable from "@supervisor/components/routes/configuracoes/entregadores/EntregadoresTable";
-import TableCupons from "@supervisor/components/routes/configuracoes/cupons/TableCupons";
+import TableCupons from "@supervisor/components/routes/marketing/cupons/TableCupons";
 
 const ComponentConfiguracoes = () => {
     const nestedTabItems = [
@@ -28,15 +27,7 @@ const ComponentConfiguracoes = () => {
         ),
         Component: () => <MeiosPagamentoTable />
       },
-      {
-        value: "parceiros",
-        label: (
-          <span className="flex items-center gap-2">
-            <Handshake size={14} /> Parceiros
-          </span>
-        ),
-        Component: () => <ParceirosTable />
-      },
+
       {
         value: "entregadores",
         label: (
@@ -46,15 +37,7 @@ const ComponentConfiguracoes = () => {
         ),
         Component: () => <EntregadoresTable />
       },
-      {
-        value: "cupons",
-        label: (
-          <span className="flex items-center gap-2">
-            <Truck size={14} /> Cupons
-          </span>
-        ),
-        Component: () => <TableCupons />
-      }
+
     ];
   
     return (
