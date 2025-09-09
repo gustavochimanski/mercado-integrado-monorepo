@@ -21,8 +21,16 @@ export interface Cupom {
   updated_at: string;
   monetizado: boolean;
   valor_por_lead?: number;
-  parceiros_ids?: number[];
+  parceiro_id?: number;
   link_whatsapp?: string;
+  links?: CupomLink[];
+}
+
+export interface CupomLink {
+  id: number;
+  cupom_id: number;
+  titulo: string;
+  url: string;
 }
 
 export interface Parceiro {
@@ -79,7 +87,7 @@ export function useParceiros(enabled = true) {
 }
 
 // -----------------------------
-// ✅ Hooks de mutation
+// ✅ Hooks de mutation (cupons)
 // -----------------------------
 export function useMutateCupom() {
   const qc = useQueryClient();
@@ -89,7 +97,11 @@ export function useMutateCupom() {
 
   const create = useMutation({
     mutationFn: (body: Omit<Cupom, "id" | "created_at" | "updated_at">) =>
-      apiMensura.post("/api/delivery/cupons", body),
+      apiMensura.post("/api/delivery/cupons", {
+        ...body,
+        // Só envia parceiro se monetizado
+        parceiro_id: body.monetizado ? body.parceiro_id : undefined,
+      }),
     onSuccess: () => {
       toast({ title: "Cupom criado!", description: "O cupom foi criado com sucesso." });
       invalidate();
@@ -104,7 +116,11 @@ export function useMutateCupom() {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<Cupom> & { id: number }) =>
-      apiMensura.put(`/api/delivery/cupons/${id}`, body),
+      apiMensura.put(`/api/delivery/cupons/${id}`, {
+        ...body,
+        // Só envia parceiro se monetizado
+        parceiro_id: body.monetizado ? body.parceiro_id : undefined,
+      }),
     onSuccess: () => {
       toast({ title: "Cupom atualizado!", description: "O cupom foi atualizado com sucesso." });
       invalidate();
@@ -126,6 +142,62 @@ export function useMutateCupom() {
     onError: (err) =>
       toast({
         title: "Erro ao remover cupom",
+        description: getErrorMessage(err),
+        variant: "destructive",
+      }),
+  });
+
+  return { create, update, remove };
+}
+
+// -----------------------------
+// ✅ Hooks de mutation (links de cupom)
+// -----------------------------
+export function useMutateCupomLink(cupom_id: number) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["cupons"] });
+
+  const create = useMutation({
+    mutationFn: (body: Omit<CupomLink, "id" | "cupom_id">) =>
+      apiMensura.post(`/api/delivery/cupons/links/${cupom_id}`, body),
+    onSuccess: () => {
+      toast({ title: "Link criado!", description: "O link do cupom foi criado com sucesso." });
+      invalidate();
+    },
+    onError: (err) =>
+      toast({
+        title: "Erro ao criar link",
+        description: getErrorMessage(err),
+        variant: "destructive",
+      }),
+  });
+
+  const update = useMutation({
+    mutationFn: ({ id, ...body }: Partial<CupomLink> & { id: number }) =>
+      apiMensura.put(`/api/delivery/cupons/links/${id}`, body),
+    onSuccess: () => {
+      toast({ title: "Link atualizado!", description: "O link do cupom foi atualizado com sucesso." });
+      invalidate();
+    },
+    onError: (err) =>
+      toast({
+        title: "Erro ao atualizar link",
+        description: getErrorMessage(err),
+        variant: "destructive",
+      }),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/cupons/links/${id}`),
+    onSuccess: () => {
+      toast({ title: "Link removido!", description: "O link do cupom foi removido com sucesso." });
+      invalidate();
+    },
+    onError: (err) =>
+      toast({
+        title: "Erro ao remover link",
         description: getErrorMessage(err),
         variant: "destructive",
       }),

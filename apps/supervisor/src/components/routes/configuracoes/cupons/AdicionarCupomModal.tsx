@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,14 @@ import { Button } from "@supervisor/components/ui/button";
 import { Input } from "@supervisor/components/ui/input";
 import { Checkbox } from "@supervisor/components/ui/checkbox";
 import { useMutateCupom } from "@supervisor/services/useQueryCupons";
-import { useParceiros, Parceiro } from "@supervisor/services/useQueryParceiros";
-import { Card } from "@supervisor/components/ui/card";
+import { useParceiros } from "@supervisor/services/useQueryParceiros";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@supervisor/components/ui/select";
 
 export default function AdicionarCupomModal({
   open,
@@ -34,9 +40,14 @@ export default function AdicionarCupomModal({
   const [ativo, setAtivo] = useState(true);
   const [monetizado, setMonetizado] = useState(false);
   const [valorPorLead, setValorPorLead] = useState<number | undefined>();
-  const [parceirosIds, setParceirosIds] = useState<number[]>([]);
+  const [parceiroId, setParceiroId] = useState<number | undefined>();
 
   const handleSave = async () => {
+    if (monetizado && !parceiroId) {
+      alert("Selecione um parceiro para cupom monetizado.");
+      return;
+    }
+
     try {
       await create.mutateAsync({
         codigo,
@@ -46,7 +57,7 @@ export default function AdicionarCupomModal({
         ativo,
         monetizado,
         valor_por_lead: valorPorLead,
-        parceiros_ids: parceirosIds,
+        parceiro_id: parceiroId, // agora é apenas 1
       });
 
       if (onSaved) onSaved();
@@ -60,16 +71,10 @@ export default function AdicionarCupomModal({
       setAtivo(true);
       setMonetizado(false);
       setValorPorLead(undefined);
-      setParceirosIds([]);
+      setParceiroId(undefined);
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const toggleParceiro = (id: number) => {
-    setParceirosIds((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
   };
 
   return (
@@ -111,36 +116,27 @@ export default function AdicionarCupomModal({
             <label className="text-sm">Monetizado</label>
           </div>
 
-          {/* 🟢 Grid de parceiros */}
           {monetizado && (
             <div className="mt-4">
-              <label className="block mb-2 text-sm font-medium">Selecione os parceiros:</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-64 overflow-y-auto">
-                {parceirosLoading ? (
-                  <p className="col-span-full text-sm text-muted-foreground">Carregando parceiros...</p>
-                ) : (
-                  parceiros.map((p) => {
-                    const isSelected = parceirosIds.includes(p.id);
-                    return (
-                      <div
-                        key={p.id}
-                        className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all duration-200
-                          ${isSelected ? "bg-blue-50 border-blue-500 shadow-sm" : "bg-white border-gray-200 hover:shadow-sm"}`}
-                        onClick={() => toggleParceiro(p.id)}
-                      >
-                        <span className="text-sm font-medium">{p.nome}</span>
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => toggleParceiro(p.id)}
-                        />
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+              <label className="block mb-2 text-sm font-medium">Selecione um parceiro:</label>
+              {parceirosLoading ? (
+                <p className="text-sm text-muted-foreground">Carregando parceiros...</p>
+              ) : (
+                <Select value={parceiroId?.toString() ?? ""} onValueChange={(val) => setParceiroId(Number(val))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Escolha um parceiro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parceiros.map((p) => (
+                      <SelectItem key={p.id} value={p.id.toString()}>
+                        {p.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
-
         </div>
 
         <DialogFooter className="mt-4 flex justify-end gap-2">

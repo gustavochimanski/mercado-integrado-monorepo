@@ -11,9 +11,12 @@ import {
 import { Button } from "@supervisor/components/ui/button";
 import { Input } from "@supervisor/components/ui/input";
 import { Checkbox } from "@supervisor/components/ui/checkbox";
+import { Label } from "@supervisor/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@supervisor/components/ui/select";
+
 import { useMutateCupom, Cupom } from "@supervisor/services/useQueryCupons";
 import { useParceiros } from "@supervisor/services/useQueryParceiros";
-import { Card } from "@supervisor/components/ui/card";
+import GerenciarLinksModal from "./GerenciarLinksModal"; // <-- import do modal separado
 
 interface EditarCupomModalProps {
   open: boolean;
@@ -22,15 +25,11 @@ interface EditarCupomModalProps {
   onSaved?: () => void;
 }
 
-export default function EditarCupomModal({
-  open,
-  onOpenChange,
-  cupom,
-  onSaved,
-}: EditarCupomModalProps) {
+export default function EditarCupomModal({ open, onOpenChange, cupom, onSaved }: EditarCupomModalProps) {
   const { update } = useMutateCupom();
   const { data: parceiros = [], isLoading: parceirosLoading } = useParceiros();
 
+  // --- estado do cupom ---
   const [codigo, setCodigo] = useState(cupom.codigo);
   const [descricao, setDescricao] = useState(cupom.descricao || "");
   const [descontoValor, setDescontoValor] = useState<number | undefined>(cupom.desconto_valor);
@@ -38,8 +37,7 @@ export default function EditarCupomModal({
   const [ativo, setAtivo] = useState(cupom.ativo);
   const [monetizado, setMonetizado] = useState(cupom.monetizado);
   const [valorPorLead, setValorPorLead] = useState<number | undefined>(cupom.valor_por_lead);
-  const [linkWhatsapp, setLinkWhatsapp] = useState(cupom.link_whatsapp || "");
-  const [parceirosIds, setParceirosIds] = useState<number[]>(cupom.parceiros_ids || []);
+  const [parceiroId, setParceiroId] = useState<number | undefined>(cupom.parceiro_id);
 
   useEffect(() => {
     if (cupom) {
@@ -50,18 +48,17 @@ export default function EditarCupomModal({
       setAtivo(cupom.ativo);
       setMonetizado(cupom.monetizado);
       setValorPorLead(cupom.valor_por_lead);
-      setLinkWhatsapp(cupom.link_whatsapp || "");
-      setParceirosIds(cupom.parceiros_ids || []);
+      setParceiroId(cupom.parceiro_id);
     }
   }, [cupom]);
 
-  const toggleParceiro = (id: number) => {
-    setParceirosIds((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
-  };
+  // --- salvar cupom ---
+  const handleSaveCupom = async () => {
+    if (monetizado && !parceiroId) {
+      alert("Selecione um parceiro para cupom monetizado.");
+      return;
+    }
 
-  const handleSave = async () => {
     try {
       await update.mutateAsync({
         id: cupom.id,
@@ -72,8 +69,7 @@ export default function EditarCupomModal({
         ativo,
         monetizado,
         valor_por_lead: valorPorLead,
-        link_whatsapp: linkWhatsapp,
-        parceiros_ids: parceirosIds,
+        parceiro_id: parceiroId,
       });
 
       if (onSaved) onSaved();
@@ -84,60 +80,83 @@ export default function EditarCupomModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Editar Cupom</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Editar Cupom</DialogTitle>
+          </DialogHeader>
 
-        <div className="flex flex-col gap-3">
-          <Input placeholder="Código" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
-          <Input placeholder="Descrição" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
-          <Input type="number" placeholder="Desconto Valor" value={descontoValor ?? ""} onChange={(e) => setDescontoValor(Number(e.target.value))} />
-          <Input type="number" placeholder="Desconto Percentual" value={descontoPercentual ?? ""} onChange={(e) => setDescontoPercentual(Number(e.target.value))} />
-          <Input type="number" placeholder="Valor por lead" value={valorPorLead ?? ""} onChange={(e) => setValorPorLead(Number(e.target.value))} />
-          <Input placeholder="Link WhatsApp" value={linkWhatsapp} onChange={(e) => setLinkWhatsapp(e.target.value)} />
+          <div className="flex flex-col gap-4 mt-2">
+            {/* Campos do cupom */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Código</Label>
+                <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} />
+              </div>
+              <div>
+                <Label>Descrição</Label>
+                <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+              </div>
+              <div>
+                <Label>Desconto Valor</Label>
+                <Input type="number" value={descontoValor ?? ""} onChange={(e) => setDescontoValor(Number(e.target.value))} />
+              </div>
+              <div>
+                <Label>Desconto Percentual</Label>
+                <Input type="number" value={descontoPercentual ?? ""} onChange={(e) => setDescontoPercentual(Number(e.target.value))} />
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <Checkbox checked={ativo} onCheckedChange={(checked) => setAtivo(!!checked)} />
-            <label className="text-sm">Ativo</label>
+            <div className="flex items-center gap-4 mt-2">
+              <Checkbox checked={ativo} onCheckedChange={(checked) => setAtivo(!!checked)} />
+              <label>Ativo</label>
+
+              <Checkbox checked={monetizado} onCheckedChange={(checked) => setMonetizado(!!checked)} />
+              <label>Monetizado</label>
+            </div>
+
+            {/* Modal de links */}
+            <GerenciarLinksModal
+              cupomId={cupom.id}
+              initialLinks={cupom.links || []}
+            />
+
+            {monetizado && (
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div>
+                  <Label>Parceiro</Label>
+                  {parceirosLoading ? (
+                    <p>Carregando parceiros...</p>
+                  ) : (
+                    <Select value={parceiroId?.toString() ?? ""} onValueChange={(val) => setParceiroId(Number(val))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolha um parceiro" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {parceiros.map((p) => (
+                          <SelectItem key={p.id} value={p.id.toString()}>{p.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                <div>
+                  <Label>Valor por Lead</Label>
+                  <Input type="number" value={valorPorLead ?? ""} onChange={(e) => setValorPorLead(Number(e.target.value))} />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Checkbox checked={monetizado} onCheckedChange={(checked) => setMonetizado(!!checked)} />
-            <label className="text-sm">Monetizado</label>
-          </div>
+          <DialogFooter className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button onClick={handleSaveCupom}>Salvar alterações</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          {monetizado && (
-            <Card className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2 h-64 overflow-auto">
-              {parceirosLoading ? (
-                <p>Carregando parceiros...</p>
-              ) : (
-                parceiros.map((p) => (
-                  <Card
-                    key={p.id}
-                    className={`p-2 border rounded flex items-center justify-between cursor-pointer ${
-                      parceirosIds.includes(p.id) ? "border-blue-500 bg-blue-50" : "border-gray-200"
-                    }`}
-                    onClick={() => toggleParceiro(p.id)}
-                  >
-                    <span className="text-sm">{p.nome}</span>
-                    <Checkbox
-                      checked={parceirosIds.includes(p.id)}
-                      onCheckedChange={() => toggleParceiro(p.id)}
-                    />
-                  </Card>
-                ))
-              )}
-            </Card>
-          )}
-        </div>
 
-        <DialogFooter className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave}>Salvar alterações</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }
