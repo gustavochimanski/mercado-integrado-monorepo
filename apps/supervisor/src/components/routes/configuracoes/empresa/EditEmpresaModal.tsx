@@ -10,6 +10,8 @@ import { Switch } from "@supervisor/components/ui/switch";
 import { useUpdateEmpresa, EmpresaForm } from "@supervisor/services/useQueryEmpresasMensura";
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 import { CardapioTemaSelect } from "./CardapioTema";
+import Image from "next/image";
+
 
 interface EditEmpresaModalProps {
   open: boolean;
@@ -146,14 +148,18 @@ export default function EditEmpresaModal({
           <div className="flex flex-col gap-2">
             <Label>Logo</Label>
             <Input type="file" {...register("logo")} accept="image/*" />
-            {logoPreview && (
-              <img
-                src={logoPreview}
-                alt="Preview da logo"
-                className="w-32 h-32 object-contain rounded border border-gray-300 mt-2"
-                loading="lazy"
-              />
-            )}
+              {logoPreview && (
+                <div className="relative w-32 h-32 mt-2 border border-gray-300 rounded">
+                  <Image
+                    src={logoPreview}
+                    alt="Preview da logo"
+                    fill
+                    className="object-contain rounded"
+                    priority={false} // lazy loading automático
+                  />
+                </div>
+              )}
+
           </div>
 
           <div className="flex gap-2">
