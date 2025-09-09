@@ -198,7 +198,7 @@ export default function FinalizarPedidoPage() {
             >
               Sim, estou nesse endereço
             </Button>
-            <Button variant="outline" onClick={() => setConfirmEnderecoOpen(false)} className="w-full sm:w-auto">
+            <Button variant="destructive" onClick={() => setConfirmEnderecoOpen(false)} className="w-full sm:w-auto">
               Não, trocar
             </Button>
           </DialogFooter>
