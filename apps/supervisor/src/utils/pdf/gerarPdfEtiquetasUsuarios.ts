@@ -1,27 +1,33 @@
 // lib/gerarPdfEtiquetasUsuarios.ts
+import { PDFDocument, rgb, StandardFonts, PDFFont, PDFPage } from "pdf-lib";
 
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-
-type Etiqueta = {
+export type Etiqueta = {
   nome: string;
   codigo: string;
-  base64: string;
+  base64: string; // URL ou data:image/png;base64,...
 };
 
+/**
+ * Desenha uma etiqueta na página do PDF
+ */
 async function drawEtiqueta(
-  page: any,
+  page: PDFPage,
   etiqueta: Etiqueta,
   x: number,
   y: number,
-  font: any,
+  font: PDFFont,
   pdfDoc: PDFDocument
-) {
+): Promise<void> {
   const barcodeWidth = 120;
   const barcodeHeight = 50;
   const gap = 5;
   const fontSize = 10;
 
-  const imageBytes = await fetch(etiqueta.base64).then((res) => res.arrayBuffer());
+  // Converte base64 ou URL para ArrayBuffer
+  const imageBytes = etiqueta.base64.startsWith("data:")
+    ? Uint8Array.from(atob(etiqueta.base64.split(",")[1]), (c) => c.charCodeAt(0))
+    : await fetch(etiqueta.base64).then((res) => res.arrayBuffer());
+
   const image = await pdfDoc.embedPng(imageBytes);
   page.drawImage(image, {
     x,
@@ -42,15 +48,21 @@ async function drawEtiqueta(
   });
 }
 
+/**
+ * Verifica se precisa de uma nova página
+ */
 function needsNewPage(currentY: number, margin: number, etiquetaHeight: number): boolean {
   return currentY < margin + etiquetaHeight;
 }
 
+/**
+ * Gera o PDF de etiquetas
+ */
 export async function gerarPdfEtiquetas(etiquetas: Etiqueta[]): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  const pageWidth = 595;
+  const pageWidth = 595; // A4
   const pageHeight = 842;
   const margin = 30;
   const etiquetasPorLinha = 3;
@@ -82,5 +94,8 @@ export async function gerarPdfEtiquetas(etiquetas: Etiqueta[]): Promise<Blob> {
   }
 
   const pdfBytes = await pdfDoc.save();
-  return new Blob([pdfBytes], { type: "application/pdf" });
+
+  // Força um Uint8Array explícito
+  return new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
+
 }
