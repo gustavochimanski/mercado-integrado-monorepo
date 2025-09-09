@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 import { useHome } from "@cardapio/services/useQueryHome";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import { CartFab } from "@cardapio/components/Shared/cart/CartFab";
+import { CartFab } from "@cardapio/components/Shared/cart/CartSuspense";
 import { CartSheet } from "@cardapio/components/Shared/cart/CartSheet";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";

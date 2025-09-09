@@ -39,7 +39,7 @@ export function CartFab({ onOpen }: Props) {
         </span>
 
         {/* Valor */}
-        <span className="text-sm text-primary h-full py-2 px-3 rounded-full font-bold bg-background">
+        <span className="text-sm text-primary h-full py-3 px-3 rounded-full font-bold bg-background">
           R$ {totalPrice.toFixed(2)}
         </span>
       </Button>

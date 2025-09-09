@@ -1,5 +1,5 @@
 "use client";
-import { CartFab } from "./CartFab";
+import { CartFab } from "./CartSuspense";
 import { CartSheet } from "./CartSheet";
 import { useCartSheet } from "@cardapio/stores/cart/useCartSheet";
 
