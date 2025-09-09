@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,13 +10,16 @@ import {
 } from "@supervisor/components/ui/dialog";
 import { Button } from "@supervisor/components/ui/button";
 import { Input } from "@supervisor/components/ui/input";
-import { Checkbox } from "@supervisor/components/ui/checkbox";
-import { useMutateParceiro, Parceiro } from "@supervisor/services/useQueryParceiros";
+import { Switch } from "@supervisor/components/ui/switch";
+import {
+  useMutateParceiro,
+  ParceiroCompletoOut,
+} from "@supervisor/services/useQueryParceiros";
 
 interface AdicionarParceiroModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  parceiro?: Parceiro | null;
+  parceiro?: ParceiroCompletoOut | null;
   onSaved?: () => void;
 }
 
@@ -26,12 +29,10 @@ export default function AdicionarParceiroModal({
   parceiro,
   onSaved,
 }: AdicionarParceiroModalProps) {
-  const { create, update } = useMutateParceiro();
-
   const [nome, setNome] = useState("");
   const [ativo, setAtivo] = useState(true);
+  const { create, update } = useMutateParceiro(); // pega as duas mutations
 
-  // 🔄 sempre que mudar parceiro, atualiza os campos
   useEffect(() => {
     if (parceiro) {
       setNome(parceiro.nome);
@@ -40,54 +41,52 @@ export default function AdicionarParceiroModal({
       setNome("");
       setAtivo(true);
     }
-  }, [parceiro, open]);
+  }, [parceiro]);
 
   const handleSave = async () => {
-    try {
-      if (parceiro) {
-        // editar
-        await update.mutateAsync({ id: parceiro.id, nome, ativo });
-      } else {
-        // criar
-        await create.mutateAsync({ nome, ativo });
-      }
-
-      if (onSaved) onSaved();
-      onOpenChange(false);
-    } catch (err) {
-      console.error(err);
+    if (parceiro) {
+      // editar
+      await update.mutateAsync({
+        id: parceiro.id,
+        nome,
+        ativo,
+      });
+    } else {
+      // criar
+      await create.mutateAsync({
+        nome,
+        ativo,
+      });
     }
+
+    onSaved?.();
+    onOpenChange(false);
   };
+
+  console.log(parceiro)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {parceiro ? "Editar parceiro" : "Adicionar parceiro"}
+            {parceiro ? "Editar Parceiro" : "Novo Parceiro"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 py-4">
           <Input
             placeholder="Nome do parceiro"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
           />
-
           <div className="flex items-center gap-2">
-            <Checkbox
-              id="ativo"
-              checked={ativo}
-              onCheckedChange={(checked) => setAtivo(!!checked)}
-            />
-            <label htmlFor="ativo" className="text-sm">
-              Ativo
-            </label>
+            <Switch checked={ativo} onCheckedChange={setAtivo} />
+            <span>Ativo</span>
           </div>
         </div>
 
-        <DialogFooter className="mt-4 flex justify-end gap-2">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>

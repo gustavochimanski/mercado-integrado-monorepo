@@ -4,11 +4,11 @@ import Image from "next/image";
 import { Button } from "@supervisor/components/ui/button";
 import { Card, CardFooter } from "@supervisor/components/ui/card";
 import { Badge } from "@supervisor/components/ui/badge";
-import { Banner } from "@supervisor/services/useQueryBanners";
+import { BannerParceiroOut } from "@supervisor/services/useQueryParceiros";
 
 interface BannerCardProps {
-  banner: Banner;
-  onEdit: (banner: Banner) => void;
+  banner: BannerParceiroOut;
+  onEdit: (banner: BannerParceiroOut) => void;
   onRemove: (bannerId: number) => void;
 }
 

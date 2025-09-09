@@ -4,17 +4,58 @@ import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useToast } from "@supervisor/hooks/use-toast";
 import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
 
-// 🔎 Tipo do parceiro
-export interface Parceiro {
+// ------------------- Tipos -------------------
+export interface CupomLinkOut {
+  id: number;
+  titulo: string;
+  url: string;
+}
+
+export interface CupomParceiroOut {
+  id: number;
+  codigo: string;
+  descricao?: string;
+  desconto_valor?: number;
+  desconto_percentual?: number;
+  ativo: boolean;
+  monetizado: boolean;
+  valor_por_lead?: number;
+  links: CupomLinkOut[];
+}
+
+// Banner vindo do parceiro full
+export interface BannerParceiroOut {
   id: number;
   nome: string;
   ativo: boolean;
-  created_at: string;
-  updated_at: string;
+  tipo_banner: string;
+  imagem?: string;
+  categoria_id: number;
+  href_destino: string;
+  // 👇 adicionar os extras que o frontend espera
+  parceiro_id: number;
+  parceiro_nome?: string;
+  categoria_destino?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-// ⏳ Debounce simples
-function useDebounced<T>(value: T, delay = 300) {
+
+export interface ParceiroCompletoOut {
+  id: number;
+  nome: string;
+  ativo: boolean;
+  telefone?: string;
+  cupons: CupomParceiroOut[];
+  banners: BannerParceiroOut[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+
+
+// ------------------- Debounce -------------------
+export function useDebounced<T>(value: T, delay = 300) {
   const [debounced, setDebounced] = React.useState(value);
   React.useEffect(() => {
     const t = setTimeout(() => setDebounced(value), delay);
@@ -23,7 +64,16 @@ function useDebounced<T>(value: T, delay = 300) {
   return debounced;
 }
 
-// ✅ Buscar todos os parceiros
+// ------------------- Parceiros -------------------
+export interface Parceiro {
+  id: number;
+  nome: string;
+  ativo: boolean;
+  telefone?: string 
+  created_at: string;
+  updated_at: string;
+}
+
 export function useParceiros(enabled = true) {
   return useQuery<Parceiro[]>({
     queryKey: ["parceiros"],
@@ -39,7 +89,23 @@ export function useParceiros(enabled = true) {
   });
 }
 
-// ✅ Mutations para criar, atualizar, deletar parceiro
+// ------------------- Parceiro Full -------------------
+export function useParceiroFull(parceiroId?: number) {
+  return useQuery<ParceiroCompletoOut>({
+    queryKey: ["parceiro-full", parceiroId],
+    queryFn: async () => {
+      if (!parceiroId) throw new Error("ID do parceiro não fornecido");
+      const { data } = await apiMensura.get<ParceiroCompletoOut>(`/api/delivery/parceiros/${parceiroId}/full`);
+      return data;
+    },
+    enabled: !!parceiroId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+
+// ------------------- Mutations -------------------
 export function useMutateParceiro() {
   const qc = useQueryClient();
   const { toast } = useToast();
@@ -54,7 +120,7 @@ export function useMutateParceiro() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao criar parceiro", description: getErrorMessage(err), variant: "destructive"  }),
+      toast({ title: "Erro ao criar parceiro", description: getErrorMessage(err), variant: "destructive" }),
   });
 
   const update = useMutation({
@@ -65,7 +131,7 @@ export function useMutateParceiro() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao atualizar parceiro", description: getErrorMessage(err), variant: "destructive"  }),
+      toast({ title: "Erro ao atualizar parceiro", description: getErrorMessage(err), variant: "destructive" }),
   });
 
   const remove = useMutation({
@@ -75,7 +141,7 @@ export function useMutateParceiro() {
       invalidate();
     },
     onError: (err) =>
-      toast({ title: "Erro ao remover parceiro", description: getErrorMessage(err), variant: "destructive"  }),
+      toast({ title: "Erro ao remover parceiro", description: getErrorMessage(err), variant: "destructive" }),
   });
 
   return { create, update, remove };

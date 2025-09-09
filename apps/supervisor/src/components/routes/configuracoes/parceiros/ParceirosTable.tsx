@@ -6,7 +6,7 @@ import { Pen, Trash2, Plus } from "lucide-react";
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
-import { useMutateParceiro, useParceiros } from "@supervisor/services/useQueryParceiros";
+import { ParceiroCompletoOut, useMutateParceiro, useParceiros } from "@supervisor/services/useQueryParceiros";
 import ParceiroBannersModal from "./ParceiroBannerModal";
 import AdicionarParceiroModal from "./AdcionarParceiroModal";
 
@@ -14,7 +14,7 @@ export default function ParceirosTable() {
   const { data: parceiros = [], isLoading, refetch } = useParceiros();
   const { remove } = useMutateParceiro();
 
-  const [selected, setSelected] = useState<any | null>(null);
+  const [selected, setSelected] = useState<ParceiroCompletoOut | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalAddParceiro, seModalAddParceiro] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -119,7 +119,7 @@ export default function ParceirosTable() {
       <ParceiroBannersModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        parceiro={selected}
+        parceiroId={selected?.id}
       />
 
       <AdicionarParceiroModal
