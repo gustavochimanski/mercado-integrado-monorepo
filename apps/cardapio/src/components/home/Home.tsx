@@ -18,8 +18,6 @@ import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { Card, CardHeader, CardTitle } from "../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import { useBanners } from "@cardapio/services/useQueryBanners";
-import Image from "next/image";
-import Link from "next/link";
 import { BannersVerticalScroll } from "../Shared/parceiros/BannersVertical";
 
 

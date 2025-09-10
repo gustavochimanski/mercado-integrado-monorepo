@@ -1,4 +1,5 @@
 import { api } from "@cardapio/app/api/api";
+import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import {  useQuery, useQueryClient } from "@tanstack/react-query";
 
 // 🔎 Tipo do banner
@@ -21,7 +22,7 @@ export function useBanners(enabled = true) {
   return useQuery<Banner[]>({
     queryKey: ["banners"],
     queryFn: async () => {
-      const { data } = await api.get<Banner[]>("/delivery/client/banners");
+      const { data } = await apiClienteAdmin.get<Banner[]>("/delivery/client/banners");
       return data;
     },
     enabled,
