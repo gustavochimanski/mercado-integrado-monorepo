@@ -7,7 +7,7 @@ import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
 import { ParceiroCompletoOut, useMutateParceiro, useParceiros } from "@supervisor/services/useQueryParceiros";
-import ParceiroBannersModal from "../parceiros/ParceiroBannerModal";
+import ParceiroBannersModal from "../parceiros/PrincipalModal";
 import AdicionarParceiroModal from "../parceiros/AdcionarParceiroModal";
 
 export default function ParceirosTable() {

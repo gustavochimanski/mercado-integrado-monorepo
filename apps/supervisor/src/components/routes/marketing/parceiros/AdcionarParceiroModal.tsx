@@ -63,8 +63,6 @@ export default function AdicionarParceiroModal({
     onOpenChange(false);
   };
 
-  console.log(parceiro)
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

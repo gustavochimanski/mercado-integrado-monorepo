@@ -12,6 +12,7 @@ interface BannerCardProps {
   onRemove: (bannerId: number) => void;
 }
 
+
 export function BannerCard({ banner, onEdit, onRemove }: BannerCardProps) {
   return (
     <div className="relative">
