@@ -1,3 +1,4 @@
+import { api } from "@cardapio/app/api/api";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import {  useQuery, useQueryClient } from "@tanstack/react-query";
 
