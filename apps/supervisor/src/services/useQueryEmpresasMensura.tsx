@@ -128,7 +128,7 @@ export function useUpdateEmpresa() {
     },
     onError: (err) => {
       const msg = getErrorMessage(err)
-      toast({ title: "Erro ao atualizar empresa", description: msg, variant: "destructive"  })
+      toast({ title: "Erro ao atualizar empresa", description: msg, variant: "destructive", duration: 5000  })
     },
   })
 }
