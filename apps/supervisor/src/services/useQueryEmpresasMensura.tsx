@@ -21,7 +21,8 @@ export interface EmpresaForm {
   }
   cardapio_link?: string
   cardapio_tema?: string
-   aceita_pedido_automatico?: boolean 
+  aceita_pedido_automatico?: boolean
+  tempo_entrega_maximo?: string
 }
 
 // --- utilitário para FormData
@@ -50,6 +51,9 @@ const buildFormData = (data: EmpresaForm, oldLogo?: string) => {
   // Aceita pedido automático
   const aceitaPedido = (data as any).aceita_pedido_automatico ? "true" : "false"
   formData.append("aceita_pedido_automatico", aceitaPedido)
+  
+    // 🔹 Tempo de entrega máximo (com valor padrão se não vier)
+  formData.append("tempo_entrega_maximo", data.tempo_entrega_maximo ?? "60")
 
   // 🔎 Log para debug
   console.log("💾 FormData enviado:")
