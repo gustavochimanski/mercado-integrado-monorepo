@@ -21,7 +21,8 @@ export interface EmpresaForm {
   }
   cardapio_link?: string
   cardapio_tema?: string
-   aceita_pedido_automatico?: boolean 
+  aceita_pedido_automatico?: boolean
+  tempo_entrega_maximo?: string
 }
 
 // --- utilitário para FormData
@@ -36,22 +37,25 @@ const buildFormData = (data: EmpresaForm, oldLogo?: string) => {
     formData.append("logo_antiga", oldLogo)
   }
 
-  formData.append("endereco", JSON.stringify({
-    logradouro: data.endereco?.logradouro ?? "",
-    numero: data.endereco?.numero ?? "",
-    bairro: data.endereco?.bairro ?? "",
-    cidade: data.endereco?.cidade ?? "",
-    cep: data.endereco?.cep ?? "",
-  }))
+  formData.append(
+    "endereco",
+    JSON.stringify({
+      logradouro: data.endereco?.logradouro ?? "",
+      numero: data.endereco?.numero ?? "",
+      bairro: data.endereco?.bairro ?? "",
+      cidade: data.endereco?.cidade ?? "",
+      cep: data.endereco?.cep ?? "",
+    })
+  )
 
   if (data.cardapio_link) formData.append("cardapio_link", data.cardapio_link)
   if (data.cardapio_tema) formData.append("cardapio_tema", data.cardapio_tema)
 
-  // Aceita pedido automático
   const aceitaPedido = (data as any).aceita_pedido_automatico ? "true" : "false"
   formData.append("aceita_pedido_automatico", aceitaPedido)
 
-  // 🔎 Log para debug
+  formData.append("tempo_entrega_maximo", data.tempo_entrega_maximo ?? "60")
+
   console.log("💾 FormData enviado:")
   for (const [key, value] of formData.entries()) {
     console.log(key, value)
@@ -60,14 +64,14 @@ const buildFormData = (data: EmpresaForm, oldLogo?: string) => {
   return formData
 }
 
-
-
 // --- Queries
 export function useEmpresas({ skip = 0, limit = 100 }: ListParams = {}) {
   return useQuery<EmpresaMensura[], Error>({
     queryKey: ["empresas", skip, limit],
     queryFn: async () => {
-      const { data } = await apiMensura.get("api/mensura/empresas/", { params: { skip, limit } })
+      const { data } = await apiMensura.get("api/mensura/empresas/", {
+        params: { skip, limit },
+      })
       return data
     },
     staleTime: 60_000,
@@ -104,7 +108,7 @@ export function useCreateEmpresa() {
     },
     onError: (err) => {
       const msg = getErrorMessage(err)
-      toast({ title: "Erro ao cadastrar empresa", description: msg, variant: "destructive"  })
+      toast({ title: "Erro ao cadastrar empresa", description: msg, variant: "destructive" })
     },
   })
 }
@@ -128,7 +132,28 @@ export function useUpdateEmpresa() {
     },
     onError: (err) => {
       const msg = getErrorMessage(err)
-      toast({ title: "Erro ao atualizar empresa", description: msg, variant: "destructive"  })
+      toast({ title: "Erro ao atualizar empresa", description: msg, variant: "destructive" })
+    },
+  })
+}
+
+// --- Delete Mutation
+export function useDeleteEmpresa(onSelectEmpresa?: (empresa: EmpresaMensura | null) => void, selectedEmpresa?: EmpresaMensura | null) {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await apiMensura.delete(`/api/mensura/empresas/${id}`)
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["empresas"] })
+      if (selectedEmpresa?.id === id) onSelectEmpresa?.(null)
+      toast({ title: "Empresa removida com sucesso!" })
+    },
+    onError: (err) => {
+      const msg = getErrorMessage(err)
+      toast({ title: "Erro ao remover empresa", description: msg, variant: "destructive" })
     },
   })
 }
