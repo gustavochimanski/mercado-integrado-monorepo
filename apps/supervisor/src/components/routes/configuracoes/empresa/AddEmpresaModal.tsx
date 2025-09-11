@@ -26,6 +26,7 @@ export default function AddEmpresaModal({ open, onOpenChange, onSuccess }: AddEm
       cardapio_link: "",
       cardapio_tema: "claro",
       aceita_pedido_automatico: false,
+      tempo_entrega_maximo: ""
     },
   });
 
@@ -57,26 +58,46 @@ export default function AddEmpresaModal({ open, onOpenChange, onSuccess }: AddEm
           <div className="flex flex-col gap-2">
             <Label>Nome</Label>
             <Input {...register("nome", { required: true })} />
+
             <Label>CNPJ</Label>
             <Input {...register("cnpj")} />
+
             <Label>Cardápio Link</Label>
             <Input {...register("cardapio_link")} />
+
             <Label>Tema do Cardápio</Label>
             <CardapioTemaSelect control={control} name="cardapio_tema" />
+
             <div className="flex items-center gap-2">
               <Controller
                 name="aceita_pedido_automatico"
                 control={control}
-                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
+                render={({ field }) => (
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                )}
               />
               <Label>Aceita pedido automático</Label>
             </div>
+
+            {/* 🆕 Tempo de entrega máximo */}
+            <Label>Tempo máximo de entrega (minutos)</Label>
+            <Input
+              type="number"
+              min={0}
+              {...register("tempo_entrega_maximo")}
+              placeholder="Ex: 60"
+            />
           </div>
 
-          <Button type="submit" disabled={loading} className="bg-green-600 w-full md:w-auto">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="bg-green-600 w-full md:w-auto"
+          >
             {loading ? "Salvando..." : "Cadastrar Empresa"}
           </Button>
         </form>
+
       </DialogContent>
     </Dialog>
   );
