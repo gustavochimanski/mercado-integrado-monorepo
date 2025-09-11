@@ -3,7 +3,7 @@
 import { CirclePlus } from "lucide-react";
 import { useState } from "react";
 import { ModalAdminAddCategoria } from "../modals/ModalAdminAddCategoria";
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 
 interface Props {
   parentID: number | null;

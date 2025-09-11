@@ -4,7 +4,7 @@ import React from "react";
 import CardAdminAddCategoria from "@cardapio/components/admin/card/CardAdminAddCategoria";
 import { CategoryCard } from "@cardapio/components/Shared/category/CategoryCard";
 import type { CategoriaMini } from "@cardapio/services/useQueryHome";
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 
 interface Props {
   categorias: CategoriaMini[];

@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 import { useMutateProduto } from "@cardapio/services/useQueryProduto";
 import { Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@cardapio/components/Shared/ui/button";

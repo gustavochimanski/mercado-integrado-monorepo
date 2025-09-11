@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
 import { CardVerMais } from "../CardVerMais";
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 
 interface Props {
   vitrineId: number;

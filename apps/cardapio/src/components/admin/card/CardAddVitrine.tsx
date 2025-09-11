@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { Card } from "../../Shared/ui/card";
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 import { ModalVitrineMarkHome } from "../modals/ModalAddVitrineHome";
 import { ModalVitrineCreateSimple } from "../modals/ModalAddVitrine";
 

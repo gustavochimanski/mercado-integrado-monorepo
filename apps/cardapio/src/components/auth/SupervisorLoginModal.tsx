@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 import { useState } from "react";
 
 export default function LoginComponent() {

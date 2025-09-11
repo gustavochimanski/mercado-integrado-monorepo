@@ -16,7 +16,7 @@ import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem
 import VitrineDestaques from "@cardapio/components/Shared/vitrine/VitrineDestaques";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { Card, CardHeader, CardTitle } from "../Shared/ui/card";
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 import { useBanners } from "@cardapio/services/useQueryBanners";
 import { BannersVerticalScroll } from "../Shared/parceiros/BannersVertical";
 

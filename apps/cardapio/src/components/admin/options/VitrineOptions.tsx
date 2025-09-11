@@ -1,4 +1,4 @@
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useUserContext } from "@cardapio/services/auth/userContext";
 import { Home, HomeIcon, Pencil, Plus, Settings, Trash2 } from "lucide-react";
 import {
   DropdownMenu,

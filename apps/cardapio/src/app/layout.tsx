@@ -5,7 +5,7 @@ import "./globals.css";
 import FooterComponent from "../components/Shared/Footer";
 import { ReactQueryProvider } from "../providers/ReactQueryClientProvider";
 import { Suspense } from "react";
-import { UserProvider } from "@cardapio/hooks/auth/userContext";
+import { UserProvider } from "@cardapio/services/auth/userContext";
 import { Toaster } from "@cardapio/components/Shared/ui/sonner";
 import { CartGlobalClient } from "@cardapio/components/Shared/cart/CartGlobalClient";
 
