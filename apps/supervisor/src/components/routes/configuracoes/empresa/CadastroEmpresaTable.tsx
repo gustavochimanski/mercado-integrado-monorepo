@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura";
 import { GridColDef } from "@mui/x-data-grid";
 import { Pen, Trash2, Plus,  Eye } from "lucide-react";
-import { useEmpresas } from "@supervisor/services/useQueryEmpresasMensura";
+import { useDeleteEmpresa, useEmpresas } from "@supervisor/services/useQueryEmpresasMensura";
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
@@ -27,16 +27,11 @@ export default function EmpresasTable({ selectedEmpresa, onSelectEmpresa }: Empr
   const [empresaToDelete, setEmpresaToDelete] = useState<EmpresaMensura | null>(null);
   const toast = useToast();
 
-  const handleDelete = async (id: number) => {
-    try {
-      await apiMensura.delete(`/api/mensura/empresas/${id}`);
-      toast.toast({ title: "Empresa removida com sucesso!", open: true });
-      refetch();
-      if (selectedEmpresa?.id === id) onSelectEmpresa(null);
-    } catch (err: any) {
-      toast.toast({ title: "Erro ao remover empresa", description: err?.message || "", open: true });
-    }
-  };
+  const { mutate: deleteEmpresa } = useDeleteEmpresa(onSelectEmpresa, selectedEmpresa)
+
+  const handleDelete = (id: number) => {
+    deleteEmpresa(id)
+  }
 
   const columns: GridColDef[] = useMemo(
     () => [
