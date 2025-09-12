@@ -26,6 +26,7 @@ export default function AddEmpresaModal({ open, onOpenChange, onSuccess }: AddEm
       cardapio_link: "",
       cardapio_tema: "claro",
       aceita_pedido_automatico: false,
+      tempo_entrega_maximo: "60", // valor default
     },
   });
 
@@ -57,12 +58,16 @@ export default function AddEmpresaModal({ open, onOpenChange, onSuccess }: AddEm
           <div className="flex flex-col gap-2">
             <Label>Nome</Label>
             <Input {...register("nome", { required: true })} />
+
             <Label>CNPJ</Label>
             <Input {...register("cnpj")} />
+
             <Label>Cardápio Link</Label>
             <Input {...register("cardapio_link")} />
+
             <Label>Tema do Cardápio</Label>
             <CardapioTemaSelect control={control} name="cardapio_tema" />
+
             <div className="flex items-center gap-2">
               <Controller
                 name="aceita_pedido_automatico"
@@ -71,6 +76,15 @@ export default function AddEmpresaModal({ open, onOpenChange, onSuccess }: AddEm
               />
               <Label>Aceita pedido automático</Label>
             </div>
+
+            {/* Novo campo */}
+            <Label>Tempo máximo de entrega (minutos)</Label>
+            <Input
+              type="number"
+              min={1}
+              {...register("tempo_entrega_maximo", { required: true })}
+              placeholder="Ex: 60"
+            />
           </div>
 
           <Button type="submit" disabled={loading} className="bg-green-600 w-full md:w-auto">
