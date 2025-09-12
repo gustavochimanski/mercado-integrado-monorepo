@@ -31,7 +31,6 @@ export default function EmpresasTable({ selectedEmpresa, onSelectEmpresa }: Empr
     deleteEmpresa(id)
   }
 
-
   const columns: GridColDef[] = useMemo(
     () => [
       { field: "id", headerName: "ID", flex: 1 },
