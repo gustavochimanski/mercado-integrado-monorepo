@@ -8,11 +8,14 @@ export default function LoginComponent() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState("");
+
   async function handleLogin() {
     try {
+      setError("");
       await login(username, password); 
     } catch {
-      window.alert("Credenciais inválidas");
+      setError("Credenciais inválidas. Tente novamente.");
     }
   }
 
@@ -36,6 +39,11 @@ export default function LoginComponent() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
+        {error && (
+          <div className="text-red-600 text-sm text-center bg-red-50 p-2 rounded">
+            {error}
+          </div>
+        )}
 
         <button
           onClick={handleLogin}

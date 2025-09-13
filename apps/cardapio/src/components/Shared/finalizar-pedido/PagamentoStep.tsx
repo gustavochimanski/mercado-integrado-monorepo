@@ -10,6 +10,12 @@ export default function PagamentoStep({ meios, selecionado, onSelect }: any) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Forma de Pagamento</h2>
+      
+      {meios.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>Nenhum meio de pagamento disponível</p>
+        </div>
+      )}
 
       <div className="grid gap-3">
         {meios.map((m: any) => {

@@ -8,10 +8,11 @@ import {
 } from "@cardapio/stores/client/ClientStore";
 import { FinalizarPedidoRequest } from "@cardapio/types/pedido";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
-  finalizarPedido: () => Promise<"sucesso" | "erro">;
+  finalizarPedido: () => Promise<"sucesso" | "erro" | { status: "erro"; message: string }>;
 }
 
 export function useFinalizarPedido(): UseFinalizarPedidoResult {
@@ -53,7 +54,13 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
         return "sucesso";
       }
       return "erro";
-    } catch {
+    } catch (error) {
+      console.error("Erro ao finalizar pedido:", error);
+      
+      // Usa a função extractErrorMessage para extrair a mensagem de erro
+      const errorMessage = extractErrorMessage(error, "Erro inesperado ao finalizar pedido");
+      
+      // Retorna apenas "erro" para corresponder ao tipo Promise<"sucesso" | "erro">
       return "erro";
     } finally {
       setLoading(false);

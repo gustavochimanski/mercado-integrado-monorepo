@@ -34,12 +34,40 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     setOpen(true);
   };
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!novo.logradouro.trim()) {
+      errors.logradouro = "Rua é obrigatória";
+    }
+    
+    if (!novo.cidade.trim()) {
+      errors.cidade = "Cidade é obrigatória";
+    }
+    
+    if (!novo.estado.trim()) {
+      errors.estado = "Estado é obrigatório";
+    }
+    
+    if (novo.cep && !/^\d{5}-?\d{3}$/.test(novo.cep.replace(/\D/g, ""))) {
+      errors.cep = "CEP deve ter 8 dígitos";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = () => {
+    if (!validateForm()) return;
+    
     if (editingId !== null) onUpdate({ id: editingId, ...novo });
     else onAdd(novo);
 
     setEditingId(null);
     setNovo({ logradouro: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
+    setValidationErrors({});
     setOpen(false);
   };
 
@@ -130,12 +158,21 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
 
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label>Rua</Label>
+              <Label>Rua *</Label>
               <Input
                 placeholder="Ex: Av. Paulista"
                 value={novo.logradouro}
-                onChange={(e) => setNovo({ ...novo, logradouro: e.target.value })}
+                onChange={(e) => {
+                  setNovo({ ...novo, logradouro: e.target.value });
+                  if (validationErrors.logradouro) {
+                    setValidationErrors(prev => ({ ...prev, logradouro: "" }));
+                  }
+                }}
+                className={validationErrors.logradouro ? "border-red-500" : ""}
               />
+              {validationErrors.logradouro && (
+                <p className="text-red-500 text-xs">{validationErrors.logradouro}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -159,20 +196,38 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>Cidade</Label>
+                <Label>Cidade *</Label>
                 <Input
                   placeholder="São Paulo"
                   value={novo.cidade}
-                  onChange={(e) => setNovo({ ...novo, cidade: e.target.value })}
+                  onChange={(e) => {
+                    setNovo({ ...novo, cidade: e.target.value });
+                    if (validationErrors.cidade) {
+                      setValidationErrors(prev => ({ ...prev, cidade: "" }));
+                    }
+                  }}
+                  className={validationErrors.cidade ? "border-red-500" : ""}
                 />
+                {validationErrors.cidade && (
+                  <p className="text-red-500 text-xs">{validationErrors.cidade}</p>
+                )}
               </div>
               <div className="space-y-1">
-                <Label>Estado</Label>
+                <Label>Estado *</Label>
                 <Input
                   placeholder="SP"
                   value={novo.estado}
-                  onChange={(e) => setNovo({ ...novo, estado: e.target.value })}
+                  onChange={(e) => {
+                    setNovo({ ...novo, estado: e.target.value });
+                    if (validationErrors.estado) {
+                      setValidationErrors(prev => ({ ...prev, estado: "" }));
+                    }
+                  }}
+                  className={validationErrors.estado ? "border-red-500" : ""}
                 />
+                {validationErrors.estado && (
+                  <p className="text-red-500 text-xs">{validationErrors.estado}</p>
+                )}
               </div>
             </div>
 
@@ -181,8 +236,17 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
               <Input
                 placeholder="00000-000"
                 value={novo.cep}
-                onChange={(e) => setNovo({ ...novo, cep: e.target.value })}
+                onChange={(e) => {
+                  setNovo({ ...novo, cep: e.target.value });
+                  if (validationErrors.cep) {
+                    setValidationErrors(prev => ({ ...prev, cep: "" }));
+                  }
+                }}
+                className={validationErrors.cep ? "border-red-500" : ""}
               />
+              {validationErrors.cep && (
+                <p className="text-red-500 text-xs">{validationErrors.cep}</p>
+              )}
             </div>
           </div>
 

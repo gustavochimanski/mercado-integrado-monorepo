@@ -49,17 +49,21 @@ export default function FinalizarPedidoPage() {
     }
   }, [items, router]);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleFinalizar = async () => {
     setOverlayStatus("loading");
+    setErrorMessage("");
     const result = await finalizarPedido();
 
     // Simula loading antes de mostrar sucesso/erro
     setTimeout(() => {
-      setOverlayStatus(result);
-
       if (result === "sucesso") {
+        setOverlayStatus("sucesso");
         setTimeout(() => router.push("/pedidos"), 3000); // 3s para mostrar check
-      } else if (result === "erro") {
+      } else if (result === "erro" || (typeof result === "object" && result.status === "erro")) {
+        setOverlayStatus("erro");
+        setErrorMessage(typeof result === "object" ? result.message : "Erro ao finalizar pedido");
         setTimeout(() => setOverlayStatus("idle"), 5000); // overlay erro 5s
       }
     }, 1500); // mantém loading por 1.5s
@@ -84,7 +88,11 @@ export default function FinalizarPedidoPage() {
         );
       case "pagamento":
         return (
-          <Button className="w-full text-lg p-6 bg-amber-600" onClick={() => setCurrentTab("observacao")}>
+          <Button 
+            className="w-full text-lg p-6 bg-amber-600" 
+            onClick={() => setCurrentTab("observacao")}
+            disabled={!meioPagamentoId}
+          >
             Continuar <CircleArrowRight strokeWidth={3} />
           </Button>
         );
@@ -150,10 +158,13 @@ export default function FinalizarPedidoPage() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -50, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg"
+                className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg max-w-md mx-4"
               >
                 <XCircle size={120} className="text-red-600" />
-                <span className="text-2xl font-bold text-red-600">Erro ao finalizar pedido</span>
+                <div className="text-center">
+                  <span className="text-2xl font-bold text-red-600 block mb-2">Erro ao finalizar pedido</span>
+                  <p className="text-sm text-gray-600">{errorMessage}</p>
+                </div>
               </motion.div>
             )}
           </motion.div>
