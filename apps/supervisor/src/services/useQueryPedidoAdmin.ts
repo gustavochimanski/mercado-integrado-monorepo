@@ -92,6 +92,7 @@ export function useUpdatePedido() {
   return useMutation({
     mutationFn: async ({ pedidoId, data }: { pedidoId: number; data: any }) => {
       const response = await apiMensura.put(`/api/delivery/pedidos/${pedidoId}`, data)
+      console.log(response.data)
       return response.data
     },
     onSuccess: () => {

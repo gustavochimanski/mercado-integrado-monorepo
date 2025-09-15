@@ -1019,8 +1019,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
               <div>
                 <p className="text-sm text-amber-800 font-medium">Pedido não editável</p>
                 <p className="text-sm text-amber-700 mt-1">
-                  Apenas pedidos com status "Pendente" ou "Em Preparo" podem ser modificados.
-                </p>
+Apenas pedidos com status &quot;Pendente&quot; ou &quot;Em Preparo&quot; podem ser modificados.                </p>
               </div>
             </div>
           </div>
@@ -1029,3 +1028,5 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     </Dialog>
   )
 }
+
+
