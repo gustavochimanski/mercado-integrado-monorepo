@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@supervisor/hooks/use-toast"
 import { getErrorMessage } from "@supervisor/lib/getErrorMessage"
 import type { Endereco, EnderecoSearchResponse } from "@supervisor/types/pedido"
+import type { EnderecoOut } from "@supervisor/api/models/EnderecoOut"
 
 export function useSearchEndereco() {
   const { toast } = useToast()
@@ -86,5 +87,19 @@ export function useUpdateEnderecoCliente() {
         variant: "destructive" 
       })
     },
+  })
+}
+
+export function useEnderecosCliente(clienteId?: number) {
+  return useQuery({
+    queryKey: ["enderecosCliente", clienteId],
+    queryFn: async () => {
+      if (!clienteId) return []
+      
+      const { data } = await apiMensura.get(`/api/delivery/cliente/${clienteId}/enderecos`)
+      return data as EnderecoOut[]
+    },
+    enabled: !!clienteId,
+    staleTime: 5 * 60 * 1000, // 5 minutos
   })
 }

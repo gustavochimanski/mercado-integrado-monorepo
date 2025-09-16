@@ -9,7 +9,7 @@ import { Input } from "../../ui/input"
 import { Label } from "../../ui/label"
 import { Badge } from "../../ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
-import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck } from "lucide-react"
+import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck, Plus, Check } from "lucide-react"
 import { useEmpresas } from "../../../services/useQueryEmpresasMensura"
 import type { PedidoKanban, Endereco, EnderecoSearchResponse } from "../../../types/pedido"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
@@ -17,8 +17,9 @@ import { useToast } from "../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdatePedido } from "@supervisor/services/useQueryPedidoAdmin"
-import { useUpdateEnderecoCliente } from "@supervisor/services/useQueryEndereco"
+import { useUpdateEnderecoCliente, useEnderecosCliente } from "@supervisor/services/useQueryEndereco"
 import { SearchEndereco } from "../../shared/SearchEndereco"
+import { EditEnderecoModal } from "../cadastros/clientes/EditEnderecoModal"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../ui/collapsible"
 import { ChevronDown } from "lucide-react"
 import { Calendar } from "../../ui/calendar"
@@ -114,6 +115,8 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isAddressDetailsOpen, setIsAddressDetailsOpen] = useState(false)
+  const [isEditEnderecoModalOpen, setIsEditEnderecoModalOpen] = useState(false)
+  const [enderecoSelecionado, setEnderecoSelecionado] = useState<Endereco | null>(null)
   const [formData, setFormData] = useState<PedidoFormData>({
     nome_cliente: pedido?.nome_cliente || "",
     telefone_cliente: pedido?.telefone_cliente || "",
@@ -131,6 +134,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const { data: empresas = [] } = useEmpresas()
   const { data: meiosPagamento = [] } = useMeiosPagamento()
   const { data: pedidoCompleto, isLoading } = useFetchPedidoDetalhes(pedido?.id || null)
+  const { data: enderecosCliente = [], isLoading: loadingEnderecos } = useEnderecosCliente(pedidoCompleto?.cliente?.id)
   const updatePedidoMutation = useUpdatePedido()
   const updateEnderecoClienteMutation = useUpdateEnderecoCliente()
   const { toast } = useToast()
@@ -227,6 +231,46 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
 
     // Fechar os detalhes do endereço quando um novo endereço for selecionado
     setIsAddressDetailsOpen(false)
+  }
+
+  const handleSelectEnderecoCliente = (endereco: any) => {
+    const enderecoConvertido: Endereco = {
+      endereco_formatado: `${endereco.logradouro || ''}${endereco.numero ? `, ${endereco.numero}` : ''}${endereco.complemento ? `, ${endereco.complemento}` : ''} - ${endereco.bairro || ''} - ${endereco.cidade || ''}/${endereco.estado || ''} - ${endereco.cep || ''}`,
+      logradouro: endereco.logradouro || "",
+      cep: endereco.cep || "",
+      cidade: endereco.cidade || "",
+      estado: endereco.estado || "",
+      bairro: endereco.bairro || undefined,
+      latitude: endereco.latitude || 0,
+      longitude: endereco.longitude || 0,
+      numero: endereco.numero || undefined,
+      complemento: endereco.complemento || undefined,
+      ponto_referencia: endereco.ponto_referencia || undefined,
+      is_principal: endereco.is_principal || false
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      endereco: enderecoConvertido,
+      endereco_cliente: enderecoConvertido.endereco_formatado || "",
+    }))
+
+    setEnderecoSelecionado(enderecoConvertido)
+  }
+
+  const handleSaveEndereco = (endereco: Endereco, enderecoId?: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      endereco: endereco,
+      endereco_cliente: endereco.endereco_formatado || "",
+    }))
+    setEnderecoSelecionado(endereco)
+    setIsEditEnderecoModalOpen(false)
+    
+    toast({
+      title: "Endereço atualizado",
+      description: "O endereço foi atualizado com sucesso.",
+    })
   }
 
   useEffect(() => {
@@ -575,29 +619,104 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                    <MapPin className="w-5 h-5 text-green-600" />
-                    Endereço de Entrega
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                      <MapPin className="w-5 h-5 text-green-600" />
+                      Endereço de Entrega
+                    </h3>
+                    {isEditing && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditEnderecoModalOpen(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar/Editar
+                      </Button>
+                    )}
+                  </div>
 
                   <div className="space-y-4">
+                    {/* Endereço atual do pedido */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">
-                        Pesquisar Endereço (Rua ou CEP)
-                      </Label>
-                      <SearchEndereco
-                        value={formData.endereco_cliente}
-                        onValueChange={(value) => setFormData((prev) => ({ ...prev, endereco_cliente: value }))}
-                        onAddressSelect={handleSelectAddress}
-                        disabled={!isEditing}
-                        placeholder="Digite a rua ou CEP"
-                      />
+                      <Label className="text-sm font-medium">Endereço Atual do Pedido</Label>
+                      <div className="bg-white border rounded-lg p-3">
+                        <p className="text-sm font-medium text-gray-800">
+                          {formData.endereco_cliente || "Não informado"}
+                        </p>
+                      </div>
                     </div>
 
+                    {/* Lista de endereços do cliente */}
+                    {isEditing && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Endereços Cadastrados do Cliente</Label>
+                        {loadingEnderecos ? (
+                          <div className="text-center py-4 text-muted-foreground">
+                            Carregando endereços...
+                          </div>
+                        ) : enderecosCliente.length === 0 ? (
+                          <div className="text-center py-4 text-muted-foreground">
+                            Nenhum endereço cadastrado
+                          </div>
+                        ) : (
+                          <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {enderecosCliente.map((endereco) => (
+                              <div
+                                key={endereco.id}
+                                onClick={() => handleSelectEnderecoCliente(endereco)}
+                                className={`p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors ${
+                                  enderecoSelecionado?.logradouro === endereco.logradouro ? 'bg-green-50 border-green-200' : ''
+                                }`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">
+                                      {endereco.logradouro}
+                                      {endereco.numero && `, ${endereco.numero}`}
+                                      {endereco.complemento && `, ${endereco.complemento}`}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {endereco.bairro} - {endereco.cidade}/{endereco.estado} - {endereco.cep}
+                                    </p>
+                                    {endereco.is_principal && (
+                                      <span className="inline-block mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                        Principal
+                                      </span>
+                                    )}
+                                  </div>
+                                  {enderecoSelecionado?.logradouro === endereco.logradouro && (
+                                    <Check className="w-4 h-4 text-green-600" />
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
+                    {/* Pesquisar novo endereço */}
+                    {isEditing && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">
+                          Pesquisar Novo Endereço (Rua ou CEP)
+                        </Label>
+                        <SearchEndereco
+                          value={formData.searchAddress}
+                          onValueChange={(value) => setFormData((prev) => ({ ...prev, searchAddress: value }))}
+                          onAddressSelect={handleSelectAddress}
+                          disabled={!isEditing}
+                          placeholder="Digite a rua ou CEP"
+                        />
+                      </div>
+                    )}
+
+                    {/* Detalhes do endereço selecionado */}
                     {Object.keys(formData.endereco).length > 0 && (
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium">Detalhes do Endereço</Label>
+                        <Label className="text-sm font-medium">Detalhes do Endereço Selecionado</Label>
                         <Collapsible open={isAddressDetailsOpen} onOpenChange={setIsAddressDetailsOpen}>
                           <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline">
                             Ver/editar detalhes
@@ -1005,6 +1124,15 @@ Apenas pedidos com status &quot;Pendente&quot; ou &quot;Em Preparo&quot; podem s
             </div>
           </div>
         )}
+
+        {/* Modal de edição de endereço */}
+        <EditEnderecoModal
+          isOpen={isEditEnderecoModalOpen}
+          onClose={() => setIsEditEnderecoModalOpen(false)}
+          onSave={handleSaveEndereco}
+          enderecoAtual={formData.endereco}
+          clienteId={pedidoCompleto?.cliente?.id}
+        />
       </DialogContent>
     </Dialog>
   )
