@@ -9,16 +9,16 @@ import { Input } from "../../ui/input"
 import { Label } from "../../ui/label"
 import { Badge } from "../../ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
-import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck } from "lucide-react"
+import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck, Plus } from "lucide-react"
 import { useEmpresas } from "../../../services/useQueryEmpresasMensura"
-import type { PedidoKanban, Endereco, EnderecoSearchResponse } from "../../../types/pedido"
+import type { PedidoKanban, Endereco } from "../../../types/pedido"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
 import { useToast } from "../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdatePedido } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdateEnderecoCliente } from "@supervisor/services/useQueryEndereco"
-import { SearchEndereco } from "../../shared/SearchEndereco"
+import { EditEnderecoModal } from "../cadastros/clientes/EditEnderecoModal"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../ui/collapsible"
 import { ChevronDown } from "lucide-react"
 import { Calendar } from "../../ui/calendar"
@@ -43,7 +43,6 @@ interface PedidoFormData {
   data_nascimento_cliente: Date | null
   endereco: Endereco
   troco_para: number
-  searchAddress: string
 }
 
 interface MeioPagamento {
@@ -114,6 +113,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isAddressDetailsOpen, setIsAddressDetailsOpen] = useState(false)
+  const [isEditEnderecoModalOpen, setIsEditEnderecoModalOpen] = useState(false)
   const [formData, setFormData] = useState<PedidoFormData>({
     nome_cliente: pedido?.nome_cliente || "",
     telefone_cliente: pedido?.telefone_cliente || "",
@@ -125,7 +125,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     data_nascimento_cliente: null,
     endereco: {},
     troco_para: 0,
-    searchAddress: "",
   })
 
   const { data: empresas = [] } = useEmpresas()
@@ -196,37 +195,20 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     return empresa?.nome || `Empresa ${empresaId}`
   }
 
-  const handleSelectAddress = (selectedAddress: EnderecoSearchResponse) => {
-    // Converter EnderecoSearchResponse para Endereco
-    const enderecoConvertido: Endereco = {
-      endereco_formatado: selectedAddress.endereco_formatado,
-      logradouro: selectedAddress.logradouro,
-      cep: selectedAddress.cep,
-      cidade: selectedAddress.cidade,
-      estado: selectedAddress.estado,
-      bairro: selectedAddress.bairro || undefined,
-      latitude: selectedAddress.latitude,
-      longitude: selectedAddress.longitude,
-      codigo_estado: selectedAddress.codigo_estado,
-      distrito: selectedAddress.distrito || undefined,
-      pais: selectedAddress.pais,
-      numero: selectedAddress.numero || undefined,
-    }
 
+
+  const handleSaveEndereco = (endereco: Endereco, enderecoId?: number) => {
     setFormData((prev) => ({
       ...prev,
-      endereco: {
-        ...enderecoConvertido,
-        logradouro: enderecoConvertido.logradouro || "",
-        numero: enderecoConvertido.numero || prev.endereco.numero || "",
-        complemento: prev.endereco.complemento || "",
-      },
-      endereco_cliente: enderecoConvertido.endereco_formatado || "",
-      searchAddress: "",
+      endereco: endereco,
+      endereco_cliente: endereco.endereco_formatado || "",
     }))
-
-    // Fechar os detalhes do endereço quando um novo endereço for selecionado
-    setIsAddressDetailsOpen(false)
+    setIsEditEnderecoModalOpen(false)
+    
+    toast({
+      title: "Endereço atualizado",
+      description: "O endereço foi atualizado com sucesso.",
+    })
   }
 
   useEffect(() => {
@@ -244,7 +226,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
           : null,
         endereco: pedidoCompleto.endereco || {},
         troco_para: pedidoCompleto.troco_para || 0,
-        searchAddress: "",
       })
     }
   }, [isOpen, pedido, pedidoCompleto])
@@ -370,7 +351,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
           : null,
         endereco: pedidoCompleto.endereco || {},
         troco_para: pedidoCompleto.troco_para || 0,
-        searchAddress: "",
       })
     }
   }
@@ -575,29 +555,40 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                    <MapPin className="w-5 h-5 text-green-600" />
-                    Endereço de Entrega
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                      <MapPin className="w-5 h-5 text-green-600" />
+                      Endereço de Entrega
+                    </h3>
+                    {isEditing && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditEnderecoModalOpen(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar/Editar
+                      </Button>
+                    )}
+                  </div>
 
                   <div className="space-y-4">
+                    {/* Endereço atual do pedido */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">
-                        Pesquisar Endereço (Rua ou CEP)
-                      </Label>
-                      <SearchEndereco
-                        value={formData.endereco_cliente}
-                        onValueChange={(value) => setFormData((prev) => ({ ...prev, endereco_cliente: value }))}
-                        onAddressSelect={handleSelectAddress}
-                        disabled={!isEditing}
-                        placeholder="Digite a rua ou CEP"
-                      />
+                      <Label className="text-sm font-medium">Endereço Atual do Pedido</Label>
+                      <div className="bg-white border rounded-lg p-3">
+                        <p className="text-sm font-medium text-gray-800">
+                          {formData.endereco_cliente || "Não informado"}
+                        </p>
+                      </div>
                     </div>
 
 
+
+                    {/* Detalhes do endereço selecionado */}
                     {Object.keys(formData.endereco).length > 0 && (
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium">Detalhes do Endereço</Label>
+                        <Label className="text-sm font-medium">Detalhes do Endereço Selecionado</Label>
                         <Collapsible open={isAddressDetailsOpen} onOpenChange={setIsAddressDetailsOpen}>
                           <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline">
                             Ver/editar detalhes
@@ -1005,6 +996,15 @@ Apenas pedidos com status &quot;Pendente&quot; ou &quot;Em Preparo&quot; podem s
             </div>
           </div>
         )}
+
+        {/* Modal de edição de endereço */}
+        <EditEnderecoModal
+          isOpen={isEditEnderecoModalOpen}
+          onClose={() => setIsEditEnderecoModalOpen(false)}
+          onSave={handleSaveEndereco}
+          enderecoAtual={formData.endereco}
+          clienteId={pedidoCompleto?.cliente?.id}
+        />
       </DialogContent>
     </Dialog>
   )
