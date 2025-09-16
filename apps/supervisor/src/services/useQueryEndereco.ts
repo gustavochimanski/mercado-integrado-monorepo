@@ -96,7 +96,7 @@ export function useEnderecosCliente(clienteId?: number) {
     queryFn: async () => {
       if (!clienteId) return []
       
-      const { data } = await apiMensura.get(`/api/delivery/cliente/${clienteId}/enderecos`)
+      const { data } = await apiMensura.get(`/api/delivery/cliente/admin/${clienteId}/enderecos`)
       return data as EnderecoOut[]
     },
     enabled: !!clienteId,

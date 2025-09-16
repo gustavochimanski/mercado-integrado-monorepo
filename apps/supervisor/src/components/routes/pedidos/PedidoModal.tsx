@@ -9,16 +9,15 @@ import { Input } from "../../ui/input"
 import { Label } from "../../ui/label"
 import { Badge } from "../../ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
-import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck, Plus, Check } from "lucide-react"
+import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck, Plus } from "lucide-react"
 import { useEmpresas } from "../../../services/useQueryEmpresasMensura"
-import type { PedidoKanban, Endereco, EnderecoSearchResponse } from "../../../types/pedido"
+import type { PedidoKanban, Endereco } from "../../../types/pedido"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
 import { useToast } from "../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdatePedido } from "@supervisor/services/useQueryPedidoAdmin"
-import { useUpdateEnderecoCliente, useEnderecosCliente } from "@supervisor/services/useQueryEndereco"
-import { SearchEndereco } from "../../shared/SearchEndereco"
+import { useUpdateEnderecoCliente } from "@supervisor/services/useQueryEndereco"
 import { EditEnderecoModal } from "../cadastros/clientes/EditEnderecoModal"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../ui/collapsible"
 import { ChevronDown } from "lucide-react"
@@ -44,7 +43,6 @@ interface PedidoFormData {
   data_nascimento_cliente: Date | null
   endereco: Endereco
   troco_para: number
-  searchAddress: string
 }
 
 interface MeioPagamento {
@@ -116,7 +114,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const [isSaving, setIsSaving] = useState(false)
   const [isAddressDetailsOpen, setIsAddressDetailsOpen] = useState(false)
   const [isEditEnderecoModalOpen, setIsEditEnderecoModalOpen] = useState(false)
-  const [enderecoSelecionado, setEnderecoSelecionado] = useState<Endereco | null>(null)
   const [formData, setFormData] = useState<PedidoFormData>({
     nome_cliente: pedido?.nome_cliente || "",
     telefone_cliente: pedido?.telefone_cliente || "",
@@ -128,13 +125,11 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     data_nascimento_cliente: null,
     endereco: {},
     troco_para: 0,
-    searchAddress: "",
   })
 
   const { data: empresas = [] } = useEmpresas()
   const { data: meiosPagamento = [] } = useMeiosPagamento()
   const { data: pedidoCompleto, isLoading } = useFetchPedidoDetalhes(pedido?.id || null)
-  const { data: enderecosCliente = [], isLoading: loadingEnderecos } = useEnderecosCliente(pedidoCompleto?.cliente?.id)
   const updatePedidoMutation = useUpdatePedido()
   const updateEnderecoClienteMutation = useUpdateEnderecoCliente()
   const { toast } = useToast()
@@ -200,63 +195,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     return empresa?.nome || `Empresa ${empresaId}`
   }
 
-  const handleSelectAddress = (selectedAddress: EnderecoSearchResponse) => {
-    // Converter EnderecoSearchResponse para Endereco
-    const enderecoConvertido: Endereco = {
-      endereco_formatado: selectedAddress.endereco_formatado,
-      logradouro: selectedAddress.logradouro,
-      cep: selectedAddress.cep,
-      cidade: selectedAddress.cidade,
-      estado: selectedAddress.estado,
-      bairro: selectedAddress.bairro || undefined,
-      latitude: selectedAddress.latitude,
-      longitude: selectedAddress.longitude,
-      codigo_estado: selectedAddress.codigo_estado,
-      distrito: selectedAddress.distrito || undefined,
-      pais: selectedAddress.pais,
-      numero: selectedAddress.numero || undefined,
-    }
 
-    setFormData((prev) => ({
-      ...prev,
-      endereco: {
-        ...enderecoConvertido,
-        logradouro: enderecoConvertido.logradouro || "",
-        numero: enderecoConvertido.numero || prev.endereco.numero || "",
-        complemento: prev.endereco.complemento || "",
-      },
-      endereco_cliente: enderecoConvertido.endereco_formatado || "",
-      searchAddress: "",
-    }))
-
-    // Fechar os detalhes do endereço quando um novo endereço for selecionado
-    setIsAddressDetailsOpen(false)
-  }
-
-  const handleSelectEnderecoCliente = (endereco: any) => {
-    const enderecoConvertido: Endereco = {
-      endereco_formatado: `${endereco.logradouro || ''}${endereco.numero ? `, ${endereco.numero}` : ''}${endereco.complemento ? `, ${endereco.complemento}` : ''} - ${endereco.bairro || ''} - ${endereco.cidade || ''}/${endereco.estado || ''} - ${endereco.cep || ''}`,
-      logradouro: endereco.logradouro || "",
-      cep: endereco.cep || "",
-      cidade: endereco.cidade || "",
-      estado: endereco.estado || "",
-      bairro: endereco.bairro || undefined,
-      latitude: endereco.latitude || 0,
-      longitude: endereco.longitude || 0,
-      numero: endereco.numero || undefined,
-      complemento: endereco.complemento || undefined,
-      ponto_referencia: endereco.ponto_referencia || undefined,
-      is_principal: endereco.is_principal || false
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      endereco: enderecoConvertido,
-      endereco_cliente: enderecoConvertido.endereco_formatado || "",
-    }))
-
-    setEnderecoSelecionado(enderecoConvertido)
-  }
 
   const handleSaveEndereco = (endereco: Endereco, enderecoId?: number) => {
     setFormData((prev) => ({
@@ -264,7 +203,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
       endereco: endereco,
       endereco_cliente: endereco.endereco_formatado || "",
     }))
-    setEnderecoSelecionado(endereco)
     setIsEditEnderecoModalOpen(false)
     
     toast({
@@ -288,7 +226,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
           : null,
         endereco: pedidoCompleto.endereco || {},
         troco_para: pedidoCompleto.troco_para || 0,
-        searchAddress: "",
       })
     }
   }, [isOpen, pedido, pedidoCompleto])
@@ -414,7 +351,6 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
           : null,
         endereco: pedidoCompleto.endereco || {},
         troco_para: pedidoCompleto.troco_para || 0,
-        searchAddress: "",
       })
     }
   }
@@ -647,71 +583,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                       </div>
                     </div>
 
-                    {/* Lista de endereços do cliente */}
-                    {isEditing && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Endereços Cadastrados do Cliente</Label>
-                        {loadingEnderecos ? (
-                          <div className="text-center py-4 text-muted-foreground">
-                            Carregando endereços...
-                          </div>
-                        ) : enderecosCliente.length === 0 ? (
-                          <div className="text-center py-4 text-muted-foreground">
-                            Nenhum endereço cadastrado
-                          </div>
-                        ) : (
-                          <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {enderecosCliente.map((endereco) => (
-                              <div
-                                key={endereco.id}
-                                onClick={() => handleSelectEnderecoCliente(endereco)}
-                                className={`p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors ${
-                                  enderecoSelecionado?.logradouro === endereco.logradouro ? 'bg-green-50 border-green-200' : ''
-                                }`}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                                  <div className="flex-1">
-                                    <p className="font-medium text-sm">
-                                      {endereco.logradouro}
-                                      {endereco.numero && `, ${endereco.numero}`}
-                                      {endereco.complemento && `, ${endereco.complemento}`}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {endereco.bairro} - {endereco.cidade}/{endereco.estado} - {endereco.cep}
-                                    </p>
-                                    {endereco.is_principal && (
-                                      <span className="inline-block mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                                        Principal
-                                      </span>
-                                    )}
-                                  </div>
-                                  {enderecoSelecionado?.logradouro === endereco.logradouro && (
-                                    <Check className="w-4 h-4 text-green-600" />
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
 
-                    {/* Pesquisar novo endereço */}
-                    {isEditing && (
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">
-                          Pesquisar Novo Endereço (Rua ou CEP)
-                        </Label>
-                        <SearchEndereco
-                          value={formData.searchAddress}
-                          onValueChange={(value) => setFormData((prev) => ({ ...prev, searchAddress: value }))}
-                          onAddressSelect={handleSelectAddress}
-                          disabled={!isEditing}
-                          placeholder="Digite a rua ou CEP"
-                        />
-                      </div>
-                    )}
 
                     {/* Detalhes do endereço selecionado */}
                     {Object.keys(formData.endereco).length > 0 && (
