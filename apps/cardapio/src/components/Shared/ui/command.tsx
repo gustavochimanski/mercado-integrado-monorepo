@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@cardapio/components/shared/ui/dialog"
+} from "@cardapio/components/Shared/ui/dialog"
 
 function Command({
   className,
