@@ -1,98 +1,141 @@
+// src/services/useQueryEndereco.ts
+import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
-import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
-import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+export interface EnderecoSearchResult {
+  endereco_formatado: string
+  logradouro: string
+  numero?: string
+  complemento?: string
+  bairro?: string
+  distrito?: string
+  cidade: string
+  estado: string
+  codigo_estado?: string
+  cep: string
+  pais: string
+  latitude: number
+  longitude: number
+  ponto_referencia?: string
+}
 
-/** 🎯 Tipos */
+export interface EnderecoSearchResponse {
+  results: EnderecoSearchResult[]
+}
+
+// Tipos para endereços cadastrados do cliente
 export interface EnderecoOut {
-  id: number;
-  token_cliente: string;
-  logradouro: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cidade: string;
-  estado: string;
-  cep: string;
-  padrao?: boolean;
-  created_at: string;
-  updated_at: string;
+  id: number
+  logradouro: string
+  numero?: string
+  complemento?: string
+  bairro?: string
+  cidade: string
+  estado: string
+  cep?: string
+  latitude?: number
+  longitude?: number
+  ponto_referencia?: string
+  padrao?: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface EnderecoCreate {
-  token_cliente: string;
-  logradouro: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cidade: string;
-  estado: string;
-  cep: string;
+  logradouro: string
+  numero?: string
+  complemento?: string
+  bairro?: string
+  cidade: string
+  estado: string
+  cep?: string
+  latitude?: number
+  longitude?: number
+  ponto_referencia?: string
+  padrao?: boolean
 }
 
-export interface EnderecoUpdate extends Partial<EnderecoCreate> {}
-
-/** 🔎 Buscar endereços do cliente */
-export function useQueryEnderecos(token_cliente?: string, opts?: { enabled?: boolean }) {
+// Função para buscar endereços cadastrados do cliente
+export function useQueryEnderecos(options?: { enabled?: boolean }) {
   return useQuery({
-    queryKey: ["enderecos", token_cliente],
+    queryKey: ["enderecos"],
     queryFn: async () => {
-      if (!token_cliente) return [];
-      const { data } = await apiClienteAdmin.get<EnderecoOut[]>(`/delivery/enderecos?cliente=${token_cliente}`);
-      return data;
+      const { data } = await apiClienteAdmin.get("/delivery/enderecos")
+      return data as EnderecoOut[]
     },
-    enabled: opts?.enabled ?? !!token_cliente,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    enabled: options?.enabled !== false,
+    staleTime: 5 * 60 * 1000, // 5 minutos
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
-  });
+  })
 }
 
-export function useGetEnderecoById(token_cliente?: string, opts?: { enabled?: boolean }) {
-  
-}
-
-
-/** 🛠️ Criar / Atualizar / Deletar endereços */
-export function useMutateEndereco(token_cliente: string) {
-  const qc = useQueryClient();
-
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["enderecos", token_cliente] });
-  };
+// Função para mutações de endereços (criar, atualizar, deletar)
+export function useMutateEndereco() {
+  const queryClient = useQueryClient()
 
   const create = useMutation({
-    mutationFn: (body: EnderecoCreate) =>
-      apiClienteAdmin.post<EnderecoOut>("/delivery/enderecos", body),
-    onSuccess: () => {
-      toast.success("Endereço criado com sucesso!");
-      invalidate();
+    mutationFn: async (enderecoData: EnderecoCreate) => {
+      const { data } = await apiClienteAdmin.post("/delivery/enderecos", enderecoData)
+      return data as EnderecoOut
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
-  });
+    onSuccess: () => {
+      toast.success("Endereço criado com sucesso!")
+      queryClient.invalidateQueries({ queryKey: ["enderecos"] })
+    },
+    onError: (err: any) => {
+      console.error("Error creating address:", err)
+      toast.error("Erro ao criar endereço. Verifique o console para detalhes.")
+    },
+  })
 
   const update = useMutation({
-    mutationFn: ({ id, ...body }: { id: number } & EnderecoUpdate) =>
-      apiClienteAdmin.put<EnderecoOut>(`/delivery/enderecos/${id}`, body),
-    onSuccess: () => {
-      toast.success("Endereço atualizado com sucesso!");
-      invalidate();
+    mutationFn: async ({ id, ...enderecoData }: EnderecoCreate & { id: number }) => {
+      const { data } = await apiClienteAdmin.put(`/delivery/enderecos/${id}`, enderecoData)
+      return data as EnderecoOut
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
-  });
+    onSuccess: () => {
+      toast.success("Endereço atualizado com sucesso!")
+      queryClient.invalidateQueries({ queryKey: ["enderecos"] })
+    },
+    onError: (err: any) => {
+      console.error("Error updating address:", err)
+      toast.error("Erro ao atualizar endereço. Verifique o console para detalhes.")
+    },
+  })
 
   const remove = useMutation({
-    mutationFn: (id: number) =>
-      apiClienteAdmin.delete<void>(`/delivery/enderecos/${id}`),
-    onSuccess: () => {
-      toast.success("Endereço removido!");
-      invalidate();
+    mutationFn: async (id: number) => {
+      await apiClienteAdmin.delete(`/delivery/enderecos/${id}`)
     },
-    onError: (err) => toast.error(extractErrorMessage(err)),
-  });
+    onSuccess: () => {
+      toast.success("Endereço removido com sucesso!")
+      queryClient.invalidateQueries({ queryKey: ["enderecos"] })
+    },
+    onError: (err: any) => {
+      console.error("Error deleting address:", err)
+      toast.error("Erro ao remover endereço. Verifique o console para detalhes.")
+    },
+  })
 
-  return { create, update, remove };
+  return { create, update, remove }
+}
+
+// Função para busca de endereços na API externa
+export function useSearchEndereco() {
+  return useMutation({
+    mutationFn: async (searchText: string) => {
+      if (!searchText.trim()) {
+        throw new Error("Texto de busca é obrigatório")
+      }
+      
+      const { data } = await apiClienteAdmin.get(`/mensura/geoapify/cliente/search-endereco?text=${searchText}`)
+      // A API retorna um array de EnderecoSearchResult diretamente
+      return data as EnderecoSearchResult[]
+    },
+    onError: (err: any) => {
+      console.error("Error searching address:", err)
+      toast.error("Erro ao buscar endereço. Verifique o console para detalhes.")
+    },
+  })
 }

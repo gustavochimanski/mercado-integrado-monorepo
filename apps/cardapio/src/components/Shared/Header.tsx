@@ -15,7 +15,7 @@ const HeaderComponent = () => {
   const pathname = usePathname(); // rota atual
 
   // Query de endereços do cliente
-  const { data: enderecos } = useQueryEnderecos(tokenCliente, { enabled: !!tokenCliente });
+  const { data: enderecos } = useQueryEnderecos({ enabled: !!tokenCliente });
 
   useEffect(() => {
     if (!tokenCliente) return; // usuário não logado

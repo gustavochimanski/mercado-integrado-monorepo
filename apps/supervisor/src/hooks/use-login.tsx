@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@supervisor/services/Auth/useAuth";
 import { useToast } from "@supervisor/hooks/use-toast";
-import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 
 // ✅ esquema de validação com zod
 export const loginSchema = z.object({
