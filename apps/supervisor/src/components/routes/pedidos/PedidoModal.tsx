@@ -9,22 +9,21 @@ import { Input } from "../../ui/input"
 import { Label } from "../../ui/label"
 import { Badge } from "../../ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
-import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck, Search } from "lucide-react"
+import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck } from "lucide-react"
 import { useEmpresas } from "../../../services/useQueryEmpresasMensura"
-import type { PedidoKanban } from "../../../types/pedido"
+import type { PedidoKanban, Endereco } from "../../../types/pedido"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
 import { useToast } from "../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdatePedido } from "@supervisor/services/useQueryPedidoAdmin"
+import { useUpdateEnderecoCliente } from "@supervisor/services/useQueryEndereco"
+import { AddressSearchCommand } from "../../shared/AddressSearchCommand"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../ui/collapsible"
 import { ChevronDown } from "lucide-react"
 import { Calendar } from "../../ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover"
 import { format } from "date-fns"
-import { Loader2 } from "lucide-react"
-import { Card, CardContent } from "../../ui/card"
-import apiMensura from "@supervisor/lib/api/apiMensura"
 
 interface PedidoModalProps {
   pedido: PedidoKanban | null
@@ -32,22 +31,6 @@ interface PedidoModalProps {
   onClose: () => void
 }
 
-interface Endereco {
-  cep?: string
-  logradouro?: string
-  numero?: string
-  complemento?: string
-  bairro?: string
-  cidade?: string
-  estado?: string
-  ponto_referencia?: string
-  latitude?: number
-  longitude?: number
-  is_principal?: boolean
-  id?: number
-  endereco_formatado?: string
-  rua?: string
-}
 
 interface PedidoFormData {
   nome_cliente: string
@@ -143,13 +126,12 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     troco_para: 0,
     searchAddress: "",
   })
-  const [isSearching, setIsSearching] = useState(false)
-  const [addressOptions, setAddressOptions] = useState<Endereco[]>([])
 
   const { data: empresas = [] } = useEmpresas()
   const { data: meiosPagamento = [] } = useMeiosPagamento()
   const { data: pedidoCompleto, isLoading } = useFetchPedidoDetalhes(pedido?.id || null)
   const updatePedidoMutation = useUpdatePedido()
+  const updateEnderecoClienteMutation = useUpdateEnderecoCliente()
   const { toast } = useToast()
 
   const canEdit = pedido?.status === "P" || pedido?.status === "R"
@@ -213,38 +195,18 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     return empresa?.nome || `Empresa ${empresaId}`
   }
 
-  const handleAddressSearch = async () => {
-    if (!formData.searchAddress) return
-    setIsSearching(true)
-    setAddressOptions([])
-    try {
-      const response = await apiMensura.get(`/api/mensura/geoapify/search-endereco?text=${formData.searchAddress}`)
-      setAddressOptions(response.data)
-    } catch (error) {
-      console.error("Error searching address:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao buscar endereço. Verifique o console para detalhes.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSearching(false)
-    }
-  }
-
   const handleSelectAddress = (selectedAddress: Endereco) => {
     setFormData((prev) => ({
       ...prev,
       endereco: {
         ...selectedAddress,
-        logradouro: selectedAddress.rua || "",
-        numero: prev.endereco.numero || "",
+        logradouro: selectedAddress.logradouro || "",
+        numero: selectedAddress.numero || prev.endereco.numero || "",
         complemento: prev.endereco.complemento || "",
       },
       endereco_cliente: selectedAddress.endereco_formatado || "",
       searchAddress: "",
     }))
-    setAddressOptions([])
   }
 
   useEffect(() => {
@@ -309,8 +271,8 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
             : "",
           ativo: true,
           endereco: {
-            acao: "update",
-            id: formData.endereco.id || 0,
+            acao: "update" as const,
+            id: pedidoCompleto.endereco_id || formData.endereco.id || 0,
             cep: formData.endereco.cep || "",
             logradouro: formData.endereco.logradouro || "",
             numero: formData.endereco.numero || "",
@@ -322,9 +284,16 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
             latitude: formData.endereco.latitude || 0,
             longitude: formData.endereco.longitude || 0,
             is_principal: formData.endereco.is_principal || true,
+            // Campos adicionais da API de busca
+            codigo_estado: formData.endereco.codigo_estado || "",
+            distrito: formData.endereco.distrito || "",
+            pais: formData.endereco.pais || "",
           },
         }
-        await apiMensura.put(`/api/delivery/cliente/admin-update/${pedidoCompleto.cliente.id}`, clienteData)
+        await updateEnderecoClienteMutation.mutateAsync({
+          clienteId: pedidoCompleto.cliente.id,
+          enderecoData: clienteData
+        })
       } else if (clienteChanged) {
         toast({
           title: "Aviso",
@@ -408,8 +377,18 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   }
 
   const getEnderecoCompleto = () => {
-    const { logradouro, numero, complemento, bairro, cep, cidade, estado } = formData.endereco
-    const parts = [logradouro, numero, complemento, bairro, cep, cidade, estado].filter(Boolean).join(", ")
+    const { logradouro, numero, complemento, bairro, distrito, cep, cidade, estado, codigo_estado, pais } = formData.endereco
+    const parts = [
+      logradouro, 
+      numero, 
+      complemento, 
+      bairro, 
+      distrito, 
+      cep, 
+      cidade, 
+      estado || codigo_estado, 
+      pais
+    ].filter(Boolean).join(", ")
     return parts || "Não informado"
   }
 
@@ -583,63 +562,18 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="searchAddress" className="text-sm font-medium">
+                      <Label className="text-sm font-medium">
                         Pesquisar Endereço (Rua ou CEP)
                       </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="searchAddress"
-                          value={formData.searchAddress}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, searchAddress: e.target.value }))}
-                          disabled={!isEditing}
-                          className="bg-white flex-1"
-                          placeholder="Digite a rua ou CEP"
-                          autoComplete="off"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleAddressSearch}
-                          disabled={!isEditing || !formData.searchAddress || isSearching}
-                        >
-                          {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                      {addressOptions.length > 0 && (
-                        <Select onValueChange={(value) => {
-                          const selected = addressOptions.find(option => option.endereco_formatado === value)
-                          if (selected) handleSelectAddress(selected)
-                        }}>
-                          <SelectTrigger className="w-full bg-white mt-2">
-                            <SelectValue placeholder="Selecione um endereço" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60 overflow-y-auto">
-                            {addressOptions.map((option, index) => (
-                              <SelectItem key={index} value={option.endereco_formatado || ""}>
-                                <div className="flex flex-col">
-                                  <span className="font-medium">{option.endereco_formatado}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="endereco_cliente" className="text-sm font-medium">
-                        Endereço Completo
-                      </Label>
-                      <textarea
-                        id="endereco_cliente"
+                      <AddressSearchCommand
                         value={formData.endereco_cliente}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, endereco_cliente: e.target.value }))}
+                        onValueChange={(value) => setFormData((prev) => ({ ...prev, endereco_cliente: value }))}
+                        onAddressSelect={handleSelectAddress}
                         disabled={!isEditing}
-                        rows={2}
-                        className="flex min-h-[60px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                        autoComplete="off"
+                        placeholder="Digite a rua ou CEP"
                       />
                     </div>
+
 
                     {Object.keys(formData.endereco).length > 0 && (
                       <div className="space-y-2">
@@ -698,6 +632,17 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                                 />
                               </div>
                               <div className="space-y-1">
+                                <Label htmlFor="endereco_distrito" className="text-sm font-medium text-gray-500">Distrito</Label>
+                                <Input
+                                  id="endereco_distrito"
+                                  value={formData.endereco.distrito || ""}
+                                  onChange={(e) => updateSnapshotField("distrito", e.target.value)}
+                                  disabled={!isEditing}
+                                  className="bg-white h-8 text-sm"
+                                  autoComplete="off"
+                                />
+                              </div>
+                              <div className="space-y-1">
                                 <Label htmlFor="endereco_cidade" className="text-sm font-medium">Cidade</Label>
                                 <Input
                                   id="endereco_cidade"
@@ -720,11 +665,33 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                                 />
                               </div>
                               <div className="space-y-1">
+                                <Label htmlFor="endereco_codigo_estado" className="text-sm font-medium text-gray-500">UF</Label>
+                                <Input
+                                  id="endereco_codigo_estado"
+                                  value={formData.endereco.codigo_estado || ""}
+                                  onChange={(e) => updateSnapshotField("codigo_estado", e.target.value)}
+                                  disabled={!isEditing}
+                                  className="bg-white h-8 text-sm"
+                                  autoComplete="off"
+                                />
+                              </div>
+                              <div className="space-y-1">
                                 <Label htmlFor="endereco_cep" className="text-sm font-medium">CEP</Label>
                                 <Input
                                   id="endereco_cep"
                                   value={formData.endereco.cep || ""}
                                   onChange={(e) => updateSnapshotField("cep", e.target.value)}
+                                  disabled={!isEditing}
+                                  className="bg-white h-8 text-sm"
+                                  autoComplete="off"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label htmlFor="endereco_pais" className="text-sm font-medium text-gray-500">País</Label>
+                                <Input
+                                  id="endereco_pais"
+                                  value={formData.endereco.pais || ""}
+                                  onChange={(e) => updateSnapshotField("pais", e.target.value)}
                                   disabled={!isEditing}
                                   className="bg-white h-8 text-sm"
                                   autoComplete="off"
