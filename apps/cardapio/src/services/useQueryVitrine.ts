@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CategoriaMini } from "./useQueryHome";
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 
 // Tipos alinhados ao backend
 export type VitrineOut = {
@@ -135,8 +136,7 @@ export function useMutateVitrine() {
       reloadPage();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || "Erro ao criar vitrine";
-      toast.error(msg, { closeButton: true });
+      toast.error(extractErrorMessage(err, "Erro ao criar vitrine"));
     },
   });
 
@@ -156,8 +156,7 @@ export function useMutateVitrine() {
       reloadPage();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || "Erro ao atualizar vitrine";
-      toast.error(msg, { closeButton: true });
+      toast.error(extractErrorMessage(err, "Erro ao atualizar vitrine"));
     },
   });
 
@@ -170,8 +169,7 @@ export function useMutateVitrine() {
       reloadPage();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || "Erro ao remover vitrine";
-      toast.error(msg, { closeButton: true });
+      toast.error(extractErrorMessage(err, "Erro ao remover vitrine"));
     },
   });
 
@@ -187,8 +185,7 @@ export function useMutateVitrine() {
       reloadPage();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || "Erro ao vincular produto";
-      toast.error(msg, { closeButton: true });
+      toast.error(extractErrorMessage(err, "Erro ao vincular produto"));
     },
   });
 
@@ -204,8 +201,7 @@ export function useMutateVitrine() {
       reloadPage();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || "Erro ao desvincular produto";
-      toast.error(msg, { closeButton: true });
+      toast.error(extractErrorMessage(err, "Erro ao desvincular produto"));
     },
   });
 
@@ -219,8 +215,7 @@ export function useMutateVitrine() {
       reloadPage();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.detail || err?.message || "Erro ao atualizar destaque da vitrine";
-      toast.error(msg, { closeButton: true });
+      toast.error(extractErrorMessage(err, "Erro ao atualizar destaque da vitrine"));
     },
   });
 

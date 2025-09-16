@@ -2,6 +2,7 @@
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage"
 
 export interface EnderecoSearchResult {
   endereco_formatado: string
@@ -85,7 +86,7 @@ export function useMutateEndereco() {
     },
     onError: (err: any) => {
       console.error("Error creating address:", err)
-      toast.error("Erro ao criar endereço. Verifique o console para detalhes.")
+      toast.error(extractErrorMessage(err, "Erro ao criar endereço"))
     },
   })
 
@@ -100,7 +101,7 @@ export function useMutateEndereco() {
     },
     onError: (err: any) => {
       console.error("Error updating address:", err)
-      toast.error("Erro ao atualizar endereço. Verifique o console para detalhes.")
+      toast.error(extractErrorMessage(err, "Erro ao atualizar endereço"))
     },
   })
 
@@ -114,7 +115,7 @@ export function useMutateEndereco() {
     },
     onError: (err: any) => {
       console.error("Error deleting address:", err)
-      toast.error("Erro ao remover endereço. Verifique o console para detalhes.")
+      toast.error(extractErrorMessage(err, "Erro ao remover endereço"))
     },
   })
 
@@ -135,7 +136,7 @@ export function useSearchEndereco() {
     },
     onError: (err: any) => {
       console.error("Error searching address:", err)
-      toast.error("Erro ao buscar endereço. Verifique o console para detalhes.")
+      toast.error(extractErrorMessage(err, "Erro ao buscar endereço"))
     },
   })
 }

@@ -3,6 +3,7 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 
 const BASE = "/delivery/produtos";
 
@@ -28,9 +29,6 @@ export type ProdutosPaginadosResponse = {
 };
 
 // ----- Helpers -----
-function errMsg(err: any, fallback: string) {
-  return err?.response?.data?.detail ?? err?.message ?? fallback;
-}
 
 export type CreateProdutoInput = {
   cod_empresa: number;
@@ -185,7 +183,7 @@ export function useMutateProduto() {
       toast.success("Produto atualizado com sucesso!");
       reloadPage(vars.cod_empresa);
     },
-    onError: (err: any) => toast.error(errMsg(err, "Erro ao atualizar produto")),
+    onError: (err: any) => toast.error(extractErrorMessage(err, "Erro ao atualizar produto")),
   });
 
 
