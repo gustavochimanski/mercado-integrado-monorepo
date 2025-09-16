@@ -11,14 +11,14 @@ import { Badge } from "../../ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
 import { Edit, Save, X, Phone, MapPin, CreditCard, Clock, Building2, Truck } from "lucide-react"
 import { useEmpresas } from "../../../services/useQueryEmpresasMensura"
-import type { PedidoKanban, Endereco } from "../../../types/pedido"
+import type { PedidoKanban, Endereco, EnderecoSearchResponse } from "../../../types/pedido"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
 import { useToast } from "../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdatePedido } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdateEnderecoCliente } from "@supervisor/services/useQueryEndereco"
-import { AddressSearchCommand } from "../../shared/AddressSearchCommand"
+import { SearchEndereco } from "../../shared/SearchEndereco"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../ui/collapsible"
 import { ChevronDown } from "lucide-react"
 import { Calendar } from "../../ui/calendar"
@@ -113,6 +113,7 @@ interface PedidoCompleto {
 export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClose }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isAddressDetailsOpen, setIsAddressDetailsOpen] = useState(false)
   const [formData, setFormData] = useState<PedidoFormData>({
     nome_cliente: pedido?.nome_cliente || "",
     telefone_cliente: pedido?.telefone_cliente || "",
@@ -195,18 +196,37 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     return empresa?.nome || `Empresa ${empresaId}`
   }
 
-  const handleSelectAddress = (selectedAddress: Endereco) => {
+  const handleSelectAddress = (selectedAddress: EnderecoSearchResponse) => {
+    // Converter EnderecoSearchResponse para Endereco
+    const enderecoConvertido: Endereco = {
+      endereco_formatado: selectedAddress.endereco_formatado,
+      logradouro: selectedAddress.logradouro,
+      cep: selectedAddress.cep,
+      cidade: selectedAddress.cidade,
+      estado: selectedAddress.estado,
+      bairro: selectedAddress.bairro || undefined,
+      latitude: selectedAddress.latitude,
+      longitude: selectedAddress.longitude,
+      codigo_estado: selectedAddress.codigo_estado,
+      distrito: selectedAddress.distrito || undefined,
+      pais: selectedAddress.pais,
+      numero: selectedAddress.numero || undefined,
+    }
+
     setFormData((prev) => ({
       ...prev,
       endereco: {
-        ...selectedAddress,
-        logradouro: selectedAddress.logradouro || "",
-        numero: selectedAddress.numero || prev.endereco.numero || "",
+        ...enderecoConvertido,
+        logradouro: enderecoConvertido.logradouro || "",
+        numero: enderecoConvertido.numero || prev.endereco.numero || "",
         complemento: prev.endereco.complemento || "",
       },
-      endereco_cliente: selectedAddress.endereco_formatado || "",
+      endereco_cliente: enderecoConvertido.endereco_formatado || "",
       searchAddress: "",
     }))
+
+    // Fechar os detalhes do endereço quando um novo endereço for selecionado
+    setIsAddressDetailsOpen(false)
   }
 
   useEffect(() => {
@@ -377,7 +397,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   }
 
   const getEnderecoCompleto = () => {
-    const { logradouro, numero, complemento, bairro, distrito, cep, cidade, estado, codigo_estado, pais } = formData.endereco
+    const { logradouro, numero, complemento, bairro, distrito, cep, cidade, codigo_estado, pais } = formData.endereco
     const parts = [
       logradouro, 
       numero, 
@@ -386,7 +406,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
       distrito, 
       cep, 
       cidade, 
-      estado || codigo_estado, 
+      codigo_estado, 
       pais
     ].filter(Boolean).join(", ")
     return parts || "Não informado"
@@ -565,7 +585,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                       <Label className="text-sm font-medium">
                         Pesquisar Endereço (Rua ou CEP)
                       </Label>
-                      <AddressSearchCommand
+                      <SearchEndereco
                         value={formData.endereco_cliente}
                         onValueChange={(value) => setFormData((prev) => ({ ...prev, endereco_cliente: value }))}
                         onAddressSelect={handleSelectAddress}
@@ -578,10 +598,10 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                     {Object.keys(formData.endereco).length > 0 && (
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Detalhes do Endereço</Label>
-                        <Collapsible>
+                        <Collapsible open={isAddressDetailsOpen} onOpenChange={setIsAddressDetailsOpen}>
                           <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline">
                             Ver/editar detalhes
-                            <ChevronDown className="w-4 h-4" />
+                            <ChevronDown className={`w-4 h-4 transition-transform ${isAddressDetailsOpen ? 'rotate-180' : ''}`} />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-2 mt-2">
                             <div className="grid grid-cols-2 gap-2">
@@ -654,25 +674,19 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                                 />
                               </div>
                               <div className="space-y-1">
-                                <Label htmlFor="endereco_estado" className="text-sm font-medium">Estado</Label>
-                                <Input
-                                  id="endereco_estado"
-                                  value={formData.endereco.estado || ""}
-                                  onChange={(e) => updateSnapshotField("estado", e.target.value)}
-                                  disabled={!isEditing}
-                                  className="bg-white h-8 text-sm"
-                                  autoComplete="off"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor="endereco_codigo_estado" className="text-sm font-medium text-gray-500">UF</Label>
+                                <Label htmlFor="endereco_codigo_estado" className="text-sm font-medium">UF</Label>
                                 <Input
                                   id="endereco_codigo_estado"
                                   value={formData.endereco.codigo_estado || ""}
-                                  onChange={(e) => updateSnapshotField("codigo_estado", e.target.value)}
+                                  onChange={(e) => {
+                                    updateSnapshotField("codigo_estado", e.target.value)
+                                    // Preencher automaticamente o estado com o código_estado
+                                    updateSnapshotField("estado", e.target.value)
+                                  }}
                                   disabled={!isEditing}
                                   className="bg-white h-8 text-sm"
                                   autoComplete="off"
+                                  placeholder="Ex.: SP"
                                 />
                               </div>
                               <div className="space-y-1">

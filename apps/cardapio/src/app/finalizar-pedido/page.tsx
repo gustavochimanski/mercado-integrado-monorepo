@@ -34,8 +34,8 @@ export default function FinalizarPedidoPage() {
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
 
-  const { data: enderecos = [] } = useQueryEnderecos(cliente?.tokenCliente, { enabled: !!cliente?.tokenCliente });
-  const { create, update, remove } = useMutateEndereco(cliente?.tokenCliente ?? "");
+  const { data: enderecos = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
+  const { create, update, remove } = useMutateEndereco();
   const { data: meiosPagamento = [] } = useMeiosPagamento(!!cliente?.tokenCliente);
 
   useEffect(() => {

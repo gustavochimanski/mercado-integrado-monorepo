@@ -5,36 +5,100 @@ import { Button } from "@cardapio/components/Shared/ui/button";
 import { Label } from "@cardapio/components/Shared/ui/label";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
-import { Pen, Trash2, Plus } from "lucide-react";
+import { Pen, Trash2, Plus, MapPin } from "lucide-react";
+import { SearchEndereco } from "@cardapio/components/Shared/SearchEndereco";
+import type { EnderecoSearchResult } from "@cardapio/services/useQueryEndereco";
 
 export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, onUpdate, onDelete }: any) {
   const [selected, setSelected] = useState<number | null>(enderecoId ?? null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [novo, setNovo] = useState({ logradouro: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
+  const [novo, setNovo] = useState({ 
+    logradouro: "", 
+    numero: "", 
+    bairro: "", 
+    cidade: "", 
+    estado: "", 
+    cep: "",
+    complemento: "",
+    distrito: "",
+    codigo_estado: "",
+    pais: "",
+    latitude: 0,
+    longitude: 0,
+    ponto_referencia: ""
+  });
   const [open, setOpen] = useState(false);
-
+  const [searchAddress, setSearchAddress] = useState("");
   useEffect(() => setSelected(enderecoId ?? null), [enderecoId]);
 
   const startEdit = (e: any) => {
     setEditingId(e.id);
     setNovo({
-      logradouro: e.logradouro,
+      logradouro: e.logradouro || "",
       numero: e.numero || "",
       bairro: e.bairro || "",
-      cidade: e.cidade,
-      estado: e.estado,
-      cep: e.cep
+      cidade: e.cidade || "",
+      estado: e.estado || "",
+      cep: e.cep || "",
+      complemento: e.complemento || "",
+      distrito: e.distrito || "",
+      codigo_estado: e.codigo_estado || "",
+      pais: e.pais || "",
+      latitude: e.latitude || 0,
+      longitude: e.longitude || 0,
+      ponto_referencia: e.ponto_referencia || ""
     });
+    setSearchAddress("");
     setOpen(true);
   };
 
   const startAddNew = () => {
     setEditingId(null);
-    setNovo({ logradouro: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
+    setNovo({ 
+      logradouro: "", 
+      numero: "", 
+      bairro: "", 
+      cidade: "", 
+      estado: "", 
+      cep: "",
+      complemento: "",
+      distrito: "",
+      codigo_estado: "",
+      pais: "",
+      latitude: 0,
+      longitude: 0,
+      ponto_referencia: ""
+    });
+    setSearchAddress("");
     setOpen(true);
   };
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const handleSelectAddress = (selectedAddress: EnderecoSearchResult) => {
+    setNovo({
+      ...novo,
+      logradouro: selectedAddress.logradouro || "",
+      numero: selectedAddress.numero || novo.numero || "",
+      complemento: selectedAddress.complemento || novo.complemento || "",
+      bairro: selectedAddress.bairro || "",
+      distrito: selectedAddress.distrito || "",
+      cidade: selectedAddress.cidade || "",
+      estado: selectedAddress.codigo_estado || selectedAddress.estado || "",
+      codigo_estado: selectedAddress.codigo_estado || "",
+      cep: selectedAddress.cep || "",
+      pais: selectedAddress.pais || "",
+      latitude: selectedAddress.latitude || 0,
+      longitude: selectedAddress.longitude || 0,
+      ponto_referencia: selectedAddress.ponto_referencia || ""
+    });
+    // Manter o endereço formatado no campo de pesquisa
+    setSearchAddress(selectedAddress.endereco_formatado || "");
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchAddress(value);
+  };
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -66,7 +130,22 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     else onAdd(novo);
 
     setEditingId(null);
-    setNovo({ logradouro: "", numero: "", bairro: "", cidade: "", estado: "", cep: "" });
+    setNovo({ 
+      logradouro: "", 
+      numero: "", 
+      bairro: "", 
+      cidade: "", 
+      estado: "", 
+      cep: "",
+      complemento: "",
+      distrito: "",
+      codigo_estado: "",
+      pais: "",
+      latitude: 0,
+      longitude: 0,
+      ponto_referencia: ""
+    });
+    setSearchAddress("");
     setValidationErrors({});
     setOpen(false);
   };
@@ -158,95 +237,127 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
 
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label>Rua *</Label>
-              <Input
-                placeholder="Ex: Av. Paulista"
-                value={novo.logradouro}
-                onChange={(e) => {
-                  setNovo({ ...novo, logradouro: e.target.value });
-                  if (validationErrors.logradouro) {
-                    setValidationErrors(prev => ({ ...prev, logradouro: "" }));
-                  }
-                }}
-                className={validationErrors.logradouro ? "border-red-500" : ""}
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                Pesquisar Endereço (Rua ou CEP) *
+              </Label>
+              <SearchEndereco
+                value={searchAddress}
+                onValueChange={handleSearchChange}
+                onAddressSelect={handleSelectAddress}
+                placeholder="Digite a rua ou CEP"
               />
               {validationErrors.logradouro && (
                 <p className="text-red-500 text-xs">{validationErrors.logradouro}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Número</Label>
-                <Input
-                  placeholder="123"
-                  value={novo.numero}
-                  onChange={(e) => setNovo({ ...novo, numero: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>Bairro</Label>
-                <Input
-                  placeholder="Centro"
-                  value={novo.bairro}
-                  onChange={(e) => setNovo({ ...novo, bairro: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Cidade *</Label>
-                <Input
-                  placeholder="São Paulo"
-                  value={novo.cidade}
-                  onChange={(e) => {
-                    setNovo({ ...novo, cidade: e.target.value });
-                    if (validationErrors.cidade) {
-                      setValidationErrors(prev => ({ ...prev, cidade: "" }));
-                    }
-                  }}
-                  className={validationErrors.cidade ? "border-red-500" : ""}
-                />
-                {validationErrors.cidade && (
-                  <p className="text-red-500 text-xs">{validationErrors.cidade}</p>
-                )}
-              </div>
-              <div className="space-y-1">
-                <Label>Estado *</Label>
-                <Input
-                  placeholder="SP"
-                  value={novo.estado}
-                  onChange={(e) => {
-                    setNovo({ ...novo, estado: e.target.value });
-                    if (validationErrors.estado) {
-                      setValidationErrors(prev => ({ ...prev, estado: "" }));
-                    }
-                  }}
-                  className={validationErrors.estado ? "border-red-500" : ""}
-                />
-                {validationErrors.estado && (
-                  <p className="text-red-500 text-xs">{validationErrors.estado}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label>CEP</Label>
-              <Input
-                placeholder="00000-000"
-                value={novo.cep}
-                onChange={(e) => {
-                  setNovo({ ...novo, cep: e.target.value });
-                  if (validationErrors.cep) {
-                    setValidationErrors(prev => ({ ...prev, cep: "" }));
-                  }
-                }}
-                className={validationErrors.cep ? "border-red-500" : ""}
-              />
-              {validationErrors.cep && (
-                <p className="text-red-500 text-xs">{validationErrors.cep}</p>
-              )}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Detalhes do Endereço</Label>
+              <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_logradouro" className="text-sm font-medium">Logradouro</Label>
+                        <Input
+                          id="endereco_logradouro"
+                          value={novo.logradouro || ""}
+                          onChange={(e) => setNovo({ ...novo, logradouro: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_numero" className="text-sm font-medium text-yellow-600">Número *</Label>
+                        <Input
+                          id="endereco_numero"
+                          value={novo.numero || ""}
+                          onChange={(e) => setNovo({ ...novo, numero: e.target.value })}
+                          className="bg-white h-8 text-sm border-2 border-yellow-200 focus:border-yellow-400"
+                          autoComplete="off"
+                          placeholder="Ex.: 123"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_complemento" className="text-sm font-medium text-gray-500">Complemento (opcional)</Label>
+                        <Input
+                          id="endereco_complemento"
+                          value={novo.complemento || ""}
+                          onChange={(e) => setNovo({ ...novo, complemento: e.target.value })}
+                          className="bg-white h-8 text-sm border-2 border-gray-200 focus:border-gray-400"
+                          autoComplete="off"
+                          placeholder="Ex.: Apto 101"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_bairro" className="text-sm font-medium">Bairro</Label>
+                        <Input
+                          id="endereco_bairro"
+                          value={novo.bairro || ""}
+                          onChange={(e) => setNovo({ ...novo, bairro: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_distrito" className="text-sm font-medium text-gray-500">Distrito</Label>
+                        <Input
+                          id="endereco_distrito"
+                          value={novo.distrito || ""}
+                          onChange={(e) => setNovo({ ...novo, distrito: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_cidade" className="text-sm font-medium">Cidade</Label>
+                        <Input
+                          id="endereco_cidade"
+                          value={novo.cidade || ""}
+                          onChange={(e) => setNovo({ ...novo, cidade: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_estado" className="text-sm font-medium">Estado</Label>
+                        <Input
+                          id="endereco_estado"
+                          value={novo.estado || ""}
+                          onChange={(e) => setNovo({ ...novo, estado: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_codigo_estado" className="text-sm font-medium text-gray-500">UF</Label>
+                        <Input
+                          id="endereco_codigo_estado"
+                          value={novo.codigo_estado || ""}
+                          onChange={(e) => setNovo({ ...novo, codigo_estado: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_cep" className="text-sm font-medium">CEP</Label>
+                        <Input
+                          id="endereco_cep"
+                          value={novo.cep || ""}
+                          onChange={(e) => setNovo({ ...novo, cep: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="endereco_pais" className="text-sm font-medium text-gray-500">País</Label>
+                        <Input
+                          id="endereco_pais"
+                          value={novo.pais || ""}
+                          onChange={(e) => setNovo({ ...novo, pais: e.target.value })}
+                          className="bg-white h-8 text-sm"
+                          autoComplete="off"
+                        />
+                      </div>
+                    </div>
             </div>
           </div>
 

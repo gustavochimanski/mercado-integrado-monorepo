@@ -2,7 +2,7 @@
 import apiMensura from "@supervisor/lib/api/apiMensura"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@supervisor/hooks/use-toast"
-import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon"
+import { getErrorMessage } from "@supervisor/lib/getErrorMessage"
 import type { Endereco, EnderecoSearchResponse } from "@supervisor/types/pedido"
 
 export function useSearchEndereco() {

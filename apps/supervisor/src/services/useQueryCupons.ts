@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useToast } from "@supervisor/hooks/use-toast";
-import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 
 // -----------------------------
 // 🔎 Tipos

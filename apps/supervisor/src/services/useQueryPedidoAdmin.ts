@@ -3,7 +3,7 @@ import apiMensura from "@supervisor/lib/api/apiMensura"
 import type { PedidoKanban, PedidoStatus, PagamentoMetodo, PagamentoGateway } from "@supervisor/types/pedido"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@supervisor/hooks/use-toast"
-import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon"
+import { getErrorMessage } from "@supervisor/lib/getErrorMessage"
 
 export function useFetchPedidosAdminKanban(date: string, empresaId?: string) {
   return useQuery<PedidoKanban[]>({

@@ -3,7 +3,7 @@ import { TypeCadProdDeliveryResponse } from "@supervisor/types/routes/cadastros/
 import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@supervisor/hooks/use-toast";
-import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon";
+import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 
 interface UpdateProdutoBody {
   cod_barras: string;

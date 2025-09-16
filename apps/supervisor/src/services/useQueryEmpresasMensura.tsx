@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import apiMensura from "@supervisor/lib/api/apiMensura"
 import { EmpresaMensura } from "@supervisor/types/empresas/TypeEmpresasMensura"
 import { useToast } from "@supervisor/hooks/use-toast"
-import { getErrorMessage } from "@supervisor/lib/getErrorMessageOrizon"
+import { getErrorMessage } from "@supervisor/lib/getErrorMessage"
 
 type ListParams = { skip?: number; limit?: number }
 
