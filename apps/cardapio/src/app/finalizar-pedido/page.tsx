@@ -10,7 +10,7 @@ import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
-import { CircleArrowRight, CircleCheck, Loader2, XCircle } from "lucide-react";
+import { CircleArrowRight, CircleCheck, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion"; // <--- IMPORT FRAMER MOTION
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-pedido/ClienteIdentificacaoModal";
@@ -33,6 +33,7 @@ export default function FinalizarPedidoPage() {
 
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
+  const [overlayMessage, setOverlayMessage] = useState("");
 
   const { data: enderecos = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
   const { create, update, remove } = useMutateEndereco();
@@ -54,6 +55,7 @@ export default function FinalizarPedidoPage() {
   const handleFinalizar = async () => {
     setOverlayStatus("loading");
     setErrorMessage("");
+    setOverlayMessage("");
     const result = await finalizarPedido();
 
     // Simula loading antes de mostrar sucesso/erro
@@ -61,10 +63,10 @@ export default function FinalizarPedidoPage() {
       if (result === "sucesso") {
         setOverlayStatus("sucesso");
         setTimeout(() => router.push("/pedidos"), 3000); // 3s para mostrar check
-      } else if (result === "erro" || (typeof result === "object" && result.status === "erro")) {
+      } else if (typeof result === "object" && result.status === "erro") {
         setOverlayStatus("erro");
-        setErrorMessage(typeof result === "object" ? result.message : "Erro ao finalizar pedido");
-        setTimeout(() => setOverlayStatus("idle"), 5000); // overlay erro 5s
+        setOverlayMessage(result.message);
+        setErrorMessage(result.message);
       }
     }, 1500); // mantém loading por 1.5s
   };
@@ -149,23 +151,16 @@ export default function FinalizarPedidoPage() {
               </motion.div>
             )}
             {overlayStatus === "sucesso" && 
-              <PedidoConfirmOverlay show={true} />
+              <PedidoConfirmOverlay show={true} type="success" />
             }
 
             {overlayStatus === "erro" && (
-              <motion.div
-                initial={{ y: -50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg max-w-md mx-4"
-              >
-                <XCircle size={120} className="text-red-600" />
-                <div className="text-center">
-                  <span className="text-2xl font-bold text-red-600 block mb-2">Erro ao finalizar pedido</span>
-                  <p className="text-sm text-gray-600">{errorMessage}</p>
-                </div>
-              </motion.div>
+              <PedidoConfirmOverlay 
+                show={true} 
+                type="error" 
+                message={overlayMessage}
+                onClose={() => setOverlayStatus("idle")}
+              />
             )}
           </motion.div>
         )}

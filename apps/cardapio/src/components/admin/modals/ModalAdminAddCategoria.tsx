@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Input } from "@cardapio/components/Shared/ui/input";
+import { Label } from "@cardapio/components/Shared/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -27,85 +28,44 @@ export const ModalAdminAddCategoria = ({
   categoriaId,
 }: ModalCategoriaProps) => {
   const [descricao, setDescricao] = useState("");
-  const [imagem, setImagem] = useState<File | undefined>(undefined);
 
-  const { create, uploadImagem, update } = useMutateCategoria();
-  const isLoading =
-    create.isPending || uploadImagem.isPending || update.isPending;
+  const { create, update } = useMutateCategoria();
+  const isLoading = create.isPending || update.isPending;
 
-  function handleSubmit() {
-    if (!descricao.trim() && !imagem) return;
+
+  const handleSubmit = async () => {
+    if (!descricao.trim()) return;
 
     if (categoriaId) {
-      // 🟡 Modo edição
-      if (descricao.trim()) {
-        update.mutate(
-          {
-            id: categoriaId,
-            descricao,
-            cod_empresa: empresaId,
-            parent_id: parentId,
-            slug: descricao.toLowerCase().replace(/\s+/g, "-"),
-          },
-          {
-            onSuccess: () => {
-              if (imagem) {
-                uploadImagem.mutate({
-                  id: categoriaId,
-                  cod_empresa: empresaId,
-                  imagem,
-                });
-              }
-              closeModal();
-            },
-          }
-        );
-      } else if (imagem) {
-        // Atualiza só imagem
-        uploadImagem.mutate(
-          {
-            id: categoriaId,
-            cod_empresa: empresaId,
-            imagem,
-          },
-          { onSuccess: closeModal }
-        );
-      }
+      // 🟡 Modo edição - apenas descrição (imagem será no ModalEditCategoria)
+      update.mutate({
+        id: categoriaId,
+        descricao,
+        cod_empresa: empresaId,
+        parent_id: parentId,
+        slug: descricao.toLowerCase().replace(/\s+/g, "-"),
+      });
+      closeModal();
     } else {
-      // 🟢 Modo criação
-      create.mutate(
-        {
-          descricao,
-          cod_empresa: empresaId,
-          parent_id: parentId,
-          slug: descricao.toLowerCase().replace(/\s+/g, "-"),
-        },
-        {
-          onSuccess: (res) => {
-            if (imagem) {
-              uploadImagem.mutate({
-                id: res.data.id,
-                cod_empresa: empresaId,
-                imagem,
-              });
-            }
-            closeModal();
-          },
-        }
-      );
+      // 🟢 Modo criação - apenas descrição
+      create.mutate({
+        descricao,
+        cod_empresa: empresaId,
+        parent_id: parentId,
+        slug: descricao.toLowerCase().replace(/\s+/g, "-"),
+      });
+      closeModal();
     }
-  }
+  };
 
   function closeModal() {
     setDescricao("");
-    setImagem(undefined);
     onOpenChange(false);
   }
 
   useEffect(() => {
     if (!open) {
       setDescricao("");
-      setImagem(undefined);
     }
   }, [open]);
 
@@ -119,22 +79,21 @@ export const ModalAdminAddCategoria = ({
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          <Input
-            placeholder="Descrição da categoria"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="descricao">Descrição da categoria</Label>
+            <Input
+              id="descricao"
+              placeholder="Digite a descrição da categoria"
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+            />
+          </div>
 
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) setImagem(file);
-            }}
-          />
-
-          <Button onClick={handleSubmit} disabled={isLoading}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isLoading || !descricao.trim()}
+            className="w-full"
+          >
             {isLoading
               ? categoriaId
                 ? "Salvando..."

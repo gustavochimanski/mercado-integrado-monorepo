@@ -52,7 +52,7 @@ export function useCategoriaById(catId: number | null, opts?: { enabled?: boolea
   return useQuery({
     queryKey: ["categoria", catId],
     queryFn: async () => {
-      const { data } = await apiAdmin.get<CategoriaMini>(`api/delivery/categorias/${catId}`);
+      const { data } = await apiAdmin.get<CategoriaMini>(`/delivery/categorias/${catId}`);
       return data;
     },
     initialData: seed,                             // usa cache se já tiver

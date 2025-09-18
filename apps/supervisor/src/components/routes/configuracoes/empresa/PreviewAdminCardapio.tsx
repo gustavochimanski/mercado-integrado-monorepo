@@ -6,7 +6,7 @@ import { Card, CardContent } from "@supervisor/components/ui/card";
 import { useEmpresaById } from "@supervisor/services/useQueryEmpresasMensura";
 
 const LINK_DEV = "http://localhost:3000";
-const IS_DEV = false;
+const IS_DEV = true;
 
 interface PreviewAdminCardapioProps {
   empresaId: number | null;
