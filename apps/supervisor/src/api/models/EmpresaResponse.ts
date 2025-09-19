@@ -8,7 +8,12 @@ export type EmpresaResponse = {
     cnpj?: (string | null);
     slug: string;
     logo?: (string | null);
+    cardapio_link?: (string | null);
+    cardapio_tema?: (string | null);
+    aceita_pedido_automatico?: boolean;
+    tempo_entrega_maximo: number;
     id: number;
+    endereco_id?: (number | null);
     endereco?: (EnderecoResponse | null);
 };
 

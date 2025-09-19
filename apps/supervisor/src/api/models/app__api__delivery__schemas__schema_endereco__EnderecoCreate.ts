@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type app__api__delivery__schemas__schema_endereco_dv__EnderecoCreate = {
+export type app__api__delivery__schemas__schema_endereco__EnderecoCreate = {
     cep?: (string | null);
     logradouro?: (string | null);
     numero?: (string | null);

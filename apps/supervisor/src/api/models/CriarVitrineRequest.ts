@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CriarVitrineRequest = {
-    cod_categoria: number;
+    cod_categoria?: (number | null);
     titulo: string;
     ordem?: number;
     is_home?: boolean;

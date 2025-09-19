@@ -7,9 +7,9 @@ import type { OrigemPedidoEnum } from './OrigemPedidoEnum';
 import type { TipoEntregaEnum } from './TipoEntregaEnum';
 export type FinalizarPedidoRequest = {
     empresa_id: number;
-    telefone_cliente?: (string | null);
-    endereco_id: number;
-    meio_pagamento_id: number;
+    cliente_id?: (string | null);
+    endereco_id?: (number | null);
+    meio_pagamento_id?: (number | null);
     tipo_entrega?: TipoEntregaEnum;
     origem?: OrigemPedidoEnum;
     observacao_geral?: (string | null);

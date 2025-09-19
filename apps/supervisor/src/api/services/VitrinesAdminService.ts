@@ -9,7 +9,7 @@ import type { VinculoRequest } from '../models/VinculoRequest';
 import type { VitrineOut } from '../models/VitrineOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class DeliveryVitrinesService {
+export class VitrinesAdminService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Search Vitrines

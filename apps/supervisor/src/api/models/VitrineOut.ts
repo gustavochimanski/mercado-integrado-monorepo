@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type VitrineOut = {
     id: number;
-    cod_categoria: number;
+    cod_categoria?: (number | null);
     titulo: string;
     slug: string;
     ordem: number;

@@ -111,7 +111,6 @@ export default function MeiosPagamentoTable() {
         rows={meios}
         columns={columns}
         getRowId={(row) => row.id}
-        autoHeight={false} // importante para respeitar altura do container
         sx={{ height: '100%', width: '100%' }}
       />
     )}

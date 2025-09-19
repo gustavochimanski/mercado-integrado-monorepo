@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__delivery__schemas__schema_endereco_dv__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco_dv__EnderecoCreate';
-import type { app__api__delivery__schemas__schema_endereco_dv__EnderecoUpdate } from '../models/app__api__delivery__schemas__schema_endereco_dv__EnderecoUpdate';
+import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__delivery__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoUpdate';
 import type { EnderecoOut } from '../models/EnderecoOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class DeliveryEndereOsService {
+export class EndereOsClienteService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Enderecos
@@ -15,12 +15,12 @@ export class DeliveryEndereOsService {
      * @returns EnderecoOut Successful Response
      * @throws ApiError
      */
-    public listarEnderecosApiDeliveryEnderecosGet(
+    public listarEnderecosApiDeliveryClienteEnderecosGet(
         xSuperToken: string,
     ): CancelablePromise<Array<EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/enderecos',
+            url: '/api/delivery/cliente/enderecos',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -36,13 +36,13 @@ export class DeliveryEndereOsService {
      * @returns EnderecoOut Successful Response
      * @throws ApiError
      */
-    public criarEnderecoApiDeliveryEnderecosPost(
+    public criarEnderecoApiDeliveryClienteEnderecosPost(
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco_dv__EnderecoCreate,
+        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
     ): CancelablePromise<EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/enderecos',
+            url: '/api/delivery/cliente/enderecos',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -60,13 +60,13 @@ export class DeliveryEndereOsService {
      * @returns EnderecoOut Successful Response
      * @throws ApiError
      */
-    public getEnderecoApiDeliveryEnderecosEnderecoIdGet(
+    public getEnderecoApiDeliveryClienteEnderecosEnderecoIdGet(
         enderecoId: number,
         xSuperToken: string,
     ): CancelablePromise<EnderecoOut> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/enderecos/{endereco_id}',
+            url: '/api/delivery/cliente/enderecos/{endereco_id}',
             path: {
                 'endereco_id': enderecoId,
             },
@@ -86,14 +86,14 @@ export class DeliveryEndereOsService {
      * @returns EnderecoOut Successful Response
      * @throws ApiError
      */
-    public atualizarEnderecoApiDeliveryEnderecosEnderecoIdPut(
+    public atualizarEnderecoApiDeliveryClienteEnderecosEnderecoIdPut(
         enderecoId: number,
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco_dv__EnderecoUpdate,
+        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
     ): CancelablePromise<EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/enderecos/{endereco_id}',
+            url: '/api/delivery/cliente/enderecos/{endereco_id}',
             path: {
                 'endereco_id': enderecoId,
             },
@@ -114,13 +114,13 @@ export class DeliveryEndereOsService {
      * @returns void
      * @throws ApiError
      */
-    public deletarEnderecoApiDeliveryEnderecosEnderecoIdDelete(
+    public deletarEnderecoApiDeliveryClienteEnderecosEnderecoIdDelete(
         enderecoId: number,
         xSuperToken: string,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/delivery/enderecos/{endereco_id}',
+            url: '/api/delivery/cliente/enderecos/{endereco_id}',
             path: {
                 'endereco_id': enderecoId,
             },
@@ -139,13 +139,13 @@ export class DeliveryEndereOsService {
      * @returns EnderecoOut Successful Response
      * @throws ApiError
      */
-    public setEnderecoPadraoApiDeliveryEnderecosEnderecoIdSetPadraoPost(
+    public setEnderecoPadraoApiDeliveryClienteEnderecosEnderecoIdSetPadraoPost(
         enderecoId: number,
         xSuperToken: string,
     ): CancelablePromise<EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/enderecos/{endereco_id}/set-padrao',
+            url: '/api/delivery/cliente/enderecos/{endereco_id}/set-padrao',
             path: {
                 'endereco_id': enderecoId,
             },

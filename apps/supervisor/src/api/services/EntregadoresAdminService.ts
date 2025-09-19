@@ -7,26 +7,17 @@ import type { EntregadorOut } from '../models/EntregadorOut';
 import type { EntregadorUpdate } from '../models/EntregadorUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class DeliveryEntregadoresService {
+export class EntregadoresAdminService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Entregadores
-     * @param empresaId
      * @returns EntregadorOut Successful Response
      * @throws ApiError
      */
-    public listarEntregadoresApiDeliveryEntregadoresGet(
-        empresaId: number,
-    ): CancelablePromise<Array<EntregadorOut>> {
+    public listarEntregadoresApiDeliveryEntregadoresGet(): CancelablePromise<Array<EntregadorOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/delivery/entregadores',
-            query: {
-                'empresa_id': empresaId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
         });
     }
     /**
@@ -106,6 +97,56 @@ export class DeliveryEntregadoresService {
             url: '/api/delivery/entregadores/{entregador_id}',
             path: {
                 'entregador_id': entregadorId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Vincular Entregador Empresa
+     * @param entregadorId
+     * @param empresaId ID da empresa a ser vinculada
+     * @returns EntregadorOut Successful Response
+     * @throws ApiError
+     */
+    public vincularEntregadorEmpresaApiDeliveryEntregadoresEntregadorIdVincularEmpresaPost(
+        entregadorId: number,
+        empresaId: number,
+    ): CancelablePromise<EntregadorOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/delivery/entregadores/{entregador_id}/vincular_empresa',
+            path: {
+                'entregador_id': entregadorId,
+            },
+            query: {
+                'empresa_id': empresaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Desvincular Entregador Empresa
+     * @param entregadorId
+     * @param empresaId ID da empresa a ser desvinculada
+     * @returns EntregadorOut Successful Response
+     * @throws ApiError
+     */
+    public desvincularEntregadorEmpresaApiDeliveryEntregadoresEntregadorIdVincularEmpresaDelete(
+        entregadorId: number,
+        empresaId: number,
+    ): CancelablePromise<EntregadorOut> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/delivery/entregadores/{entregador_id}/vincular_empresa',
+            path: {
+                'entregador_id': entregadorId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

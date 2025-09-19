@@ -4,6 +4,7 @@
 /* eslint-disable */
 export enum PedidoStatusEnum {
     P = 'P',
+    I = 'I',
     R = 'R',
     S = 'S',
     E = 'E',

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { EmpresaMiniOut } from './EmpresaMiniOut';
 export type EntregadorOut = {
     id: number;
     nome: string;
@@ -12,5 +13,6 @@ export type EntregadorOut = {
     acrescimo_taxa: (number | null);
     created_at: string;
     updated_at: string;
+    empresas?: Array<EmpresaMiniOut>;
 };
 

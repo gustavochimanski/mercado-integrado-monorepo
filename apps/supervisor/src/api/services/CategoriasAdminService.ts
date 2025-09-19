@@ -2,13 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch } from '../models/Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch';
+import type { Body_upload_imagem_categoria_api_delivery_categorias_admin__cat_id__imagem_patch } from '../models/Body_upload_imagem_categoria_api_delivery_categorias_admin__cat_id__imagem_patch';
 import type { CategoriaDeliveryIn } from '../models/CategoriaDeliveryIn';
 import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
 import type { CategoriaSearchOut } from '../models/CategoriaSearchOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class DeliveryCategoriasService {
+export class CategoriasAdminService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Search Categorias
@@ -18,14 +18,14 @@ export class DeliveryCategoriasService {
      * @returns CategoriaSearchOut Successful Response
      * @throws ApiError
      */
-    public searchCategoriasApiDeliveryCategoriasSearchGet(
+    public searchCategoriasApiDeliveryCategoriasAdminSearchGet(
         q?: (string | null),
         limit: number = 30,
         offset?: number,
     ): CancelablePromise<Array<CategoriaSearchOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/categorias/search',
+            url: '/api/delivery/categorias/admin/search',
             query: {
                 'q': q,
                 'limit': limit,
@@ -42,12 +42,12 @@ export class DeliveryCategoriasService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public getCategoriaApiDeliveryCategoriasCatIdGet(
+    public getCategoriaApiDeliveryCategoriasAdminCatIdGet(
         catId: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/categorias/{cat_id}',
+            url: '/api/delivery/categorias/admin/{cat_id}',
             path: {
                 'cat_id': catId,
             },
@@ -63,13 +63,13 @@ export class DeliveryCategoriasService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public editarCategoriaApiDeliveryCategoriasCatIdPut(
+    public editarCategoriaApiDeliveryCategoriasAdminCatIdPut(
         catId: number,
         requestBody: CategoriaDeliveryIn,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/categorias/{cat_id}',
+            url: '/api/delivery/categorias/admin/{cat_id}',
             path: {
                 'cat_id': catId,
             },
@@ -86,12 +86,12 @@ export class DeliveryCategoriasService {
      * @returns void
      * @throws ApiError
      */
-    public deletarCategoriaApiDeliveryCategoriasCatIdDelete(
+    public deletarCategoriaApiDeliveryCategoriasAdminCatIdDelete(
         catId: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/delivery/categorias/{cat_id}',
+            url: '/api/delivery/categorias/admin/{cat_id}',
             path: {
                 'cat_id': catId,
             },
@@ -106,12 +106,12 @@ export class DeliveryCategoriasService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public criarCategoriaApiDeliveryCategoriasPost(
+    public criarCategoriaApiDeliveryCategoriasAdminPost(
         requestBody: CategoriaDeliveryIn,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/categorias',
+            url: '/api/delivery/categorias/admin',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -125,12 +125,12 @@ export class DeliveryCategoriasService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public moveCategoriaDireitaApiDeliveryCategoriasCatIdMoveRightPost(
+    public moveCategoriaDireitaApiDeliveryCategoriasAdminCatIdMoveRightPost(
         catId: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/categorias/{cat_id}/move-right',
+            url: '/api/delivery/categorias/admin/{cat_id}/move-right',
             path: {
                 'cat_id': catId,
             },
@@ -145,12 +145,12 @@ export class DeliveryCategoriasService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public moveCategoriaEsquerdaApiDeliveryCategoriasCatIdMoveLeftPost(
+    public moveCategoriaEsquerdaApiDeliveryCategoriasAdminCatIdMoveLeftPost(
         catId: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/categorias/{cat_id}/move-left',
+            url: '/api/delivery/categorias/admin/{cat_id}/move-left',
             path: {
                 'cat_id': catId,
             },
@@ -166,13 +166,13 @@ export class DeliveryCategoriasService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public uploadImagemCategoriaApiDeliveryCategoriasCatIdImagemPatch(
+    public uploadImagemCategoriaApiDeliveryCategoriasAdminCatIdImagemPatch(
         catId: number,
-        formData: Body_upload_imagem_categoria_api_delivery_categorias__cat_id__imagem_patch,
+        formData: Body_upload_imagem_categoria_api_delivery_categorias_admin__cat_id__imagem_patch,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/api/delivery/categorias/{cat_id}/imagem',
+            url: '/api/delivery/categorias/admin/{cat_id}/imagem',
             path: {
                 'cat_id': catId,
             },

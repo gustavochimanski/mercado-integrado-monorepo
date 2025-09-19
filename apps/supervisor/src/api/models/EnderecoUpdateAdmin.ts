@@ -2,7 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type app__api__delivery__schemas__schema_endereco_dv__EnderecoUpdate = {
+export type EnderecoUpdateAdmin = {
+    acao: EnderecoUpdateAdmin.acao;
+    id?: (number | null);
     cep?: (string | null);
     logradouro?: (string | null);
     numero?: (string | null);
@@ -15,4 +17,11 @@ export type app__api__delivery__schemas__schema_endereco_dv__EnderecoUpdate = {
     longitude?: (number | null);
     is_principal?: (boolean | null);
 };
+export namespace EnderecoUpdateAdmin {
+    export enum acao {
+        ADD = 'add',
+        UPDATE = 'update',
+        REMOVE = 'remove',
+    }
+}
 

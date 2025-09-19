@@ -3,10 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 export type Body_update_empresa_api_mensura_empresas__id__put = {
-    nome?: string;
+    nome?: (string | null);
     cnpj?: (string | null);
-    slug?: string;
     endereco_id?: (number | null);
+    endereco?: (string | null);
     logo?: (Blob | null);
+    cardapio_link?: (string | null);
+    cardapio_tema?: (string | null);
+    aceita_pedido_automatico?: (string | null);
+    tempo_entrega_maximo?: (number | null);
 };
 
