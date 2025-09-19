@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/co
 import { Label } from "@supervisor/components/ui/label";
 import { Button } from "@supervisor/components/ui/button";
 import { useMutateRegiaoEntrega } from "@supervisor/services/useQueryRegioesEntrega";
+import EnderecoSearchInput from "@supervisor/components/shared/endereco/EnderecoSearchInput";
 import type { RegiaoEntregaCreate, RegiaoEntregaUpdate } from "@supervisor/api";
 import { RegiaoEntregaForm, RegiaoEntregaModalProps } from "@supervisor/types/configuraçoes/regiaoEntrega";
 
@@ -31,34 +32,7 @@ export default function RegiaoEntregaModal({
       raio_km: 0,
       ativo: true,
     },
-  });
-
-  const cepValue = watch("cep");
-
-  // Busca automática por CEP
-  const buscarCEP = useCallback(async (cep: string) => {
-    if (cep && cep.replace(/\D/g, "").length === 8) {
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, "")}/json/`);
-        const data = await response.json();
-
-        if (!data.erro) {
-          setValue("bairro", data.bairro || "");
-          setValue("cidade", data.localidade || "");
-          setValue("uf", data.uf || "");
-        }
-      } catch (error) {
-        console.error("Erro ao buscar CEP:", error);
-      }
-    }
-  }, [setValue]);
-
-  // Buscar CEP quando digitado
-  useEffect(() => {
-    if (cepValue && cepValue.replace(/\D/g, "").length === 8) {
-      buscarCEP(cepValue);
-    }
-  }, [cepValue, buscarCEP]);
+  });  
 
   // Reset do form quando mudar a regiaoEntrega
   useEffect(() => {
@@ -134,35 +108,66 @@ export default function RegiaoEntregaModal({
 
         {/* Formulário para criação/edição de região de entrega */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Campo de busca inteligente de endereço */}
+          <div className="col-span-full">
+            <EnderecoSearchInput
+              label="Buscar Endereço"
+              placeholder="Digite CEP ou Endereço"
+              onEnderecoSelected={(endereco) => {
+                setValue("cep", endereco.cep || "");
+                setValue("bairro", endereco.bairro);
+                setValue("cidade", endereco.cidade);
+                setValue("uf", endereco.uf);
+              }}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* CEP (readonly, preenchido automaticamente) */}
             <div className="flex flex-col gap-1">
               <Label>CEP</Label>
               <Input
                 {...register("cep")}
-                placeholder="Ex: 01000-000"
-                maxLength={9}
+                placeholder="Preenchido automaticamente"
+                readOnly
+                className="bg-gray-50 text-gray-600"
               />
-              <span className="text-xs text-gray-500">Digite o CEP para buscar o endereço automaticamente</span>
             </div>
 
             {/* Campos de UF */}
             <div className="flex flex-col gap-1">
               <Label>UF *</Label>
-              <Input {...register("uf", { required: true, maxLength: 2 })} placeholder="Ex: SP" maxLength={2} />
+              <Input
+                {...register("uf", { required: true, maxLength: 2 })}
+                placeholder="Preenchido automaticamente"
+                readOnly
+                className="bg-gray-50 text-gray-600"
+                maxLength={2}
+              />
               {errors.uf && <span className="text-red-500 text-sm">UF é obrigatório</span>}
             </div>
 
-            {/* Campos de Cidadea */}
+            {/* Campos de Cidade */}
             <div className="flex flex-col gap-1">
               <Label>Cidade *</Label>
-              <Input {...register("cidade", { required: true })} placeholder="Ex: São Paulo" />
+              <Input
+                {...register("cidade", { required: true })}
+                placeholder="Preenchida automaticamente"
+                readOnly
+                className="bg-gray-50 text-gray-600"
+              />
               {errors.cidade && <span className="text-red-500 text-sm">Cidade é obrigatória</span>}
             </div>
 
             {/* Campos de Bairro */}
             <div className="flex flex-col gap-1">
               <Label>Bairro *</Label>
-              <Input {...register("bairro", { required: true })} placeholder="Ex: Centro" />
+              <Input
+                {...register("bairro", { required: true })}
+                placeholder="Preenchido automaticamente"
+                readOnly
+                className="bg-gray-50 text-gray-600"
+              />
               {errors.bairro && <span className="text-red-500 text-sm">Bairro é obrigatório</span>}
             </div>
 
