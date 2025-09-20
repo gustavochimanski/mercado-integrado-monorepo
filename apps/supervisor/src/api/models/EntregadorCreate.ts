@@ -9,5 +9,6 @@ export type EntregadorCreate = {
     veiculo_tipo?: (string | null);
     placa?: (string | null);
     acrescimo_taxa?: (number | null);
+    empresa_id: number;
 };
 

@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ClienteOut = {
+    id: number;
     nome: string;
     cpf: (string | null);
     telefone: (string | null);

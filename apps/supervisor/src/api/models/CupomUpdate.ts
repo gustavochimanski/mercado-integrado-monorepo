@@ -9,6 +9,8 @@ export type CupomUpdate = {
     ativo?: (boolean | null);
     validade_inicio?: (string | null);
     validade_fim?: (string | null);
-    minimo_compra?: (number | null);
+    monetizado?: (boolean | null);
+    valor_por_lead?: (number | null);
+    parceiro_id?: (number | null);
 };
 

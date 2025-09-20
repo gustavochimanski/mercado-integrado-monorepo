@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__mensura__schemas__endereco_schema__EnderecoCreate } from '../models/app__api__mensura__schemas__endereco_schema__EnderecoCreate';
-import type { app__api__mensura__schemas__endereco_schema__EnderecoUpdate } from '../models/app__api__mensura__schemas__endereco_schema__EnderecoUpdate';
+import type { app__api__mensura__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__mensura__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__mensura__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__mensura__schemas__schema_endereco__EnderecoUpdate';
 import type { EnderecoResponse } from '../models/EnderecoResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -16,7 +16,7 @@ export class EnderecosService {
      * @throws ApiError
      */
     public createEnderecoApiMensuraEnderecosPost(
-        requestBody: app__api__mensura__schemas__endereco_schema__EnderecoCreate,
+        requestBody: app__api__mensura__schemas__schema_endereco__EnderecoCreate,
     ): CancelablePromise<EnderecoResponse> {
         return this.httpRequest.request({
             method: 'POST',
@@ -80,7 +80,7 @@ export class EnderecosService {
      */
     public updateEnderecoApiMensuraEnderecosIdPut(
         id: number,
-        requestBody: app__api__mensura__schemas__endereco_schema__EnderecoUpdate,
+        requestBody: app__api__mensura__schemas__schema_endereco__EnderecoUpdate,
     ): CancelablePromise<EnderecoResponse> {
         return this.httpRequest.request({
             method: 'PUT',

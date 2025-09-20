@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Input } from "@supervisor/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/components/ui/dialog";
 import { Label } from "@supervisor/components/ui/label";
 import { Button } from "@supervisor/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@supervisor/components/ui/select";
 import { MeioPagamento, useMutateMeioPagamento } from "@supervisor/services/useQueryMeioPagamento";
+import { MeioPagamentoTipoEnum } from "@supervisor/api";
 
 interface MeioPagamentoForm {
   nome: string;
@@ -28,7 +29,7 @@ export default function MeioPagamentoModal({ open, onOpenChange, meioPagamento }
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<MeioPagamentoForm>({
     defaultValues: {
       nome: "",
-      tipo: "DINHEIRO",
+      tipo: MeioPagamentoTipoEnum.DINHEIRO,
       ativo: true,
     },
   });
@@ -46,11 +47,11 @@ export default function MeioPagamentoModal({ open, onOpenChange, meioPagamento }
     }
   }, [meioPagamento, reset]);
 
-  const onSubmit = async (data: MeioPagamentoForm) => {
+  const onSubmit: SubmitHandler<MeioPagamentoForm> = async (data) => {
     setLoading(true);
     try {
       if (meioPagamento?.id) {
-        await update.mutateAsync({ id: meioPagamento.id, ...data });
+        await update.mutateAsync({ id: meioPagamento.id, data });
       } else {
         await create.mutateAsync(data);
       }
@@ -86,8 +87,8 @@ export default function MeioPagamentoModal({ open, onOpenChange, meioPagamento }
                 name="tipo"
                 render={({ field }) => (
                   <Select
-                    value={field.value}                  // valor atual do form
-                    onValueChange={field.onChange}       // atualiza RHF
+                    value={field.value}                  
+                    onValueChange={field.onChange}       
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o tipo" />

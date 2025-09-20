@@ -5,7 +5,7 @@
 export type Body_atualizar_produto_api_delivery_produtos__cod_barras__put = {
     cod_empresa: number;
     descricao: string;
-    cod_categoria: number;
+    cod_categoria?: (number | null);
     vitrine_id?: (number | null);
     preco_venda: (number | string);
     custo?: (number | string | null);

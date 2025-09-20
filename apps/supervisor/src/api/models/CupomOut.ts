@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CupomLinkOut } from './CupomLinkOut';
 export type CupomOut = {
     id: number;
     codigo: string;
@@ -11,8 +12,10 @@ export type CupomOut = {
     ativo: boolean;
     validade_inicio: (string | null);
     validade_fim: (string | null);
-    minimo_compra: (number | null);
     created_at: string;
     updated_at: string;
+    monetizado: boolean;
+    valor_por_lead: (number | null);
+    links?: Array<CupomLinkOut>;
 };
 

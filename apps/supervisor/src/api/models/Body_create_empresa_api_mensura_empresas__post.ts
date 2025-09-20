@@ -5,8 +5,11 @@
 export type Body_create_empresa_api_mensura_empresas__post = {
     nome: string;
     cnpj?: (string | null);
-    slug: string;
     endereco: string;
     logo?: (Blob | null);
+    cardapio_link?: (string | null);
+    cardapio_tema?: (string | null);
+    aceita_pedido_automatico?: (string | null);
+    tempo_entrega_maximo: number;
 };
 

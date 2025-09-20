@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type CategoriaDeliveryIn = {
     descricao: string;
-    slug: string;
+    slug?: (string | null);
     parent_id?: (number | null);
     imagem?: (string | null);
     posicao?: (number | null);

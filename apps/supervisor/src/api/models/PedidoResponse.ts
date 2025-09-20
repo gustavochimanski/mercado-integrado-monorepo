@@ -9,10 +9,12 @@ import type { TipoEntregaEnum } from './TipoEntregaEnum';
 export type PedidoResponse = {
     id: number;
     status: PedidoStatusEnum;
+    cliente_id?: (number | null);
     telefone_cliente?: (string | null);
     empresa_id: number;
     entregador_id: (number | null);
     endereco_id: (number | null);
+    meio_pagamento_id?: (number | null);
     tipo_entrega: TipoEntregaEnum;
     origem: OrigemPedidoEnum;
     subtotal: number;
@@ -25,6 +27,8 @@ export type PedidoResponse = {
     observacao_geral?: (string | null);
     troco_para?: (number | null);
     cupom_id?: (number | null);
+    endereco_snapshot?: (Record<string, any> | null);
+    endereco_geography?: (string | null);
     data_criacao: string;
     data_atualizacao: string;
     itens: Array<ItemPedidoResponse>;

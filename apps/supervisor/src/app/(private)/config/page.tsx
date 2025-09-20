@@ -1,10 +1,11 @@
 "use client";
 
-import { Banknote, Handshake, Monitor, Truck } from "lucide-react";
+import { Banknote, Handshake, Monitor, Truck, MapPin } from "lucide-react";
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import MeiosPagamentoTable from "@supervisor/components/routes/configuracoes/meioPagamento/MeioPagamentoTable";
 import EmpresaTabWrapper from "@supervisor/components/routes/configuracoes/empresa/TabWrapperEmpresa";
 import EntregadoresTable from "@supervisor/components/routes/configuracoes/entregadores/EntregadoresTable";
+import RegioesEntregaTable from "@supervisor/components/routes/configuracoes/regioesEntrega/RegioesEntregaTable";
 import TableCupons from "@supervisor/components/routes/marketing/cupons/TableCupons";
 
 const ComponentConfiguracoes = () => {
@@ -36,6 +37,16 @@ const ComponentConfiguracoes = () => {
           </span>
         ),
         Component: () => <EntregadoresTable />
+      },
+
+      {
+        value: "regioes-entrega",
+        label: (
+          <span className="flex items-center gap-2">
+            <MapPin size={14} /> Regiões de Entrega
+          </span>
+        ),
+        Component: () => <RegioesEntregaTable />
       },
 
     ];
