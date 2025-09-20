@@ -3,12 +3,13 @@
 import type { PedidoKanban } from "@supervisor/types/pedido"
 import React, { useState } from "react"
 import TempoPedidoBadge from "./TempoPedidoBadge"
-import { PedidoModal } from "./PedidoModal"
+import { PedidoModal } from "./modal"
 import { Checkbox } from "@supervisor/components/ui/checkbox"
 import { isToday, parseISO } from "date-fns"
 import { ChevronRight, Eye, Printer } from "lucide-react"
 import { useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin"
 
+// Componente PedidoCard
 export const PedidoCard = React.memo(
   ({
     pedido,
@@ -33,11 +34,13 @@ export const PedidoCard = React.memo(
       return currentIndex < statusOrder.length - 1 ? statusOrder[currentIndex + 1] : currentStatus
     }
 
+    // Função para atualizar o status do pedido
     const handleNextStatus = () => {
       const nextStatus = getNextStatus(pedido.status)
       atualizarStatus.mutate({ id: pedido.id, status: nextStatus as any })
     }
 
+    // Renderização do componente
     return (
       <>
         <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition flex flex-col gap-2 text-sm">
@@ -78,6 +81,8 @@ export const PedidoCard = React.memo(
           {/* Valor total */}
           <div className="flex justify-between font-bold text-foreground">
             R$ {pedido.valor_total.toFixed(2)}
+
+            {/* Ações */}
             <div className="flex gap-1">
               <button
                 className="bg-primary/20 text-primary rounded-full px-2 hover:bg-primary/30 transition-colors"
