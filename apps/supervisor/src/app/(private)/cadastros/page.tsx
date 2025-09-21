@@ -1,8 +1,9 @@
 "use client"
-import { Monitor } from "lucide-react";
+import { Monitor, Users } from "lucide-react";
 
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper"; // Componente genérico que renderiza tabs
-import TableCadastroProdutos from "@supervisor/components/routes/cadastros/TableCadastroProduto";
+import TableCadastroProdutos from "@supervisor/components/routes/cadastros/produtos/TableCadastroProduto";
+import TableCadastroClientes from "@supervisor/components/routes/cadastros/clientes/TableCadastroClientes";
 
 
 // Componente principal da página de cadastros
@@ -15,7 +16,16 @@ const PageCadastros = () => {
           <Monitor size={15} /> Caixas
         </span>
       ),
-      Component: () => <TableCadastroProdutos empresaId={1} />, 
+      Component: () => <TableCadastroProdutos empresaId={1} />,
+    },
+    {
+      value: "clientes",
+      label: (
+        <span className="flex items-center gap-2">
+          <Users size={15} /> Clientes
+        </span>
+      ),
+      Component: () => <TableCadastroClientes empresaId={1} />,
     }
   ];
 

@@ -116,6 +116,7 @@ export default function ComponentMeioPagamento({ data }: Props) {
         <div className="flex flex-col md:flex-row justify-center items-center gap-4">
           <div className="w-full flex justify-center items-center">
             <PieChart
+              width={300}
               height={200}
               series={[
                 {
