@@ -9,4 +9,6 @@ export enum PedidoStatusEnum {
     S = 'S',
     E = 'E',
     C = 'C',
+    D = 'D',
+    X = 'X',
 }

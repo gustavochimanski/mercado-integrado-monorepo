@@ -13,6 +13,10 @@ export type PedidoPendenteImpressaoResponse = {
      */
     numero: number;
     /**
+     * Status do pedido
+     */
+    status: string;
+    /**
      * Nome do cliente
      */
     cliente: string;

@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { Body_atualizar_produto_api_delivery_produtos__cod_barras__put } from '../models/Body_atualizar_produto_api_delivery_produtos__cod_barras__put';
 import type { CriarNovoProdutoResponse } from '../models/CriarNovoProdutoResponse';
-import type { SetDisponibilidadeRequest } from '../models/SetDisponibilidadeRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ProdutosAdminDeliveryService {
@@ -66,13 +65,13 @@ export class ProdutosAdminDeliveryService {
         });
     }
     /**
-     * Deletar Produto
+     * Desvincular Produto
      * @param codBarras
      * @param empresaId Empresa dona do vínculo a ser removido
      * @returns void
      * @throws ApiError
      */
-    public deletarProdutoApiDeliveryProdutosCodBarrasDelete(
+    public desvincularProdutoApiDeliveryProdutosCodBarrasDelete(
         codBarras: string,
         empresaId: number,
     ): CancelablePromise<void> {
@@ -85,30 +84,6 @@ export class ProdutosAdminDeliveryService {
             query: {
                 'empresa_id': empresaId,
             },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Set Disponibilidade
-     * @param codBarras
-     * @param requestBody
-     * @returns void
-     * @throws ApiError
-     */
-    public setDisponibilidadeApiDeliveryProdutosCodBarrasDisponibilidadePatch(
-        codBarras: string,
-        requestBody: SetDisponibilidadeRequest,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/delivery/produtos/{cod_barras}/disponibilidade',
-            path: {
-                'cod_barras': codBarras,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
