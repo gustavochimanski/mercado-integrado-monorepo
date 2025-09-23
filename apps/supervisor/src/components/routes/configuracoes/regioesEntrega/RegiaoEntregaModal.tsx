@@ -29,7 +29,6 @@ export default function RegiaoEntregaModal({
       cidade: "",
       uf: "",
       taxa_entrega: 0,
-      raio_km: 0,
       ativo: true,
     },
   });  
@@ -43,7 +42,6 @@ export default function RegiaoEntregaModal({
         cidade: regiaoEntrega.cidade,
         uf: regiaoEntrega.uf,
         taxa_entrega: parseFloat(regiaoEntrega.taxa_entrega) || 0,
-        raio_km: parseFloat(regiaoEntrega.raio_km || "0") || 0,
         ativo: regiaoEntrega.ativo ?? true,
       });
     } else {
@@ -53,7 +51,6 @@ export default function RegiaoEntregaModal({
         cidade: "",
         uf: "",
         taxa_entrega: 0,
-        raio_km: 0,
         ativo: true,
       });
     }
@@ -70,7 +67,6 @@ export default function RegiaoEntregaModal({
           cidade: data.cidade,
           uf: data.uf,
           taxa_entrega: data.taxa_entrega,
-          raio_km: data.raio_km || null,
           ativo: data.ativo,
         };
         await update.mutateAsync({ id: regiaoEntrega.id, data: updateData });
@@ -81,7 +77,6 @@ export default function RegiaoEntregaModal({
           cidade: data.cidade,
           uf: data.uf,
           taxa_entrega: data.taxa_entrega,
-          raio_km: data.raio_km || null,
           ativo: data.ativo,
           empresa_id: empresaId,
         };
@@ -181,17 +176,6 @@ export default function RegiaoEntregaModal({
                 placeholder="Ex: 5.00"
               />
               {errors.taxa_entrega && <span className="text-red-500 text-sm">Taxa de entrega é obrigatória</span>}
-            </div>
-
-            {/* Campos de raio de cobertura */}
-            <div className="flex flex-col gap-1">
-              <Label>Raio de cobertura (km)</Label>
-              <Input
-                type="number"
-                step="0.1"
-                {...register("raio_km", { min: 0 })}
-                placeholder="Ex: 5.0"
-              />
             </div>
           </div>
 

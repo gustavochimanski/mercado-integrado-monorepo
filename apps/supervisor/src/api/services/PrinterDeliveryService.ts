@@ -6,7 +6,7 @@ import type { PedidoPendenteImpressaoResponse } from '../models/PedidoPendenteIm
 import type { RespostaImpressaoPrinter } from '../models/RespostaImpressaoPrinter';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class PrinterService {
+export class PrinterDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Pedidos Pendentes Impressao

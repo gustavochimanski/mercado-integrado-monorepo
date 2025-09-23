@@ -8,12 +8,6 @@ export type RegiaoEntregaUpdate = {
     cidade: string;
     uf: string;
     taxa_entrega: (number | string);
-    /**
-     * Raio de cobertura em km
-     */
-    raio_km?: (number | string | null);
     ativo?: boolean;
-    latitude?: (number | null);
-    longitude?: (number | null);
 };
 

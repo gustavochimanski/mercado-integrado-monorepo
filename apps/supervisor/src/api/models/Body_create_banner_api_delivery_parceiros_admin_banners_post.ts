@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Body_create_banner_api_delivery_banners_post = {
+export type Body_create_banner_api_delivery_parceiros_admin_banners_post = {
     nome: string;
     tipo_banner: string;
     ativo: boolean;

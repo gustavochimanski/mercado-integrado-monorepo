@@ -62,7 +62,7 @@ export function useQueryEnderecos(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["enderecos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get("/delivery/enderecos")
+      const { data } = await apiClienteAdmin.get("/delivery/cliente/enderecos")
       return data as EnderecoOut[]
     },
     enabled: options?.enabled !== false,
@@ -77,7 +77,7 @@ export function useMutateEndereco() {
 
   const create = useMutation({
     mutationFn: async (enderecoData: EnderecoCreate) => {
-      const { data } = await apiClienteAdmin.post("/delivery/enderecos", enderecoData)
+      const { data } = await apiClienteAdmin.post("/delivery/cliente/enderecos", enderecoData)
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -92,7 +92,7 @@ export function useMutateEndereco() {
 
   const update = useMutation({
     mutationFn: async ({ id, ...enderecoData }: EnderecoCreate & { id: number }) => {
-      const { data } = await apiClienteAdmin.put(`/delivery/enderecos/${id}`, enderecoData)
+      const { data } = await apiClienteAdmin.put(`/delivery/cliente/enderecos/${id}`, enderecoData)
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -107,7 +107,7 @@ export function useMutateEndereco() {
 
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await apiClienteAdmin.delete(`/delivery/enderecos/${id}`)
+      await apiClienteAdmin.delete(`/delivery/cliente/enderecos/${id}`)
     },
     onSuccess: () => {
       toast.success("Endereço removido com sucesso!")

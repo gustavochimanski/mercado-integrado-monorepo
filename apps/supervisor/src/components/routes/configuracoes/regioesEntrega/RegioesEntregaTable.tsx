@@ -45,7 +45,6 @@ export default function RegioesEntregaTable() {
         flex: 1,
         renderCell: (params) => `R$ ${params.value}`,
       },
-      { field: "raio_km", headerName: "Raio (km)", flex: 1 },
       {
         field: "ativo",
         headerName: "Ativo",

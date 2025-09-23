@@ -7,7 +7,7 @@ import type { CriarNovoProdutoResponse } from '../models/CriarNovoProdutoRespons
 import type { SetDisponibilidadeRequest } from '../models/SetDisponibilidadeRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class ProdutosAdminService {
+export class ProdutosAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Search Produtos

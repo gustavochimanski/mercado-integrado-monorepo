@@ -6,7 +6,7 @@ import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
 import type { CategoriaSearchOut } from '../models/CategoriaSearchOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class CategoriasClienteService {
+export class CategoriasClienteDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Search Categorias

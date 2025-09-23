@@ -7,7 +7,7 @@ import type { ClienteOut } from '../models/ClienteOut';
 import type { EnderecoOut } from '../models/EnderecoOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class ClienteAdminService {
+export class ClienteAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Update Cliente Admin

@@ -7,7 +7,7 @@ import type { MeioPagamentoResponse } from '../models/MeioPagamentoResponse';
 import type { MeioPagamentoUpdate } from '../models/MeioPagamentoUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class MeiosDePagamentoAdminService {
+export class MeiosDePagamentoAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Meios Pagamento Admin

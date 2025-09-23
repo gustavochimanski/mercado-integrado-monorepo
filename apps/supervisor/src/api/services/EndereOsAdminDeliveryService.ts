@@ -7,7 +7,7 @@ import type { app__api__delivery__schemas__schema_endereco__EnderecoUpdate } fro
 import type { EnderecoOut } from '../models/EnderecoOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class EndereOsAdminService {
+export class EndereOsAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Enderecos Admin

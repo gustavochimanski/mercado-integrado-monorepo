@@ -1,5 +1,5 @@
 // ================= Enums =================
-export type PedidoStatus = "P" | "R" | "E" | "S" | "C"; // Pendente,  Em preparo, Entregue, Saiu para entrega, cancelado
+export type PedidoStatus = "P" | "R" | "E" | "S" | "C" | "I" | "D"; // Pendente,  Em preparo, Entregue, Saiu para entrega, cancelado, Pendente Impressão, Em Edição
 export type TipoEntrega = "DELIVERY" | "RETIRADA";
 export type OrigemPedido = "WEB" | "APP" | "PDV";
 export type PagamentoMetodo = "DINHEIRO" | "CARTAO" | "PIX";
@@ -18,6 +18,7 @@ export interface ItemPedido {
 
 // ================= Pedido completo =================
 export interface Pedido {
+  endereco_snapshot: any;
   id: number;
   status: PedidoStatus;
   telefone_cliente?: string | null;
@@ -39,6 +40,9 @@ export interface Pedido {
   data_criacao: string; // ISO string
   data_atualizacao: string; // ISO string
   itens: ItemPedido[];
+  meio_pagamento_nome: string
+  cliente_nome: string
+
 }
 
 // ================= Request de finalizar pedido =================

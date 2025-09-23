@@ -7,7 +7,7 @@ import type { HomeResponse } from '../models/HomeResponse';
 import type { VitrineComProdutosResponse } from '../models/VitrineComProdutosResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class HomePBlicoService {
+export class HomePBlicoDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Home

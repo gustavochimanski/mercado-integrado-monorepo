@@ -21,7 +21,7 @@ export function usePedidos() {
   return useQuery<Pedido[]>({
     queryKey: ["pedidos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<Pedido[]>("/delivery/pedidos/");
+      const { data } = await apiClienteAdmin.get<Pedido[]>("/delivery/cliente/pedidos/");
       return data;
     },
     staleTime: 5 * 60 * 1000,
@@ -39,7 +39,7 @@ export function usePedidoById(pedidoId: number | null, opts?: { enabled?: boolea
   return useQuery({
     queryKey: ["pedido", pedidoId],
     queryFn: async () => {
-      const { data } = await apiAdmin.get<PedidoItem>(`/delivery/pedidos/${pedidoId}`);
+      const { data } = await apiAdmin.get<PedidoItem>(`/delivery/cliente/pedidos/${pedidoId}`);
       return data;
     },
     initialData: seed,
@@ -66,7 +66,7 @@ export function useMutatePedido() {
   };
 
   const create = useMutation({
-    mutationFn: (body: Partial<PedidoItem>) => apiAdmin.post("/delivery/pedidos", body),
+    mutationFn: (body: Partial<PedidoItem>) => apiAdmin.post("/delivery/cliente/pedidos", body),
     onSuccess: () => {
       toast.success("Pedido criado com sucesso!");
       invalidate();
@@ -86,7 +86,7 @@ export function useMutatePedido() {
 
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiAdmin.delete(`/delivery/pedidos/${id}`),
+    mutationFn: (id: number) => apiAdmin.delete(`/delivery/cliente/pedidos/${id}`),
     onSuccess: () => {
       toast.success("Pedido removido!");
       invalidate();

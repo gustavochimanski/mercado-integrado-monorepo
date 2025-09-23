@@ -60,7 +60,7 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
         })),
       };
 
-      const response = await apiClienteAdmin.post("/delivery/pedidos/checkout", payload);
+      const response = await apiClienteAdmin.post("/delivery/cliente/pedidos/checkout", payload);
 
       if (response.status === 200 || response.status === 201) {
         clear();

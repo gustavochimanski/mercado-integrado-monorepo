@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { mensuraApi } from "@supervisor/api/MensuraApi";
-import type { RegiaoEntregaOut, RegiaoEntregaCreate, RegiaoEntregaUpdate } from "@supervisor/api";
+import type { RegiaoEntregaCreate, RegiaoEntregaUpdate } from "@supervisor/api";
 import { useToast } from "@supervisor/hooks/use-toast";
 import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 
@@ -9,7 +9,7 @@ export type { RegiaoEntregaOut as RegiaoEntrega } from "@supervisor/api";
 export function useRegioesEntrega(empresaId: number) {
   return useQuery({
     queryKey: ["regioes-entrega", empresaId],
-    queryFn: () => mensuraApi.regiEsDeEntregaAdmin.listRegioesApiDeliveryRegioesEntregaEmpresaIdGet(empresaId),
+    queryFn: () => mensuraApi.regiEsDeEntregaAdminDelivery.listRegioesApiDeliveryRegioesEntregaEmpresaIdGet(empresaId),
     enabled: !!empresaId,
   });
 }
@@ -24,7 +24,7 @@ export function useMutateRegiaoEntrega() {
 
   const create = useMutation({
     mutationFn: (data: RegiaoEntregaCreate) =>
-      mensuraApi.regiEsDeEntregaAdmin.createRegiaoApiDeliveryRegioesEntregaPost(data),
+      mensuraApi.regiEsDeEntregaAdminDelivery.createRegiaoApiDeliveryRegioesEntregaPost(data),
     onSuccess: () => {
       toast({
         title: "Região de entrega criada!",
@@ -42,7 +42,7 @@ export function useMutateRegiaoEntrega() {
 
   const update = useMutation({
     mutationFn: ({ id, data }: { id: number; data: RegiaoEntregaUpdate }) =>
-      mensuraApi.regiEsDeEntregaAdmin.updateRegiaoApiDeliveryRegioesEntregaRegiaoIdPut(id, data),
+      mensuraApi.regiEsDeEntregaAdminDelivery.updateRegiaoApiDeliveryRegioesEntregaRegiaoIdPut(id, data),
     onSuccess: () => {
       toast({
         title: "Região de entrega atualizada!",
@@ -60,7 +60,7 @@ export function useMutateRegiaoEntrega() {
 
   const remove = useMutation({
     mutationFn: (id: number) =>
-      mensuraApi.regiEsDeEntregaAdmin.deleteRegiaoApiDeliveryRegioesEntregaRegiaoIdDelete(id),
+      mensuraApi.regiEsDeEntregaAdminDelivery.deleteRegiaoApiDeliveryRegioesEntregaRegiaoIdDelete(id),
     onSuccess: () => {
       toast({
         title: "Região de entrega removida!",

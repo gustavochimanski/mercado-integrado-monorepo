@@ -9,7 +9,7 @@ import type { ConfirmacaoCodigoRequest } from '../models/ConfirmacaoCodigoReques
 import type { NovoDispositivoRequest } from '../models/NovoDispositivoRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class ClienteClienteService {
+export class ClienteClienteDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Novo Dispositivo

@@ -9,7 +9,7 @@ import type { CupomOut } from '../models/CupomOut';
 import type { CupomUpdate } from '../models/CupomUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class CuponsAdminService {
+export class CuponsAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Cupons

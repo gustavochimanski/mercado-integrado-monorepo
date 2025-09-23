@@ -7,7 +7,7 @@ import type { EntregadorOut } from '../models/EntregadorOut';
 import type { EntregadorUpdate } from '../models/EntregadorUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class EntregadoresAdminService {
+export class EntregadoresAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Entregadores

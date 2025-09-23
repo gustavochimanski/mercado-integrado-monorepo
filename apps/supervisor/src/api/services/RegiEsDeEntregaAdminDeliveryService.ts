@@ -7,7 +7,7 @@ import type { RegiaoEntregaOut } from '../models/RegiaoEntregaOut';
 import type { RegiaoEntregaUpdate } from '../models/RegiaoEntregaUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class RegiEsDeEntregaAdminService {
+export class RegiEsDeEntregaAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * List Regioes
