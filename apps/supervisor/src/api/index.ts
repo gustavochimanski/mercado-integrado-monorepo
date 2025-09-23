@@ -148,7 +148,6 @@ export { MeiosDePagamentoClienteService } from './services/MeiosDePagamentoClien
 export { MetasService } from './services/MetasService';
 export { ParceirosPBlicoService } from './services/ParceirosPBlicoService';
 export { PedidosAdminService } from './services/PedidosAdminService';
-export { PedidosClienteService } from './services/PedidosClienteService';
 export { PrinterService } from './services/PrinterService';
 export { ProdutosAdminService } from './services/ProdutosAdminService';
 export { ProdutosDeliveryService } from './services/ProdutosDeliveryService';

@@ -28,7 +28,6 @@ import { MeiosDePagamentoClienteService } from './services/MeiosDePagamentoClien
 import { MetasService } from './services/MetasService';
 import { ParceirosPBlicoService } from './services/ParceirosPBlicoService';
 import { PedidosAdminService } from './services/PedidosAdminService';
-import { PedidosClienteService } from './services/PedidosClienteService';
 import { PrinterService } from './services/PrinterService';
 import { ProdutosAdminService } from './services/ProdutosAdminService';
 import { ProdutosDeliveryService } from './services/ProdutosDeliveryService';
@@ -62,7 +61,6 @@ export class MensuraApiClient {
     public readonly metas: MetasService;
     public readonly parceirosPBlico: ParceirosPBlicoService;
     public readonly pedidosAdmin: PedidosAdminService;
-    public readonly pedidosCliente: PedidosClienteService;
     public readonly printer: PrinterService;
     public readonly produtosAdmin: ProdutosAdminService;
     public readonly produtosDelivery: ProdutosDeliveryService;
@@ -107,7 +105,6 @@ export class MensuraApiClient {
         this.metas = new MetasService(this.request);
         this.parceirosPBlico = new ParceirosPBlicoService(this.request);
         this.pedidosAdmin = new PedidosAdminService(this.request);
-        this.pedidosCliente = new PedidosClienteService(this.request);
         this.printer = new PrinterService(this.request);
         this.produtosAdmin = new ProdutosAdminService(this.request);
         this.produtosDelivery = new ProdutosDeliveryService(this.request);

@@ -1,11 +1,12 @@
 "use client"
+
 import TableCupons from "@supervisor/components/routes/marketing/cupons/TableCupons";
 import ParceirosTable from "@supervisor/components/routes/marketing/parceiros/ParceirosTable";
 // app/seu-caminho/page.tsx (Server Component)
 import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
 import { Handshake, Truck} from "lucide-react";
 
-const PageProcessos = async () => {
+const PageProcessos = () => {
   
   const nestedTabItems = [
     {

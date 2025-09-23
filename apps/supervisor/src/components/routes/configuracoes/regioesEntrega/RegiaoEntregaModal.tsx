@@ -9,7 +9,7 @@ import { Button } from "@supervisor/components/ui/button";
 import { useMutateRegiaoEntrega } from "@supervisor/services/useQueryRegioesEntrega";
 import EnderecoSearchInput from "@supervisor/components/shared/endereco/EnderecoSearchInput";
 import type { RegiaoEntregaCreate, RegiaoEntregaUpdate } from "@supervisor/api";
-import { RegiaoEntregaForm, RegiaoEntregaModalProps } from "@supervisor/types/configuraçoes/regiaoEntrega";
+import { RegiaoEntregaForm, RegiaoEntregaModalProps } from "@supervisor/types/configuracoes/regiaoEntrega";
 
 // Componente de modal para criar/editar região de entrega
 export default function RegiaoEntregaModal({
