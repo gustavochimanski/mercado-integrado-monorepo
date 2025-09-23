@@ -20,7 +20,6 @@ import { EnderecosService } from './services/EnderecosService';
 import { EndereOsAdminDeliveryService } from './services/EndereOsAdminDeliveryService';
 import { EndereOsClienteDeliveryService } from './services/EndereOsClienteDeliveryService';
 import { EntregadoresAdminDeliveryService } from './services/EntregadoresAdminDeliveryService';
-import { ExcludeFromClientService } from './services/ExcludeFromClientService';
 import { GeoapifyService } from './services/GeoapifyService';
 import { HomePBlicoDeliveryService } from './services/HomePBlicoDeliveryService';
 import { MeiosDePagamentoAdminDeliveryService } from './services/MeiosDePagamentoAdminDeliveryService';
@@ -55,7 +54,6 @@ export class MensuraApiClient {
     public readonly endereOsAdminDelivery: EndereOsAdminDeliveryService;
     public readonly endereOsClienteDelivery: EndereOsClienteDeliveryService;
     public readonly entregadoresAdminDelivery: EntregadoresAdminDeliveryService;
-    public readonly excludeFromClient: ExcludeFromClientService;
     public readonly geoapify: GeoapifyService;
     public readonly homePBlicoDelivery: HomePBlicoDeliveryService;
     public readonly meiosDePagamentoAdminDelivery: MeiosDePagamentoAdminDeliveryService;
@@ -101,7 +99,6 @@ export class MensuraApiClient {
         this.endereOsAdminDelivery = new EndereOsAdminDeliveryService(this.request);
         this.endereOsClienteDelivery = new EndereOsClienteDeliveryService(this.request);
         this.entregadoresAdminDelivery = new EntregadoresAdminDeliveryService(this.request);
-        this.excludeFromClient = new ExcludeFromClientService(this.request);
         this.geoapify = new GeoapifyService(this.request);
         this.homePBlicoDelivery = new HomePBlicoDeliveryService(this.request);
         this.meiosDePagamentoAdminDelivery = new MeiosDePagamentoAdminDeliveryService(this.request);

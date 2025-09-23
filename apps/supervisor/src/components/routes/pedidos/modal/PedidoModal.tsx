@@ -232,13 +232,13 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   // Função para obter o nome do meio de pagamento
   const getMeioPagamentoNome = (id: number | null) => {
     if (!id) return "Não informado"
-    const meio = meiosPagamento.find((m) => m.id === id)
+    const meio = meiosPagamento.find((m: { id: number }) => m.id === id)
     return meio?.nome || `Método de Pagamento ${id}`
   }
 
   // Verifica se o meio de pagamento é em dinheiro
   const isMeioPagamentoDinheiro = () => {
-    const meio = meiosPagamento.find((m) => m.id === formData.meio_pagamento_id)
+    const meio = meiosPagamento.find((m: { id: number | null }) => m.id === formData.meio_pagamento_id)
     return meio?.tipo === "DINHEIRO"
   }
 

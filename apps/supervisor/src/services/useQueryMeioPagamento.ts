@@ -23,7 +23,7 @@ export type { MeioPagamentoTipoEnum } from "@supervisor/api";
 export function useMeiosPagamento(enabled = true) {
   return useQuery({
     queryKey: ["meios_pagamento"],
-    queryFn: () => mensuraApi.meiosDePagamentoAdmin.listarMeiosPagamentoAdminApiDeliveryMeiosPagamentoAdminGet(),
+    queryFn: () => mensuraApi.meiosDePagamentoAdminDelivery.listarMeiosPagamentoAdminApiDeliveryMeiosPagamentoAdminGet(),
     enabled,
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -43,7 +43,7 @@ export function useMutateMeioPagamento() {
 
   const create = useMutation({
     mutationFn: (data: MeioPagamentoCreate) =>
-      mensuraApi.meiosDePagamentoAdmin.criarMeioPagamentoApiDeliveryMeiosPagamentoAdminPost(data),
+      mensuraApi.meiosDePagamentoAdminDelivery.criarMeioPagamentoApiDeliveryMeiosPagamentoAdminPost(data),
     onSuccess: () => {
       toast({ title: "Meio de pagamento criado!", description: "O meio de pagamento foi criado com sucesso." });
       invalidate();
@@ -54,7 +54,7 @@ export function useMutateMeioPagamento() {
 
   const update = useMutation({
     mutationFn: ({ id, data }: { id: number; data: MeioPagamentoUpdate }) =>
-      mensuraApi.meiosDePagamentoAdmin.atualizarMeioPagamentoApiDeliveryMeiosPagamentoAdminMeioPagamentoIdPut(id, data),
+      mensuraApi.meiosDePagamentoAdminDelivery.atualizarMeioPagamentoApiDeliveryMeiosPagamentoAdminMeioPagamentoIdPut(id, data),
     onSuccess: () => {
       toast({ title: "Meio de pagamento atualizado!", description: "O meio de pagamento foi atualizado com sucesso." });
       invalidate();
@@ -65,7 +65,7 @@ export function useMutateMeioPagamento() {
 
   const remove = useMutation({
     mutationFn: (id: number) =>
-      mensuraApi.meiosDePagamentoAdmin.deletarMeioPagamentoApiDeliveryMeiosPagamentoAdminMeioPagamentoIdDelete(id),
+      mensuraApi.meiosDePagamentoAdminDelivery.deletarMeioPagamentoApiDeliveryMeiosPagamentoAdminMeioPagamentoIdDelete(id),
     onSuccess: () => {
       toast({ title: "Meio de pagamento removido!", description: "O meio de pagamento foi removido com sucesso."});
       invalidate();

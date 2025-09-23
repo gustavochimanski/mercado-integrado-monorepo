@@ -136,7 +136,6 @@ export { EnderecosService } from './services/EnderecosService';
 export { EndereOsAdminDeliveryService } from './services/EndereOsAdminDeliveryService';
 export { EndereOsClienteDeliveryService } from './services/EndereOsClienteDeliveryService';
 export { EntregadoresAdminDeliveryService } from './services/EntregadoresAdminDeliveryService';
-export { ExcludeFromClientService } from './services/ExcludeFromClientService';
 export { GeoapifyService } from './services/GeoapifyService';
 export { HomePBlicoDeliveryService } from './services/HomePBlicoDeliveryService';
 export { MeiosDePagamentoAdminDeliveryService } from './services/MeiosDePagamentoAdminDeliveryService';
