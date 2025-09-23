@@ -162,5 +162,3 @@ export function useEnderecoSearch(): UseEnderecoSearchReturn {
     clearSuggestions
   };
 }
-
-export { EnderecoSuggestion };

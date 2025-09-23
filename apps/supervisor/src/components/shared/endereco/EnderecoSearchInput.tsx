@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, MapPin, Loader2, X } from "lucide-react";
 import { Input } from "@supervisor/components/ui/input";
 import { Label } from "@supervisor/components/ui/label";
-import { useEnderecoSearch, EnderecoSuggestion } from "@supervisor/hooks/useEnderecoSearch";
+import { useEnderecoSearch } from "@supervisor/hooks/useEnderecoSearch";
+import { EnderecoSuggestion } from "@supervisor/types/configuracoes/regiaoEntrega";
 
 interface EnderecoSearchInputProps {
   label?: string;
