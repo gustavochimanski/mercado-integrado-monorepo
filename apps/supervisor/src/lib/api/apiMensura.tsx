@@ -31,11 +31,8 @@ apiMensura.interceptors.response.use(
       try {
         // Verificar se estamos no client-side
         if (typeof window !== "undefined") {
-          // Importar dinamicamente para evitar problemas de SSR
-          const { useReauthContext } = await import("@supervisor/providers/ReauthProvider");
-          
           // Tentar reautenticação
-          const reauthSuccess = await window.showReauthModal?.();
+          const reauthSuccess = await (window as any).showReauthModal?.();
           
           if (reauthSuccess) {
             // Refazer a requisição original
@@ -43,6 +40,7 @@ apiMensura.interceptors.response.use(
           } else {
             // Falha na reautenticação, redirecionar para login
             window.location.href = "/login";
+            return Promise.reject(error); // Rejeitar para não permitir acesso
           }
         }
       } catch (reauthError) {
@@ -51,6 +49,7 @@ apiMensura.interceptors.response.use(
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
+        return Promise.reject(error); // Rejeitar para não permitir acesso
       }
     }
 

@@ -26,6 +26,7 @@ export function useReauth() {
       setReauthState(prev => ({
         ...prev,
         isOpen: true,
+        attempts: 0, // RESETAR tentativas quando modal abre
         resolveReauth: resolve
       }))
     })
@@ -58,31 +59,34 @@ export function useReauth() {
   }, [reauthState.resolveReauth])
 
   const handleReauthError = useCallback(() => {
-    const newAttempts = reauthState.attempts + 1
-    
-    if (newAttempts >= reauthState.maxAttempts) {
-      // Máximo de tentativas atingido
-      setReauthState(prev => ({
-        ...prev,
-        isOpen: false,
-        attempts: 0,
-        resolveReauth: null
-      }))
+    setReauthState(prev => {
+      const newAttempts = prev.attempts + 1
       
-      if (reauthState.resolveReauth) {
-        reauthState.resolveReauth(false)
+      if (newAttempts >= prev.maxAttempts) {
+        // Máximo de tentativas atingido
+        if (prev.resolveReauth) {
+          prev.resolveReauth(false)
+        }
+        
+        // Logout e redirecionar
+        logoutService(true)
+        
+        return {
+          ...prev,
+          isOpen: false,
+          attempts: 0,
+          resolveReauth: null
+        }
+      } else {
+        // Incrementar tentativas mas MANTER modal aberto
+        return {
+          ...prev,
+          attempts: newAttempts
+          // isOpen permanece true
+        }
       }
-      
-      // Logout e redirecionar
-      logoutService(true)
-    } else {
-      // Incrementar tentativas
-      setReauthState(prev => ({
-        ...prev,
-        attempts: newAttempts
-      }))
-    }
-  }, [reauthState.attempts, reauthState.maxAttempts, reauthState.resolveReauth])
+    })
+  }, [])
 
   return {
     reauthState,

@@ -6,19 +6,22 @@ import { Button } from "@supervisor/components/ui/button"
 import { Input } from "@supervisor/components/ui/input"
 import { Label } from "@supervisor/components/ui/label"
 import { Eye, EyeOff, Lock } from "lucide-react"
-import { useLoginForm } from "@supervisor/hooks/use-login"
+import { useReauthLoginForm } from "@supervisor/hooks/useReauthLogin"
 
 interface ReauthModalProps {
   isOpen: boolean
   onSuccess: () => void
   onCancel: () => void
+  onError: () => void
   attempts: number
   maxAttempts: number
 }
 
-export function ReauthModal({ isOpen, onSuccess, onCancel, attempts, maxAttempts }: ReauthModalProps) {
+export function ReauthModal({ isOpen, onSuccess, onCancel, onError, attempts, maxAttempts }: ReauthModalProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const { form, onSubmit, isLoggingIn } = useLoginForm()
+  const [loginError, setLoginError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { form, onSubmit } = useReauthLoginForm()
 
   const { register, handleSubmit, formState: { errors }, reset } = form
 
@@ -26,15 +29,25 @@ export function ReauthModal({ isOpen, onSuccess, onCancel, attempts, maxAttempts
   useEffect(() => {
     if (isOpen) {
       reset()
+      setLoginError("")
+      setIsLoading(false)
     }
   }, [isOpen, reset])
 
   const handleFormSubmit = async (data: any) => {
+    setIsLoading(true)
+    setLoginError("")
+    
     try {
       await onSubmit(data)
       onSuccess()
     } catch (error) {
-      // Erro já é tratado pelo hook
+      // Mostrar erro e incrementar tentativas
+      setLoginError("Usuário ou senha incorretos")
+      onError()
+      // NÃO fechar o modal, apenas mostrar erro
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -60,6 +73,11 @@ export function ReauthModal({ isOpen, onSuccess, onCancel, attempts, maxAttempts
                 Tentativas restantes: {remainingAttempts}
               </p>
             )}
+            {loginError && (
+              <p className="text-xs text-red-600 mt-2">
+                {loginError}
+              </p>
+            )}
           </div>
 
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -69,7 +87,7 @@ export function ReauthModal({ isOpen, onSuccess, onCancel, attempts, maxAttempts
                 id="username"
                 placeholder="Digite seu usuário"
                 {...register("username")}
-                disabled={isLoggingIn}
+                disabled={isLoading}
                 className="mt-1"
               />
               {errors.username && (
@@ -85,7 +103,7 @@ export function ReauthModal({ isOpen, onSuccess, onCancel, attempts, maxAttempts
                   type={showPassword ? "text" : "password"}
                   placeholder="Digite sua senha"
                   {...register("password")}
-                  disabled={isLoggingIn}
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -109,17 +127,17 @@ export function ReauthModal({ isOpen, onSuccess, onCancel, attempts, maxAttempts
                 type="button"
                 variant="outline"
                 onClick={onCancel}
-                disabled={isLoggingIn}
+                disabled={isLoading}
                 className="flex-1"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                disabled={isLoggingIn}
+                disabled={isLoading}
                 className="flex-1"
               >
-                {isLoggingIn ? "Entrando..." : "Entrar"}
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </div>
           </form>

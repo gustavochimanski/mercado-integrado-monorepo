@@ -38,6 +38,7 @@ export function ReauthProvider({ children }: ReauthProviderProps) {
         isOpen={reauthState.isOpen}
         onSuccess={handleReauthSuccess}
         onCancel={handleReauthCancel}
+        onError={handleReauthError}
         attempts={reauthState.attempts}
         maxAttempts={reauthState.maxAttempts}
       />
