@@ -135,62 +135,61 @@ export const TableCadastroClientes = ({ empresaId }: Props) => {
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 h-full">
-      <Card className="flex-1 flex flex-col">
-        <CardHeader>
-          <CardTitle>Clientes do Delivery</CardTitle>
-        </CardHeader>
-
-        <CardContent className="flex-1 overflow-auto">
-          {hasError ? (
-            <div className="text-red-500 p-4">
-              Erro ao carregar clientes.
-            </div>
-          ) : clientes.length === 0 && !isLoading ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <p className="text-lg font-medium">Nenhum cliente encontrado</p>
-                <p className="text-sm mt-2">Os clientes aparecerão aqui quando conectado à API</p>
-              </div>
-            </div>
-          ) : (
-            <DataTableComponentMui
-              rows={clientes}
-              columns={columns}
-              loading={isLoading}
-              getRowId={(row: any) => row.id}
-              density="compact"
-              disableColumnMenu
-              disableColumnFilter
-              disableColumnSelector
-              scrollbarSize={8}
-              onRowSelectionModelChange={handleRowSelectionChange}
-              onRowEditConfirm={handleRowEdit}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 30, page: 0 } },
-              }}
-              pageSizeOptions={[30, 50, 100]}
-            />
-          )}
-        </CardContent>
-
-        <CardFooter className="flex justify-start gap-4">
+    <div className="flex flex-col h-full">
+      <div className="flex justify-end mb-4">
+        <div className="flex gap-2">
           <Button
             variant="outline"
+            size="sm"
             disabled={selectedClientes.length !== 1}
             onClick={handleEditCliente}
           >
-            <Edit size={16} /> Editar Cliente
+            <Edit className="w-4 h-4 mr-1" />
+            Editar Cliente
           </Button>
           <Button
             variant="destructive"
+            size="sm"
             disabled={selectedClientes.length === 0}
             onClick={handleDeleteCliente}
           >
-            <Trash2 size={16} /> Excluir
+            <Trash2 className="w-4 h-4 mr-1" />
+            Excluir
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        {hasError ? (
+          <p>Erro ao carregar clientes.</p>
+        ) : clientes.length === 0 && !isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <div className="text-center">
+              <p className="text-lg font-medium">Nenhum cliente encontrado</p>
+              <p className="text-sm mt-2">Os clientes aparecerão aqui quando conectado à API</p>
+            </div>
+          </div>
+        ) : (
+          <DataTableComponentMui
+            rows={clientes}
+            columns={columns}
+            loading={isLoading}
+            getRowId={(row: any) => row.id}
+            density="compact"
+            disableColumnMenu
+            disableColumnFilter
+            disableColumnSelector
+            scrollbarSize={8}
+            onRowSelectionModelChange={handleRowSelectionChange}
+            onRowEditConfirm={handleRowEdit}
+            sx={{ height: '100%', width: '100%' }}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 30, page: 0 } },
+            }}
+            pageSizeOptions={[30, 50, 100]}
+          />
+        )}
+      </div>
     </div>
   );
 };

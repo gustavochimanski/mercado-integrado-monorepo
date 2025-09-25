@@ -96,46 +96,42 @@ const columns: GridColDef[] = useMemo(
   const closeModal = useCallback((open: boolean) => setModalOpen(open), []);
 
   return (
-    <div className="flex flex-col flex-1 h-full">
-      <Card className="flex-1 flex flex-col">
-        <CardHeader>
-          <CardTitle>Produtos</CardTitle>
-        </CardHeader>
-
-        <CardContent className="flex-1 overflow-auto">
-          {prodError ? (
-            <div className="text-red-500 p-4">
-              Erro ao carregar produtos. {String((error as any)?.message ?? "")}
-            </div>
-          ) : (
-            <DataTableComponentMui
-              rows={produtos}
-              columns={columns}
-              loading={prodLoading}
-              // ⚙️ Ajustes de performance para MUI DataGrid (seu wrapper deve repassar)
-              getRowId={(row: any) => row.cod_barras}
-              density="compact"
-              disableColumnMenu
-              disableColumnFilter
-              disableColumnSelector
-              scrollbarSize={8}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 30, page: 0 } },
-              }}
-              pageSizeOptions={[30, 50, 100]}
-            />
-          )}
-        </CardContent>
-
-        <CardFooter className="flex justify-start gap-4">
-          <Button onClick={openModal}>
-            <CirclePlus /> Novo Produto
+    <div className="flex flex-col h-full">
+      <div className="flex justify-end mb-4">
+        <div className="flex gap-2">
+          <Button size="sm" onClick={openModal}>
+            <CirclePlus className="w-4 h-4 mr-1" />
+            Novo Produto
           </Button>
-          <Button variant="destructive" disabled>
-            <Trash2 /> Excluir Produto
+          <Button variant="destructive" size="sm" disabled>
+            <Trash2 className="w-4 h-4 mr-1" />
+            Excluir Produto
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        {prodError ? (
+          <p>Erro ao carregar produtos. {String((error as any)?.message ?? "")}</p>
+        ) : (
+          <DataTableComponentMui
+            rows={produtos}
+            columns={columns}
+            loading={prodLoading}
+            getRowId={(row: any) => row.cod_barras}
+            density="compact"
+            disableColumnMenu
+            disableColumnFilter
+            disableColumnSelector
+            scrollbarSize={8}
+            sx={{ height: '100%', width: '100%' }}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 30, page: 0 } },
+            }}
+            pageSizeOptions={[30, 50, 100]}
+          />
+        )}
+      </div>
 
       <ModalNovoProduto open={modalOpen} onOpenChange={closeModal} empresaId={empresaId} />
     </div>
