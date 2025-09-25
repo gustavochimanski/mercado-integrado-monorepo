@@ -7,7 +7,7 @@ import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 export interface Entregador {
   id: number;
   nome: string;
-  ativo: boolean;
+  ativo?: boolean;
   telefone?: string;
   documento?: string;
   veiculo_tipo?: string;
@@ -15,6 +15,10 @@ export interface Entregador {
   acrescimo_taxa?: number;
   created_at: string;
   updated_at: string;
+  empresas?: Array<{
+    id: number;
+    nome: string;
+  }>;
 }
 
 export function useDebounced<T>(value: T, delay = 300) {
@@ -33,6 +37,25 @@ export function useEntregadores(enabled = true) {
     queryFn: async () => {
       const { data } = await apiMensura.get<Entregador[]>("/api/delivery/entregadores");
       return data;
+    },
+    enabled,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+
+// Buscar entregadores vinculados à empresa atual
+export function useEntregadoresVinculados(enabled = true) {
+  return useQuery<Entregador[]>({
+    queryKey: ["entregadores-vinculados"],
+    queryFn: async () => {
+      const { data } = await apiMensura.get<Entregador[]>("/api/delivery/entregadores");
+      // Filtra entregadores que têm empresas vinculadas
+      return data.filter(entregador =>
+        entregador.empresas &&
+        entregador.empresas.length > 0
+      );
     },
     enabled,
     staleTime: 10 * 60 * 1000,

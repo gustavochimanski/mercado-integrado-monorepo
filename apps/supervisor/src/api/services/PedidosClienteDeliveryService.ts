@@ -6,8 +6,8 @@ import type { EditarPedidoRequest } from '../models/EditarPedidoRequest';
 import type { FinalizarPedidoRequest } from '../models/FinalizarPedidoRequest';
 import type { ItemPedidoEditar } from '../models/ItemPedidoEditar';
 import type { ModoEdicaoRequest } from '../models/ModoEdicaoRequest';
-import { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
-import { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
+import type { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
+import type { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
 import type { PedidoResponse } from '../models/PedidoResponse';
 import type { PedidoResponseSimplificado } from '../models/PedidoResponseSimplificado';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -48,8 +48,8 @@ export class PedidosClienteDeliveryService {
      */
     public confirmarPagamentoApiDeliveryClientePedidosPedidoIdConfirmarPagamentoPost(
         pedidoId: number,
-        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX,
-        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.PIX_INTERNO,
+        metodo: PagamentoMetodoEnum = 'PIX',
+        gateway: PagamentoGatewayEnum = 'PIX_INTERNO',
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',

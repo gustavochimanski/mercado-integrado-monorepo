@@ -1,7 +1,10 @@
 import { Input } from "../../../ui/input"
 import { Label } from "../../../ui/label"
-import { Truck } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../ui/select"
+import { Button } from "../../../ui/button"
+import { Truck, User, Phone, Car, ExternalLink } from "lucide-react"
 import { EntregaTabProps } from "@supervisor/types/pedidos/modal"
+import { useEntregadores } from "@supervisor/services/useQueryEntregadores"
 
 // Componente funcional React
 export const EntregaTab: React.FC<EntregaTabProps> = ({
@@ -11,6 +14,10 @@ export const EntregaTab: React.FC<EntregaTabProps> = ({
   pedidoCompleto,
   formatDateTime
 }) => {
+  const { data: entregadores = [], isLoading: loadingEntregadores } = useEntregadores(true)
+
+  const entregadorAtual = pedidoCompleto?.entregador
+  const entregadoresDisponiveis = entregadores.filter(e => e.empresas && e.empresas.length > 0)
 
   // Renderiza o componente
   return (
@@ -35,30 +42,105 @@ export const EntregaTab: React.FC<EntregaTabProps> = ({
 
         {/* Seção de Informações do Entregador */ }
         <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800">Entregador</h3>
-          {pedidoCompleto?.entregador ? (
+          <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+            <User className="w-5 h-5 text-indigo-600" />
+            Entregador Vinculado
+          </h3>
+
+          {isEditing ? (
             <div className="space-y-4">
-
-              {/* Campo Nome do Entregador */ }
+              {/* Seletor de Entregador */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Nome</Label>
-                <Input value={pedidoCompleto.entregador.nome} disabled className="bg-white" />
-              </div>
-
-              {/* Campo Telefone do Entregador */ }
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Telefone</Label>
-                <Input value={pedidoCompleto.entregador.telefone} disabled className="bg-white" />
-              </div>
-
-              {/* Campo Veículo do Entregador */ }
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Veículo</Label>
-                <Input value={`${pedidoCompleto.entregador.veiculo_tipo} - ${pedidoCompleto.entregador.placa}`} disabled className="bg-white" />
+                <Label className="text-sm font-medium">Selecionar Entregador</Label>
+                <Select
+                  value={formData.entregador_id ? formData.entregador_id.toString() : "none"}
+                  onValueChange={(value) => setFormData((prev: any) => ({
+                    ...prev,
+                    entregador_id: value === "none" ? null : Number(value)
+                  }))}
+                >
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Selecione um entregador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum entregador</SelectItem>
+                    {loadingEntregadores ? (
+                      <SelectItem value="loading" disabled>
+                        Carregando entregadores...
+                      </SelectItem>
+                    ) : (
+                      entregadoresDisponiveis.map((entregador: any) => (
+                          <SelectItem key={entregador.id} value={entregador.id.toString()}>
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4" />
+                              <span>{entregador.nome}</span>
+                              {entregador.telefone && (
+                                <span className="text-muted-foreground">- {entregador.telefone}</span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Nenhum entregador vinculado</p>
+            // Modo visualização
+            entregadorAtual ? (
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-indigo-100 rounded-full p-2">
+                      <User className="w-4 h-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">{entregadorAtual.nome}</h4>
+                      <p className="text-sm text-gray-500">Entregador Ativo</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Telefone */}
+                    {entregadorAtual.telefone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">
+                          {entregadorAtual.telefone}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Veículo */}
+                    {(entregadorAtual.veiculo_tipo || entregadorAtual.placa) && (
+                      <div className="flex items-center gap-2">
+                        <Car className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">
+                          {entregadorAtual.veiculo_tipo}
+                          {entregadorAtual.placa && `- ${entregadorAtual.placa}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg p-6 border border-dashed border-gray-300 text-center">
+                <div className="bg-gray-100 rounded-full p-3 w-12 h-12 mx-auto mb-3">
+                  <User className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-500 mb-2">Nenhum entregador vinculado ao pedido</p>
+                {entregadoresDisponiveis.length > 0 ? (
+                  <p className="text-xs text-gray-400">
+                    Use o modo de edição para vincular um dos {entregadoresDisponiveis.length} entregador(es) disponível(is)
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400">
+                    Nenhum entregador disponível para vincular
+                  </p>
+                )}
+              </div>
+            )
           )}
         </div>
       </div>

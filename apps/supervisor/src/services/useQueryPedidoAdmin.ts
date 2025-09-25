@@ -29,11 +29,14 @@ export function useMutatePedidoAdmin() {
   const qc = useQueryClient()
   const { toast } = useToast()
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+    qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+  }
 
   const atualizarStatus = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: PedidoStatus }) => {
-      const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/status/${id}?status=${status}`)
+      const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/status/${id}?novo_status=${status}`)
       return data
     },
     onSuccess: () => {
@@ -67,7 +70,21 @@ export function useMutatePedidoAdmin() {
     },
   })
 
-  return { atualizarStatus, confirmarPagamento }
+  const vincularEntregador = useMutation({
+    mutationFn: async ({ pedidoId, entregadorId }: { pedidoId: number; entregadorId: number | null }) => {
+      const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/entregador?entregador_id=${entregadorId}`, {})
+      return data
+    },
+    onSuccess: (data) => {
+      toast({ title: "Entregador vinculado", description: "O entregador foi vinculado ao pedido com sucesso." })
+      invalidate()
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro ao vincular entregador", description: getErrorMessage(err), variant: "destructive" })
+    },
+  })
+
+  return { atualizarStatus, confirmarPagamento, vincularEntregador }
 }
 
 export function useFetchPedidoDetalhes(pedidoId: number | null) {
