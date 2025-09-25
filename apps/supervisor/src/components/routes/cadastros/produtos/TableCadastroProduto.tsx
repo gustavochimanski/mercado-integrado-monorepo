@@ -6,9 +6,9 @@ import dynamic from "next/dynamic";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@supervisor/components/ui/card";
 import { Button } from "@supervisor/components/ui/button";
 import type { GridColDef} from "@mui/x-data-grid";
-import { CirclePlus, Trash2 } from "lucide-react";
+import { CirclePlus, Trash2, Edit } from "lucide-react";
 
-import { useFetchCadProdMensura } from "@supervisor/services/useQueryProduto";
+import { useFetchCadProdMensura, useMutateProduto } from "@supervisor/services/useQueryProduto";
 
 // ⬇️ Lazy-load do DataGrid wrapper (só no client)
 const DataTableComponentMui = dynamic(
@@ -16,9 +16,14 @@ const DataTableComponentMui = dynamic(
   { ssr: false, loading: () => <div className="p-4 text-sm text-muted-foreground">Carregando tabela...</div> }
 );
 
-// ⬇️ Lazy-load do modal (só abre quando clicar)
+// ⬇️ Lazy-load dos modals (só abre quando clicar)
 const ModalNovoProduto = dynamic(
   () => import("./ModalAddProduto").then(m => m.ModalNovoProduto),
+  { ssr: false }
+);
+
+const ModalEditarProduto = dynamic(
+  () => import("./ModalEditProduto").then(m => m.ModalEditarProduto),
   { ssr: false }
 );
 
@@ -28,6 +33,8 @@ interface Props {
 
 export const TableCadastroProdutos = ({ empresaId }: Props) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // ⚠️ Se seu hook aceitar opções, ajuste nele:
   // refetchOnWindowFocus: false, staleTime: 5*60_000, keepPreviousData: true
@@ -36,6 +43,7 @@ export const TableCadastroProdutos = ({ empresaId }: Props) => {
 
   // ✅ Memo nos dados
   const produtos = useMemo(() => resp?.data ?? [], [resp?.data]);
+
 
 
 // helper simples
@@ -60,7 +68,6 @@ const columns: GridColDef[] = useMemo(
       headerName: "Preço",
       flex: 1,
       minWidth: 120,
-      editable: true,
       valueFormatter: (value: any) => fmtBRL(value),
     },
     {
@@ -68,7 +75,6 @@ const columns: GridColDef[] = useMemo(
       headerName: "Preço Delivery",
       flex: 1,
       minWidth: 120,
-      editable: true,
       valueFormatter: (value: any) => fmtBRL(value),
     },
     {
@@ -85,15 +91,49 @@ const columns: GridColDef[] = useMemo(
       type: "boolean",
       valueGetter: (value: any, row: any) => Boolean(value ?? row?.exibir_delivery),
     },
+    {
+      field: "actions",
+      headerName: "Ações",
+      sortable: false,
+      filterable: false,
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => {
+        const produto = params.row;
+        return (
+          <div className="flex justify-center items-center h-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+              onClick={() => {
+                setSelectedProduct(produto);
+                setEditModalOpen(true);
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
   ],
   []
 );
 
 
 
+
   // ✅ Callbacks memorizados
   const openModal = useCallback(() => setModalOpen(true), []);
   const closeModal = useCallback((open: boolean) => setModalOpen(open), []);
+
+  const closeEditModal = useCallback((open: boolean) => {
+    setEditModalOpen(open);
+    if (!open) {
+      setSelectedProduct(null);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
@@ -134,6 +174,13 @@ const columns: GridColDef[] = useMemo(
       </div>
 
       <ModalNovoProduto open={modalOpen} onOpenChange={closeModal} empresaId={empresaId} />
+
+      <ModalEditarProduto
+        open={editModalOpen}
+        onOpenChange={closeEditModal}
+        produto={selectedProduct}
+        empresaId={empresaId}
+      />
     </div>
   );
 };
