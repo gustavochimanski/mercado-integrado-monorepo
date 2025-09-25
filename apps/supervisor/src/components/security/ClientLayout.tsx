@@ -8,6 +8,7 @@ import ModalEnviarConfiguracao from "@supervisor/app/(private)/processos/compone
 import ModalEnviarProdutos from "@supervisor/app/(private)/processos/components/comunicacao/ModalEnviarProdutos"
 import { ThemeProvider } from "next-themes"
 import { useMediaQuery, useTheme } from "@mui/material"
+import { useGlobalReauth } from "@supervisor/hooks/useGlobalReauth"
 
 
 interface ClientLayoutProps {
@@ -19,6 +20,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
+  // Inicializar o hook global de reautenticação
+  useGlobalReauth();
 
   useEffect(() => {
     const cookieValue = document.cookie
