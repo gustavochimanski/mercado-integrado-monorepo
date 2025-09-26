@@ -1,8 +1,10 @@
 import { PedidoStatus } from "@supervisor/types/pedido";
 import { statusMap } from "./Kanban";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SelecionarEntregadorModal } from "./SelecionarEntregadorModal";
-import { useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
+import { ConfirmarDesvincularModal } from "./ConfirmarDesvincularModal";
+import { useMutatePedidoAdmin, useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin";
+import apiMensura from "@supervisor/lib/api/apiMensura";
 
 // ---------------- FooterSelecionados com transition ----------------
 export const FooterSelecionados = ({
@@ -16,31 +18,76 @@ export const FooterSelecionados = ({
   onMoverSelecionados: (novoStatus: PedidoStatus) => void;
   onCancelar: () => void;
   visivel: boolean;
-  pedidosSelecionados?: Array<{ id: number; status: string; motoboy?: string }>; // Dados dos pedidos selecionados
+  pedidosSelecionados?: Array<{ id: number; status: string; entregador_id?: number | null }>; // Dados dos pedidos selecionados
 }) => {
   const [isEntregadorModalOpen, setIsEntregadorModalOpen] = useState(false)
+  const [isDesvincularModalOpen, setIsDesvincularModalOpen] = useState(false)
   const [statusParaMover, setStatusParaMover] = useState<PedidoStatus | null>(null)
-  const [pedidosParaProcessar, setPedidosParaProcessar] = useState<Array<{ id: number; status: string; motoboy?: string }>>([])
-  const [pedidoAtual, setPedidoAtual] = useState<{ id: number; status: string; motoboy?: string } | null>(null)
+  const [pedidosParaProcessar, setPedidosParaProcessar] = useState<Array<{ id: number; status: string; entregador_id?: number | null }>>([])
+  const [pedidoAtual, setPedidoAtual] = useState<{ id: number; status: string; entregador_id?: number | null } | null>(null)
   const [indiceAtual, setIndiceAtual] = useState(0)
+  const [pedidosCompletos, setPedidosCompletos] = useState<Array<{ id: number; status: string; entregador_id?: number | null }>>([])
   const { atualizarStatus, vincularEntregador } = useMutatePedidoAdmin()
+
+  // Buscar dados completos dos pedidos selecionados
+  useEffect(() => {
+    if (pedidosSelecionados.length > 0) {
+      const buscarDadosCompletos = async () => {
+        try {
+          const promises = pedidosSelecionados.map(async (pedido) => {
+            const { data } = await apiMensura.get(`/api/delivery/pedidos/admin/${pedido.id}`)
+            return {
+              id: pedido.id,
+              status: pedido.status,
+              entregador_id: data.entregador?.id || null
+            }
+          })
+          
+          const pedidosComDadosCompletos = await Promise.all(promises)
+          setPedidosCompletos(pedidosComDadosCompletos)
+          console.log('📦 Dados completos dos pedidos:', pedidosComDadosCompletos)
+        } catch (error) {
+          console.error('Erro ao buscar dados completos:', error)
+        }
+      }
+      
+      buscarDadosCompletos()
+    }
+  }, [pedidosSelecionados])
 
   // Função para verificar se precisa vincular entregador
   const precisaVincularEntregador = (novoStatus: PedidoStatus) => {
-    return novoStatus === "S" && pedidosSelecionados.some(pedido => !pedido.motoboy)
+    return novoStatus === "S" && pedidosCompletos.some(pedido => !pedido.entregador_id)
   }
 
   // Função para verificar se precisa desvincular entregador
   const precisaDesvincularEntregador = (novoStatus: PedidoStatus) => {
-    return (novoStatus === "P" || novoStatus === "R") && pedidosSelecionados.some(pedido => pedido.motoboy)
+    const temEntregador = pedidosCompletos.some(pedido => pedido.entregador_id)
+    const statusValido = novoStatus === "P" || novoStatus === "R"
+    console.log('🔍 Debug desvincular:', { 
+      novoStatus, 
+      temEntregador, 
+      statusValido, 
+      pedidosCompletos: pedidosCompletos.map(p => ({ 
+        id: p.id, 
+        entregador_id: p.entregador_id
+      }))
+    })
+    return statusValido && temEntregador
   }
 
   // Função para mover pedidos selecionados
   const handleMoverPedidos = async (novoStatus: PedidoStatus) => {
+    console.log('🚀 handleMoverPedidos chamado:', { 
+      novoStatus, 
+      precisaVincular: precisaVincularEntregador(novoStatus), 
+      precisaDesvincular: precisaDesvincularEntregador(novoStatus) 
+    })
+    
     if (precisaVincularEntregador(novoStatus)) {
       // Separar pedidos que precisam de entregador dos que não precisam
-      const pedidosSemEntregador = pedidosSelecionados.filter(pedido => !pedido.motoboy)
-      const pedidosComEntregador = pedidosSelecionados.filter(pedido => pedido.motoboy)
+      const pedidosSemEntregador = pedidosCompletos.filter(pedido => !pedido.entregador_id)
+      const pedidosComEntregador = pedidosCompletos.filter(pedido => pedido.entregador_id)
       
       // Atualizar status dos pedidos que já têm entregador
       pedidosComEntregador.forEach(pedido => {
@@ -56,29 +103,10 @@ export const FooterSelecionados = ({
         setIsEntregadorModalOpen(true)
       }
     } else if (precisaDesvincularEntregador(novoStatus)) {
-      // Desvincular entregador dos pedidos que têm entregador
-      const pedidosComEntregador = pedidosSelecionados.filter(pedido => pedido.motoboy)
-      
-      // Desvincular todos os entregadores primeiro (aguardar conclusão)
-      const desvincularPromises = pedidosComEntregador.map(pedido => 
-        vincularEntregador.mutateAsync({ 
-          pedidoId: pedido.id, 
-          entregadorId: null 
-        })
-      )
-      
-      try {
-        await Promise.all(desvincularPromises)
-        
-        // Atualizar status de todos os pedidos após desvincular (aguardar também)
-        const atualizarPromises = pedidosSelecionados.map(pedido => 
-          atualizarStatus.mutateAsync({ id: pedido.id, status: novoStatus })
-        )
-        
-        await Promise.all(atualizarPromises)
-      } catch (error) {
-        console.error('Erro ao desvincular entregadores:', error)
-      }
+      console.log('✅ Abrindo modal de desvincular para status:', novoStatus)
+      // Abrir modal de confirmação para desvincular
+      setStatusParaMover(novoStatus)
+      setIsDesvincularModalOpen(true)
     } else {
       onMoverSelecionados(novoStatus)
     }
@@ -113,6 +141,7 @@ export const FooterSelecionados = ({
         setPedidosParaProcessar([])
         setPedidoAtual(null)
         setIndiceAtual(0)
+        onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
       }
     } catch (error) {
       console.error('Erro ao vincular entregador:', error)
@@ -131,6 +160,41 @@ export const FooterSelecionados = ({
       setPedidosParaProcessar([])
       setPedidoAtual(null)
       setIndiceAtual(0)
+      onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
+    }
+  }
+
+  // Função para confirmar desvinculação
+  const handleConfirmarDesvincular = async () => {
+    if (!statusParaMover) return
+
+    try {
+      // Desvincular entregador dos pedidos que têm entregador
+      const pedidosComEntregador = pedidosCompletos.filter(pedido => pedido.entregador_id)
+      
+      // Desvincular todos os entregadores primeiro (aguardar conclusão)
+      const desvincularPromises = pedidosComEntregador.map(pedido => 
+        vincularEntregador.mutateAsync({ 
+          pedidoId: pedido.id, 
+          entregadorId: null 
+        })
+      )
+      
+      await Promise.all(desvincularPromises)
+      
+      // Atualizar status de todos os pedidos após desvincular (aguardar também)
+      const atualizarPromises = pedidosCompletos.map(pedido => 
+        atualizarStatus.mutateAsync({ id: pedido.id, status: statusParaMover })
+      )
+      
+      await Promise.all(atualizarPromises)
+
+      // Fechar modal e limpar seleção
+      setIsDesvincularModalOpen(false)
+      setStatusParaMover(null)
+      onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
+    } catch (error) {
+      console.error('Erro ao desvincular entregadores:', error)
     }
   }
 
@@ -183,6 +247,18 @@ export const FooterSelecionados = ({
         indiceAtual={indiceAtual}
         totalPedidos={pedidosParaProcessar.length}
         onPular={handlePularPedido}
+      />
+
+      {/* Modal de confirmação para desvincular entregador */}
+      <ConfirmarDesvincularModal
+        isOpen={isDesvincularModalOpen}
+        onClose={() => {
+          setIsDesvincularModalOpen(false)
+          setStatusParaMover(null)
+        }}
+        onConfirm={handleConfirmarDesvincular}
+        pedidosIds={pedidosSelecionados.map(p => p.id)}
+        isMultiplo={true}
       />
     </div>
   );

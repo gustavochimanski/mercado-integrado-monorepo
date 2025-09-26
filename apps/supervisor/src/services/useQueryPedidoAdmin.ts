@@ -76,7 +76,7 @@ export function useMutatePedidoAdmin() {
   const vincularEntregador = useMutation({
     mutationFn: async ({ pedidoId, entregadorId }: { pedidoId: number; entregadorId: number | null }) => {
       if (entregadorId === null) {
-        // Usar DELETE para desvincular
+        // Usar DELETE para desvincular (sem parâmetros, apenas pedido_id na URL)
         const { data } = await apiMensura.delete(`/api/delivery/pedidos/admin/${pedidoId}/entregador`)
         return data
       } else {
