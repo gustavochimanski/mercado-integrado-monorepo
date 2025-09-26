@@ -27,6 +27,11 @@ const ModalEditarProduto = dynamic(
   { ssr: false }
 );
 
+const ModalDeleteProduto = dynamic(
+  () => import("./ModalDeleteProduto").then(m => m.ModalDeleteProduto),
+  { ssr: false }
+);
+
 interface Props {
   empresaId: number;
 }
@@ -34,6 +39,7 @@ interface Props {
 export const TableCadastroProdutos = ({ empresaId }: Props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // ⚠️ Se seu hook aceitar opções, ajuste nele:
@@ -101,17 +107,26 @@ const columns: GridColDef[] = useMemo(
       renderCell: (params) => {
         const produto = params.row;
         return (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex justify-center items-center gap-2 mt-1">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
               onClick={() => {
                 setSelectedProduct(produto);
                 setEditModalOpen(true);
               }}
             >
               <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                setSelectedProduct(produto);
+                setDeleteModalOpen(true);
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         );
@@ -135,19 +150,34 @@ const columns: GridColDef[] = useMemo(
     }
   }, []);
 
+  const closeDeleteModal = useCallback((open: boolean) => {
+    setDeleteModalOpen(open);
+    if (!open) {
+      setSelectedProduct(null);
+    }
+  }, []);
+
+  const handleDeleteProduct = useCallback(async () => {
+    if (!selectedProduct?.cod_barras) return;
+    
+    try {
+      // TODO: Implementar quando tiver API de delete
+      console.log("Excluir produto:", selectedProduct.cod_barras);
+      // await deleteProduct.mutateAsync(selectedProduct.cod_barras);
+      setDeleteModalOpen(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+    }
+  }, [selectedProduct]);
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-end mb-4">
-        <div className="flex gap-2">
-          <Button size="sm" onClick={openModal}>
-            <CirclePlus className="w-4 h-4 mr-1" />
-            Novo Produto
-          </Button>
-          <Button variant="destructive" size="sm" disabled>
-            <Trash2 className="w-4 h-4 mr-1" />
-            Excluir Produto
-          </Button>
-        </div>
+        <Button size="sm" onClick={openModal}>
+          <CirclePlus className="w-4 h-4 mr-1" />
+          Novo Produto
+        </Button>
       </div>
 
       <div className="flex-1 min-h-0">
@@ -157,18 +187,9 @@ const columns: GridColDef[] = useMemo(
           <DataTableComponentMui
             rows={produtos}
             columns={columns}
-            loading={prodLoading}
             getRowId={(row: any) => row.cod_barras}
-            density="compact"
-            disableColumnMenu
-            disableColumnFilter
-            disableColumnSelector
-            scrollbarSize={8}
+            autoHeight={false}
             sx={{ height: '100%', width: '100%' }}
-            initialState={{
-              pagination: { paginationModel: { pageSize: 30, page: 0 } },
-            }}
-            pageSizeOptions={[30, 50, 100]}
           />
         )}
       </div>
@@ -180,6 +201,14 @@ const columns: GridColDef[] = useMemo(
         onOpenChange={closeEditModal}
         produto={selectedProduct}
         empresaId={empresaId}
+      />
+
+      <ModalDeleteProduto
+        open={deleteModalOpen}
+        onOpenChange={closeDeleteModal}
+        produto={selectedProduct}
+        onConfirm={handleDeleteProduct}
+        isDeleting={false} // TODO: Implementar quando tiver API
       />
     </div>
   );

@@ -8,6 +8,8 @@ export interface ClienteTabProps {
   isEditing: boolean
   pedidoCompleto: any
   getEnderecoCompleto: () => string
+  onEnderecoUpdate?: (endereco: any) => void
+  isUpdatingEndereco?: boolean
 }
 
 // Define as propriedades esperadas pelo componente EntregaTab

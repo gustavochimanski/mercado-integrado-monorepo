@@ -1,5 +1,6 @@
 // src/services/usePedidosAdmin.ts
 import apiMensura from "@supervisor/lib/api/apiMensura"
+import { mensuraApi } from "@supervisor/api/MensuraApi"
 import type { PedidoKanban, PedidoStatus, PagamentoMetodo, PagamentoGateway } from "@supervisor/types/pedido"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@supervisor/hooks/use-toast"
@@ -111,7 +112,8 @@ export function useUpdatePedido() {
     onSuccess: () => {
       toast({ title: "Pedido atualizado", description: "As informações do pedido foram atualizadas com sucesso." })
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
-      qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+      // Removido: não invalidar pedidoDetalhes para preservar endereço atualizado
+      // qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
     },
     onError: (err: any) => {
       toast({ title: "Erro ao atualizar pedido", description: getErrorMessage(err), variant: "destructive" })
@@ -125,8 +127,15 @@ export function useUpdateCliente() {
 
   return useMutation({
     mutationFn: async ({ clienteId, data }: { clienteId: number; data: any }) => {
-      const response = await apiMensura.put(`/api/delivery/cliente/admin/update/${clienteId}`, data)
-      return response.data
+      const response = await mensuraApi.clienteAdminDelivery.updateClienteAdminApiDeliveryClienteAdminUpdateClienteIdPut(clienteId, {
+        nome: data.nome,
+        cpf: data.cpf,
+        telefone: data.telefone,
+        email: data.email,
+        data_nascimento: data.data_nascimento,
+        ativo: data.ativo
+      })
+      return response
     },
     onSuccess: () => {
       // Não fazer invalidação automática aqui, deixar para o componente controlar
@@ -188,9 +197,10 @@ export function useUpdateItens() {
     onSuccess: (data, variables) => {
       toast({ title: "Itens atualizados", description: "Os itens do pedido foram atualizados com sucesso." })
 
-      // Invalidar cache específico do pedido e kanban
-      qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
+      // Invalidar apenas o kanban (preservar endereço atualizado)
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+      // Removido: não invalidar pedidoDetalhes para preservar endereço atualizado
+      // qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
     },
     onError: (err: any) => {
       // Extrair mensagem de erro mais específica
@@ -208,6 +218,51 @@ export function useUpdateItens() {
       }
 
       toast({ title: "Erro ao atualizar itens", description: errorMessage, variant: "destructive" })
+    },
+  })
+}
+
+export function useUpdateEndereco() {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: async ({ 
+      clienteId, 
+      enderecoId, 
+      endereco 
+    }: { 
+      clienteId: number; 
+      enderecoId: number; 
+      endereco: any 
+    }) => {
+      const { data } = await apiMensura.put(`/api/delivery/enderecos/admin/cliente/${clienteId}/endereco/${enderecoId}`, {
+        cep: endereco.cep,
+        logradouro: endereco.logradouro,
+        numero: endereco.numero,
+        complemento: endereco.complemento,
+        bairro: endereco.bairro,
+        cidade: endereco.cidade,
+        estado: endereco.estado,
+        ponto_referencia: endereco.ponto_referencia,
+        latitude: endereco.latitude,
+        longitude: endereco.longitude,
+        is_principal: endereco.is_principal
+      })
+      return data
+    },
+    onSuccess: () => {
+      toast({ 
+        title: "Endereço atualizado", 
+        description: "O endereço foi atualizado com sucesso no servidor." 
+      })
+    },
+    onError: (err: any) => {
+      toast({ 
+        title: "Erro ao atualizar endereço", 
+        description: getErrorMessage(err), 
+        variant: "destructive" 
+      })
     },
   })
 }

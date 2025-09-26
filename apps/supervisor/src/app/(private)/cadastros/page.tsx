@@ -25,7 +25,7 @@ const PageCadastros = () => {
           <Users size={15} /> Clientes
         </span>
       ),
-      Component: () => <TableCadastroClientes empresaId={1} />,
+      Component: () => <TableCadastroClientes />,
     }
   ];
 

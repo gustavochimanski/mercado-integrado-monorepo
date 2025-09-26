@@ -25,7 +25,7 @@ export async function loginService(
   // 🔐 Armazena em cookie para acesso universal (SSR + client)
   setCookie("access_token", data.access_token, {
     path: "/",            // acessível em todas as rotas
-    maxAge: 60 * 25,      
+    maxAge: 60 * 120,     // 120 minutos (2 horas)
     sameSite: "lax",
     secure: false,
   });
