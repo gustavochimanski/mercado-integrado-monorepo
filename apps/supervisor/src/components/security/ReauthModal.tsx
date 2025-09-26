@@ -54,7 +54,8 @@ export function ReauthModal({ isOpen, onSuccess, onCancel, onError, attempts, ma
   const remainingAttempts = maxAttempts - attempts
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen} onOpenChange={() => {      
+    }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

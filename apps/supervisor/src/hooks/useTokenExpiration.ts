@@ -18,7 +18,6 @@ export function useTokenExpiration() {
   const checkTokenExpiration = async () => {
     // Evitar múltiplas verificações simultâneas
     if (isCheckingRef.current) {
-      console.log("🔄 Verificação já em andamento, pulando...")
       return
     }
 
@@ -27,7 +26,6 @@ export function useTokenExpiration() {
       const token = getCookie("access_token")
 
       if (!token || typeof token !== "string") {
-        console.warn("🔒 Token não encontrado")
         return
       }
 
@@ -36,21 +34,14 @@ export function useTokenExpiration() {
       const currentTime = Math.floor(Date.now() / 1000) // Unix timestamp
       const timeUntilExpiry = decoded.exp - currentTime
 
-      console.log(`⏰ Token expira em ${Math.floor(timeUntilExpiry / 60)} minutos`)
-
       // Se está entre 20 e 29 minutos de uso, mostrar reauth
       // Se JWT expira em 89 min, então:
       // - 20 min de uso = 69 min restantes
       // - 29 min de uso = 60 min restantes
       if (timeUntilExpiry <= 4140 && timeUntilExpiry > 3600) { // Entre 69 e 60 min restantes
-        console.warn("⚠️ Token está expirando, mostrando modal de reauth")
-        console.log("🔄 Chamando showReauthModal...")
         const result = await showReauthModal()
-        console.log("✅ showReauthModal retornou:", result)
       }
-
-    } catch (error) {
-      console.error("❌ Erro ao verificar expiração do token:", error)
+    } catch (error) {      
     } finally {
       isCheckingRef.current = false
     }

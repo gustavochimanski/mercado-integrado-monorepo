@@ -81,7 +81,7 @@ export function useReauth() {
         // Incrementar tentativas mas MANTER modal aberto
         return {
           ...prev,
-          attempts: newAttempts
+          attempts: newAttempts,
           // isOpen permanece true
         }
       }

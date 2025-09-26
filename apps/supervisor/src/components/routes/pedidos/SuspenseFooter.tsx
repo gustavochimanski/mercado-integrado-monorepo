@@ -45,9 +45,8 @@ export const FooterSelecionados = ({
           
           const pedidosComDadosCompletos = await Promise.all(promises)
           setPedidosCompletos(pedidosComDadosCompletos)
-          console.log('📦 Dados completos dos pedidos:', pedidosComDadosCompletos)
         } catch (error) {
-          console.error('Erro ao buscar dados completos:', error)
+          // Erro silencioso ao buscar dados completos
         }
       }
       
@@ -64,26 +63,11 @@ export const FooterSelecionados = ({
   const precisaDesvincularEntregador = (novoStatus: PedidoStatus) => {
     const temEntregador = pedidosCompletos.some(pedido => pedido.entregador_id)
     const statusValido = novoStatus === "P" || novoStatus === "R"
-    console.log('🔍 Debug desvincular:', { 
-      novoStatus, 
-      temEntregador, 
-      statusValido, 
-      pedidosCompletos: pedidosCompletos.map(p => ({ 
-        id: p.id, 
-        entregador_id: p.entregador_id
-      }))
-    })
     return statusValido && temEntregador
   }
 
   // Função para mover pedidos selecionados
-  const handleMoverPedidos = async (novoStatus: PedidoStatus) => {
-    console.log('🚀 handleMoverPedidos chamado:', { 
-      novoStatus, 
-      precisaVincular: precisaVincularEntregador(novoStatus), 
-      precisaDesvincular: precisaDesvincularEntregador(novoStatus) 
-    })
-    
+  const handleMoverPedidos = async (novoStatus: PedidoStatus) => {    
     if (precisaVincularEntregador(novoStatus)) {
       // Separar pedidos que precisam de entregador dos que não precisam
       const pedidosSemEntregador = pedidosCompletos.filter(pedido => !pedido.entregador_id)
@@ -103,7 +87,6 @@ export const FooterSelecionados = ({
         setIsEntregadorModalOpen(true)
       }
     } else if (precisaDesvincularEntregador(novoStatus)) {
-      console.log('✅ Abrindo modal de desvincular para status:', novoStatus)
       // Abrir modal de confirmação para desvincular
       setStatusParaMover(novoStatus)
       setIsDesvincularModalOpen(true)
@@ -143,9 +126,9 @@ export const FooterSelecionados = ({
         setIndiceAtual(0)
         onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
       }
-    } catch (error) {
-      console.error('Erro ao vincular entregador:', error)
-    }
+        } catch (error) {
+          // Erro silencioso ao vincular entregador
+        }
   }
 
   // Função para pular pedido atual
@@ -193,9 +176,9 @@ export const FooterSelecionados = ({
       setIsDesvincularModalOpen(false)
       setStatusParaMover(null)
       onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
-    } catch (error) {
-      console.error('Erro ao desvincular entregadores:', error)
-    }
+      } catch (error) {
+        // Erro silencioso ao desvincular entregadores
+      }
   }
 
   return (

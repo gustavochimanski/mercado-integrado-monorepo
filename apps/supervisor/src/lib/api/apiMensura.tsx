@@ -26,6 +26,14 @@ apiMensura.interceptors.response.use(
 
     // Se for 401 e não for uma tentativa de reautenticação
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Verificar se é uma requisição de login (não deve ser interceptada)
+      const isLoginRequest = originalRequest.url?.includes('/auth/token');
+      
+      if (isLoginRequest) {
+        // Se for login, apenas rejeitar o erro sem tentar reautenticação
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
@@ -44,7 +52,6 @@ apiMensura.interceptors.response.use(
           }
         }
       } catch (reauthError) {
-        console.error("Erro na reautenticação:", reauthError);
         // Em caso de erro, redirecionar para login
         if (typeof window !== "undefined") {
           window.location.href = "/login";
