@@ -30,8 +30,13 @@ export const FooterSelecionados = ({
     return novoStatus === "S" && pedidosSelecionados.some(pedido => !pedido.motoboy)
   }
 
+  // Função para verificar se precisa desvincular entregador
+  const precisaDesvincularEntregador = (novoStatus: PedidoStatus) => {
+    return (novoStatus === "P" || novoStatus === "R") && pedidosSelecionados.some(pedido => pedido.motoboy)
+  }
+
   // Função para mover pedidos selecionados
-  const handleMoverPedidos = (novoStatus: PedidoStatus) => {
+  const handleMoverPedidos = async (novoStatus: PedidoStatus) => {
     if (precisaVincularEntregador(novoStatus)) {
       // Separar pedidos que precisam de entregador dos que não precisam
       const pedidosSemEntregador = pedidosSelecionados.filter(pedido => !pedido.motoboy)
@@ -49,6 +54,30 @@ export const FooterSelecionados = ({
         setPedidoAtual(pedidosSemEntregador[0])
         setIndiceAtual(0)
         setIsEntregadorModalOpen(true)
+      }
+    } else if (precisaDesvincularEntregador(novoStatus)) {
+      // Desvincular entregador dos pedidos que têm entregador
+      const pedidosComEntregador = pedidosSelecionados.filter(pedido => pedido.motoboy)
+      
+      // Desvincular todos os entregadores primeiro (aguardar conclusão)
+      const desvincularPromises = pedidosComEntregador.map(pedido => 
+        vincularEntregador.mutateAsync({ 
+          pedidoId: pedido.id, 
+          entregadorId: null 
+        })
+      )
+      
+      try {
+        await Promise.all(desvincularPromises)
+        
+        // Atualizar status de todos os pedidos após desvincular (aguardar também)
+        const atualizarPromises = pedidosSelecionados.map(pedido => 
+          atualizarStatus.mutateAsync({ id: pedido.id, status: novoStatus })
+        )
+        
+        await Promise.all(atualizarPromises)
+      } catch (error) {
+        console.error('Erro ao desvincular entregadores:', error)
       }
     } else {
       onMoverSelecionados(novoStatus)

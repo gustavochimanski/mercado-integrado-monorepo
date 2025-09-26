@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../ui/tabs"
 import { useToast } from "../../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
-import { useUpdatePedido, useUpdateCliente, useUpdateItens, useUpdateEndereco } from "@supervisor/services/useQueryPedidoAdmin"
+import { useUpdatePedido, useUpdateCliente, useUpdateItens, useUpdateEndereco, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin"
 import { useQueryClient } from "@tanstack/react-query"
 import { User, CreditCard, Truck, Package, History } from "lucide-react"
 import { ClienteTab } from "./ClienteTab"
@@ -44,6 +44,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const updateClienteMutation = useUpdateCliente()
   const updateItensMutation = useUpdateItens()
   const updateEnderecoMutation = useUpdateEndereco()
+  const { vincularEntregador } = useMutatePedidoAdmin()
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -201,12 +202,32 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     setIsSaving(true)
 
     try {
-      // Atualizar dados do pedido
+      // Atualizar dados do pedido (sem entregador_id)
       const pedidoData = {
         meio_pagamento_id: formData.meio_pagamento_id,
         observacao_geral: formData.observacao_geral,
         troco_para: formData.troco_para,
-        entregador_id: formData.entregador_id,
+      }
+
+      // Gerenciar entregador separadamente
+      const entregadorAnterior = pedidoCompleto.entregador?.id
+      const entregadorNovo = formData.entregador_id
+
+      // Se mudou o entregador, usar endpoint específico
+      if (entregadorAnterior !== entregadorNovo) {
+        if (entregadorNovo === null) {
+          // Desvincular entregador
+          await vincularEntregador.mutateAsync({ 
+            pedidoId: pedido.id, 
+            entregadorId: null 
+          })
+        } else {
+          // Vincular novo entregador
+          await vincularEntregador.mutateAsync({ 
+            pedidoId: pedido.id, 
+            entregadorId: entregadorNovo 
+          })
+        }
       }
 
       // Atualizar dados do cliente (se tiver cliente_id)

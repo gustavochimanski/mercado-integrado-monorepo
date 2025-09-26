@@ -33,6 +33,8 @@ export function useMutatePedidoAdmin() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
     qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+    // Forçar refetch de todas as queries relacionadas a pedidos
+    qc.refetchQueries({ queryKey: ["pedidoDetalhes"], exact: false })
   }
 
   const atualizarStatus = useMutation({
@@ -73,12 +75,27 @@ export function useMutatePedidoAdmin() {
 
   const vincularEntregador = useMutation({
     mutationFn: async ({ pedidoId, entregadorId }: { pedidoId: number; entregadorId: number | null }) => {
-      const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/entregador?entregador_id=${entregadorId}`, {})
-      return data
+      if (entregadorId === null) {
+        // Usar DELETE para desvincular
+        const { data } = await apiMensura.delete(`/api/delivery/pedidos/admin/${pedidoId}/entregador`)
+        return data
+      } else {
+        // Usar PUT para vincular
+        const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/entregador?entregador_id=${entregadorId}`, {})
+        return data
+      }
     },
-    onSuccess: (data) => {
-      toast({ title: "Entregador vinculado", description: "O entregador foi vinculado ao pedido com sucesso." })
-      invalidate()
+    onSuccess: (data, variables) => {
+      if (variables.entregadorId === null) {
+        toast({ title: "Entregador desvinculado", description: "O entregador foi desvinculado do pedido com sucesso." })
+      } else {
+        toast({ title: "Entregador vinculado", description: "O entregador foi vinculado ao pedido com sucesso." })
+      }
+      
+      // Invalidar e refetch específico do pedido
+      qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+      qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
+      qc.refetchQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
     },
     onError: (err: any) => {
       toast({ title: "Erro ao vincular entregador", description: getErrorMessage(err), variant: "destructive" })
