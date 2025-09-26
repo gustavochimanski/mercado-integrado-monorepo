@@ -1,5 +1,8 @@
 import { PedidoStatus } from "@supervisor/types/pedido";
 import { statusMap } from "./Kanban";
+import { useState } from "react";
+import { SelecionarEntregadorModal } from "./SelecionarEntregadorModal";
+import { useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin";
 
 // ---------------- FooterSelecionados com transition ----------------
 export const FooterSelecionados = ({
@@ -7,12 +10,101 @@ export const FooterSelecionados = ({
   onMoverSelecionados,
   onCancelar,
   visivel,
+  pedidosSelecionados = [], // Array de pedidos selecionados
 }: {
   count: number;
   onMoverSelecionados: (novoStatus: PedidoStatus) => void;
   onCancelar: () => void;
   visivel: boolean;
+  pedidosSelecionados?: Array<{ id: number; status: string; motoboy?: string }>; // Dados dos pedidos selecionados
 }) => {
+  const [isEntregadorModalOpen, setIsEntregadorModalOpen] = useState(false)
+  const [statusParaMover, setStatusParaMover] = useState<PedidoStatus | null>(null)
+  const [pedidosParaProcessar, setPedidosParaProcessar] = useState<Array<{ id: number; status: string; motoboy?: string }>>([])
+  const [pedidoAtual, setPedidoAtual] = useState<{ id: number; status: string; motoboy?: string } | null>(null)
+  const [indiceAtual, setIndiceAtual] = useState(0)
+  const { atualizarStatus, vincularEntregador } = useMutatePedidoAdmin()
+
+  // Função para verificar se precisa vincular entregador
+  const precisaVincularEntregador = (novoStatus: PedidoStatus) => {
+    return novoStatus === "S" && pedidosSelecionados.some(pedido => !pedido.motoboy)
+  }
+
+  // Função para mover pedidos selecionados
+  const handleMoverPedidos = (novoStatus: PedidoStatus) => {
+    if (precisaVincularEntregador(novoStatus)) {
+      // Separar pedidos que precisam de entregador dos que não precisam
+      const pedidosSemEntregador = pedidosSelecionados.filter(pedido => !pedido.motoboy)
+      const pedidosComEntregador = pedidosSelecionados.filter(pedido => pedido.motoboy)
+      
+      // Atualizar status dos pedidos que já têm entregador
+      pedidosComEntregador.forEach(pedido => {
+        atualizarStatus.mutate({ id: pedido.id, status: novoStatus })
+      })
+
+      // Processar pedidos sem entregador um por vez
+      if (pedidosSemEntregador.length > 0) {
+        setStatusParaMover(novoStatus)
+        setPedidosParaProcessar(pedidosSemEntregador)
+        setPedidoAtual(pedidosSemEntregador[0])
+        setIndiceAtual(0)
+        setIsEntregadorModalOpen(true)
+      }
+    } else {
+      onMoverSelecionados(novoStatus)
+    }
+  }
+
+  // Função para confirmar seleção de entregador
+  const handleConfirmEntregador = async (entregadorId: number) => {
+    if (!statusParaMover || !pedidoAtual) return
+
+    try {
+      // Vincular entregador para o pedido atual
+      await vincularEntregador.mutateAsync({ 
+        pedidoId: pedidoAtual.id, 
+        entregadorId 
+      })
+
+      // Atualizar status do pedido atual
+      atualizarStatus.mutate({ id: pedidoAtual.id, status: statusParaMover })
+
+      // Verificar se há mais pedidos para processar
+      const proximoIndice = indiceAtual + 1
+      
+      if (proximoIndice < pedidosParaProcessar.length) {
+        // Próximo pedido - manter modal aberto
+        const proximoPedido = pedidosParaProcessar[proximoIndice]
+        setPedidoAtual(proximoPedido)
+        setIndiceAtual(proximoIndice)
+      } else {
+        // Finalizou todos os pedidos
+        setIsEntregadorModalOpen(false)
+        setStatusParaMover(null)
+        setPedidosParaProcessar([])
+        setPedidoAtual(null)
+        setIndiceAtual(0)
+      }
+    } catch (error) {
+      console.error('Erro ao vincular entregador:', error)
+    }
+  }
+
+  // Função para pular pedido atual
+  const handlePularPedido = () => {
+    const proximoIndice = indiceAtual + 1
+    if (proximoIndice < pedidosParaProcessar.length) {
+      setPedidoAtual(pedidosParaProcessar[proximoIndice])
+      setIndiceAtual(proximoIndice)
+    } else {
+      setIsEntregadorModalOpen(false)
+      setStatusParaMover(null)
+      setPedidosParaProcessar([])
+      setPedidoAtual(null)
+      setIndiceAtual(0)
+    }
+  }
+
   return (
     <div
       className={`
@@ -36,13 +128,33 @@ export const FooterSelecionados = ({
         {Object.entries(statusMap).map(([statusKey, meta]) => (
           <button
             key={statusKey}
-            onClick={() => onMoverSelecionados(statusKey as PedidoStatus)}
+            onClick={() => handleMoverPedidos(statusKey as PedidoStatus)}
             className={`px-3 py-1 rounded-full text-xs font-semibold ${meta.headerClass} hover:opacity-80 transition`}
           >
             {meta.label}
           </button>
         ))}
       </div>
+
+      {/* Modal de seleção de entregador */}
+      <SelecionarEntregadorModal
+        isOpen={isEntregadorModalOpen}
+        onClose={() => {
+          setIsEntregadorModalOpen(false)
+          setStatusParaMover(null)
+          setPedidosParaProcessar([])
+          setPedidoAtual(null)
+          setIndiceAtual(0)
+        }}
+        onConfirm={handleConfirmEntregador}
+        pedidoId={pedidoAtual?.id}
+        pedidosIds={pedidosParaProcessar.map(p => p.id)}
+        isMultiplo={true}
+        pedidoAtual={pedidoAtual}
+        indiceAtual={indiceAtual}
+        totalPedidos={pedidosParaProcessar.length}
+        onPular={handlePularPedido}
+      />
     </div>
   );
 };

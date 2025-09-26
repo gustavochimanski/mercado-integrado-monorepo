@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@supervisor/components/ui/dialog"
 import { Button } from "@supervisor/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@supervisor/components/ui/select"
@@ -12,8 +12,14 @@ interface SelecionarEntregadorModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: (entregadorId: number) => void
-  pedidoId: number
+  pedidoId?: number
+  pedidosIds?: number[] // Para seleção múltipla
   empresaId?: number 
+  isMultiplo?: boolean // Indica se é seleção múltipla
+  pedidoAtual?: { id: number; status: string; motoboy?: string } | null // Pedido sendo processado
+  indiceAtual?: number // Índice atual no processamento
+  totalPedidos?: number // Total de pedidos para processar
+  onPular?: () => void // Função para pular pedido atual
 }
 
 export function SelecionarEntregadorModal({
@@ -21,13 +27,26 @@ export function SelecionarEntregadorModal({
   onClose,
   onConfirm,
   pedidoId,
-  empresaId = 1 // Default empresa ID
+  pedidosIds = [],
+  empresaId = 1, // Default empresa ID
+  isMultiplo = false,
+  pedidoAtual = null,
+  indiceAtual = 0,
+  totalPedidos = 0,
+  onPular
 }: SelecionarEntregadorModalProps) {
   const [selectedEntregador, setSelectedEntregador] = useState<string>("")
   const [isVinculando, setIsVinculando] = useState(false)
   const { toast } = useToast()
   const { data: entregadores, isLoading, refetch } = useEntregadores(isOpen)
   const { vincularEmpresa } = useMutateEntregador()
+
+  // Limpar seleção quando muda o pedido atual
+  useEffect(() => {
+    if (isMultiplo && pedidoAtual) {
+      setSelectedEntregador("")
+    }
+  }, [pedidoAtual, isMultiplo])
 
   const handleConfirm = async () => {
     if (selectedEntregador && selectedEntregador !== "loading" && selectedEntregador !== "no-entregadores") {
@@ -62,7 +81,7 @@ export function SelecionarEntregadorModal({
 
       onConfirm(entregadorId)
       setSelectedEntregador("")
-      onClose()
+      // Não fechar o modal aqui - deixar o FooterSelecionados controlar
     }
   }
 
@@ -87,9 +106,50 @@ export function SelecionarEntregadorModal({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Progresso para processamento individual */}
+          {isMultiplo && pedidoAtual && totalPedidos > 1 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-blue-800">
+                  Processando pedidos ({indiceAtual + 1} de {totalPedidos})
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-blue-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((indiceAtual + 1) / totalPedidos) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-blue-600">
+                Pedido atual: <strong>#{pedidoAtual.id}</strong>
+              </p>
+            </div>
+          )}
+
           <p className="text-sm text-muted-foreground">
-            Para alterar o status do pedido #{pedidoId} para &quot;Saiu para Entrega&quot;, é necessário vincular um entregador.
+            {isMultiplo && pedidoAtual
+              ? `Para alterar o status do pedido #${pedidoAtual.id} para "Saiu para Entrega", é necessário vincular um entregador.`
+              : isMultiplo
+              ? `Para alterar o status de ${pedidosIds.length} pedido(s) para "Saiu para Entrega", é necessário vincular um entregador.`
+              : `Para alterar o status do pedido #${pedidoId} para "Saiu para Entrega", é necessário vincular um entregador.`
+            }
           </p>
+          
+          {/* Lista de pedidos para seleção múltipla simples */}
+          {isMultiplo && !pedidoAtual && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm font-medium text-blue-800 mb-2">Pedidos selecionados:</p>
+              <div className="flex flex-wrap gap-1">
+                {pedidosIds.map((id, index) => (
+                  <span key={id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                    #{id}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Entregador</label>
@@ -145,16 +205,25 @@ export function SelecionarEntregadorModal({
             </Select>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={handleClose}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              disabled={!selectedEntregador || selectedEntregador === "loading" || selectedEntregador === "no-entregadores" || selectedEntregador === "header-inativos" || isVinculando}
-            >
-              {isVinculando ? "Vinculando..." : "Confirmar"}
-            </Button>
+          <div className="flex justify-between pt-4">
+            <div className="flex gap-2">
+              {isMultiplo && pedidoAtual && onPular && (
+                <Button variant="outline" onClick={onPular}>
+                  Pular Pedido
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleClose}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={!selectedEntregador || selectedEntregador === "loading" || selectedEntregador === "no-entregadores" || selectedEntregador === "header-inativos" || isVinculando}
+              >
+                {isVinculando ? "Vinculando..." : "Confirmar"}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

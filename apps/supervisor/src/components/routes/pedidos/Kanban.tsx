@@ -800,6 +800,11 @@ const KanbanPedidos = () => {
     setSelecionados(new Set())
   }
 
+  // Obter dados dos pedidos selecionados
+  const pedidosSelecionados = useMemo(() => {
+    return pedidos.filter(pedido => selecionados.has(pedido.id))
+  }, [pedidos, selecionados])
+
   const handleCancelarSelecionados = () => setSelecionados(new Set())
 
   const limparFiltros = () => {
@@ -888,6 +893,7 @@ const KanbanPedidos = () => {
           onMoverSelecionados={handleMoverSelecionados}
           onCancelar={handleCancelarSelecionados}
           visivel={selecionados.size > 0}
+          pedidosSelecionados={pedidosSelecionados}
         />
       )}
     </div>
