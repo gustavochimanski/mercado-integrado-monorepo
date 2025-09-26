@@ -187,7 +187,7 @@ const columns: GridColDef[] = useMemo(
           <DataTableComponentMui
             rows={produtos}
             columns={columns}
-            getRowId={(row: any) => row.cod_barras}
+            getRowId={(row: any) => row.id || row.cod_barras}
             autoHeight={false}
             sx={{ height: '100%', width: '100%' }}
           />

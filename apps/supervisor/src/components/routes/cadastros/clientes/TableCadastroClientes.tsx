@@ -1,4 +1,3 @@
-// src/components/routes/cadastros/clientes/TableCadastroClientes.tsx
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -9,13 +8,13 @@ import { CirclePlus, Trash2, Edit } from "lucide-react";
 
 import { useFetchClientes, useMutateCliente } from "@supervisor/services/useQueryCliente";
 
-// ⬇️ Lazy-load do DataGrid wrapper (só no client)
+// ⬇Lazy-load do DataGrid wrapper (só no client)
 const DataTableComponentMui = dynamic(
   () => import("@supervisor/components/shared/table/mui-data-table"),
   { ssr: false, loading: () => <div className="p-4 text-sm text-muted-foreground">Carregando tabela...</div> }
 );
 
-// ⬇️ Lazy-load dos modals (só abre quando clicar)
+// Lazy-load dos modals (só abre quando clicar)
 const ModalNovoCliente = dynamic(
   () => import("./ModalAddCliente").then(m => m.ModalNovoCliente),
   { ssr: false }
@@ -43,8 +42,11 @@ export const TableCadastroClientes = () => {
 
   const { remove: deleteCliente } = useMutateCliente();
 
-  // ✅ Memo nos dados
-  const clientes = useMemo(() => resp?.data ?? [], [resp?.data]);
+  // Memo nos dados - ordenados por ID crescente
+  const clientes = useMemo(() => {
+    const data = resp?.data ?? [];
+    return data.sort((a: any, b: any) => a.id - b.id);
+  }, [resp?.data]);
 
 // helper para formatar data
 const fmtDate = (dateString: string) => {
@@ -59,6 +61,7 @@ const fmtDate = (dateString: string) => {
   // colunas
   const columns: GridColDef[] = useMemo(
     () => [
+      { field: "id", headerName: "ID", flex: 0.5, minWidth: 80 },
       { field: "nome", headerName: "Nome", flex: 2, minWidth: 200 },
     { field: "cpf", headerName: "CPF", flex: 1.2, minWidth: 140 },
     { field: "telefone", headerName: "Telefone", flex: 1.2, minWidth: 140 },
@@ -124,7 +127,7 @@ const fmtDate = (dateString: string) => {
   []
 );
 
-  // ✅ Callbacks memorizados
+  // Callbacks memorizados
   const openModal = useCallback(() => setModalOpen(true), []);
   const closeModal = useCallback((open: boolean) => setModalOpen(open), []);
 
