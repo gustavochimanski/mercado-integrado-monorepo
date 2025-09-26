@@ -7,6 +7,8 @@ import { Label } from "@supervisor/components/ui/label";
 import { Switch } from "@supervisor/components/ui/switch";
 import { useEffect, useState } from "react";
 import { User, Mail, Phone, Calendar, CreditCard } from "lucide-react";
+import { useUpdateCliente } from "@supervisor/services/useQueryPedidoAdmin";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 interface Props {
   open: boolean;
@@ -34,6 +36,8 @@ export const ModalEditarCliente = ({ open, onOpenChange, cliente }: Props) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const updateClienteMutation = useUpdateCliente();
 
   // Preencher form com dados do cliente quando abrir modal
   useEffect(() => {
@@ -77,27 +81,50 @@ export const ModalEditarCliente = ({ open, onOpenChange, cliente }: Props) => {
 
     if (!cliente?.id) return;
 
+    // Validação adicional no frontend
+    if (!form.nome.trim()) {
+      toast({
+        title: "Erro de validação",
+        description: "Nome é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!form.telefone.trim()) {
+      toast({
+        title: "Erro de validação", 
+        description: "Telefone é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Implementar chamada para API quando endpoint estiver disponível
-      console.log("Dados do cliente a serem atualizados:", {
-        id: cliente.id,
-        ...form,
-      });
+      // Preparar dados no formato correto da API
+      const clienteData = {
+        nome: form.nome.trim(),
+        cpf: form.cpf.replace(/\D/g, ""), // Remove formatação do CPF
+        telefone: form.telefone.replace(/\D/g, ""), // Remove formatação do telefone
+        email: form.email.trim(),
+        data_nascimento: form.data_nascimento,
+        ativo: form.ativo
+      };
 
-      // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Chamar API de atualização
+      await updateClienteMutation.mutateAsync({
+        clienteId: cliente.id,
+        data: clienteData
+      });
 
       // Fechar modal após sucesso
       onOpenChange(false);
 
-      // TODO: Mostrar toast de sucesso
-      console.log("Cliente atualizado com sucesso!");
-
     } catch (error) {
       console.error("Erro ao atualizar cliente:", error);
-      // TODO: Mostrar toast de erro
+      // O toast de erro já é mostrado pelo hook
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +163,7 @@ export const ModalEditarCliente = ({ open, onOpenChange, cliente }: Props) => {
   };
 
   // Validação básica
-  const isFormValid = form.nome.trim();
+  const isFormValid = form.nome.trim() && form.telefone.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -252,7 +279,7 @@ export const ModalEditarCliente = ({ open, onOpenChange, cliente }: Props) => {
             </Button>
             <Button
               type="submit"
-              disabled={!isFormValid || isSubmitting}
+              disabled={!isFormValid || isSubmitting || updateClienteMutation.isPending}
               className="flex-1"
             >
               {isSubmitting ? "Salvando..." : "Salvar Alterações"}

@@ -144,21 +144,56 @@ export function useUpdateCliente() {
 
   return useMutation({
     mutationFn: async ({ clienteId, data }: { clienteId: number; data: any }) => {
-      const response = await mensuraApi.clienteAdminDelivery.updateClienteAdminApiDeliveryClienteAdminUpdateClienteIdPut(clienteId, {
-        nome: data.nome,
-        cpf: data.cpf,
-        telefone: data.telefone,
-        email: data.email,
-        data_nascimento: data.data_nascimento,
-        ativo: data.ativo
-      })
-      return response
+      // Validação dos campos obrigatórios
+      if (!data.nome?.trim()) {
+        throw new Error("Nome é obrigatório")
+      }
+      if (!data.telefone?.trim()) {
+        throw new Error("Telefone é obrigatório")
+      }
+
+      // Preparar dados no formato correto da API
+      const clienteData = {
+        nome: data.nome?.trim() || null,
+        cpf: data.cpf?.trim() || null,
+        telefone: data.telefone?.trim() || null,
+        email: data.email?.trim() || null,
+        data_nascimento: data.data_nascimento || null,
+        ativo: data.ativo ?? null,
+        // Campo endereco é opcional, mas se não for fornecido, não incluir
+        ...(data.endereco && { endereco: data.endereco })
+      }
+
+      try {
+        const response = await apiMensura.put(`/api/delivery/cliente/admin/update/${clienteId}`, clienteData)
+        return response.data
+      } catch (error: any) {
+        // Tratamento específico de erros da API
+        if (error.response?.status === 422) {
+          const errorMessage = error.response?.data?.detail || "Dados inválidos"
+          throw new Error(`Erro de validação: ${errorMessage}`)
+        } else if (error.response?.status === 404) {
+          throw new Error("Cliente não encontrado")
+        } else if (error.response?.status === 400) {
+          const errorMessage = error.response?.data?.detail || "Dados inválidos"
+          throw new Error(`Erro na requisição: ${errorMessage}`)
+        } else {
+          throw new Error(`Erro do servidor: ${error.message}`)
+        }
+      }
     },
     onSuccess: () => {
-      // Não fazer invalidação automática aqui, deixar para o componente controlar
+      // Invalidar cache de clientes
+      qc.invalidateQueries({ queryKey: ["clientes"], exact: false })
+      toast({ title: "Cliente atualizado", description: "O cliente foi atualizado com sucesso." })
     },
     onError: (err: any) => {
-      toast({ title: "Erro ao atualizar cliente", description: getErrorMessage(err), variant: "destructive" })
+      console.error("Erro detalhado ao atualizar cliente:", err)
+      toast({ 
+        title: "Erro ao atualizar cliente", 
+        description: err.message || getErrorMessage(err), 
+        variant: "destructive" 
+      })
     },
   })
 }
