@@ -8,6 +8,8 @@ import { Checkbox } from "@supervisor/components/ui/checkbox"
 import { isToday, parseISO } from "date-fns"
 import { ChevronRight, Eye, Printer } from "lucide-react"
 import { useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin"
+import { SelecionarEntregadorModal } from "./SelecionarEntregadorModal"
+import { useQueryClient } from "@tanstack/react-query"
 
 // Componente PedidoCard
 export const PedidoCard = React.memo(
@@ -23,7 +25,9 @@ export const PedidoCard = React.memo(
     selectedDate: string
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const { atualizarStatus } = useMutatePedidoAdmin()
+    const [isEntregadorModalOpen, setIsEntregadorModalOpen] = useState(false)
+    const { atualizarStatus, vincularEntregador } = useMutatePedidoAdmin()
+    const queryClient = useQueryClient()
 
     const mostrarTempoBadge = pedido.status !== "C" && pedido.status !== "E" && isToday(parseISO(selectedDate))
 
@@ -37,7 +41,28 @@ export const PedidoCard = React.memo(
     // Função para atualizar o status do pedido
     const handleNextStatus = () => {
       const nextStatus = getNextStatus(pedido.status)
+
+      // Se o próximo status for "S" (Saiu para Entrega), verificar se precisa vincular entregador
+      if (nextStatus === "S" && !pedido.motoboy) {
+        setIsEntregadorModalOpen(true)
+        return
+      }
+
+      // Se não precisa vincular entregador, atualizar status diretamente
       atualizarStatus.mutate({ id: pedido.id, status: nextStatus as any })
+    }
+
+    // Função para confirmar seleção de entregador
+    const handleConfirmEntregador = async (entregadorId: number) => {
+      try {
+        // Primeiro vincula o entregador
+        await vincularEntregador.mutateAsync({ pedidoId: pedido.id, entregadorId })
+        // Depois atualiza o status
+        atualizarStatus.mutate({ id: pedido.id, status: "S" as any })
+      } catch (error) {
+        // O erro já é tratado pelo hook
+        console.error('Erro ao vincular entregador:', error)
+      }
     }
 
     // Renderização do componente
@@ -106,6 +131,13 @@ export const PedidoCard = React.memo(
         </div>
 
         <PedidoModal pedido={pedido} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+        <SelecionarEntregadorModal
+          isOpen={isEntregadorModalOpen}
+          onClose={() => setIsEntregadorModalOpen(false)}
+          onConfirm={handleConfirmEntregador}
+          pedidoId={pedido.id}
+        />
       </>
     )
   },

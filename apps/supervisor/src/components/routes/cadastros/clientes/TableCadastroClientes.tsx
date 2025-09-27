@@ -2,195 +2,199 @@
 
 import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@supervisor/components/ui/card";
 import { Button } from "@supervisor/components/ui/button";
 import type { GridColDef} from "@mui/x-data-grid";
-import { Trash2, Edit } from "lucide-react";
+import { CirclePlus, Trash2, Edit } from "lucide-react";
 
-// Lazy-load do DataGrid wrapper (só no client)
+import { useFetchClientes, useMutateCliente } from "@supervisor/services/useQueryCliente";
+
+// ⬇Lazy-load do DataGrid wrapper (só no client)
 const DataTableComponentMui = dynamic(
   () => import("@supervisor/components/shared/table/mui-data-table"),
   { ssr: false, loading: () => <div className="p-4 text-sm text-muted-foreground">Carregando tabela...</div> }
 );
 
+// Lazy-load dos modals (só abre quando clicar)
+const ModalNovoCliente = dynamic(
+  () => import("./ModalAddCliente").then(m => m.ModalNovoCliente),
+  { ssr: false }
+);
 
-interface Props {
-  empresaId: number;
-}
+const ModalEditarCliente = dynamic(
+  () => import("./ModalEditCliente").then(m => m.ModalEditarCliente),
+  { ssr: false }
+);
 
-export const TableCadastroClientes = ({ empresaId }: Props) => {
-  const [selectedClientes, setSelectedClientes] = useState<number[]>([]);
+const ModalDeleteCliente = dynamic(
+  () => import("./ModalDeleteCliente").then(m => m.ModalDeleteCliente),
+  { ssr: false }
+);
 
-  // TODO: Conectar com hook da API quando estiver disponível
-  const clientes: any[] = []; // Array vazio até ter dados da API
-  const isLoading = false;
-  const hasError = false;
 
-  // Helper para formatar data
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "—";
+export const TableCadastroClientes = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+
+  const { data: resp, isLoading: clientesLoading, isError: clientesError, error } =
+    useFetchClientes();
+
+  const { remove: deleteCliente } = useMutateCliente();
+
+  // Memo nos dados - ordenados por ID crescente
+  const clientes = useMemo(() => {
+    const data = resp?.data ?? [];
+    return data.sort((a: any, b: any) => a.id - b.id);
+  }, [resp?.data]);
+
+// helper para formatar data
+const fmtDate = (dateString: string) => {
+  if (!dateString) return "—";
+  try {
     return new Date(dateString).toLocaleDateString('pt-BR');
-  };
+  } catch {
+    return "—";
+  }
+};
 
-  // Helper para status
-  const getStatusText = (ativo: boolean) => ativo ? "Ativo" : "Inativo";
-
-  // Helper para formatar telefone
-  const formatTelefone = (telefone: string) => {
-    if (!telefone) return "—";
-    return telefone;
-  };
-
-  // Colunas da tabela
+  // colunas
   const columns: GridColDef[] = useMemo(
     () => [
-      {
-        field: "id",
-        headerName: "ID",
-        flex: 0.5,
-        minWidth: 80
-      },
-      {
-        field: "nome",
-        headerName: "Nome",
-        flex: 2,
-        minWidth: 200,
-        editable: true,
-      },
-      {
-        field: "cpf",
-        headerName: "CPF",
-        flex: 1.2,
-        minWidth: 140
-      },
-      {
-        field: "telefone",
-        headerName: "Telefone",
-        flex: 1.2,
-        minWidth: 140,
-        editable: true,
-        valueFormatter: (value: any) => formatTelefone(value),
-      },
-      {
-        field: "email",
-        headerName: "Email",
-        flex: 2,
-        minWidth: 200,
-        editable: true,
-      },
-      {
-        field: "data_nascimento",
-        headerName: "Nascimento",
-        flex: 1,
-        minWidth: 120,
-        valueFormatter: (value: any) => formatDate(value),
-      },
-      {
-        field: "ativo",
-        headerName: "Status",
-        flex: 1,
-        minWidth: 100,
-        type: "boolean",
-        editable: true,
-        valueGetter: (value: any, row: any) => Boolean(value ?? row?.ativo),
-        cellClassName: (params) => {
-          return params.row.ativo ? "cell-status-ativo" : "cell-status-inativo";
-        },
-      },
-      {
-        field: "created_at",
-        headerName: "Cadastro",
-        flex: 1,
-        minWidth: 120,
-        valueFormatter: (value: any) => formatDate(value),
-      },
-    ],
-    []
-  );
+      { field: "id", headerName: "ID", flex: 0.5, minWidth: 80 },
+      { field: "nome", headerName: "Nome", flex: 2, minWidth: 200 },
+    { field: "cpf", headerName: "CPF", flex: 1.2, minWidth: 140 },
+    { field: "telefone", headerName: "Telefone", flex: 1.2, minWidth: 140 },
+    { field: "email", headerName: "Email", flex: 2, minWidth: 200 },
+    {
+      field: "data_nascimento",
+      headerName: "Nascimento",
+      flex: 1,
+      minWidth: 120,
+      valueFormatter: (value: any) => fmtDate(value),
+    },
+    {
+      field: "ativo",
+      headerName: "Ativo",
+      flex: 0.8,
+      minWidth: 100,
+      type: "boolean",
+      valueGetter: (value: any) => Boolean(value),
+    },
+    {
+      field: "created_at",
+      headerName: "Cadastrado",
+      flex: 1,
+      minWidth: 120,
+      valueFormatter: (value: any) => fmtDate(value),
+    },
+           {
+             field: "actions",
+             headerName: "Ações",
+             sortable: false,
+             filterable: false,
+             flex: 1,
+             minWidth: 120,
+             renderCell: (params) => {
+               const cliente = params.row;
+        return (
+          <div className="flex justify-center items-center gap-2 mt-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedClient(cliente);
+                setEditModalOpen(true);
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                setSelectedClient(cliente);
+                setDeleteModalOpen(true);
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        );
+             },
+           },
+  ],
+  []
+);
 
   // Callbacks memorizados
-  const handleRowSelectionChange = useCallback((ids: any) => {
-    setSelectedClientes(ids);
+  const openModal = useCallback(() => setModalOpen(true), []);
+  const closeModal = useCallback((open: boolean) => setModalOpen(open), []);
+
+  const closeEditModal = useCallback((open: boolean) => {
+    setEditModalOpen(open);
+    if (!open) {
+      setSelectedClient(null);
+    }
   }, []);
 
-  const handleEditCliente = useCallback(() => {
-    if (selectedClientes.length === 1) {
-      // TODO: Implementar edição quando tiver endpoint
-      console.log("Editar cliente:", selectedClientes[0]);
+  const closeDeleteModal = useCallback((open: boolean) => {
+    setDeleteModalOpen(open);
+    if (!open) {
+      setSelectedClient(null);
     }
-  }, [selectedClientes]);
-
-  const handleDeleteCliente = useCallback(() => {
-    if (selectedClientes.length > 0) {
-      // TODO: Implementar exclusão quando tiver endpoint
-      console.log("Excluir clientes:", selectedClientes);
-    }
-  }, [selectedClientes]);
-
-
-  const handleRowEdit = useCallback((newRow: any, wasEnterKey: boolean) => {
-    // TODO: Implementar edição inline quando tiver endpoint de update
-    console.log("Editando cliente:", newRow, "Com Enter:", wasEnterKey);
-    return newRow;
   }, []);
+
+  const handleDeleteClient = useCallback(async () => {
+    if (!selectedClient?.id) return;
+    
+    try {
+      await deleteCliente.mutateAsync(selectedClient.id);
+      setDeleteModalOpen(false);
+      setSelectedClient(null);
+    } catch (error) {
+      console.error("Erro ao excluir cliente:", error);
+    }
+  }, [selectedClient, deleteCliente]);
 
   return (
-    <div className="flex flex-col flex-1 h-full">
-      <Card className="flex-1 flex flex-col">
-        <CardHeader>
-          <CardTitle>Clientes do Delivery</CardTitle>
-        </CardHeader>
+    <div className="flex flex-col h-full">
+      <div className="flex justify-end mb-4">
+        <Button size="sm" onClick={openModal}>
+          <CirclePlus className="w-4 h-4 mr-1" />
+          Novo Cliente
+        </Button>
+      </div>
 
-        <CardContent className="flex-1 overflow-auto">
-          {hasError ? (
-            <div className="text-red-500 p-4">
-              Erro ao carregar clientes.
-            </div>
-          ) : clientes.length === 0 && !isLoading ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <p className="text-lg font-medium">Nenhum cliente encontrado</p>
-                <p className="text-sm mt-2">Os clientes aparecerão aqui quando conectado à API</p>
-              </div>
-            </div>
-          ) : (
-            <DataTableComponentMui
-              rows={clientes}
-              columns={columns}
-              loading={isLoading}
-              getRowId={(row: any) => row.id}
-              density="compact"
-              disableColumnMenu
-              disableColumnFilter
-              disableColumnSelector
-              scrollbarSize={8}
-              onRowSelectionModelChange={handleRowSelectionChange}
-              onRowEditConfirm={handleRowEdit}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 30, page: 0 } },
-              }}
-              pageSizeOptions={[30, 50, 100]}
-            />
-          )}
-        </CardContent>
+      <div className="flex-1 min-h-0">
+        {clientesError ? (
+          <p>Erro ao carregar clientes. {String((error as any)?.message ?? "")}</p>
+        ) : (
+          <DataTableComponentMui
+            rows={clientes}
+            columns={columns}
+            getRowId={(row: any) => row.id}
+            autoHeight={false}
+            sx={{ height: '100%', width: '100%' }}
+          />
+        )}
+      </div>
 
-        <CardFooter className="flex justify-start gap-4">
-          <Button
-            variant="outline"
-            disabled={selectedClientes.length !== 1}
-            onClick={handleEditCliente}
-          >
-            <Edit size={16} /> Editar Cliente
-          </Button>
-          <Button
-            variant="destructive"
-            disabled={selectedClientes.length === 0}
-            onClick={handleDeleteCliente}
-          >
-            <Trash2 size={16} /> Excluir
-          </Button>
-        </CardFooter>
-      </Card>
+      <ModalNovoCliente open={modalOpen} onOpenChange={closeModal} />
+
+      <ModalEditarCliente
+        open={editModalOpen}
+        onOpenChange={closeEditModal}
+        cliente={selectedClient}
+      />
+
+      <ModalDeleteCliente
+        open={deleteModalOpen}
+        onOpenChange={closeDeleteModal}
+        cliente={selectedClient}
+        onConfirm={handleDeleteClient}
+        isDeleting={deleteCliente.isPending}
+      />
     </div>
   );
 };

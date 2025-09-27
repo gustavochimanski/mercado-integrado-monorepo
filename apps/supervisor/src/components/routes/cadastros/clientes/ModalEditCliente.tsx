@@ -7,11 +7,13 @@ import { Label } from "@supervisor/components/ui/label";
 import { Switch } from "@supervisor/components/ui/switch";
 import { useEffect, useState } from "react";
 import { User, Mail, Phone, Calendar, CreditCard } from "lucide-react";
-import { useMutateCliente } from "@supervisor/services/useQueryCliente";
+import { useUpdateCliente } from "@supervisor/services/useQueryPedidoAdmin";
+import { useToast } from "@supervisor/hooks/use-toast";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  cliente: any;
 }
 
 interface FormData {
@@ -23,7 +25,7 @@ interface FormData {
   ativo: boolean;
 }
 
-export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
+export const ModalEditarCliente = ({ open, onOpenChange, cliente }: Props) => {
   const [form, setForm] = useState<FormData>({
     nome: "",
     cpf: "",
@@ -33,7 +35,37 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
     ativo: true,
   });
 
-  const { create: createClienteMutate } = useMutateCliente();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const updateClienteMutation = useUpdateCliente();
+
+  // Preencher form com dados do cliente quando abrir modal
+  useEffect(() => {
+    if (cliente && open) {
+      setForm({
+        nome: cliente.nome || "",
+        cpf: cliente.cpf || "",
+        telefone: cliente.telefone || "",
+        email: cliente.email || "",
+        data_nascimento: cliente.data_nascimento ? cliente.data_nascimento.split('T')[0] : "",
+        ativo: cliente.ativo ?? true,
+      });
+    }
+  }, [cliente, open]);
+
+  // Limpar form quando fechar modal
+  useEffect(() => {
+    if (!open) {
+      setForm({
+        nome: "",
+        cpf: "",
+        telefone: "",
+        email: "",
+        data_nascimento: "",
+        ativo: true,
+      });
+    }
+  }, [open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,37 +79,55 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação mínima
-    if (!form.nome.trim()) return;
+    if (!cliente?.id) return;
+
+    // Validação adicional no frontend
+    if (!form.nome.trim()) {
+      toast({
+        title: "Erro de validação",
+        description: "Nome é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!form.telefone.trim()) {
+      toast({
+        title: "Erro de validação", 
+        description: "Telefone é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      // Preparar dados no formato correto da API (sem campo 'ativo')
-      await createClienteMutate.mutateAsync({
+      // Preparar dados no formato correto da API
+      const clienteData = {
         nome: form.nome.trim(),
         cpf: form.cpf.replace(/\D/g, ""), // Remove formatação do CPF
         telefone: form.telefone.replace(/\D/g, ""), // Remove formatação do telefone
         email: form.email.trim(),
         data_nascimento: form.data_nascimento,
+        ativo: form.ativo
+      };
+
+      // Chamar API de atualização
+      await updateClienteMutation.mutateAsync({
+        clienteId: cliente.id,
+        data: clienteData
       });
 
       // Fechar modal após sucesso
       onOpenChange(false);
-      resetForm();
 
     } catch (error) {
-      console.error("Erro ao criar cliente:", error);
+      console.error("Erro ao atualizar cliente:", error);
+      // O toast de erro já é mostrado pelo hook
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const resetForm = () => {
-    setForm({
-      nome: "",
-      cpf: "",
-      telefone: "",
-      email: "",
-      data_nascimento: "",
-      ativo: true,
-    });
   };
 
   // Função para formatar CPF
@@ -112,21 +162,15 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
     setForm((prev) => ({ ...prev, telefone: formatted }));
   };
 
-  useEffect(() => {
-    if (!open) {
-      resetForm();
-    }
-  }, [open]);
-
   // Validação básica
-  const isFormValid = form.nome.trim();
+  const isFormValid = form.nome.trim() && form.telefone.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">            
-            Novo Cliente
+            Editar Cliente
           </DialogTitle>
         </DialogHeader>
 
@@ -151,7 +195,7 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
           <div className="space-y-2">
             <Label htmlFor="cpf" className="flex items-center gap-2">
               <CreditCard size={16} />
-              CPF *
+              CPF
             </Label>
             <Input
               id="cpf"
@@ -160,7 +204,7 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
               onChange={handleCPFChange}
               placeholder="000.000.000-00"
               maxLength={14}
-              required
+              disabled // Normalmente CPF não deve ser editável
             />
           </div>
 
@@ -235,10 +279,10 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
             </Button>
             <Button
               type="submit"
-              disabled={!isFormValid || createClienteMutate.isPending}
+              disabled={!isFormValid || isSubmitting || updateClienteMutation.isPending}
               className="flex-1"
             >
-              {createClienteMutate.isPending ? "Salvando..." : "Salvar Cliente"}
+              {isSubmitting ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </div>
         </form>
@@ -247,4 +291,4 @@ export const ModalNovoCliente = ({ open, onOpenChange }: Props) => {
   );
 };
 
-export default ModalNovoCliente;
+export default ModalEditarCliente;

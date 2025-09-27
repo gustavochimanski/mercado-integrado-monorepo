@@ -1,5 +1,6 @@
 // src/services/usePedidosAdmin.ts
 import apiMensura from "@supervisor/lib/api/apiMensura"
+import { mensuraApi } from "@supervisor/api/MensuraApi"
 import type { PedidoKanban, PedidoStatus, PagamentoMetodo, PagamentoGateway } from "@supervisor/types/pedido"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@supervisor/hooks/use-toast"
@@ -29,11 +30,16 @@ export function useMutatePedidoAdmin() {
   const qc = useQueryClient()
   const { toast } = useToast()
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+    qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+    // Forçar refetch de todas as queries relacionadas a pedidos
+    qc.refetchQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+  }
 
   const atualizarStatus = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: PedidoStatus }) => {
-      const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/status/${id}?status=${status}`)
+      const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/status/${id}?novo_status=${status}`)
       return data
     },
     onSuccess: () => {
@@ -67,7 +73,36 @@ export function useMutatePedidoAdmin() {
     },
   })
 
-  return { atualizarStatus, confirmarPagamento }
+  const vincularEntregador = useMutation({
+    mutationFn: async ({ pedidoId, entregadorId }: { pedidoId: number; entregadorId: number | null }) => {
+      if (entregadorId === null) {
+        // Usar DELETE para desvincular (sem parâmetros, apenas pedido_id na URL)
+        const { data } = await apiMensura.delete(`/api/delivery/pedidos/admin/${pedidoId}/entregador`)
+        return data
+      } else {
+        // Usar PUT para vincular
+        const { data } = await apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/entregador?entregador_id=${entregadorId}`, {})
+        return data
+      }
+    },
+    onSuccess: (data, variables) => {
+      if (variables.entregadorId === null) {
+        toast({ title: "Entregador desvinculado", description: "O entregador foi desvinculado do pedido com sucesso." })
+      } else {
+        toast({ title: "Entregador vinculado", description: "O entregador foi vinculado ao pedido com sucesso." })
+      }
+      
+      // Invalidar e refetch específico do pedido
+      qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+      qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
+      qc.refetchQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
+    },
+    onError: (err: any) => {
+      toast({ title: "Erro ao vincular entregador", description: getErrorMessage(err), variant: "destructive" })
+    },
+  })
+
+  return { atualizarStatus, confirmarPagamento, vincularEntregador }
 }
 
 export function useFetchPedidoDetalhes(pedidoId: number | null) {
@@ -94,7 +129,8 @@ export function useUpdatePedido() {
     onSuccess: () => {
       toast({ title: "Pedido atualizado", description: "As informações do pedido foram atualizadas com sucesso." })
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
-      qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+      // Removido: não invalidar pedidoDetalhes para preservar endereço atualizado
+      // qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
     },
     onError: (err: any) => {
       toast({ title: "Erro ao atualizar pedido", description: getErrorMessage(err), variant: "destructive" })
@@ -108,14 +144,56 @@ export function useUpdateCliente() {
 
   return useMutation({
     mutationFn: async ({ clienteId, data }: { clienteId: number; data: any }) => {
-      const response = await apiMensura.put(`/api/delivery/cliente/admin/update/${clienteId}`, data)
-      return response.data
+      // Validação dos campos obrigatórios
+      if (!data.nome?.trim()) {
+        throw new Error("Nome é obrigatório")
+      }
+      if (!data.telefone?.trim()) {
+        throw new Error("Telefone é obrigatório")
+      }
+
+      // Preparar dados no formato correto da API
+      const clienteData = {
+        nome: data.nome?.trim() || null,
+        cpf: data.cpf?.trim() || null,
+        telefone: data.telefone?.trim() || null,
+        email: data.email?.trim() || null,
+        data_nascimento: data.data_nascimento || null,
+        ativo: data.ativo ?? null,
+        // Campo endereco é opcional, mas se não for fornecido, não incluir
+        ...(data.endereco && { endereco: data.endereco })
+      }
+
+      try {
+        const response = await apiMensura.put(`/api/delivery/cliente/admin/update/${clienteId}`, clienteData)
+        return response.data
+      } catch (error: any) {
+        // Tratamento específico de erros da API
+        if (error.response?.status === 422) {
+          const errorMessage = error.response?.data?.detail || "Dados inválidos"
+          throw new Error(`Erro de validação: ${errorMessage}`)
+        } else if (error.response?.status === 404) {
+          throw new Error("Cliente não encontrado")
+        } else if (error.response?.status === 400) {
+          const errorMessage = error.response?.data?.detail || "Dados inválidos"
+          throw new Error(`Erro na requisição: ${errorMessage}`)
+        } else {
+          throw new Error(`Erro do servidor: ${error.message}`)
+        }
+      }
     },
     onSuccess: () => {
-      // Não fazer invalidação automática aqui, deixar para o componente controlar
+      // Invalidar cache de clientes
+      qc.invalidateQueries({ queryKey: ["clientes"], exact: false })
+      toast({ title: "Cliente atualizado", description: "O cliente foi atualizado com sucesso." })
     },
     onError: (err: any) => {
-      toast({ title: "Erro ao atualizar cliente", description: getErrorMessage(err), variant: "destructive" })
+      console.error("Erro detalhado ao atualizar cliente:", err)
+      toast({ 
+        title: "Erro ao atualizar cliente", 
+        description: err.message || getErrorMessage(err), 
+        variant: "destructive" 
+      })
     },
   })
 }
@@ -171,9 +249,10 @@ export function useUpdateItens() {
     onSuccess: (data, variables) => {
       toast({ title: "Itens atualizados", description: "Os itens do pedido foram atualizados com sucesso." })
 
-      // Invalidar cache específico do pedido e kanban
-      qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
+      // Invalidar apenas o kanban (preservar endereço atualizado)
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
+      // Removido: não invalidar pedidoDetalhes para preservar endereço atualizado
+      // qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
     },
     onError: (err: any) => {
       // Extrair mensagem de erro mais específica
@@ -191,6 +270,51 @@ export function useUpdateItens() {
       }
 
       toast({ title: "Erro ao atualizar itens", description: errorMessage, variant: "destructive" })
+    },
+  })
+}
+
+export function useUpdateEndereco() {
+  const qc = useQueryClient()
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: async ({ 
+      clienteId, 
+      enderecoId, 
+      endereco 
+    }: { 
+      clienteId: number; 
+      enderecoId: number; 
+      endereco: any 
+    }) => {
+      const { data } = await apiMensura.put(`/api/delivery/enderecos/admin/cliente/${clienteId}/endereco/${enderecoId}`, {
+        cep: endereco.cep,
+        logradouro: endereco.logradouro,
+        numero: endereco.numero,
+        complemento: endereco.complemento,
+        bairro: endereco.bairro,
+        cidade: endereco.cidade,
+        estado: endereco.estado,
+        ponto_referencia: endereco.ponto_referencia,
+        latitude: endereco.latitude,
+        longitude: endereco.longitude,
+        is_principal: endereco.is_principal
+      })
+      return data
+    },
+    onSuccess: () => {
+      toast({ 
+        title: "Endereço atualizado", 
+        description: "O endereço foi atualizado com sucesso no servidor." 
+      })
+    },
+    onError: (err: any) => {
+      toast({ 
+        title: "Erro ao atualizar endereço", 
+        description: getErrorMessage(err), 
+        variant: "destructive" 
+      })
     },
   })
 }

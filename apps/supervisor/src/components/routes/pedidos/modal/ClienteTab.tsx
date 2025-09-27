@@ -1,7 +1,10 @@
 import { Input } from "../../../ui/input"
 import { Label } from "../../../ui/label"
-import { User, MapPin } from "lucide-react"
+import { Button } from "../../../ui/button"
+import { User, MapPin, Edit } from "lucide-react"
 import { ClienteTabProps } from "@supervisor/types/pedidos/modal"
+import { EnderecoEditModal } from "./EnderecoEditModal"
+import { useState } from "react"
 
 
 // Componente funcional ClienteTab
@@ -10,8 +13,24 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   setFormData,
   isEditing,
   pedidoCompleto,
-  getEnderecoCompleto
+  getEnderecoCompleto,
+  onEnderecoUpdate,
+  isUpdatingEndereco = false
 }) => {
+  const [enderecoEditModalOpen, setEnderecoEditModalOpen] = useState(false)
+
+  // Função para abrir modal de edição de endereço
+  const handleEditEndereco = () => {
+    setEnderecoEditModalOpen(true)
+  }
+
+  // Função para salvar endereço
+  const handleSaveEndereco = (endereco: any) => {
+    if (onEnderecoUpdate) {
+      onEnderecoUpdate(endereco)
+    }
+    setEnderecoEditModalOpen(false)
+  }
 
   // Renderiza o componente
   return (
@@ -87,10 +106,24 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
 
         {/* Seção de Endereço de Entrega */}
         <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-            <MapPin className="w-5 h-5 text-green-600" />
-            Endereço de Entrega
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+              <MapPin className="w-5 h-5 text-green-600" />
+              Endereço de Entrega
+            </h3>
+            {isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleEditEndereco}
+                className="flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Editar Endereço
+              </Button>
+            )}
+          </div>
           <div className="space-y-4">
 
             {/* Campo Endereço Completo */}
@@ -109,6 +142,15 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal de Edição de Endereço */}
+      <EnderecoEditModal
+        open={enderecoEditModalOpen}
+        onOpenChange={setEnderecoEditModalOpen}
+        endereco={pedidoCompleto?.endereco || null}
+        onSave={handleSaveEndereco}
+        isSaving={isUpdatingEndereco}
+      />
     </div>
   )
 }

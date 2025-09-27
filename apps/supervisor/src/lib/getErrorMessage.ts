@@ -9,7 +9,14 @@ export const getErrorMessage = (error: unknown): string | undefined => {
     if (data?.detail) {
       // pode ser string ou array
       if (typeof data.detail === "string") return data.detail;
-      if (Array.isArray(data.detail)) return data.detail[0];
+      if (Array.isArray(data.detail)) {
+        // Se for array de objetos com propriedade 'msg', extrair a mensagem
+        if (data.detail[0] && typeof data.detail[0] === "object" && data.detail[0].msg) {
+          return data.detail[0].msg;
+        }
+        // Se for array de strings, retornar a primeira
+        return String(data.detail[0]);
+      }
     }
 
     // Se houver array de errors (padrão outro backend)

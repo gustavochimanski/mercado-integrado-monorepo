@@ -7,36 +7,71 @@ import { Label } from "@supervisor/components/ui/label";
 import { Switch } from "@supervisor/components/ui/switch";
 import { useMutateProduto } from "@supervisor/services/useQueryProduto";
 import { useEffect, useState } from "react";
-import { Package, DollarSign, Image, Hash } from "lucide-react";
+import { Package, DollarSign, Image, Hash, Tag } from "lucide-react";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  produto: any;
   empresaId: number;
 }
 
 interface FormData {
   cod_barras: string;
   descricao: string;
-  preco_venda: string;
   custo: string;
+  preco_venda: string;
   preco_delivery: string;
+  categoria: string;
   exibir_delivery: boolean;
   imagem: File | undefined;
 }
 
-export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
+export const ModalEditarProduto = ({ open, onOpenChange, produto, empresaId }: Props) => {
   const [form, setForm] = useState<FormData>({
     cod_barras: "",
     descricao: "",
-    preco_venda: "",
     custo: "",
+    preco_venda: "",
     preco_delivery: "",
+    categoria: "",
     exibir_delivery: true,
     imagem: undefined,
   });
 
-  const { create: createProductMutate } = useMutateProduto();
+  const { update: updateProductMutate } = useMutateProduto();
+
+  // Preencher form com dados do produto quando abrir modal
+  useEffect(() => {
+    if (produto && open) {
+      setForm({
+        cod_barras: produto.cod_barras || "",
+        descricao: produto.descricao || "",
+        custo: produto.custo || "",
+        preco_venda: produto.preco_venda || "",
+        preco_delivery: produto.preco_delivery || "",
+        categoria: produto.label_categoria || "",
+        exibir_delivery: produto.exibir_delivery || true,
+        imagem: undefined,
+      });
+    }
+  }, [produto, open]);
+
+  // Limpar form quando fechar modal
+  useEffect(() => {
+    if (!open) {
+      setForm({
+        cod_barras: "",
+        descricao: "",
+        custo: "",
+        preco_venda: "",
+        preco_delivery: "",
+        categoria: "",
+        exibir_delivery: true,
+        imagem: undefined,
+      });
+    }
+  }, [open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,52 +87,43 @@ export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
     if (file) setForm((prev) => ({ ...prev, imagem: file }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação mínima
-    if (!form.cod_barras.trim() || !form.descricao.trim() || !form.preco_venda) return;
+    if (!produto?.cod_barras) return;
 
-    // Envia o objeto tipado que o hook espera
-    createProductMutate.mutate(
-      {
+    // Validação mínima
+    if (!form.descricao.trim() || !form.preco_venda) return;
+
+    try {
+      // Preparar dados no formato correto
+      await updateProductMutate.mutateAsync({
         cod_barras: form.cod_barras.trim(),
         descricao: form.descricao.trim(),
         cod_empresa: empresaId,
+        custo: form.custo && !isNaN(Number(form.custo)) ? Number(form.custo) : undefined,
         preco_venda: Number(form.preco_venda),
-        custo: form.custo === "" ? undefined : Number(form.custo),
+        preco_delivery: form.preco_delivery && !isNaN(Number(form.preco_delivery)) ? Number(form.preco_delivery) : undefined,
+        categoria: form.categoria.trim(),
+        exibir_delivery: form.exibir_delivery,
         imagem: form.imagem,
-      }
-    );
-  };
+      });
 
-  const resetForm = () => {
-    setForm({
-      cod_barras: "",
-      descricao: "",
-      preco_venda: "",
-      custo: "",
-      preco_delivery: "",
-      exibir_delivery: true,
-      imagem: undefined,
-    });
-  };
-
-  useEffect(() => {
-    if (!open) {
-      resetForm();
+      onOpenChange(false); // Fechar modal após sucesso
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
     }
-  }, [open]);
+  };
 
   // Validação básica
-  const isFormValid = form.cod_barras.trim() && form.descricao.trim() && form.preco_venda;
+  const isFormValid = form.descricao.trim() && form.preco_venda;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">            
-            Novo Produto
+            Editar Produto
           </DialogTitle>
         </DialogHeader>
 
@@ -106,15 +132,15 @@ export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
           <div className="space-y-2">
             <Label htmlFor="cod_barras" className="flex items-center gap-2">
               <Hash size={16} />
-              Código de Barras *
+              Código de Barras
             </Label>
             <Input
               id="cod_barras"
               name="cod_barras"
               value={form.cod_barras}
               onChange={handleChange}
-              placeholder="Digite o código de barras"
-              required
+              disabled // Não permite editar código de barras
+              className="bg-gray-50"
             />
           </div>
 
@@ -189,11 +215,26 @@ export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
             />
           </div>
 
+          {/* Categoria */}
+          <div className="space-y-2">
+            <Label htmlFor="categoria" className="flex items-center gap-2">
+              <Tag size={16} />
+              Categoria
+            </Label>
+            <Input
+              id="categoria"
+              name="categoria"
+              value={form.categoria}
+              onChange={handleChange}
+              placeholder="Digite a categoria"
+            />
+          </div>
+
           {/* Imagem */}
           <div className="space-y-2">
             <Label htmlFor="imagem" className="flex items-center gap-2">
               <Image size={16} />
-              Imagem
+              Nova Imagem (opcional)
             </Label>
             <Input
               id="imagem"
@@ -228,10 +269,10 @@ export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
             </Button>
             <Button
               type="submit"
-              disabled={!isFormValid || createProductMutate.isPending}
+              disabled={!isFormValid || updateProductMutate.isPending}
               className="flex-1"
             >
-              {createProductMutate.isPending ? "Salvando..." : "Salvar Produto"}
+              {updateProductMutate.isPending ? "Atualizando..." : "Salvar Alterações"}
             </Button>
           </div>
         </form>

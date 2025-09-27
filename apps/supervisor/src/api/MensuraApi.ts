@@ -1,5 +1,6 @@
 import { MensuraApiClient } from "@supervisor/api"
 import type { OpenAPIConfig } from "@supervisor/api/core/OpenAPI";
+import { getCookie } from "cookies-next";
 
 export const mensuraApi = new MensuraApiClient({
   BASE: process.env.NEXT_PUBLIC_API_URL!,
@@ -8,7 +9,7 @@ export const mensuraApi = new MensuraApiClient({
   CREDENTIALS: "same-origin",
   TOKEN: async () => {
     if (typeof window === "undefined") return "";
-    const match = document.cookie.match(/(^| )access_token=([^;]+)/);
-    return match ? match[2] : "";
-    }
+    const token = getCookie("access_token");
+    return token && typeof token === "string" ? token : "";
+  }
 } satisfies Partial<OpenAPIConfig>);

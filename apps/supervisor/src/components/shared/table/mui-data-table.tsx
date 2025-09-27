@@ -19,7 +19,6 @@ export interface DataTableComponentProps
   columns: GridColDef[];
   columnOrder?: string[];
   onRowClick?: (rowData: any) => void;
-  onRowSelectionModelChange?: (ids: GridRowSelectionModel) => void;
   onRowEditConfirm?: (newRow: GridRowModel, foiComEnter: boolean) => void;
   apiRef?: React.MutableRefObject<GridApi | null>;
 }
@@ -40,7 +39,6 @@ const DataTableComponentMui: React.FC<DataTableComponentProps> = ({
   rows,
   columns,
   onRowClick,
-  onRowSelectionModelChange,
   onRowEditConfirm,
   apiRef,
   columnOrder,
@@ -68,6 +66,8 @@ const DataTableComponentMui: React.FC<DataTableComponentProps> = ({
   };
 
   const orderedColumns = useMemo(() => {
+    if (!columns || !Array.isArray(columns)) return [];
+    
     const enhanceColumn = (col: GridColDef): GridColDef => ({
       ...col,
       headerAlign: col.headerAlign ?? "center",
@@ -94,16 +94,13 @@ const DataTableComponentMui: React.FC<DataTableComponentProps> = ({
       }}
     >
       <DataGrid
-        rows={rows}
-        apiRef={apiRef}
+        rows={rows ?? []}
+        {...(apiRef ? { apiRef } : {})}
         columns={orderedColumns}
         rowHeight={35}
-        checkboxSelection
-        disableRowSelectionOnClick
         editMode="cell"
         localeText={defaultLocaleText}
         onRowClick={handleRowClick}
-        onRowSelectionModelChange={onRowSelectionModelChange}
         onCellEditStop={handleCellEditStop}
         processRowUpdate={handleProcessRowUpdate}
         paginationModel={{ pageSize: 20, page: 0 }}
@@ -149,6 +146,19 @@ const DataTableComponentMui: React.FC<DataTableComponentProps> = ({
             fontSize: "0.75rem",
             border: "none",
             color: "hsl(var(--inputValue))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          "& .MuiDataGrid-cell[data-field='actions']": {
+            justifyContent: "center !important",
+            textAlign: "center",
+          },
+          "& .MuiDataGrid-cell[data-field='actions'] > div": {
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           },
           "& .MuiDataGrid-footerContainer": {
             backgroundColor: "hsl(var(--card))",

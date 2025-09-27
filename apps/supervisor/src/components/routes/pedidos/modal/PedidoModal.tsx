@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../ui/tabs"
 import { useToast } from "../../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
-import { useUpdatePedido, useUpdateCliente, useUpdateItens } from "@supervisor/services/useQueryPedidoAdmin"
+import { useUpdatePedido, useUpdateCliente, useUpdateItens, useUpdateEndereco, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin"
 import { useQueryClient } from "@tanstack/react-query"
 import { User, CreditCard, Truck, Package, History } from "lucide-react"
 import { ClienteTab } from "./ClienteTab"
@@ -43,6 +43,8 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const updatePedidoMutation = useUpdatePedido()
   const updateClienteMutation = useUpdateCliente()
   const updateItensMutation = useUpdateItens()
+  const updateEnderecoMutation = useUpdateEndereco()
+  const { vincularEntregador } = useMutatePedidoAdmin()
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -50,6 +52,9 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const [itensEditados, setItensEditados] = useState<any[]>([])
   const [isEditingItens, setIsEditingItens] = useState(false)
   const [isSavingItens, setIsSavingItens] = useState(false)
+
+  // Estado para edição de endereço
+  const [isUpdatingEndereco, setIsUpdatingEndereco] = useState(false)
   
   // Função para verificar se o pedido pode ser editado
   const canEdit = () => {
@@ -119,6 +124,46 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     return parts || "Não informado"
   }
 
+  // Função para atualizar endereço
+  const handleEnderecoUpdate = async (endereco: any) => {
+    if (!pedidoCompleto?.id || !pedidoCompleto?.cliente?.id || !pedidoCompleto?.endereco?.id) {
+      toast({
+        title: "Erro",
+        description: "Dados insuficientes para atualizar o endereço.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsUpdatingEndereco(true)
+    try {
+      // Atualizar endereço no servidor
+      await updateEnderecoMutation.mutateAsync({
+        clienteId: pedidoCompleto.cliente.id,
+        enderecoId: pedidoCompleto.endereco.id,
+        endereco: endereco
+      })
+      
+      // Atualizar cache localmente para manter consistência sem recarregar
+      queryClient.setQueryData(["pedidoDetalhes", pedidoCompleto.id], (oldData: any) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          endereco: {
+            ...oldData.endereco,
+            ...endereco
+          }
+        }
+      })
+      
+    } catch (error) {
+      console.error("Erro ao atualizar endereço:", error)
+      // O toast de erro já é mostrado pela mutação
+    } finally {
+      setIsUpdatingEndereco(false)
+    }
+  }
+
   // Efeito para inicializar dados quando o modal abre
   useEffect(() => {
     if (isOpen && pedido && pedidoCompleto) {
@@ -157,12 +202,32 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     setIsSaving(true)
 
     try {
-      // Atualizar dados do pedido
+      // Atualizar dados do pedido (sem entregador_id)
       const pedidoData = {
         meio_pagamento_id: formData.meio_pagamento_id,
         observacao_geral: formData.observacao_geral,
         troco_para: formData.troco_para,
-        entregador_id: formData.entregador_id,
+      }
+
+      // Gerenciar entregador separadamente
+      const entregadorAnterior = pedidoCompleto.entregador?.id
+      const entregadorNovo = formData.entregador_id
+
+      // Se mudou o entregador, usar endpoint específico
+      if (entregadorAnterior !== entregadorNovo) {
+        if (entregadorNovo === null) {
+          // Desvincular entregador
+          await vincularEntregador.mutateAsync({ 
+            pedidoId: pedido.id, 
+            entregadorId: null 
+          })
+        } else {
+          // Vincular novo entregador
+          await vincularEntregador.mutateAsync({ 
+            pedidoId: pedido.id, 
+            entregadorId: entregadorNovo 
+          })
+        }
       }
 
       // Atualizar dados do cliente (se tiver cliente_id)
@@ -192,9 +257,30 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
         description: "Pedido e cliente atualizados com sucesso!",
       })
 
-      // Invalidar cache em background (não bloquear a UI) - mas só depois do toast
+      // Atualizar cache localmente para manter consistência
+      queryClient.setQueryData(["pedidoDetalhes", pedido.id], (oldData: any) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          // Atualizar apenas campos específicos do pedido (não sobrescrever endereço)
+          meio_pagamento_id: formData.meio_pagamento_id,
+          observacao_geral: formData.observacao_geral,
+          troco_para: formData.troco_para,
+          entregador_id: formData.entregador_id,
+          cliente: {
+            ...oldData.cliente,
+            nome: formData.nome_cliente,
+            cpf: formData.cpf_cliente,
+            telefone: formData.telefone_cliente,
+            email: formData.email_cliente,
+            data_nascimento: formData.data_nascimento_cliente
+          }
+          // Preservar endereço atualizado (não sobrescrever)
+        }
+      })
+      
+      // Invalidar apenas o cache do Kanban em background (não afeta o modal)
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["pedidoDetalhes", pedido.id] })
         queryClient.invalidateQueries({ queryKey: ["pedidosAdminKanban"] })
       }, 100)
 
@@ -454,6 +540,8 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                 isEditing={isEditing}
                 pedidoCompleto={pedidoCompleto}
                 getEnderecoCompleto={getEnderecoCompleto}
+                onEnderecoUpdate={handleEnderecoUpdate}
+                isUpdatingEndereco={isUpdatingEndereco}
               />
             </TabsContent>
 
