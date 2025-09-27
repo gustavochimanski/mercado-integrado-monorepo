@@ -14,7 +14,7 @@ interface HorizontalSpyProps {
 }
 
 export function HorizontalSpy({ items, activeId, onClickItem }: HorizontalSpyProps) {
-  if (!items.length) return null;
+  if (!items || !Array.isArray(items) || items.length === 0) return null;
 
   const listRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef<Record<number, HTMLButtonElement | null>>({});

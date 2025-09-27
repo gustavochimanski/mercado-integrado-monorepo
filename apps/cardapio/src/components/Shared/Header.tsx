@@ -8,17 +8,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { Input } from "./ui/input";
 
 const HeaderComponent = () => {
-  const { tokenCliente, enderecoPadraoId } = getCliente();
+  const [clienteData, setClienteData] = useState<{ tokenCliente?: string; enderecoPadraoId?: number } | null>(null);
   const [enderecoAtual, setEnderecoAtual] = useState<EnderecoOut | null>(null);
 
   const router = useRouter();
   const pathname = usePathname(); // rota atual
 
+  // Carrega dados do cliente apenas no cliente
+  useEffect(() => {
+    const { tokenCliente, enderecoPadraoId } = getCliente();
+    setClienteData({ tokenCliente, enderecoPadraoId });
+  }, []);
+
   // Query de endereços do cliente
-  const { data: enderecos } = useQueryEnderecos({ enabled: !!tokenCliente });
+  const { data: enderecos } = useQueryEnderecos({ enabled: !!clienteData?.tokenCliente });
 
   useEffect(() => {
-    if (!tokenCliente) return; // usuário não logado
+    if (!clienteData?.tokenCliente) return; // usuário não logado
 
     if (!enderecos || enderecos.length === 0) {
       setEnderecoAtual(null); // sem endereço cadastrado
@@ -26,7 +32,7 @@ const HeaderComponent = () => {
     }
 
     // tenta pegar pelo id do endereço padrão
-    let endereco = enderecos.find(e => e.id === enderecoPadraoId);
+    let endereco = enderecos.find(e => e.id === clienteData?.enderecoPadraoId);
 
     // se não tiver, pega o que estiver marcado como padrao
     if (!endereco) endereco = enderecos.find(e => e.padrao);
@@ -38,11 +44,11 @@ const HeaderComponent = () => {
       setEnderecoAtual(endereco);
       setEnderecoPadraoId(endereco.id); // atualiza store
     }
-  }, [enderecos, enderecoPadraoId, tokenCliente]);
+  }, [enderecos, clienteData?.enderecoPadraoId, clienteData?.tokenCliente]);
 
   // Texto do endereço
   let textoEndereco = "";
-  if (!tokenCliente) {
+  if (!clienteData?.tokenCliente) {
     textoEndereco = "Usuário não logado";
   } else if (!enderecoAtual) {
     textoEndereco = "Nenhum endereço cadastrado";

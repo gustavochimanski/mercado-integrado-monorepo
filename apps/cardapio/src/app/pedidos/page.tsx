@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -13,10 +13,13 @@ import {
   AccordionTrigger,
   AccordionContent
 } from "@cardapio/components/Shared/ui/accordion";
+import { Button } from "@cardapio/components/Shared/ui/button";
 import { format, isToday, isYesterday, subDays, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Pedido } from "@cardapio/types/pedido";
 import { usePedidos } from "@cardapio/services/useQueryPedido";
+import { Pencil } from "lucide-react";
+import ModalEditarPedido from "@cardapio/components/Shared/pedidos/ModalEditarPedido";
 
 const statusClasses: Record<Pedido["status"], string> = {
   I: "bg-gray-100 text-gray-600",
@@ -64,6 +67,18 @@ function sortGroups(groups: Map<string, Pedido[]>) {
 
 export default function RoutePedidos() {
   const { data: pedidos = [], isLoading } = usePedidos();
+  const [pedidoEdicao, setPedidoEdicao] = useState<Pedido | null>(null);
+  const [modalEdicaoOpen, setModalEdicaoOpen] = useState(false);
+
+  const handleEditarPedido = (pedido: Pedido) => {
+    setPedidoEdicao(pedido);
+    setModalEdicaoOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalEdicaoOpen(false);
+    setPedidoEdicao(null);
+  };
 
   const groupedOrders = groupOrdersByDate(pedidos);
 
@@ -93,8 +108,8 @@ export default function RoutePedidos() {
                   return (
                     <AccordionItem key={order.id} value={String(order.id)}>
                       <div className="border-b">
-                        {/* Trigger mostra cliente e data */}
-                        <AccordionTrigger className="flex justify-between items-center px-4 py-3 hover:bg-muted/50 rounded-md">
+                        {/* Header com cliente e botão editar */}
+                        <div className="flex justify-between items-center px-4 py-2">
                           <div className="flex flex-col gap-1 text-left flex-1">
                             <span className="text-xs text-muted-foreground">
                               {formattedDate} • {order.itens.length} itens
@@ -103,6 +118,23 @@ export default function RoutePedidos() {
                               Cliente: {order.cliente_nome}
                             </span>
                           </div>
+                          {/* Botão Editar - apenas para pedidos que podem ser editados */}
+                          {(order.status === "P" || order.status === "I") && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditarPedido(order)}
+                              className="text-xs"
+                            >
+                              <Pencil className="w-3 h-3 mr-1" />
+                              Editar
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Trigger apenas para expandir */}
+                        <AccordionTrigger className="flex justify-center items-center px-4 py-2 hover:bg-muted/50">
+                          <span className="text-sm text-muted-foreground">Ver detalhes</span>
                         </AccordionTrigger>
 
                         {/* Conteúdo expandido */}
@@ -193,6 +225,13 @@ export default function RoutePedidos() {
           </Card>
         ))
       )}
+
+      {/* Modal de Edição */}
+      <ModalEditarPedido
+        pedido={pedidoEdicao}
+        isOpen={modalEdicaoOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

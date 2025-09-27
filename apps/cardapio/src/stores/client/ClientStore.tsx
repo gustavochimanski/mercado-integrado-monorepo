@@ -2,6 +2,7 @@
 export interface ClienteStore {
   id?: number;               // id do cliente (quando vem da API)
   nome?: string;
+  telefone?: string;         // telefone do cliente
   email?: string;
   cpf_cnpj?: string | null;
 

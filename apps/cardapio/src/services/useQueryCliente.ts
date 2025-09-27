@@ -45,11 +45,12 @@ export function useMutateCliente() {
   /** Criar cliente novo */
   const create = useMutation({
     mutationFn: (body: ClienteCreate) =>
-      api.post<ClienteOut>("/delivery/cliente/", body),
+      api.post<ClienteOut>("/api/delivery/cliente/", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
         nome: data.nome,
+        telefone: data.telefone,
         tokenCliente: data.super_token,
       });
       invalidate();
@@ -63,11 +64,12 @@ export function useMutateCliente() {
   /** Atualizar cliente */
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number } & ClienteUpdate) =>
-      apiClienteAdmin.put<ClienteOut>(`/delivery/cliente/${id}`, body),
+      apiClienteAdmin.put<ClienteOut>(`/api/delivery/cliente/${id}`, body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
         nome: data.nome,
+        telefone: data.telefone,
         tokenCliente: data.super_token,
       });
       invalidate();
@@ -81,7 +83,7 @@ export function useMutateCliente() {
   /** Enviar código OTP para telefone existente */
   const enviarCodigoNovoDispositivo = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
-      api.post("/delivery/cliente/novo-dispositivo", body),
+      api.post("/api/delivery/cliente/novo-dispositivo", body),
     onSuccess: () => {
       toast.success("Código enviado com sucesso!");
     },
@@ -93,11 +95,12 @@ export function useMutateCliente() {
   /** Confirmar código OTP e receber token */
   const confirmarCodigo = useMutation({
     mutationFn: (body: ConfirmacaoCodigoRequest) =>
-      api.post<ClienteOut>("/delivery/cliente/confirmar-codigo", body),
+      api.post<ClienteOut>("/api/delivery/cliente/confirmar-codigo", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
         nome: data.nome,
+        telefone: data.telefone,
         tokenCliente: data.super_token,
       });
       invalidate();

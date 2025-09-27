@@ -21,7 +21,7 @@ export function usePedidos() {
   return useQuery<Pedido[]>({
     queryKey: ["pedidos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<Pedido[]>("/delivery/cliente/pedidos/");
+      const { data } = await apiClienteAdmin.get<Pedido[]>("/api/delivery/cliente/pedidos/");
       return data;
     },
     staleTime: 5 * 60 * 1000,
@@ -94,5 +94,25 @@ export function useMutatePedido() {
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
-  return { create, updateStatus, remove };
+  const toggleModoEdicao = useMutation({
+    mutationFn: ({ id, modo }: { id: number; modo: boolean }) =>
+      apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/modo-edicao`, { modo_edicao: modo }),
+    onSuccess: (_, { modo }) => {
+      toast.success(modo ? "Modo edição ativado" : "Modo edição desativado");
+      invalidate();
+    },
+    onError: (err) => toast.error(extractErrorMessage(err, "Erro ao alterar modo edição")),
+  });
+
+  const updatePedido = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/editar`, data),
+    onSuccess: () => {
+      toast.success("Pedido atualizado com sucesso!");
+      invalidate();
+    },
+    onError: (err) => toast.error(extractErrorMessage(err, "Erro ao atualizar pedido")),
+  });
+
+  return { create, updateStatus, remove, toggleModoEdicao, updatePedido };
 }
