@@ -74,18 +74,24 @@ const HeaderComponent = () => {
         </Button>
       )}
 
-        {/* BARRA DE BUSCA */}
-            <form className="flex w-full max-w-md gap-2">
-        <Input
-          type="search"
-          placeholder="Buscar produtos, categorias..."
-          className="flex-1 rounded-3xl  placeholder:text-primary"
-          aria-label="Buscar"
-        />
-        <Button type="submit"  className="rounded-3xl">
-          <Search   size={18} />
-        </Button>
-      </form>
+      {/* BARRA DE BUSCA */}
+      <div className={`relative flex-1 ${pathname === "/" ? "max-w-none" : "max-w-md"}`}>
+        <form className="relative">
+          <Input
+            type="search"
+            placeholder="Buscar produtos, categorias..."
+            className="w-full pl-4 pr-12 py-2.5 rounded-full border-2 border-primary/20 bg-white/80 backdrop-blur-sm focus:border-primary focus:bg-white transition-all duration-200 placeholder:text-gray-400 text-sm"
+            aria-label="Buscar"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary hover:bg-primary/90 transition-colors duration-200"
+          >
+            <Search size={16} />
+          </Button>
+        </form>
+      </div>
     </header>
   );
 };

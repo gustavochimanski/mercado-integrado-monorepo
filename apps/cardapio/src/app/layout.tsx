@@ -53,13 +53,17 @@ export default function RootLayout({
                 "--destructive-border": "#dc2626",
               } as React.CSSProperties}
             />
-            <div className="min-h-screen">
-              {children}
+            <div className="min-h-screen bg-gray-50 flex justify-center">
+              <div className="w-full max-w-md bg-white min-h-screen shadow-xl relative flex flex-col">
+                <div className="flex-1">
+                  {children}
+                </div>
+                <FooterComponent />
+              </div>
             </div>
             <CartGlobalClient />
           </UserProvider>
         </ReactQueryProvider>
-        <FooterComponent />
       </body>
     </html>
   );
