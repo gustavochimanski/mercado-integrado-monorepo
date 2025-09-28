@@ -1,8 +1,5 @@
-import { api } from "@cardapio/app/api/api";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import {  useQuery, useQueryClient } from "@tanstack/react-query";
-import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
-import { toast } from "sonner";
 
 // 🔎 Tipo do banner
 export interface Banner {
@@ -24,7 +21,7 @@ export function useBanners(enabled = true) {
   return useQuery<Banner[]>({
     queryKey: ["banners"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<Banner[]>("/api/delivery/public/banners");
+      const { data } = await apiClienteAdmin.get<Banner[]>("/delivery/public/banners");
       return data;
     },
     enabled,

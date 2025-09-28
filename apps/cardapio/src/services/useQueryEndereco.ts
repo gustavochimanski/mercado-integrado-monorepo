@@ -62,7 +62,7 @@ export function useQueryEnderecos(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["enderecos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get("/api/delivery/cliente/enderecos")
+      const { data } = await apiClienteAdmin.get("/delivery/cliente/enderecos")
       return data as EnderecoOut[]
     },
     enabled: options?.enabled !== false,
@@ -77,7 +77,7 @@ export function useMutateEndereco() {
 
   const create = useMutation({
     mutationFn: async (enderecoData: EnderecoCreate) => {
-      const { data } = await apiClienteAdmin.post("/api/delivery/cliente/enderecos", enderecoData)
+      const { data } = await apiClienteAdmin.post("/delivery/cliente/enderecos", enderecoData)
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -92,7 +92,7 @@ export function useMutateEndereco() {
 
   const update = useMutation({
     mutationFn: async ({ id, ...enderecoData }: EnderecoCreate & { id: number }) => {
-      const { data } = await apiClienteAdmin.put(`/api/delivery/cliente/enderecos/${id}`, enderecoData)
+      const { data } = await apiClienteAdmin.put(`/delivery/cliente/enderecos/${id}`, enderecoData)
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -107,7 +107,7 @@ export function useMutateEndereco() {
 
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await apiClienteAdmin.delete(`/api/delivery/cliente/enderecos/${id}`)
+      await apiClienteAdmin.delete(`/delivery/cliente/enderecos/${id}`)
     },
     onSuccess: () => {
       toast.success("Endereço removido com sucesso!")
@@ -130,7 +130,7 @@ export function useSearchEndereco() {
         throw new Error("Texto de busca é obrigatório")
       }
       
-      const { data } = await apiClienteAdmin.get(`/api/mensura/geoapify/cliente/search-endereco?text=${searchText}`)
+      const { data } = await apiClienteAdmin.get(`/mensura/geoapify/cliente/search-endereco?text=${searchText}`)
       // A API retorna um array de EnderecoSearchResult diretamente
       return data as EnderecoSearchResult[]
     },

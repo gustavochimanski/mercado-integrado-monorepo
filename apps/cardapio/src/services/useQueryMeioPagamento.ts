@@ -31,7 +31,7 @@ export function useMeiosPagamento(enabled = true) {
   return useQuery<MeioPagamento[]>({
     queryKey: ["meios_pagamento"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/api/delivery/cliente/meios-pagamento/");
+      const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/delivery/cliente/meios-pagamento/");
       return data;
     },
     enabled,

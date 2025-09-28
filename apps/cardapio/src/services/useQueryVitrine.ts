@@ -3,7 +3,6 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CategoriaMini } from "./useQueryHome";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 
 // Tipos alinhados ao backend

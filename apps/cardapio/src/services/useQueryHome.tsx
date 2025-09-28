@@ -2,8 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../app/api/api";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
-import { toast } from "sonner";
 
 export interface VitrineComProdutosResponse {
   id: number;
@@ -57,7 +55,7 @@ export function useCategoriaPorSlug(empresaId?: number | null, slug?: string | n
   return useQuery<CategoriaPorSlugResponse>({
     queryKey: ["categoria-por-slug", empresaId, slug],
     queryFn: async () => {
-      const { data } = await api.get<CategoriaPorSlugResponse>("/api/delivery/home/categoria", {
+      const { data } = await api.get<CategoriaPorSlugResponse>("/delivery/home/categoria", {
         params: { empresa_id: empresaId, slug },
       });
       return data;
@@ -76,7 +74,7 @@ export function useHome(empresa_id: number | null, isHome: boolean) {
     queryFn: async () => {
       const params: Record<string, any> = { empresa_id };
       if (typeof isHome === "boolean") params.is_home = isHome;
-      const { data } = await api.get<HomeResponse>("/api/delivery/home", { params });
+      const { data } = await api.get<HomeResponse>("/delivery/home", { params });
       return data;
     },
     staleTime: 5 * 60 * 1000,
@@ -92,7 +90,7 @@ export function useProdutosVitrinePorCategoria(
     enabled: !!empresa_id && !!codCategoria,
     queryFn: async () => {
       const params: Record<string, any> = { cod_categoria: codCategoria, empresa_id };
-      const { data } = await api.get<VitrineComProdutosResponse[]>("/api/delivery/home/vitrine-por-categoria", { params });
+      const { data } = await api.get<VitrineComProdutosResponse[]>("/delivery/home/vitrine-por-categoria", { params });
       return data;
     },
     staleTime: 5 * 60 * 1000,
