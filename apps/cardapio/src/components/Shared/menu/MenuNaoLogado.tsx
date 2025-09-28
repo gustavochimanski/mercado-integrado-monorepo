@@ -8,9 +8,20 @@ import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-ped
 
 export default function MenuNaoLogado() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(false); // true = login, false = cadastro
 
   const handleLoginSuccess = () => {
     window.location.reload();
+  };
+
+  const handleEntrarConta = () => {
+    setIsLoginMode(true);
+    setIsModalOpen(true);
+  };
+
+  const handleCriarConta = () => {
+    setIsLoginMode(false);
+    setIsModalOpen(true);
   };
 
   return (
@@ -28,7 +39,7 @@ export default function MenuNaoLogado() {
 
           <div className="space-y-4">
             <Button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleEntrarConta}
               className="w-full h-12 cursor-pointer"
             >
               <LogIn className="w-4 h-4 mr-2" />
@@ -36,7 +47,7 @@ export default function MenuNaoLogado() {
             </Button>
 
             <Button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleCriarConta}
               variant="outline"
               className="w-full h-12 cursor-pointer"
             >
@@ -51,6 +62,7 @@ export default function MenuNaoLogado() {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleLoginSuccess}
+        forceLoginMode={isLoginMode}
       />
     </div>
   );

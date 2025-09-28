@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -11,17 +11,30 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onConfirm?: () => void;
+  forceLoginMode?: boolean; // true = forçar login, false = forçar cadastro, undefined = livre
 }
 
-export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: Props) {
+export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, forceLoginMode }: Props) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [codigo, setCodigo] = useState("");
   const [erro, setErro] = useState("");
-  const [jaTenhoCadastro, setJaTenhoCadastro] = useState(false);
+  const [jaTenhoCadastro, setJaTenhoCadastro] = useState(forceLoginMode ?? false);
   const [aguardandoCodigo, setAguardandoCodigo] = useState(false);
 
   const { create, enviarCodigoNovoDispositivo, confirmarCodigo } = useMutateCliente();
+
+  // Reset estado quando modal abrir com modo forçado
+  useEffect(() => {
+    if (open && forceLoginMode !== undefined) {
+      setJaTenhoCadastro(forceLoginMode);
+      setNome("");
+      setTelefone("");
+      setCodigo("");
+      setErro("");
+      setAguardandoCodigo(false);
+    }
+  }, [open, forceLoginMode]);
 
   const handleConfirmar = () => {
     const telefoneLimpo = telefone.replace(/\D/g, "");
@@ -114,7 +127,7 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm }: 
 
           {erro && <p className="text-sm text-red-500">{erro}</p>}
 
-          {!aguardandoCodigo && (
+          {!aguardandoCodigo && forceLoginMode === undefined && (
             <p
               className="text-sm text-blue-500 cursor-pointer hover:underline"
               onClick={() => {
