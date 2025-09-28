@@ -67,23 +67,21 @@ export const FooterSelecionados = ({
   }
 
   // Função para mover pedidos selecionados
-  const handleMoverPedidos = async (novoStatus: PedidoStatus) => {    
+  const handleMoverPedidos = async (novoStatus: PedidoStatus) => {
     if (precisaVincularEntregador(novoStatus)) {
       // Separar pedidos que precisam de entregador dos que não precisam
       const pedidosSemEntregador = pedidosCompletos.filter(pedido => !pedido.entregador_id)
       const pedidosComEntregador = pedidosCompletos.filter(pedido => pedido.entregador_id)
-      
+
       // Atualizar status dos pedidos que já têm entregador
       pedidosComEntregador.forEach(pedido => {
         atualizarStatus.mutate({ id: pedido.id, status: novoStatus })
       })
 
-      // Processar pedidos sem entregador um por vez
+      // Para pedidos sem entregador, abrir modal de seleção em lote
       if (pedidosSemEntregador.length > 0) {
         setStatusParaMover(novoStatus)
         setPedidosParaProcessar(pedidosSemEntregador)
-        setPedidoAtual(pedidosSemEntregador[0])
-        setIndiceAtual(0)
         setIsEntregadorModalOpen(true)
       }
     } else if (precisaDesvincularEntregador(novoStatus)) {
@@ -95,56 +93,48 @@ export const FooterSelecionados = ({
     }
   }
 
-  // Função para confirmar seleção de entregador
+  // Função para confirmar seleção de entregador (agora em lote)
   const handleConfirmEntregador = async (entregadorId: number) => {
-    if (!statusParaMover || !pedidoAtual) return
+    if (!statusParaMover || pedidosParaProcessar.length === 0) return
 
     try {
-      // Vincular entregador para o pedido atual
-      await vincularEntregador.mutateAsync({ 
-        pedidoId: pedidoAtual.id, 
-        entregadorId 
-      })
+      // Vincular o mesmo entregador para todos os pedidos em paralelo
+      const vincularPromises = pedidosParaProcessar.map(pedido =>
+        vincularEntregador.mutateAsync({
+          pedidoId: pedido.id,
+          entregadorId
+        })
+      )
 
-      // Atualizar status do pedido atual
-      atualizarStatus.mutate({ id: pedidoAtual.id, status: statusParaMover })
+      await Promise.all(vincularPromises)
 
-      // Verificar se há mais pedidos para processar
-      const proximoIndice = indiceAtual + 1
-      
-      if (proximoIndice < pedidosParaProcessar.length) {
-        // Próximo pedido - manter modal aberto
-        const proximoPedido = pedidosParaProcessar[proximoIndice]
-        setPedidoAtual(proximoPedido)
-        setIndiceAtual(proximoIndice)
-      } else {
-        // Finalizou todos os pedidos
-        setIsEntregadorModalOpen(false)
-        setStatusParaMover(null)
-        setPedidosParaProcessar([])
-        setPedidoAtual(null)
-        setIndiceAtual(0)
-        onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
-      }
-        } catch (error) {
-          // Erro silencioso ao vincular entregador
-        }
-  }
+      // Atualizar status de todos os pedidos em paralelo
+      const atualizarPromises = pedidosParaProcessar.map(pedido =>
+        atualizarStatus.mutateAsync({ id: pedido.id, status: statusParaMover })
+      )
 
-  // Função para pular pedido atual
-  const handlePularPedido = () => {
-    const proximoIndice = indiceAtual + 1
-    if (proximoIndice < pedidosParaProcessar.length) {
-      setPedidoAtual(pedidosParaProcessar[proximoIndice])
-      setIndiceAtual(proximoIndice)
-    } else {
+      await Promise.all(atualizarPromises)
+
+      // Fechar modal e limpar seleção
       setIsEntregadorModalOpen(false)
       setStatusParaMover(null)
       setPedidosParaProcessar([])
       setPedidoAtual(null)
       setIndiceAtual(0)
       onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
+    } catch (error) {
+      // Erro silencioso ao vincular entregador
     }
+  }
+
+  // Função para pular (não mais necessária no modo lote, mas mantida para compatibilidade)
+  const handlePularPedido = () => {
+    setIsEntregadorModalOpen(false)
+    setStatusParaMover(null)
+    setPedidosParaProcessar([])
+    setPedidoAtual(null)
+    setIndiceAtual(0)
+    onCancelar() // Fechar o SuspenseFooter e desmarcar pedidos
   }
 
   // Função para confirmar desvinculação
@@ -223,11 +213,9 @@ export const FooterSelecionados = ({
           setIndiceAtual(0)
         }}
         onConfirm={handleConfirmEntregador}
-        pedidoId={pedidoAtual?.id}
         pedidosIds={pedidosParaProcessar.map(p => p.id)}
         isMultiplo={true}
-        pedidoAtual={pedidoAtual}
-        indiceAtual={indiceAtual}
+        isLote={true}
         totalPedidos={pedidosParaProcessar.length}
         onPular={handlePularPedido}
       />

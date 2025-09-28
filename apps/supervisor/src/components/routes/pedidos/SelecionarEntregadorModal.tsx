@@ -13,13 +13,14 @@ interface SelecionarEntregadorModalProps {
   onClose: () => void
   onConfirm: (entregadorId: number) => void
   pedidoId?: number
-  pedidosIds?: number[] // Para seleção múltipla
-  empresaId?: number 
-  isMultiplo?: boolean // Indica se é seleção múltipla
-  pedidoAtual?: { id: number; status: string; motoboy?: string } | null // Pedido sendo processado
-  indiceAtual?: number // Índice atual no processamento
-  totalPedidos?: number // Total de pedidos para processar
-  onPular?: () => void // Função para pular pedido atual
+  pedidosIds?: number[] 
+  empresaId?: number
+  isMultiplo?: boolean 
+  isLote?: boolean 
+  pedidoAtual?: { id: number; status: string; motoboy?: string } | null 
+  indiceAtual?: number 
+  totalPedidos?: number 
+  onPular?: () => void 
 }
 
 export function SelecionarEntregadorModal({
@@ -30,6 +31,7 @@ export function SelecionarEntregadorModal({
   pedidosIds = [],
   empresaId = 1, // Default empresa ID
   isMultiplo = false,
+  isLote = false,
   pedidoAtual = null,
   indiceAtual = 0,
   totalPedidos = 0,
@@ -106,8 +108,22 @@ export function SelecionarEntregadorModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Progresso para processamento individual */}
-          {isMultiplo && pedidoAtual && totalPedidos > 1 && (
+          {/* Informação para vinculação em lote */}
+          {isLote && totalPedidos > 1 && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-green-800">
+                  Vinculação em Lote
+                </p>
+                <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                  {totalPedidos} pedidos
+                </div>
+              </div>             
+            </div>
+          )}
+
+          {/* Progresso para processamento individual (modo antigo) */}
+          {isMultiplo && !isLote && pedidoAtual && totalPedidos > 1 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-blue-800">
@@ -115,7 +131,7 @@ export function SelecionarEntregadorModal({
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="w-24 bg-blue-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${((indiceAtual + 1) / totalPedidos) * 100}%` }}
                     />
@@ -128,8 +144,10 @@ export function SelecionarEntregadorModal({
             </div>
           )}
 
-          <p className="text-sm text-muted-foreground">
-            {isMultiplo && pedidoAtual
+          <p className="text-sm text-muted-foreground text-justify">
+            {isLote
+              ? `O entregador selecionado será vinculado automaticamente aos pedidos e todos terão seu status alterado para "Saiu para Entrega".`
+              : isMultiplo && pedidoAtual
               ? `Para alterar o status do pedido #${pedidoAtual.id} para "Saiu para Entrega", é necessário vincular um entregador.`
               : isMultiplo
               ? `Para alterar o status de ${pedidosIds.length} pedido(s) para "Saiu para Entrega", é necessário vincular um entregador.`
@@ -137,8 +155,24 @@ export function SelecionarEntregadorModal({
             }
           </p>
           
-          {/* Lista de pedidos para seleção múltipla simples */}
-          {isMultiplo && !pedidoAtual && (
+          {/* Lista de pedidos para vinculação em lote */}
+          {isLote && pedidosIds.length > 0 && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <p className="text-sm font-medium text-gray-800 mb-2">
+                Pedidos que receberão o entregador:
+              </p>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {pedidosIds.map((id, index) => (
+                  <span key={id} className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">
+                    #{id}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Lista de pedidos para seleção múltipla individual (modo antigo) */}
+          {isMultiplo && !isLote && !pedidoAtual && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm font-medium text-blue-800 mb-2">Pedidos selecionados:</p>
               <div className="flex flex-wrap gap-1">
@@ -207,7 +241,8 @@ export function SelecionarEntregadorModal({
 
           <div className="flex justify-between pt-4">
             <div className="flex gap-2">
-              {isMultiplo && pedidoAtual && onPular && (
+              {/* Botão "Pular" apenas para o modo individual (não lote) */}
+              {isMultiplo && !isLote && pedidoAtual && onPular && (
                 <Button variant="outline" onClick={onPular}>
                   Pular Pedido
                 </Button>
@@ -221,7 +256,12 @@ export function SelecionarEntregadorModal({
                 onClick={handleConfirm}
                 disabled={!selectedEntregador || selectedEntregador === "loading" || selectedEntregador === "no-entregadores" || selectedEntregador === "header-inativos" || isVinculando}
               >
-                {isVinculando ? "Vinculando..." : "Confirmar"}
+                {isVinculando
+                  ? "Vinculando..."
+                  : isLote
+                  ? `Vincular Entregador`
+                  : "Confirmar"
+                }
               </Button>
             </div>
           </div>
