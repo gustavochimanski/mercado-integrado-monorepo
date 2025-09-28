@@ -20,19 +20,17 @@ export default function CategoryScrollSection({
 
   const {isAdmin} = useUserContext()
   return (
-    <section className="mb-4  rounded-xl">
+    <section className="mb-6">
       {categorias.length > 1 && (
-        <div className="flex justify-between items-center px-2 bg-muted rounded-t-xl">
-          <h2 className="text-base font-semibold my-1 text-primary">
+        <div className="flex justify-between items-center px-4 mb-3">
+          <h2 className="text-lg font-semibold text-gray-800">
             Categorias
           </h2>
         </div>
       )}
 
-      <div className="relative  border-2 border-muted rounded-b-xl">
-        {/* Linha colorida no topo */}
-
-        <div className={`relative flex overflow-x-auto gap-4 pb-2 rounded-xl z-20 px-4 py-2 ${isAdmin ? "": "hide-scrollbar"}`}>
+      <div className="relative">
+        <div className={`relative flex overflow-x-auto gap-4 px-4 py-2 ${isAdmin ? "": "hide-scrollbar"}`}>
           {categorias.map((cat) => (
             <CategoryCard
               key={cat.id}

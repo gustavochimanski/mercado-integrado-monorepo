@@ -8,7 +8,7 @@ export function mapProdutoToCartItem(
   observacao?: string
 ): CartItem {
   return {
-    cod_barras: produto.cod_barras, // ✅ correto: está na raiz
+    cod_barras: produto.cod_barras, 
     nome: produto.produto.descricao,
     preco: produto.preco_venda,
     quantity,

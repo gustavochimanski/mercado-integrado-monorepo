@@ -9,6 +9,7 @@ import {
 import { FinalizarPedidoRequest } from "@cardapio/types/pedido";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
@@ -18,6 +19,7 @@ interface UseFinalizarPedidoResult {
 export function useFinalizarPedido(): UseFinalizarPedidoResult {
   const { items, observacao, clear } = useCart();
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   async function finalizarPedido(): Promise<"sucesso" | { status: "erro"; message: string }> {
     setLoading(true);
@@ -60,20 +62,30 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
         })),
       };
 
-      const response = await apiClienteAdmin.post("/delivery/cliente/pedidos/checkout", payload);
+      const response = await apiClienteAdmin.post("/api/delivery/cliente/pedidos/checkout", payload);
 
       if (response.status === 200 || response.status === 201) {
         clear();
+        // Invalida o cache de pedidos para mostrar o novo pedido na lista
+        queryClient.invalidateQueries({ queryKey: ["pedidos"] });
         return "sucesso";
       }
       
       return { status: "erro", message: "Erro interno do servidor. Tente novamente em alguns minutos." };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao finalizar pedido:", error);
-      
+
+      // Verifica se é erro 400 (área de atendimento)
+      if (error.response?.status === 400) {
+        const apiMessage = error.response?.data?.message || error.response?.data?.detail;
+        if (apiMessage && apiMessage.includes("área")) {
+          return { status: "erro", message: "❌ Endereço fora da área de atendimento. Selecione outro endereço ou verifique se a empresa atende sua região." };
+        }
+      }
+
       // Usa a função extractErrorMessage para extrair a mensagem de erro
       const errorMessage = extractErrorMessage(error, "Erro inesperado ao finalizar pedido");
-      
+
       return { status: "erro", message: errorMessage };
     } finally {
       setLoading(false);

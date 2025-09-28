@@ -1,14 +1,29 @@
 // src/token/tokenStore.ts
-let token: string | null = null;
+const TOKEN_KEY = "userToken";
 
-export function setToken(newToken: string) {
-  token = newToken;
+function loadFromStorage(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
 }
 
-export function getToken() {
-  return token;
+function saveToStorage(token: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+function removeFromStorage() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+export function setToken(newToken: string) {
+  saveToStorage(newToken);
+}
+
+export function getToken(): string | null {
+  return loadFromStorage();
 }
 
 export function clearToken() {
-  token = null;
+  removeFromStorage();
 }

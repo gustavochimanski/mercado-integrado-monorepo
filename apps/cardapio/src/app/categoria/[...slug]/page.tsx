@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "@cardapio/components/Shared/ui/button";
@@ -35,6 +35,13 @@ export default function RouteCategoryPage() {
   const categoriaAtual = data?.categoria ?? null;
   const subcategorias = data?.subcategorias ?? [];
 
+  // Atualiza meta das vitrines quando data muda
+  useEffect(() => {
+    if (data?.vitrines) {
+      setVitrinesMeta(data.vitrines.map(v => ({ id: v.id, titulo: v.titulo })));
+    }
+  }, [data?.vitrines]);
+
   // Sheet
   const openSheet = useCallback((p: ProdutoEmpMini) => {
     setProdutoSelecionado(p);
@@ -57,8 +64,16 @@ export default function RouteCategoryPage() {
     document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="p-6 w-full h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   if (!categoriaAtual) {
-    return <div className="p-6 w-full h-min-scren text-center text-muted-foreground"></div>;
+    return <div className="p-6 w-full h-min-screen text-center text-muted-foreground">Categoria não encontrada</div>;
   }
 
   return (
@@ -66,7 +81,14 @@ export default function RouteCategoryPage() {
       <HeaderComponent/>
 
       <main className="flex-1 p-2">
-        <HorizontalSpy items={vitrinesMeta} activeId={activeId} onClickItem={scrollToSection} />
+        {vitrinesMeta.length > 0 && (
+          <HorizontalSpy
+            key={`spy-${categoriaAtual.id}-${vitrinesMeta.length}`}
+            items={vitrinesMeta}
+            activeId={activeId}
+            onClickItem={scrollToSection}
+          />
+        )}
 
         <CategoryScrollSection
           categorias={subcategorias}
@@ -74,14 +96,22 @@ export default function RouteCategoryPage() {
           empresaId={empresa_id!}
         />
 
-        <ProductsSection
-          codCategoria={categoriaAtual.id}
-          empresaId={empresa_id!}
-          isHome={false}
-          onOpenSheet={openSheet}
-          onMeta={setVitrinesMeta}
-          sectionRefFactory={register}
-        />
+        {/* Usar vitrines já carregadas ao invés de ProductsSection */}
+        {data?.vitrines?.map((vitrine) => (
+          <ProductsVitrineSection
+            key={vitrine.id}
+            vitrineId={vitrine.id}
+            titulo={vitrine.titulo}
+            produtos={vitrine.produtos}
+            codCategoria={vitrine.cod_categoria}
+            empresaId={empresa_id!}
+            onOpenSheet={openSheet}
+            sectionRef={register(vitrine.id)}
+            hrefCategoria={vitrine.href_categoria}
+            isHome={false}
+            vitrineIsHome={vitrine.is_home}
+          />
+        ))}
 
         {subcategorias && data?.vitrines_filho?.map((vit) => (
           <ProductsVitrineSection
@@ -93,7 +123,7 @@ export default function RouteCategoryPage() {
             empresaId={empresa_id!}
             onOpenSheet={openSheet}
             hrefCategoria={vit.href_categoria}
-            isHome={true}  // se não for contexto da home
+            isHome={true}  
           />
         ))}
 

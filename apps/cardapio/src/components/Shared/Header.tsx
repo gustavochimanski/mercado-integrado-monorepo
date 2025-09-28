@@ -8,17 +8,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { Input } from "./ui/input";
 
 const HeaderComponent = () => {
-  const { tokenCliente, enderecoPadraoId } = getCliente();
+  const [clienteData, setClienteData] = useState<{ tokenCliente?: string; enderecoPadraoId?: number } | null>(null);
   const [enderecoAtual, setEnderecoAtual] = useState<EnderecoOut | null>(null);
 
   const router = useRouter();
   const pathname = usePathname(); // rota atual
 
+  // Carrega dados do cliente apenas no cliente
+  useEffect(() => {
+    const { tokenCliente, enderecoPadraoId } = getCliente();
+    setClienteData({ tokenCliente, enderecoPadraoId });
+  }, []);
+
   // Query de endereços do cliente
-  const { data: enderecos } = useQueryEnderecos({ enabled: !!tokenCliente });
+  const { data: enderecos } = useQueryEnderecos({ enabled: !!clienteData?.tokenCliente });
 
   useEffect(() => {
-    if (!tokenCliente) return; // usuário não logado
+    if (!clienteData?.tokenCliente) return; // usuário não logado
 
     if (!enderecos || enderecos.length === 0) {
       setEnderecoAtual(null); // sem endereço cadastrado
@@ -26,7 +32,7 @@ const HeaderComponent = () => {
     }
 
     // tenta pegar pelo id do endereço padrão
-    let endereco = enderecos.find(e => e.id === enderecoPadraoId);
+    let endereco = enderecos.find(e => e.id === clienteData?.enderecoPadraoId);
 
     // se não tiver, pega o que estiver marcado como padrao
     if (!endereco) endereco = enderecos.find(e => e.padrao);
@@ -38,11 +44,11 @@ const HeaderComponent = () => {
       setEnderecoAtual(endereco);
       setEnderecoPadraoId(endereco.id); // atualiza store
     }
-  }, [enderecos, enderecoPadraoId, tokenCliente]);
+  }, [enderecos, clienteData?.enderecoPadraoId, clienteData?.tokenCliente]);
 
   // Texto do endereço
   let textoEndereco = "";
-  if (!tokenCliente) {
+  if (!clienteData?.tokenCliente) {
     textoEndereco = "Usuário não logado";
   } else if (!enderecoAtual) {
     textoEndereco = "Nenhum endereço cadastrado";
@@ -68,18 +74,24 @@ const HeaderComponent = () => {
         </Button>
       )}
 
-        {/* BARRA DE BUSCA */}
-            <form className="flex w-full max-w-md gap-2">
-        <Input
-          type="search"
-          placeholder="Buscar produtos, categorias..."
-          className="flex-1 rounded-3xl  placeholder:text-primary"
-          aria-label="Buscar"
-        />
-        <Button type="submit"  className="rounded-3xl">
-          <Search   size={18} />
-        </Button>
-      </form>
+      {/* BARRA DE BUSCA */}
+      <div className={`relative flex-1 ${pathname === "/" ? "max-w-none" : "max-w-md"}`}>
+        <form className="relative">
+          <Input
+            type="search"
+            placeholder="Buscar produtos, categorias..."
+            className="w-full pl-4 pr-12 py-2.5 rounded-full border-2 border-primary/20 bg-white/80 backdrop-blur-sm focus:border-primary focus:bg-white transition-all duration-200 placeholder:text-gray-400 text-sm"
+            aria-label="Buscar"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary hover:bg-primary/90 transition-colors duration-200"
+          >
+            <Search size={16} />
+          </Button>
+        </form>
+      </div>
     </header>
   );
 };

@@ -81,11 +81,11 @@ export default function HomePage() {
   if (isError) return null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <LoginWrapper />
       <HeaderComponent />
 
-      <main className="flex-1 p-2 gap-2 mb-6">
+      <main className="flex-1 pt-4 pb-20">
         {/* Categorias raiz */}
         <CategoryScrollSection
           categorias={categorias}
@@ -99,7 +99,7 @@ export default function HomePage() {
         />}
 
         {/* Vitrines marcadas como is_home */}
-        <div className="my-6 p-0  space-y-4">
+        <div className="space-y-6">
           {vitrines
             .filter((v) => v.is_home)
             .map((v) => (

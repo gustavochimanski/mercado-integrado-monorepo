@@ -8,21 +8,23 @@ export const apiClienteAdmin = axios.create({
 // Interceptor de request → adiciona o token
 apiClienteAdmin.interceptors.request.use((config) => {
   const cliente = getCliente()
+
   if (cliente?.tokenCliente) {
     config.headers = config.headers ?? {}
-    ;(config.headers as any)["x-super-token"] = cliente.tokenCliente
+    config.headers["x-super-token"] = cliente.tokenCliente
   }
+
   return config
 })
 
 // Interceptor de response → trata erro 401
 apiClienteAdmin.interceptors.response.use(
-  (response) => response, // se sucesso, retorna normal
+  (response) => {
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
-      console.warn("⚠️ Token inválido ou expirado. Limpando cliente do localStorage.")
       clearCliente()
-      // opcional: redirecionar para login ou homepage
       if (typeof window !== "undefined") {
         window.location.href = "/"
       }
