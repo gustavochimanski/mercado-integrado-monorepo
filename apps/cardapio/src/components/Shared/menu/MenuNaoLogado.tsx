@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@cardapio/components/Shared/ui/card";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { UserPlus, LogIn } from "lucide-react";
@@ -29,8 +30,15 @@ export default function MenuNaoLogado() {
       {/* Header com avatar e mensagem */}
       <Card className="mx-auto w-full max-w-md">
         <CardContent className="p-8 text-center">
-          <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-6 flex items-center justify-center">
-            <UserPlus className="w-8 h-8 text-gray-500" />
+          <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="Logo da empresa"
+              width={70}
+              height={70}
+              className="object-contain rounded-lg"
+              priority
+            />
           </div>
           <h2 className="text-xl font-semibold mb-3">Olá! Bem-vindo</h2>
           <p className="text-muted-foreground mb-8">

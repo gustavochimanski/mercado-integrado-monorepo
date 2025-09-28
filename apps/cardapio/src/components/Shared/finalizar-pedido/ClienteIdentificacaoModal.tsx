@@ -76,7 +76,7 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm sm:max-w-xs mx-auto">
         <DialogHeader>
           <DialogTitle>
             {jaTenhoCadastro
