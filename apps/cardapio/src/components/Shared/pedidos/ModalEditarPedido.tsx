@@ -15,7 +15,7 @@ import {
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Textarea } from "@cardapio/components/Shared/ui/textarea";
 import { Label } from "@cardapio/components/Shared/ui/label";
-import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 
@@ -203,49 +203,53 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
     return (
       <form onSubmit={formGeral.handleSubmit(onSubmitGeral)} className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        <div className="flex-1 space-y-6">
           {/* Observação Geral */}
-          <div>
-            <Label htmlFor="observacao_geral">Observação Geral</Label>
+          <div className="space-y-2">
+            <Label htmlFor="observacao_geral" className="text-sm font-medium text-gray-700">
+              Observação Geral
+            </Label>
             <Textarea
               id="observacao_geral"
               {...formGeral.register("observacao_geral")}
               placeholder="Observações gerais sobre o pedido..."
-              className="mt-1"
+              className="min-h-[80px] resize-none border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
           {/* Troco Para */}
-          <div>
-            <Label htmlFor="troco_para">Troco Para (R$)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="troco_para" className="text-sm font-medium text-gray-700">
+              Troco Para (R$)
+            </Label>
             <Input
               id="troco_para"
               type="number"
               step="0.01"
               {...formGeral.register("troco_para", { valueAsNumber: true })}
               placeholder="0.00"
-              className="mt-1"
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
-          {/* Informações do Pedido (somente leitura) */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="font-medium">Pedido:</span>
-                <span>#{pedido.id}</span>
+          {/* Informações do Pedido */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-1 border-b border-blue-100 last:border-b-0">
+                <span className="text-sm font-medium text-gray-600">Pedido:</span>
+                <span className="text-sm font-semibold text-gray-800">#{pedido.id}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Cliente:</span>
-                <span>{pedido.cliente_nome}</span>
+              <div className="flex justify-between items-center py-1 border-b border-blue-100 last:border-b-0">
+                <span className="text-sm font-medium text-gray-600">Cliente:</span>
+                <span className="text-sm font-semibold text-gray-800">{pedido.cliente_nome}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Pagamento:</span>
-                <span>{pedido.meio_pagamento_nome}</span>
+              <div className="flex justify-between items-center py-1 border-b border-blue-100 last:border-b-0">
+                <span className="text-sm font-medium text-gray-600">Pagamento:</span>
+                <span className="text-sm font-semibold text-gray-800">{pedido.meio_pagamento_nome}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Total:</span>
-                <span className="font-bold text-green-600">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-sm font-medium text-gray-600">Total:</span>
+                <span className="text-lg font-bold text-emerald-600">
                   R$ {pedido.valor_total.toFixed(2)}
                 </span>
               </div>
@@ -253,11 +257,11 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className="mt-4 gap-2 flex">
-          <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
+        <div className="mt-6 flex gap-3 pt-4 border-t border-gray-200">
+          <Button type="button" variant="outline" onClick={handleClose} className="flex-1 border-gray-300 hover:bg-gray-50 cursor-pointer">
             Fechar
           </Button>
-          <Button type="submit" disabled={loadingGeral} className="flex-1">
+          <Button type="submit" disabled={loadingGeral} className="flex-1 cursor-pointer">
             {loadingGeral ? (
               <>
                 <Loader2 className="animate-spin mr-2 w-4 h-4" />
@@ -382,10 +386,10 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
         </div>
 
         <div className="mt-4 gap-2 flex">
-          <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
+          <Button type="button" variant="outline" onClick={handleClose} className="flex-1 cursor-pointer">
             Fechar
           </Button>
-          <Button type="submit" disabled={loadingItens} className="flex-1">
+          <Button type="submit" disabled={loadingItens} className="flex-1 cursor-pointer">
             {loadingItens ? (
               <>
                 <Loader2 className="animate-spin mr-2 w-4 h-4" />
@@ -417,9 +421,11 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Editar Pedido #{pedido.id}</DialogTitle>
+      <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col gap-6 p-6">
+        <DialogHeader className="text-center border-b pb-4">
+          <DialogTitle className="text-xl font-semibold text-gray-800">
+            Editar Pedido #{pedido.id}
+          </DialogTitle>
         </DialogHeader>
 
         {isLoading ? (
@@ -431,8 +437,8 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
           <Tabs
             items={tabItems}
             defaultValue="geral"
-            containerClassName="flex-1"
-            contentClassName="p-0"
+            containerClassName="flex-1 border-none"
+            contentClassName="p-0 border-none bg-transparent"
           />
         )}
       </DialogContent>

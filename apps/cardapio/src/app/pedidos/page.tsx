@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -18,7 +19,7 @@ import { format, isToday, isYesterday, subDays, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Pedido } from "@cardapio/types/pedido";
 import { usePedidos } from "@cardapio/services/useQueryPedido";
-import { Pencil } from "lucide-react";
+import { Pencil, CircleArrowLeft } from "lucide-react";
 import ModalEditarPedido from "@cardapio/components/Shared/pedidos/ModalEditarPedido";
 
 const statusClasses: Record<Pedido["status"], string> = {
@@ -66,6 +67,7 @@ function sortGroups(groups: Map<string, Pedido[]>) {
 }
 
 export default function RoutePedidos() {
+  const router = useRouter();
   const { data: pedidos = [], isLoading } = usePedidos();
   const [pedidoEdicao, setPedidoEdicao] = useState<Pedido | null>(null);
   const [modalEdicaoOpen, setModalEdicaoOpen] = useState(false);
@@ -83,7 +85,15 @@ export default function RoutePedidos() {
   const groupedOrders = groupOrdersByDate(pedidos);
 
   return (
-    <div className="h-full flex flex-col gap-6 p-6 overflow-auto">
+    <div className="min-h-screen bg-background">
+      {/* Header com botão voltar */}
+      <header className="w-full flex flex-row items-center sticky top-0 z-50 bg-background p-6 pb-4">
+        <Button onClick={() => router.push('/')} variant="link" className="mr-auto cursor-pointer p-0">
+          <CircleArrowLeft /> Voltar
+        </Button>
+      </header>
+
+      <div className="h-full flex flex-col gap-6 p-6 pt-0 overflow-auto">
       {isLoading ? (
         <div>Carregando pedidos...</div>
       ) : groupedOrders.size === 0 ? (
@@ -97,8 +107,8 @@ export default function RoutePedidos() {
             </CardHeader>
 
             {/* Conteúdo do card com scroll interno */}
-            <CardContent className="p-0 max-h-[500px] overflow-auto">
-              <Accordion type="single" collapsible className="w-full">
+            <CardContent className="p-4 space-y-4">
+              <Accordion type="single" collapsible className="w-full space-y-4">
                 {orders.map((order) => {
                   const date = new Date(order.data_criacao);
                   const formattedDate = isToday(date)
@@ -106,8 +116,8 @@ export default function RoutePedidos() {
                     : format(date, "dd/MM/yyyy HH:mm", { locale: ptBR });
 
                   return (
-                    <AccordionItem key={order.id} value={String(order.id)}>
-                      <div className="border-b">
+                    <AccordionItem key={order.id} value={String(order.id)} className="border rounded-lg overflow-hidden shadow-sm">
+                      <div className="bg-white">
                         {/* Header com cliente e botão editar */}
                         <div className="flex justify-between items-center px-4 py-2">
                           <div className="flex flex-col gap-1 text-left flex-1">
@@ -124,7 +134,7 @@ export default function RoutePedidos() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleEditarPedido(order)}
-                              className="text-xs"
+                              className="text-xs cursor-pointer"
                             >
                               <Pencil className="w-3 h-3 mr-1" />
                               Editar
@@ -133,12 +143,12 @@ export default function RoutePedidos() {
                         </div>
 
                         {/* Trigger apenas para expandir */}
-                        <AccordionTrigger className="flex justify-center items-center px-4 py-2 hover:bg-muted/50">
+                        <AccordionTrigger className="flex justify-center items-center px-4 py-2 hover:bg-muted/50 border-t cursor-pointer">
                           <span className="text-sm text-muted-foreground">Ver detalhes</span>
                         </AccordionTrigger>
 
                         {/* Conteúdo expandido */}
-                        <AccordionContent className="border-t p-4 max-h-80 overflow-auto space-y-4">
+                        <AccordionContent className="border-t p-4 space-y-4">
                           {/* Endereço */}
                           {order.endereco_snapshot && (
                             <div className="text-sm text-muted-foreground">
@@ -232,6 +242,7 @@ export default function RoutePedidos() {
         isOpen={modalEdicaoOpen}
         onClose={handleCloseModal}
       />
+      </div>
     </div>
   );
 }
