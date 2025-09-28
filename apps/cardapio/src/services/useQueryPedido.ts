@@ -33,16 +33,16 @@ export function usePedidos() {
 // ================= Hook para buscar pedido por ID =========================
 // ==========================================================================
 export function usePedidoById(pedidoId: number | null, opts?: { enabled?: boolean }) {
-  const qc = useQueryClient();
-  const seed = pedidoId ? qc.getQueryData<PedidoItem>(["pedido", pedidoId]) : undefined;
-
+  // Busca o pedido na lista em cache ao invés de fazer request individual
   return useQuery({
     queryKey: ["pedido", pedidoId],
     queryFn: async () => {
-      const { data } = await apiAdmin.get<PedidoItem>(`/delivery/cliente/pedidos/${pedidoId}`);
-      return data;
+      // Busca todos os pedidos e filtra o específico
+      const { data } = await apiClienteAdmin.get<Pedido[]>("/api/delivery/cliente/pedidos/");
+      const pedido = data.find(p => p.id === pedidoId);
+      if (!pedido) throw new Error(`Pedido ${pedidoId} não encontrado`);
+      return pedido;
     },
-    initialData: seed,
     enabled: !!pedidoId && (opts?.enabled ?? true),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -95,13 +95,16 @@ export function useMutatePedido() {
   });
 
   const toggleModoEdicao = useMutation({
-    mutationFn: ({ id, modo }: { id: number; modo: boolean }) =>
-      apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/modo-edicao`, { modo_edicao: modo }),
-    onSuccess: (_, { modo }) => {
+    mutationFn: async ({ id, modo }: { id: number; modo: boolean }) => {
+      return apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/modo-edicao`, { modo_edicao: modo });
+    },
+    onSuccess: (response, { modo }) => {
       toast.success(modo ? "Modo edição ativado" : "Modo edição desativado");
       invalidate();
     },
-    onError: (err) => toast.error(extractErrorMessage(err, "Erro ao alterar modo edição")),
+    onError: (err: any) => {
+      toast.error(extractErrorMessage(err, "Erro ao alterar modo edição"));
+    },
   });
 
   const updatePedido = useMutation({

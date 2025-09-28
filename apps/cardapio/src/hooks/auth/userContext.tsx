@@ -41,7 +41,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const token = getToken();
 
     if (!token) {
-      console.warn("⚠️ Nenhum token encontrado");
+      // Sem logs de warning para limpar o console
       return;
     }
 
