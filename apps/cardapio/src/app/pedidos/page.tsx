@@ -207,6 +207,12 @@ export default function RoutePedidos() {
                               <span>Pagamento</span>
                               <span>{order.meio_pagamento_nome}</span>
                             </div>
+                            {order.meio_pagamento_nome === "Dinheiro" && order.troco_para && order.troco_para > 0 && (
+                              <div className="flex justify-between text-green-600">
+                                <span>Troco para</span>
+                                <span>R$ {order.troco_para.toFixed(2)}</span>
+                              </div>
+                            )}
                           </div>
                         </AccordionContent>
 
