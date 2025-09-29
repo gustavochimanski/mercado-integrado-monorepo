@@ -117,8 +117,12 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   // Carrega dados do pedido quando abre o modal
   useEffect(() => {
     if (pedido && isOpen) {
-      // Carrega dados gerais
-      formGeral.setValue("meio_pagamento_id", undefined); // TODO: pegar do pedido quando disponível
+      // Carrega dados gerais - preenche com valores atuais do pedido
+
+      // Busca o meio de pagamento pelo nome
+      const meioPagamentoAtual = meiosPagamento.find(mp => mp.nome === pedido.meio_pagamento_nome);
+      formGeral.setValue("meio_pagamento_id", meioPagamentoAtual?.id || undefined);
+
       formGeral.setValue("endereco_id", pedido.endereco_id || undefined);
       formGeral.setValue("cupom_id", pedido.cupom_id || undefined);
       formGeral.setValue("observacao_geral", pedido.observacao_geral || "");
@@ -140,7 +144,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       setModoEdicaoAtivo(false);
       modoEdicaoJaAtivado.current = false;
     }
-  }, [pedido, isOpen, formGeral, formItens]);
+  }, [pedido, isOpen, formGeral, formItens, meiosPagamento]);
 
   const handleClose = async () => {
     if (pedido && modoEdicaoAtivo) {
