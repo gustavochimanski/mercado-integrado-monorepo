@@ -15,9 +15,13 @@ import {
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Textarea } from "@cardapio/components/Shared/ui/textarea";
 import { Label } from "@cardapio/components/Shared/ui/label";
-import { Loader2, Minus, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import Tabs from "@cardapio/components/Shared/ui/tabs";
+import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
+import { useQueryEnderecos } from "@cardapio/services/useQueryEndereco";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@cardapio/components/Shared/ui/select";
+import { Edit, MapPin } from "lucide-react";
 
 // Schemas separados para cada tab
 const itemEditadoSchema = z.object({
@@ -51,6 +55,9 @@ interface Props {
 
 export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   const { toggleModoEdicao, updatePedido } = useMutatePedido();
+  const { data: meiosPagamento = [] } = useMeiosPagamento();
+  const { data: enderecos = [] } = useQueryEnderecos();
+  const [showEnderecoModal, setShowEnderecoModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [modoEdicaoAtivo, setModoEdicaoAtivo] = useState(false);
   const modoEdicaoJaAtivado = useRef(false);
@@ -111,7 +118,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   useEffect(() => {
     if (pedido && isOpen) {
       // Carrega dados gerais
-      formGeral.setValue("meio_pagamento_id", undefined);
+      formGeral.setValue("meio_pagamento_id", undefined); // TODO: pegar do pedido quando disponível
       formGeral.setValue("endereco_id", pedido.endereco_id || undefined);
       formGeral.setValue("cupom_id", pedido.cupom_id || undefined);
       formGeral.setValue("observacao_geral", pedido.observacao_geral || "");
@@ -165,18 +172,24 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
     setLoadingGeral(true);
 
-    const dadosTeste = {
-      observacao_geral: data.observacao_geral || ""
-    };
+    const dadosCompletos: Record<string, unknown> = {};
+
+    // Só adiciona campos que foram preenchidos
+    if (data.meio_pagamento_id) dadosCompletos.meio_pagamento_id = data.meio_pagamento_id;
+    if (data.endereco_id) dadosCompletos.endereco_id = data.endereco_id;
+    if (data.cupom_id) dadosCompletos.cupom_id = data.cupom_id;
+    if (data.observacao_geral?.trim()) dadosCompletos.observacao_geral = data.observacao_geral.trim();
+    if (data.troco_para) dadosCompletos.troco_para = data.troco_para;
 
     updatePedido.mutate(
       {
         id: pedido.id,
-        data: dadosTeste,
+        data: dadosCompletos,
       },
       {
         onSuccess: () => {
           setLoadingGeral(false);
+          handleClose(); // Fecha o modal após sucesso
         },
         onError: () => {
           setLoadingGeral(false);
@@ -201,9 +214,102 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   const renderDadosGerais = () => {
     if (!pedido) return null;
 
+    const meioPagamentoSelecionado = formGeral.watch("meio_pagamento_id");
+    const meioPagamento = meiosPagamento.find(mp => mp.id === meioPagamentoSelecionado);
+    const isDinheiro = meioPagamento?.tipo === "DINHEIRO";
+    const enderecoSelecionado = enderecos.find(end => end.id === formGeral.watch("endereco_id"));
+
     return (
       <form onSubmit={formGeral.handleSubmit(onSubmitGeral)} className="flex flex-col h-full">
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 space-y-4">
+          {/* Meio de Pagamento */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">
+              Meio de Pagamento
+            </Label>
+            <Select
+              value={meioPagamentoSelecionado?.toString() || ""}
+              onValueChange={(value) => formGeral.setValue("meio_pagamento_id", value ? parseInt(value) : undefined)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o meio de pagamento" />
+              </SelectTrigger>
+              <SelectContent>
+                {meiosPagamento.map((meio) => (
+                  <SelectItem key={meio.id} value={meio.id.toString()}>
+                    {meio.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Endereço */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">
+              Endereço de Entrega
+            </Label>
+            <div className="flex gap-2">
+              <Select
+                value={formGeral.watch("endereco_id")?.toString() || ""}
+                onValueChange={(value) => formGeral.setValue("endereco_id", value ? parseInt(value) : undefined)}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Selecione o endereço" />
+                </SelectTrigger>
+                <SelectContent>
+                  {enderecos.map((endereco) => (
+                    <SelectItem key={endereco.id} value={endereco.id.toString()}>
+                      <div className="text-left">
+                        <div className="font-medium">{endereco.logradouro}, {endereco.numero}</div>
+                        <div className="text-xs text-gray-500">{endereco.bairro} - {endereco.cidade}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEnderecoModal(true)}
+                className="px-3"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            </div>
+            {enderecoSelecionado && (
+              <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div>{enderecoSelecionado.logradouro}, {enderecoSelecionado.numero}</div>
+                    <div>{enderecoSelecionado.bairro} - {enderecoSelecionado.cidade}/{enderecoSelecionado.estado}</div>
+                    {enderecoSelecionado.ponto_referencia && (
+                      <div className="text-gray-500">Ref: {enderecoSelecionado.ponto_referencia}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Cupom */}
+          <div className="space-y-2">
+            <Label htmlFor="cupom_id" className="text-sm font-medium text-gray-700">
+              Cupom de Desconto
+            </Label>
+            <Input
+              id="cupom_id"
+              type="number"
+              {...formGeral.register("cupom_id", {
+                setValueAs: (value) => value === "" || value === null ? undefined : Number(value)
+              })}
+              placeholder="ID do cupom (opcional)"
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
           {/* Observação Geral */}
           <div className="space-y-2">
             <Label htmlFor="observacao_geral" className="text-sm font-medium text-gray-700">
@@ -217,20 +323,22 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
             />
           </div>
 
-          {/* Troco Para */}
-          <div className="space-y-2">
-            <Label htmlFor="troco_para" className="text-sm font-medium text-gray-700">
-              Troco Para (R$)
-            </Label>
-            <Input
-              id="troco_para"
-              type="number"
-              step="0.01"
-              {...formGeral.register("troco_para", { valueAsNumber: true })}
-              placeholder="0.00"
-              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
+          {/* Troco Para - só aparece se for DINHEIRO */}
+          {isDinheiro && (
+            <div className="space-y-2">
+              <Label htmlFor="troco_para" className="text-sm font-medium text-gray-700">
+                Troco Para (R$)
+              </Label>
+              <Input
+                id="troco_para"
+                type="number"
+                step="0.01"
+                {...formGeral.register("troco_para", { valueAsNumber: true })}
+                placeholder="0.00"
+                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+          )}
 
           {/* Informações do Pedido */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 shadow-sm">
@@ -406,6 +514,46 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   if (!pedido) return null;
 
+  // Modal simples para informar sobre edição de endereços
+  const renderEnderecoModal = () => (
+    <Dialog open={showEnderecoModal} onOpenChange={setShowEnderecoModal}>
+      <DialogContent className="max-w-sm mx-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5" />
+            Editar Endereços
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <p className="text-sm text-gray-600">
+            Para editar, adicionar ou remover endereços, acesse a seção de endereços no seu perfil.
+          </p>
+          <p className="text-xs text-gray-500">
+            Após fazer as alterações, retorne aqui e selecione o endereço desejado na lista.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowEnderecoModal(false)}
+            className="flex-1"
+          >
+            Fechar
+          </Button>
+          <Button
+            onClick={() => {
+              // TODO: Navegar para página de endereços
+              setShowEnderecoModal(false);
+            }}
+            className="flex-1"
+          >
+            Ir para Endereços
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   const tabItems = [
     {
       value: "geral",
@@ -421,8 +569,8 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col gap-6 p-6">
-        <DialogHeader className="text-center border-b pb-4">
+      <DialogContent className="max-w-md mx-auto max-h-[100vh] w-113 overflow-hidden flex flex-col gap-4 p-5">
+        <DialogHeader className="text-center border-b pt-6 pb-6">
           <DialogTitle className="text-xl font-semibold text-gray-800">
             Editar Pedido #{pedido.id}
           </DialogTitle>
@@ -441,6 +589,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
             contentClassName="p-0 border-none bg-transparent"
           />
         )}
+        {renderEnderecoModal()}
       </DialogContent>
     </Dialog>
   );
