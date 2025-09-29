@@ -128,8 +128,8 @@ export default function RoutePedidos() {
                               Cliente: {order.cliente_nome}
                             </span>
                           </div>
-                          {/* Botão Editar - apenas para pedidos que podem ser editados */}
-                          {(order.status === "P" || order.status === "I") && (
+                          {/* Botão Editar - permite edição até o pedido sair para entrega */}
+                          {(order.status === "I" || order.status === "P" || order.status === "D" || order.status === "R") && (
                             <Button
                               size="sm"
                               variant="outline"
