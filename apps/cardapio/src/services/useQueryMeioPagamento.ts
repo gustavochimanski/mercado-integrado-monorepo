@@ -31,7 +31,7 @@ export function useMeiosPagamento(enabled = true) {
   return useQuery<MeioPagamento[]>({
     queryKey: ["meios_pagamento"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/delivery/cliente/meios-pagamento/");
+      const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/api/delivery/cliente/meios-pagamento/");
       return data;
     },
     enabled,
@@ -52,7 +52,7 @@ export function useMutateMeioPagamento() {
 
   const create = useMutation({
     mutationFn: (body: Omit<MeioPagamento, "id" | "created_at" | "updated_at">) =>
-      apiAdmin.post("/delivery/meios-pagamento", body),
+      apiAdmin.post("/api/delivery/meios-pagamento", body),
     onSuccess: () => {
       toast.success("Meio de pagamento criado!");
       invalidate();
@@ -62,7 +62,7 @@ export function useMutateMeioPagamento() {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<MeioPagamento> & { id: number }) =>
-      apiAdmin.put(`/delivery/meios-pagamento/${id}`, body),
+      apiAdmin.put(`/api/delivery/meios-pagamento/${id}`, body),
     onSuccess: () => {
       toast.success("Meio de pagamento atualizado!");
       invalidate();
@@ -71,7 +71,7 @@ export function useMutateMeioPagamento() {
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiAdmin.delete(`/delivery/meios-pagamento/${id}`),
+    mutationFn: (id: number) => apiAdmin.delete(`/api/delivery/meios-pagamento/${id}`),
     onSuccess: () => {
       toast.success("Meio de pagamento removido!");
       invalidate();

@@ -37,7 +37,7 @@ export function usePedidos() {
   return useQuery<Pedido[]>({
     queryKey: ["pedidos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<Pedido[]>("/delivery/cliente/pedidos/");
+      const { data } = await apiClienteAdmin.get<Pedido[]>("/api/delivery/cliente/pedidos/");
       return data;
     },
     staleTime: 5 * 60 * 1000,
@@ -51,7 +51,7 @@ export function usePedidoById(pedidoId: number | null, opts?: { enabled?: boolea
     queryKey: ["pedido", pedidoId],
     queryFn: async () => {
       // Busca todos os pedidos e filtra o específico
-      const { data } = await apiClienteAdmin.get<Pedido[]>("/delivery/cliente/pedidos/");
+      const { data } = await apiClienteAdmin.get<Pedido[]>("/api/delivery/cliente/pedidos/");
       const pedido = data.find(p => p.id === pedidoId);
       if (!pedido) throw new Error(`Pedido ${pedidoId} não encontrado`);
       return pedido;
@@ -85,7 +85,7 @@ export function useMutatePedido() {
 
   const toggleModoEdicao = useMutation({
     mutationFn: async ({ id, modo }: { id: number; modo: boolean }) => {
-      return apiClienteAdmin.put(`/delivery/cliente/pedidos/${id}/modo-edicao`, { modo_edicao: modo });
+      return apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/modo-edicao`, { modo_edicao: modo });
     },
     onSuccess: (_, { modo }) => {
       toast.success(modo ? "Modo edição ativado" : "Modo edição desativado");
@@ -98,7 +98,7 @@ export function useMutatePedido() {
 
   const updatePedido = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) =>
-      apiClienteAdmin.put(`/delivery/cliente/pedidos/${id}/editar`, data),
+      apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/editar`, data),
     onSuccess: () => {
       toast.success("Pedido atualizado com sucesso!");
       invalidate();
@@ -108,7 +108,7 @@ export function useMutatePedido() {
 
   const confirmarPagamento = useMutation({
     mutationFn: ({ id, dadosPagamento }: { id: number; dadosPagamento: ConfirmarPagamentoRequest }) =>
-      apiClienteAdmin.post(`/delivery/cliente/pedidos/${id}/confirmar-pagamento`, dadosPagamento),
+      apiClienteAdmin.post(`/api/delivery/cliente/pedidos/${id}/confirmar-pagamento`, dadosPagamento),
     onSuccess: () => {
       toast.success("Pagamento confirmado com sucesso!");
       invalidate();
@@ -118,7 +118,7 @@ export function useMutatePedido() {
 
   const updateItens = useMutation({
     mutationFn: ({ id, itens }: { id: number; itens: ItemPedidoUpdate[] }) =>
-      apiClienteAdmin.put(`/delivery/cliente/pedidos/${id}/itens`, { itens }),
+      apiClienteAdmin.put(`/api/delivery/cliente/pedidos/${id}/itens`, { itens }),
     onSuccess: () => {
       toast.success("Itens do pedido atualizados com sucesso!");
       invalidate();
