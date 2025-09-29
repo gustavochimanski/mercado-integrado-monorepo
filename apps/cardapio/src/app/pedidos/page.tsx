@@ -129,7 +129,7 @@ export default function RoutePedidos() {
                             </span>
                           </div>
                           {/* Botão Editar - apenas para pedidos que podem ser editados */}
-                          {(order.status === "P" || order.status === "I") && (
+                          {(order.status === "P" || order.status === "I" || order.status === "R") && (
                             <Button
                               size="sm"
                               variant="outline"
