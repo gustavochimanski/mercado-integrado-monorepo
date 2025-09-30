@@ -43,23 +43,23 @@ export default function RootLayout({
         <Suspense />
         <ReactQueryProvider>
           <UserProvider>
-            <Toaster
-              position="top-right"
-              richColors
-              style={{
-                /* sucesso (toast.success) */
-                "--success-bg": "#22c55e",
-                "--success-text": "#ffffff",
-                "--success-border": "#16a34a",
-
-                /* erro (toast.error → variante 'destructive') */
-                "--destructive-bg": "#ef4444",
-                "--destructive-text": "#ffffff",
-                "--destructive-border": "#dc2626",
-              } as React.CSSProperties}
-            />
             <div className="min-h-screen bg-gray-50 flex justify-center">
               <div className="w-full max-w-md bg-white min-h-screen shadow-xl relative flex flex-col">
+                <Toaster
+                  position="top-right"
+                  richColors
+                  style={{
+                    /* sucesso (toast.success) */
+                    "--success-bg": "#22c55e",
+                    "--success-text": "#ffffff",
+                    "--success-border": "#16a34a",
+
+                    /* erro (toast.error → variante 'destructive') */
+                    "--destructive-bg": "#ef4444",
+                    "--destructive-text": "#ffffff",
+                    "--destructive-border": "#dc2626",
+                  } as React.CSSProperties}
+                />
                 <div className="flex-1">
                   {children}
                 </div>

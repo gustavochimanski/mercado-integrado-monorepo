@@ -221,7 +221,8 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     const meioPagamentoSelecionado = formGeral.watch("meio_pagamento_id");
     const meioPagamento = meiosPagamento.find(mp => mp.id === meioPagamentoSelecionado);
     const isDinheiro = meioPagamento?.tipo === "DINHEIRO";
-    const enderecoSelecionado = enderecos.find(end => end.id === formGeral.watch("endereco_id"));
+    // Usa o snapshot do pedido como endereço padrão
+    const enderecoSelecionado = pedido.endereco_snapshot || enderecos.find(end => end.id === formGeral.watch("endereco_id"));
 
     return (
       <form onSubmit={formGeral.handleSubmit(onSubmitGeral)} className="flex flex-col h-full">
@@ -253,25 +254,25 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
             <Label className="text-sm font-medium text-gray-700">
               Endereço de Entrega
             </Label>
-            <div className="flex gap-2">
-              <Select
-                value={formGeral.watch("endereco_id")?.toString() || ""}
-                onValueChange={(value) => formGeral.setValue("endereco_id", value ? parseInt(value) : undefined)}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Selecione o endereço" />
-                </SelectTrigger>
-                <SelectContent>
-                  {enderecos.map((endereco) => (
-                    <SelectItem key={endereco.id} value={endereco.id.toString()}>
-                      <div className="text-left">
-                        <div className="font-medium">{endereco.logradouro}, {endereco.numero}</div>
-                        <div className="text-xs text-gray-500">{endereco.bairro} - {endereco.cidade}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex gap-2 items-center">
+              {enderecoSelecionado ? (
+                <div className="flex-1 text-sm text-gray-600 bg-gray-50 p-3 rounded border">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-medium">{enderecoSelecionado.logradouro}, {enderecoSelecionado.numero}</div>
+                      <div className="text-xs text-gray-500">{enderecoSelecionado.bairro} - {enderecoSelecionado.cidade}/{enderecoSelecionado.estado}</div>
+                      {enderecoSelecionado.ponto_referencia && (
+                        <div className="text-xs text-gray-400 mt-1">Ref: {enderecoSelecionado.ponto_referencia}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 text-sm text-gray-400 bg-gray-50 p-3 rounded border">
+                  Nenhum endereço selecionado
+                </div>
+              )}
               <Button
                 type="button"
                 variant="outline"
@@ -282,20 +283,6 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
                 <Edit className="w-4 h-4" />
               </Button>
             </div>
-            {enderecoSelecionado && (
-              <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border">
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <div>{enderecoSelecionado.logradouro}, {enderecoSelecionado.numero}</div>
-                    <div>{enderecoSelecionado.bairro} - {enderecoSelecionado.cidade}/{enderecoSelecionado.estado}</div>
-                    {enderecoSelecionado.ponto_referencia && (
-                      <div className="text-gray-500">Ref: {enderecoSelecionado.ponto_referencia}</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Cupom */}
@@ -344,29 +331,6 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
             </div>
           )}
 
-          {/* Informações do Pedido */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 shadow-sm">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-1 border-b border-blue-100 last:border-b-0">
-                <span className="text-sm font-medium text-gray-600">Pedido:</span>
-                <span className="text-sm font-semibold text-gray-800">#{pedido.id}</span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-blue-100 last:border-b-0">
-                <span className="text-sm font-medium text-gray-600">Cliente:</span>
-                <span className="text-sm font-semibold text-gray-800">{pedido.cliente_nome}</span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-blue-100 last:border-b-0">
-                <span className="text-sm font-medium text-gray-600">Pagamento:</span>
-                <span className="text-sm font-semibold text-gray-800">{pedido.meio_pagamento_nome}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-sm font-medium text-gray-600">Total:</span>
-                <span className="text-lg font-bold text-emerald-600">
-                  R$ {pedido.valor_total.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className="mt-6 flex gap-3 pt-4 border-t border-gray-200">
@@ -521,7 +485,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   // Modal simples para informar sobre edição de endereços
   const renderEnderecoModal = () => (
     <Dialog open={showEnderecoModal} onOpenChange={setShowEnderecoModal}>
-      <DialogContent className="max-w-sm mx-auto">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-[384px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5" />
@@ -573,7 +537,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md mx-auto max-h-[100vh] w-113 overflow-hidden flex flex-col gap-4 p-5">
+      <DialogContent className="w-[calc(100%-3rem)] max-w-[450px] sm:max-w-[435px] md:max-w-[445px] max-h-[95vh] flex flex-col gap-1 p-6">
         <DialogHeader className="text-center border-b pt-6 pb-6">
           <DialogTitle className="text-xl font-semibold text-gray-800">
             Editar Pedido #{pedido.id}
