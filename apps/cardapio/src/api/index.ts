@@ -143,7 +143,6 @@ export { MetasService } from './services/MetasService';
 export { ParceirosAdminDeliveryService } from './services/ParceirosAdminDeliveryService';
 export { ParceirosPBlicoDeliveryService } from './services/ParceirosPBlicoDeliveryService';
 export { PedidosAdminDeliveryService } from './services/PedidosAdminDeliveryService';
-export { PedidosClienteDeliveryService } from './services/PedidosClienteDeliveryService';
 export { PrinterDeliveryService } from './services/PrinterDeliveryService';
 export { ProdutosAdminDeliveryService } from './services/ProdutosAdminDeliveryService';
 export { ProdutosMensuraService } from './services/ProdutosMensuraService';
