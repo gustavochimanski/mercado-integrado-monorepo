@@ -145,6 +145,32 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     toast.success(`Editando Pedido #${pedido.id}. Adicione ou remova produtos!`);
   };
 
+  const handleEditarEndereco = () => {
+    if (!pedido) return;
+
+    // Converte itens do pedido para formato do carrinho
+    const cartItems = pedido.itens.map(item => ({
+      cod_barras: item.produto_cod_barras,
+      nome: item.produto_descricao_snapshot || `Produto ${item.produto_cod_barras}`,
+      preco: item.preco_unitario,
+      quantity: item.quantidade,
+      empresaId: pedido.empresa_id,
+      imagem: item.produto_imagem_snapshot,
+      observacao: item.observacao || undefined,
+    }));
+
+    // Inicia modo edição no carrinho
+    startEditingPedido(pedido.id, cartItems, pedido.observacao_geral || "");
+
+    // Fecha o modal
+    onClose();
+
+    // Redireciona para finalizar-pedido (já abre na tab de endereço)
+    router.push("/finalizar-pedido");
+
+    toast.success(`Editando endereço do Pedido #${pedido.id}`);
+  };
+
   // Carrega dados do pedido quando abre o modal
   useEffect(() => {
     if (pedido && isOpen) {
@@ -346,6 +372,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
                 size="sm"
                 onClick={() => setShowEnderecoModal(true)}
                 className="px-3"
+                title="Editar endereço"
               >
                 <Edit className="w-4 h-4" />
               </Button>
@@ -560,22 +587,22 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   if (!pedido) return null;
 
-  // Modal simples para informar sobre edição de endereços
+  // Modal de confirmação para editar endereço
   const renderEnderecoModal = () => (
     <Dialog open={showEnderecoModal} onOpenChange={setShowEnderecoModal}>
-      <DialogContent className="w-[calc(100%-2rem)] max-w-[384px]">
+      <DialogContent className="w-[calc(100%-2rem)] !max-w-[384px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5" />
-            Editar Endereços
+            Alterar Endereço
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <p className="text-sm text-gray-600">
-            Para editar, adicionar ou remover endereços, acesse a seção de endereços no seu perfil.
+        <div className="space-y-3 py-4">
+          <p className="text-sm text-gray-700">
+            Deseja alterar o endereço de entrega deste pedido?
           </p>
-          <p className="text-xs text-gray-500">
-            Após fazer as alterações, retorne aqui e selecione o endereço desejado na lista.
+          <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-200">
+            Você será redirecionado para selecionar ou cadastrar um novo endereço. O pedido continuará em modo de edição.
           </p>
         </div>
         <div className="flex gap-2">
@@ -584,16 +611,16 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
             onClick={() => setShowEnderecoModal(false)}
             className="flex-1"
           >
-            Fechar
+            Cancelar
           </Button>
           <Button
             onClick={() => {
-              // TODO: Navegar para página de endereços
               setShowEnderecoModal(false);
+              handleEditarEndereco(); // Redireciona direto para /finalizar-pedido na tab de endereço
             }}
-            className="flex-1"
+            className="flex-1 bg-blue-600"
           >
-            Ir para Endereços
+            Continuar
           </Button>
         </div>
       </DialogContent>
