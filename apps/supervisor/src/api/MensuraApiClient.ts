@@ -28,7 +28,6 @@ import { MetasService } from './services/MetasService';
 import { ParceirosAdminDeliveryService } from './services/ParceirosAdminDeliveryService';
 import { ParceirosPBlicoDeliveryService } from './services/ParceirosPBlicoDeliveryService';
 import { PedidosAdminDeliveryService } from './services/PedidosAdminDeliveryService';
-import { PedidosClienteDeliveryService } from './services/PedidosClienteDeliveryService';
 import { PrinterDeliveryService } from './services/PrinterDeliveryService';
 import { ProdutosAdminDeliveryService } from './services/ProdutosAdminDeliveryService';
 import { ProdutosMensuraService } from './services/ProdutosMensuraService';
@@ -62,7 +61,6 @@ export class MensuraApiClient {
     public readonly parceirosAdminDelivery: ParceirosAdminDeliveryService;
     public readonly parceirosPBlicoDelivery: ParceirosPBlicoDeliveryService;
     public readonly pedidosAdminDelivery: PedidosAdminDeliveryService;
-    public readonly pedidosClienteDelivery: PedidosClienteDeliveryService;
     public readonly printerDelivery: PrinterDeliveryService;
     public readonly produtosAdminDelivery: ProdutosAdminDeliveryService;
     public readonly produtosMensura: ProdutosMensuraService;
@@ -107,7 +105,6 @@ export class MensuraApiClient {
         this.parceirosAdminDelivery = new ParceirosAdminDeliveryService(this.request);
         this.parceirosPBlicoDelivery = new ParceirosPBlicoDeliveryService(this.request);
         this.pedidosAdminDelivery = new PedidosAdminDeliveryService(this.request);
-        this.pedidosClienteDelivery = new PedidosClienteDeliveryService(this.request);
         this.printerDelivery = new PrinterDeliveryService(this.request);
         this.produtosAdminDelivery = new ProdutosAdminDeliveryService(this.request);
         this.produtosMensura = new ProdutosMensuraService(this.request);
