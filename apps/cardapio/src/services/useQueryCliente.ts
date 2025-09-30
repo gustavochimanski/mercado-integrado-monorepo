@@ -50,7 +50,7 @@ export function useMutateCliente() {
       const data = response.data;
       setCliente({
         nome: data.nome,
-        telefone: data.telefone,
+        telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
       });
       invalidate();
@@ -69,7 +69,7 @@ export function useMutateCliente() {
       const data = response.data;
       setCliente({
         nome: data.nome,
-        telefone: data.telefone,
+        telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
       });
       invalidate();
@@ -100,7 +100,7 @@ export function useMutateCliente() {
       const data = response.data;
       setCliente({
         nome: data.nome,
-        telefone: data.telefone,
+        telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
       });
       invalidate();
