@@ -71,6 +71,7 @@ export function useMutatePedido() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["pedidos"] });
     qc.invalidateQueries({ queryKey: ["pedidos_search"] });
+    qc.invalidateQueries({ queryKey: ["pedido"] });
   };
 
   const updateStatus = useMutation({

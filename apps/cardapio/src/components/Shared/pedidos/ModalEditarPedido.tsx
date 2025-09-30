@@ -15,13 +15,16 @@ import {
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Textarea } from "@cardapio/components/Shared/ui/textarea";
 import { Label } from "@cardapio/components/Shared/ui/label";
-import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
 import { useQueryEnderecos } from "@cardapio/services/useQueryEndereco";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@cardapio/components/Shared/ui/select";
 import { Edit, MapPin } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useCart } from "@cardapio/stores/cart/useCart";
 
 // Schemas separados para cada tab
 const itemEditadoSchema = z.object({
@@ -54,6 +57,8 @@ interface Props {
 }
 
 export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
+  const router = useRouter();
+  const { startEditingPedido } = useCart();
   const { toggleModoEdicao, updatePedido } = useMutatePedido();
   const { data: meiosPagamento = [] } = useMeiosPagamento();
   const { data: enderecos = [] } = useQueryEnderecos();
@@ -114,6 +119,32 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     formItens.setValue("itens", itens);
   };
 
+  const handleAdicionarProdutos = () => {
+    if (!pedido) return;
+
+    // Converte itens do pedido para formato do carrinho
+    const cartItems = pedido.itens.map(item => ({
+      cod_barras: item.produto_cod_barras,
+      nome: item.produto_descricao_snapshot || `Produto ${item.produto_cod_barras}`,
+      preco: item.preco_unitario,
+      quantity: item.quantidade,
+      empresaId: pedido.empresa_id,
+      imagem: item.produto_imagem_snapshot,
+      observacao: item.observacao || undefined,
+    }));
+
+    // Inicia modo edição no carrinho
+    startEditingPedido(pedido.id, cartItems, pedido.observacao_geral || "");
+
+    // Fecha o modal
+    onClose();
+
+    // Redireciona para home
+    router.push("/");
+
+    toast.success(`Editando Pedido #${pedido.id}. Adicione ou remova produtos!`);
+  };
+
   // Carrega dados do pedido quando abre o modal
   useEffect(() => {
     if (pedido && isOpen) {
@@ -145,6 +176,20 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       modoEdicaoJaAtivado.current = false;
     }
   }, [pedido, isOpen, formGeral, formItens, meiosPagamento]);
+
+  // Recarrega os itens do formulário quando o pedido mudar (após salvar)
+  useEffect(() => {
+    if (!pedido || !isOpen) return;
+
+    const itensEditaveis = pedido.itens.map(item => ({
+      id: item.id,
+      produto_cod_barras: item.produto_cod_barras,
+      quantidade: item.quantidade,
+      observacao: item.observacao || "",
+      acao: "MANTER" as const,
+    }));
+    formItens.setValue("itens", itensEditaveis);
+  }, [pedido, isOpen, formItens]);
 
   const handleClose = async () => {
     if (pedido && modoEdicaoAtivo) {
@@ -203,14 +248,36 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   };
 
   // Submit para itens do pedido
-  const onSubmitItens = async () => {
+  const onSubmitItens = async (data: EditarItensData) => {
     if (!pedido) return;
 
     setLoadingItens(true);
 
-    // TODO: Implementar endpoint específico para itens quando descobrir qual é
+    // Formata itens para o endpoint conforme schema da API
+    const itensParaEnviar = data.itens.map(item => ({
+      id: item.id || 0,
+      produto_cod_barras: item.produto_cod_barras,
+      quantidade: item.quantidade,
+      observacao: item.observacao || "",
+      acao: item.acao,
+    }));
 
-    setLoadingItens(false);
+    updatePedido.mutate(
+      {
+        id: pedido.id,
+        data: { itens: itensParaEnviar },
+      },
+      {
+        onSuccess: () => {
+          setLoadingItens(false);
+          // Não fecha o modal para ver a atualização
+          toast.success("Itens atualizados! Verifique as alterações.");
+        },
+        onError: () => {
+          setLoadingItens(false);
+        },
+      }
+    );
   };
 
 
@@ -358,12 +425,24 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
     return (
       <form onSubmit={formItens.handleSubmit(onSubmitItens)} className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-          {/* Itens do Pedido */}
-          <div>
-            <Label className="text-lg font-semibold">Itens do Pedido</Label>
-            <div className="mt-3 space-y-3">
-              {itensWatch.map((item, index) => (
+        {/* Header fixo */}
+        <div className="flex justify-between items-center mb-4 pb-3 border-b">
+          <Label className="text-lg font-semibold">Itens do Pedido</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAdicionarProdutos}
+            className="text-xs gap-1 m-3"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Adicionar Produtos
+          </Button>
+        </div>
+
+        {/* Lista de itens com scroll */}
+        <div className="flex-1 overflow-y-auto pr-2 max-h-[400px] space-y-3">
+          {itensWatch.map((item, index) => (
                 <div
                   key={`${item.id}-${index}`}
                   className={`border rounded-lg p-4 ${
@@ -374,9 +453,9 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
                       : "bg-white"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="font-medium text-sm text-gray-900">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-gray-900 break-words">
                         {pedido.itens.find(p => p.id === item.id)?.produto_descricao_snapshot ||
                          `Produto: ${item.produto_cod_barras}`}
                       </div>
@@ -385,7 +464,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {item.acao !== "REMOVER" ? (
                         <>
                           {/* Controle de Quantidade */}
@@ -457,11 +536,10 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
                   )}
                 </div>
               ))}
-            </div>
-          </div>
         </div>
 
-        <div className="mt-4 gap-2 flex">
+        {/* Footer fixo */}
+        <div className="mt-4 pt-4 border-t gap-2 flex">
           <Button type="button" variant="outline" onClick={handleClose} className="flex-1 cursor-pointer">
             Fechar
           </Button>
