@@ -24,7 +24,7 @@ export interface ClienteCreate {
   cpf_cnpj?: string | null;
 }
 
-export interface ClienteUpdate extends Partial<ClienteCreate> {}
+export type ClienteUpdate = Partial<ClienteCreate>;
 
 export interface NovoDispositivoRequest {
   telefone: string;
@@ -45,7 +45,7 @@ export function useMutateCliente() {
   /** Criar cliente novo */
   const create = useMutation({
     mutationFn: (body: ClienteCreate) =>
-      api.post<ClienteOut>("/delivery/cliente/", body),
+      api.post<ClienteOut>("/api/delivery/cliente/", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
@@ -83,7 +83,7 @@ export function useMutateCliente() {
   /** Enviar código OTP para telefone existente */
   const enviarCodigoNovoDispositivo = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
-      api.post("/delivery/cliente/novo-dispositivo", body),
+      api.post("/api/delivery/cliente/novo-dispositivo", body),
     onSuccess: () => {
       toast.success("Código enviado com sucesso!");
     },
@@ -95,7 +95,7 @@ export function useMutateCliente() {
   /** Confirmar código OTP e receber token */
   const confirmarCodigo = useMutation({
     mutationFn: (body: ConfirmacaoCodigoRequest) =>
-      api.post<ClienteOut>("/delivery/cliente/confirmar-codigo", body),
+      api.post<ClienteOut>("/api/delivery/cliente/confirmar-codigo", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({

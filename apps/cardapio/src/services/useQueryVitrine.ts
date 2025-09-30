@@ -76,7 +76,7 @@ export function useVitrinesSearch(
       if (hasQuery) params.q = qDeb.trim();
       if (codCategoria != null) params.cod_categoria = codCategoria;
       if (isHome != null) params.is_home = isHome;
-      const { data } = await apiAdmin.get<VitrineSearchItem[]>("/delivery/vitrines/search", { params });
+      const { data } = await apiAdmin.get<VitrineSearchItem[]>("/api/delivery/vitrines/search", { params });
       return data;
     },
     enabled: enabled ?? (hasCat || hasQuery),
@@ -97,7 +97,7 @@ export function useFetchVitrine(empresaId: number, codCategoria?: number) {
       if (codCategoria) params.cod_categoria = codCategoria;
 
       const { data } = await apiAdmin.get<VitrineOut[]>(
-        "/delivery/vitrines/search",
+        "/api/delivery/vitrines/search",
         { params }
       );
       return data;
@@ -127,7 +127,7 @@ export function useMutateVitrine() {
         ...(typeof body.ordem === "number" ? { ordem: body.ordem } : {}),
         ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
       };
-      const { data } = await apiAdmin.post("/delivery/vitrines", payload);
+      const { data } = await apiAdmin.post("/api/delivery/vitrines", payload);
       return data as VitrineOut;
     },
     onSuccess: () => {
@@ -147,7 +147,7 @@ export function useMutateVitrine() {
         ...(typeof body.ordem === "number" ? { ordem: body.ordem } : {}),
         ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
       };
-      const { data } = await apiAdmin.put(`/delivery/vitrines/${id}`, payload);
+      const { data } = await apiAdmin.put(`/api/delivery/vitrines/${id}`, payload);
       return data as VitrineOut;
     },
     onSuccess: () => {
@@ -161,7 +161,7 @@ export function useMutateVitrine() {
 
   const remove = useMutation({
     mutationFn: async (vitrineId: number) => {
-      await apiAdmin.delete(`/delivery/vitrines/${vitrineId}`);
+      await apiAdmin.delete(`/api/delivery/vitrines/${vitrineId}`);
     },
     onSuccess: () => {
       toast.success("Vitrine removida com sucesso!");
@@ -174,7 +174,7 @@ export function useMutateVitrine() {
 
   const vincular = useMutation({
     mutationFn: async (p: { vitrineId: number; empresa_id: number; cod_barras: string }) => {
-      await apiAdmin.post(`/delivery/vitrines/${p.vitrineId}/vincular`, {
+      await apiAdmin.post(`/api/delivery/vitrines/${p.vitrineId}/vincular`, {
         empresa_id: p.empresa_id,
         cod_barras: p.cod_barras,
       });
@@ -191,7 +191,7 @@ export function useMutateVitrine() {
   const desvincular = useMutation({
     mutationFn: async (p: { vitrineId: number; empresa_id: number; cod_barras: string }) => {
       await apiAdmin.delete(
-        `/delivery/vitrines/${p.vitrineId}/vincular/${encodeURIComponent(p.cod_barras)}`,
+        `/api/delivery/vitrines/${p.vitrineId}/vincular/${encodeURIComponent(p.cod_barras)}`,
         { params: { empresa_id: p.empresa_id } }
       );
     },
@@ -206,7 +206,7 @@ export function useMutateVitrine() {
 
   const markHome = useMutation({
     mutationFn: async ({ id, is_home }: { id: number; is_home: boolean }) => {
-      const { data } = await apiAdmin.patch(`/delivery/vitrines/${id}/home`, { is_home });
+      const { data } = await apiAdmin.patch(`/api/delivery/vitrines/${id}/home`, { is_home });
       return data as VitrineOut;
     },
     onSuccess: (v) => {

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 
-const BASE = "/delivery/produtos";
+const BASE = "/api/delivery/produtos";
 
 // ----- Tipos (espelham seu backend) -----
 export type ProdutoListItem = {

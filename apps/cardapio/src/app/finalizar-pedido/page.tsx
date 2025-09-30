@@ -7,6 +7,7 @@ import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, setEnderecoPadraoI
 import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
 import { useQueryEnderecos, useMutateEndereco, EnderecoCreate } from "@cardapio/services/useQueryEndereco";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
+import { useMutatePedido } from "@cardapio/services/useQueryPedido";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
@@ -22,8 +23,10 @@ import PedidoConfirmOverlay from "@cardapio/components/Shared/finalizar-pedido/P
 
 export default function FinalizarPedidoPage() {
   const router = useRouter();
-  const { items, totalPrice, observacao } = useCart();
+  const { items, totalPrice, observacao, editingPedidoId, stopEditingPedido } = useCart();
   const { finalizarPedido, loading } = useFinalizarPedido();
+
+  const isEditingMode = editingPedidoId !== null;
 
   const [cliente, setCliente] = useState<any>(null);
   const [showClienteModal, setShowClienteModal] = useState(false);
@@ -38,6 +41,7 @@ export default function FinalizarPedidoPage() {
   const { data: enderecos = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
   const { create, update, remove } = useMutateEndereco();
   const { data: meiosPagamento = [] } = useMeiosPagamento(!!cliente?.tokenCliente);
+  const { updatePedido } = useMutatePedido();
 
   useEffect(() => {
     const c = getCliente();
@@ -56,19 +60,60 @@ export default function FinalizarPedidoPage() {
     setOverlayStatus("loading");
     setErrorMessage("");
     setOverlayMessage("");
-    const result = await finalizarPedido();
 
-    // Simula loading antes de mostrar sucesso/erro
-    setTimeout(() => {
-      if (result === "sucesso") {
-        setOverlayStatus("sucesso");
-        setTimeout(() => router.push("/pedidos"), 3000); // 3s para mostrar check
-      } else if (typeof result === "object" && result.status === "erro") {
-        setOverlayStatus("erro");
-        setOverlayMessage(result.message);
-        setErrorMessage(result.message);
-      }
-    }, 1500); // mantém loading por 1.5s
+    if (isEditingMode && editingPedidoId) {
+      // Modo edição: atualiza pedido existente
+      const itensParaEnviar = items.map(item => ({
+        id: 0, // Novo item não tem id
+        produto_cod_barras: item.cod_barras,
+        quantidade: item.quantity,
+        observacao: item.observacao || "",
+        acao: "EDITAR",
+      }));
+
+      updatePedido.mutate(
+        {
+          id: editingPedidoId,
+          data: {
+            itens: itensParaEnviar,
+            observacao_geral: observacao,
+            meio_pagamento_id: meioPagamentoId,
+            endereco_id: enderecoId,
+          },
+        },
+        {
+          onSuccess: () => {
+            setTimeout(() => {
+              setOverlayStatus("sucesso");
+              stopEditingPedido(); // Limpa o modo edição
+              setTimeout(() => router.push("/pedidos"), 3000);
+            }, 1500);
+          },
+          onError: (error: any) => {
+            setTimeout(() => {
+              setOverlayStatus("erro");
+              const message = error?.response?.data?.message || "Erro ao atualizar pedido";
+              setOverlayMessage(message);
+              setErrorMessage(message);
+            }, 1500);
+          },
+        }
+      );
+    } else {
+      // Modo normal: cria novo pedido
+      const result = await finalizarPedido();
+
+      setTimeout(() => {
+        if (result === "sucesso") {
+          setOverlayStatus("sucesso");
+          setTimeout(() => router.push("/pedidos"), 3000);
+        } else if (typeof result === "object" && result.status === "erro") {
+          setOverlayStatus("erro");
+          setOverlayMessage(result.message);
+          setErrorMessage(result.message);
+        }
+      }, 1500);
+    }
   };
 
   const renderFooterButton = () => {
@@ -108,7 +153,7 @@ export default function FinalizarPedidoPage() {
         return (
           <Button onClick={handleFinalizar} disabled={items.length === 0} className="w-full text-lg p-6 bg-green-600">
             <div className="flex gap-3 items-center">
-              Confirmar Pedido <CircleCheck strokeWidth={3} />
+              {isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"} <CircleCheck strokeWidth={3} />
             </div>
           </Button>
         );

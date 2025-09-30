@@ -10,8 +10,10 @@ import { useRouter } from "next/navigation";
 import { CardDescription } from "../ui/card";
 
 export function CartSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { items, totalPrice, clear, inc, dec, remove, observacao, setObservacao } = useCart();
+  const { items, totalPrice, clear, inc, dec, remove, observacao, setObservacao, editingPedidoId } = useCart();
   const router = useRouter();
+
+  const isEditingMode = editingPedidoId !== null;
 
   function handleFinalizar() {
     if (items.length === 0) return;
@@ -23,7 +25,18 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="bottom" className="max-w-full p-2 gap-0 h-[80%]">
         <SheetHeader>
-          <SheetTitle>Meu carrinho</SheetTitle>
+          <SheetTitle>
+            {isEditingMode ? (
+              <div className="flex flex-col gap-1">
+                <span>Editando Pedido #{editingPedidoId}</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  Adicione ou remova produtos do pedido
+                </span>
+              </div>
+            ) : (
+              "Meu carrinho"
+            )}
+          </SheetTitle>
         </SheetHeader>
 
         <main className="p-2 overflow-y-auto space-y-2">
@@ -73,10 +86,10 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
         <div className="mt-4 flex gap-2">
           <Button variant="outline" onClick={clear} className="flex-1">
-            Limpar
+            {isEditingMode ? "Cancelar Edição" : "Limpar"}
           </Button>
           <Button className="flex-1" onClick={handleFinalizar}>
-            Finalizar pedido
+            {isEditingMode ? "Atualizar Pedido" : "Finalizar pedido"}
           </Button>
         </div>
       </SheetContent>

@@ -19,6 +19,7 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   observacao: string;
+  editingPedidoId: number | null;
   setObservacao: (texto: string) => void;
   add: (item: CartItem) => void;
   inc: (cod_barras: string, step?: number) => void;
@@ -28,6 +29,8 @@ interface CartState {
   clear: () => void;
   totalItems: () => number;
   totalPrice: () => number;
+  startEditingPedido: (pedidoId: number, items: CartItem[], observacao?: string) => void;
+  stopEditingPedido: () => void;
 }
 
 /* ---------- Logger middleware ---------- */
@@ -58,6 +61,7 @@ export const useCart = create<CartState>()(
     withLogger<CartState>((set, get) => ({
       items: [],
       observacao: "",
+      editingPedidoId: null,
 
       setObservacao: (texto) => {
         set({ observacao: texto });
@@ -115,13 +119,29 @@ export const useCart = create<CartState>()(
           items: get().items.filter((p: { cod_barras: string; }) => p.cod_barras !== cod_barras),
         }),
 
-      clear: () => set({ items: [], observacao: "" }),
+      clear: () => set({ items: [], observacao: "", editingPedidoId: null }),
 
       totalItems: () =>
         get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0),
 
       totalPrice: () =>
         get().items.reduce((total: number, item: { quantity: number; preco: number; }) => total + item.quantity * item.preco, 0),
+
+      startEditingPedido: (pedidoId, items, observacao = "") => {
+        set({
+          editingPedidoId: pedidoId,
+          items,
+          observacao
+        });
+      },
+
+      stopEditingPedido: () => {
+        set({
+          editingPedidoId: null,
+          items: [],
+          observacao: ""
+        });
+      },
     })),
     {
       name: "cardapio-cart",
@@ -129,6 +149,7 @@ export const useCart = create<CartState>()(
       partialize: (s) => ({
         items: s.items,
         observacao: s.observacao,
+        editingPedidoId: s.editingPedidoId,
       }),
     }
   )

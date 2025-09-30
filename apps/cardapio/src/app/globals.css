@@ -138,3 +138,20 @@
   scrollbar-width: thin;
 }
 
+/* Toaster fixo dentro do container max-w-md */
+[data-sonner-toaster] {
+  position: fixed !important;
+  right: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  max-width: 448px !important; /* max-w-md */
+  width: 100% !important;
+  padding: 0 1rem !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast] {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  max-width: 100% !important;
+}
+
