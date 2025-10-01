@@ -4,6 +4,7 @@ import { Button } from "../../../ui/button"
 import { User, MapPin, Edit } from "lucide-react"
 import { ClienteTabProps } from "@supervisor/types/pedidos/modal"
 import { EnderecoEditModal } from "./EnderecoEditModal"
+import { BirthDatePicker } from "../../../shared/BirthDatePicker"
 import { useState } from "react"
 
 
@@ -45,7 +46,7 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
           </h3>
           <div className="space-y-4">
 
-            {/* Campo Nome Cliente*/}
+            {/* Campo Nome Cliente */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Nome</Label>
               <Input
@@ -92,12 +93,11 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
             {/* Campo Data de Nascimento Cliente*/}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Data de Nascimento</Label>
-              <Input
-                type="date"
+              <BirthDatePicker
                 value={formData.data_nascimento_cliente}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, data_nascimento_cliente: e.target.value }))}
+                onChange={(dateString) => setFormData((prev: any) => ({ ...prev, data_nascimento_cliente: dateString }))}
                 disabled={!isEditing}
-                className="bg-white"
+                placeholder="Selecione a data de nascimento"
               />
             </div>
           </div>
