@@ -34,6 +34,17 @@ export function useUpdateEnderecoEntrega() {
       pedidoId: number;
       enderecoId: number;
     }) => {
+      // Validações
+      if (!pedidoId || pedidoId <= 0) {
+        throw new Error('ID do pedido é obrigatório e deve ser maior que 0');
+      }
+
+      if (!enderecoId || enderecoId <= 0) {
+        throw new Error('ID do endereço é obrigatório e deve ser maior que 0');
+      }
+
+      console.log('Atualizando pedido:', { pedidoId, enderecoId });
+
       // Usa o endpoint correto para atualizar o pedido
       const response = await mensuraApi.pedidosAdminDelivery.atualizarPedidoApiDeliveryPedidosAdminPedidoIdPut(
         pedidoId,
