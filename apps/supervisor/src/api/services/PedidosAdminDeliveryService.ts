@@ -8,7 +8,6 @@ import type { PedidoKanbanResponse } from '../models/PedidoKanbanResponse';
 import type { PedidoResponse } from '../models/PedidoResponse';
 import type { PedidoResponseCompletoTotal } from '../models/PedidoResponseCompletoTotal';
 import type { PedidoStatusEnum } from '../models/PedidoStatusEnum';
-import type { VincularEntregadorRequest } from '../models/VincularEntregadorRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class PedidosAdminDeliveryService {
@@ -179,13 +178,13 @@ export class PedidosAdminDeliveryService {
      * Para vincular: envie entregador_id com o ID do entregador
      * Para desvincular: envie entregador_id como null
      * @param pedidoId ID do pedido
-     * @param requestBody
+     * @param entregadorId ID do entregador (omita para desvincular)
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
     public vincularEntregadorApiDeliveryPedidosAdminPedidoIdEntregadorPut(
         pedidoId: number,
-        requestBody: VincularEntregadorRequest,
+        entregadorId?: (number | null),
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
@@ -193,8 +192,34 @@ export class PedidosAdminDeliveryService {
             path: {
                 'pedido_id': pedidoId,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            query: {
+                'entregador_id': entregadorId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Desvincular Entregador
+     * Desvincula o entregador atual de um pedido.
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     *
+     * Remove a vinculação do entregador com o pedido.
+     * @param pedidoId ID do pedido
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public desvincularEntregadorApiDeliveryPedidosAdminPedidoIdEntregadorDelete(
+        pedidoId: number,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/delivery/pedidos/admin/{pedido_id}/entregador',
+            path: {
+                'pedido_id': pedidoId,
+            },
             errors: {
                 422: `Validation Error`,
             },

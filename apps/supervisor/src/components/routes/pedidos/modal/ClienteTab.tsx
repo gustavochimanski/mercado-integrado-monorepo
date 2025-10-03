@@ -4,6 +4,7 @@ import { User, MapPin } from "lucide-react"
 import { ClienteTabProps } from "@supervisor/types/pedidos/modal"
 import { EnderecoEditModal } from "./EnderecoEditModal"
 import { EnderecosList } from "./EnderecosList"
+import { ConfirmarTrocaEnderecoModal } from "./ConfirmarTrocaEnderecoModal"
 import { BirthDatePicker } from "../../../shared/BirthDatePicker"
 import { useState } from "react"
 import { useEnderecosCliente, useUpdateEnderecoEntrega } from "@supervisor/services/useQueryEnderecoCliente"
@@ -23,6 +24,8 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   const [enderecoEditModalOpen, setEnderecoEditModalOpen] = useState(false)
   const [enderecoParaEdicao, setEnderecoParaEdicao] = useState<Endereco | null>(null)
   const [isNovoEndereco, setIsNovoEndereco] = useState(false)
+  const [confirmarTrocaModalOpen, setConfirmarTrocaModalOpen] = useState(false)
+  const [enderecoParaTroca, setEnderecoParaTroca] = useState<EnderecoOut | null>(null)
 
   // Hook para buscar endereços do cliente
   const clienteId = pedidoCompleto?.cliente?.id
@@ -31,13 +34,38 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   // Hook para atualizar endereço de entrega
   const updateEnderecoEntrega = useUpdateEnderecoEntrega()
 
-  // Função para selecionar endereço para entrega
+  // Função para formatar endereço para exibição
+  const formatarEnderecoCompleto = (endereco: EnderecoOut): string => {
+    const partes = [
+      endereco.logradouro,
+      endereco.numero,
+      endereco.bairro,
+      endereco.cidade,
+      endereco.estado
+    ].filter(Boolean);
+    return partes.join(", ");
+  };
+
+  // Função para abrir modal de confirmação de troca
   const handleEnderecoSelect = (endereco: EnderecoOut) => {
-    if (pedidoCompleto?.id && endereco.id) {
+    // Verificar se está realmente trocando de endereço
+    if (endereco.id === pedidoCompleto?.endereco?.id) {
+      return; // Mesmo endereço, não fazer nada
+    }
+
+    setEnderecoParaTroca(endereco);
+    setConfirmarTrocaModalOpen(true);
+  }
+
+  // Função para confirmar troca de endereço
+  const handleConfirmarTrocaEndereco = () => {
+    if (pedidoCompleto?.id && enderecoParaTroca?.id) {
       updateEnderecoEntrega.mutate({
         pedidoId: pedidoCompleto.id,
-        enderecoId: endereco.id
-      })
+        enderecoId: enderecoParaTroca.id,
+        pedidoCompleto: pedidoCompleto
+      });
+      setEnderecoParaTroca(null);
     }
   }
 
@@ -192,6 +220,18 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
         isSaving={isUpdatingEndereco}
         isNewAddress={isNovoEndereco}
         clienteId={clienteId}
+      />
+
+      {/* Modal de Confirmação de Troca de Endereço */}
+      <ConfirmarTrocaEnderecoModal
+        isOpen={confirmarTrocaModalOpen}
+        onClose={() => {
+          setConfirmarTrocaModalOpen(false);
+          setEnderecoParaTroca(null);
+        }}
+        onConfirm={handleConfirmarTrocaEndereco}
+        enderecoAtual={pedidoCompleto?.endereco ? formatarEnderecoCompleto(pedidoCompleto.endereco) : undefined}
+        enderecoNovo={enderecoParaTroca ? formatarEnderecoCompleto(enderecoParaTroca) : undefined}
       />
     </div>
   )

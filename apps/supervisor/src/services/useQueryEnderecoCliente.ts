@@ -12,7 +12,7 @@ export function useEnderecosCliente(clienteId?: number) {
     queryFn: async (): Promise<EnderecoOut[]> => {
       if (!clienteId) return [];
 
-      const response = await mensuraApi.clienteAdminDelivery.getEnderecosClienteApiDeliveryClienteAdminClienteIdEnderecosGet(clienteId);
+      const response = await mensuraApi.clienteAdminDelivery.getEnderecosClienteApiDeliveryClienteAdminClienteIdUpdateEnderecoGet(clienteId);
       return response || [];
     },
     enabled: !!clienteId,
@@ -29,10 +29,12 @@ export function useUpdateEnderecoEntrega() {
   return useMutation({
     mutationFn: async ({
       pedidoId,
-      enderecoId
+      enderecoId,
+      pedidoCompleto
     }: {
       pedidoId: number;
       enderecoId: number;
+      pedidoCompleto?: any;
     }) => {
       // Validações
       if (!pedidoId || pedidoId <= 0) {
@@ -43,18 +45,62 @@ export function useUpdateEnderecoEntrega() {
         throw new Error('ID do endereço é obrigatório e deve ser maior que 0');
       }
 
-      console.log('Atualizando pedido:', { pedidoId, enderecoId });
+      console.log('Atualizando endereço do pedido:', { pedidoId, enderecoId });
+
+      // Monta o payload com os dados atuais do pedido + novo endereço
+      const payload: any = {
+        endereco_id: enderecoId,
+      };
+
+      // Preserva outros campos do pedido se disponíveis
+      if (pedidoCompleto) {
+        if (pedidoCompleto.meio_pagamento?.id) {
+          payload.meio_pagamento_id = pedidoCompleto.meio_pagamento.id;
+        }
+        if (pedidoCompleto.observacao_geral) {
+          payload.observacao_geral = pedidoCompleto.observacao_geral;
+        }
+        if (pedidoCompleto.troco_para !== undefined && pedidoCompleto.troco_para !== null) {
+          payload.troco_para = pedidoCompleto.troco_para;
+        }
+      }
 
       // Usa o endpoint correto para atualizar o pedido
-      const response = await mensuraApi.pedidosAdminDelivery.atualizarPedidoApiDeliveryPedidosAdminPedidoIdPut(
-        pedidoId,
-        {
-          endereco_id: enderecoId
+      try {
+        const response = await mensuraApi.pedidosAdminDelivery.atualizarPedidoApiDeliveryPedidosAdminPedidoIdPut(
+          pedidoId,
+          payload
+        );
+        return { success: true, data: response };
+      } catch (err: any) {
+        // Verificar se é um erro de região de entrega (regra de negócio válida)
+        const errorMessage = err?.body?.detail || err?.response?.data?.detail || err?.message || '';
+
+        if (errorMessage?.includes("Não entregamos") || errorMessage?.includes("não entregamos")) {
+          // Não é erro técnico, é regra de negócio - retornar com flag
+          return {
+            success: false,
+            isDeliveryAreaError: true,
+            message: errorMessage
+          };
         }
-      );
-      return response;
+
+        // Se for erro técnico real, propagar
+        throw err;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (result: any) => {
+      // Se foi erro de área de entrega (regra de negócio)
+      if (result?.isDeliveryAreaError) {
+        toast({
+          title: "Região fora da área de entrega",
+          description: result.message,
+          variant: "default",
+        });
+        return;
+      }
+
+      // Sucesso real
       toast({
         title: "Endereço atualizado",
         description: "O endereço de entrega foi atualizado com sucesso."
@@ -65,10 +111,14 @@ export function useUpdateEnderecoEntrega() {
       qc.invalidateQueries({ queryKey: ["enderecosCliente"], exact: false });
     },
     onError: (err: any) => {
-      console.error("Error updating delivery address:", err);
+      // Apenas erros técnicos reais chegam aqui
+      console.error("Erro técnico ao atualizar endereço:", err);
+
+      const errorMessage = err?.body?.detail || err?.response?.data?.detail || getErrorMessage(err);
+
       toast({
         title: "Erro ao atualizar endereço",
-        description: getErrorMessage(err),
+        description: errorMessage,
         variant: "destructive"
       });
     },
