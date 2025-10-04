@@ -219,24 +219,41 @@ export function useUpdateItens() {
         throw new Error("Nenhum item válido para atualizar")
       }
 
-      // Formatar dados conforme modelo ItemPedidoEditar
-      const itensFormatados = itensValidos.map(item => ({
-        id: item.id || null,
-        produto_cod_barras: item.produto_cod_barras || null,
-        quantidade: Number(item.quantidade) || null,
-        preco_unitario: Number(item.preco_unitario) || null,
-        observacao: item.observacao || "",
-        acao: "atualizar"
-      }))
+      // Separar itens novos dos existentes
+      const itensNovos = itensValidos.filter(item => !item.id && item.action !== "remove")
+      const itensExistentes = itensValidos.filter(item => item.id)
+
+      // Formatar itens existentes (atualizar/remover)
+      const itensFormatados = itensExistentes.map(item => {
+        const itemFormatado: any = {
+          id: item.id,
+          produto_cod_barras: item.produto_cod_barras,
+          quantidade: Number(item.quantidade),
+          observacao: item.observacao || "",
+          acao: "atualizar"
+        };
+
+        if (item.action === "remove") {
+          itemFormatado.remover = true;
+        }
+
+        return itemFormatado;
+      })
+
+      // Adicionar itens novos com formato diferente (sem id, sem acao)
+      itensNovos.forEach(item => {
+        itensFormatados.push({
+          produto_cod_barras: item.produto_cod_barras,
+          quantidade: Number(item.quantidade),
+          observacao: item.observacao || ""
+        });
+      })
 
       // Validar se todos os campos obrigatórios estão presentes
       const itensComErros = itensFormatados.filter(item =>
         !item.produto_cod_barras ||
         !item.quantidade ||
-        item.quantidade <= 0 ||
-        item.preco_unitario === null ||
-        item.preco_unitario === undefined ||
-        item.preco_unitario <= 0
+        item.quantidade <= 0
       )
 
       if (itensComErros.length > 0) {

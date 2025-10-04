@@ -262,11 +262,11 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
     }
 
     const error = errors[result.status];
-    if (error && result.status !== 401) { // Não lançar erro para 401
+    if (error) {
         throw new ApiError(options, result, error);
     }
 
-    if (!result.ok && result.status !== 401) { // Não lançar erro genérico para 401
+    if (!result.ok) {
         const errorStatus = result.status ?? 'unknown';
         const errorStatusText = result.statusText ?? 'unknown';
         const errorBody = (() => {

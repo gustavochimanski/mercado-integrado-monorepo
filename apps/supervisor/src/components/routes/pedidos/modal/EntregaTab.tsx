@@ -32,11 +32,58 @@ export const EntregaTab: React.FC<EntregaTabProps> = ({
           </h3>
           <div className="space-y-4">
 
-            {/* Campo Data de Entrega */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Tipo de Entrega</Label>
-              <Input value={pedidoCompleto?.tipo_entrega || ""} disabled className="bg-white" />
-            </div>
+            {/* Endereço de Entrega */}
+            {pedidoCompleto?.endereco ? (
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-start gap-3">             
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-900 mb-2">Endereço de Entrega</h4>
+
+                    {/* Endereço formatado */}
+                    <p className="text-sm text-gray-700 mb-2">
+                      {[
+                        pedidoCompleto.endereco.logradouro,
+                        pedidoCompleto.endereco.numero,
+                        pedidoCompleto.endereco.bairro,
+                        pedidoCompleto.endereco.cidade,
+                        pedidoCompleto.endereco.estado
+                      ].filter(Boolean).join(", ")}
+                    </p>
+
+                    {/* CEP */}
+                    {pedidoCompleto.endereco.cep && (
+                      <p className="text-xs text-gray-500 mb-2">
+                        CEP: {pedidoCompleto.endereco.cep}
+                      </p>
+                    )}
+
+                    {/* Complemento */}
+                    {pedidoCompleto.endereco.complemento && (
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium">Complemento:</span> {pedidoCompleto.endereco.complemento}
+                      </p>
+                    )}
+
+                    {/* Ponto de referência */}
+                    {pedidoCompleto.endereco.ponto_referencia && (
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium">Referência:</span> {pedidoCompleto.endereco.ponto_referencia}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg p-6 border border-dashed border-gray-300 text-center">
+                <div className="bg-gray-100 rounded-full p-3 w-12 h-12 mx-auto mb-3">
+                  <Truck className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-500">Nenhum endereço de entrega definido</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Configure o endereço na aba Cliente
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

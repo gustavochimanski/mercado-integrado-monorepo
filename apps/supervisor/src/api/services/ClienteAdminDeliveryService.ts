@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
 import type { ClienteAdminUpdate } from '../models/ClienteAdminUpdate';
 import type { ClienteCreate } from '../models/ClienteCreate';
 import type { ClienteOut } from '../models/ClienteOut';
@@ -122,6 +123,32 @@ export class ClienteAdminDeliveryService {
         });
     }
     /**
+     * Criar Endereco Cliente
+     * Endpoint para criar um novo endereço para um cliente específico.
+     * Requer autenticação de admin.
+     * @param clienteId ID do cliente para adicionar endereço
+     * @param requestBody
+     * @returns EnderecoOut Successful Response
+     * @throws ApiError
+     */
+    public criarEnderecoClienteApiDeliveryClienteAdminClienteIdCriarEnderecoPost(
+        clienteId: number,
+        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<EnderecoOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/delivery/cliente/admin/{cliente_id}/criar-endereco',
+            path: {
+                'cliente_id': clienteId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Get Enderecos Cliente
      * Endpoint para consultar endereços de um cliente específico.
      * Requer autenticação de admin.
@@ -129,12 +156,12 @@ export class ClienteAdminDeliveryService {
      * @returns EnderecoOut Successful Response
      * @throws ApiError
      */
-    public getEnderecosClienteApiDeliveryClienteAdminClienteIdEnderecosGet(
+    public getEnderecosClienteApiDeliveryClienteAdminClienteIdUpdateEnderecoGet(
         clienteId: number,
     ): CancelablePromise<Array<EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/cliente/admin/{cliente_id}/enderecos',
+            url: '/api/delivery/cliente/admin/{cliente_id}/update-endereco',
             path: {
                 'cliente_id': clienteId,
             },

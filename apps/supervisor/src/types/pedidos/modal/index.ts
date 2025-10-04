@@ -40,6 +40,7 @@ export interface ItensTabProps {
   handleQuantidadeChange: (index: number, novaQuantidade: number) => void
   handleObservacaoChange: (index: number, novaObservacao: string) => void
   handleRemoverItem: (index: number) => void
+  handleAdicionarItem: (produto: any) => void
   formatCurrency: (value: number) => string
 }
 
