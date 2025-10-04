@@ -12,6 +12,18 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ParceirosAdminDeliveryService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
+     * List Parceiros
+     * Lista parceiros cadastrados (endpoint admin)
+     * @returns ParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public listParceirosApiDeliveryParceirosAdminGet(): CancelablePromise<Array<ParceiroOut>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/delivery/parceiros/admin/',
+        });
+    }
+    /**
      * Create Parceiro
      * Cria um novo parceiro (endpoint admin)
      * @param requestBody
@@ -26,6 +38,27 @@ export class ParceirosAdminDeliveryService {
             url: '/api/delivery/parceiros/admin/',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get Parceiro
+     * Retorna dados de um parceiro específico (endpoint admin)
+     * @param parceiroId
+     * @returns ParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public getParceiroApiDeliveryParceirosAdminParceiroIdGet(
+        parceiroId: number,
+    ): CancelablePromise<ParceiroOut> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/delivery/parceiros/admin/{parceiro_id}',
+            path: {
+                'parceiro_id': parceiroId,
+            },
             errors: {
                 422: `Validation Error`,
             },

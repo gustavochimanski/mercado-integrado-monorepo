@@ -56,10 +56,12 @@ export function useMutateBanner() {
 
 
   const create = useMutation({
-    mutationFn: (body: FormData) =>
-      apiMensura.post("/api/delivery/banners", body, {
-        headers: { "Content-Type": "multipart/form-data" },
-      }),
+    mutationFn: (body: FormData | object) => {
+      const isFormData = body instanceof FormData;
+      return apiMensura.post("/api/delivery/parceiros/admin/banners", body,
+        isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : {}
+      );
+    },
     onSuccess: () => {
       toast({ title: "Banner criado!", description: "O banner foi criado com sucesso." });
       invalidate();
@@ -70,10 +72,12 @@ export function useMutateBanner() {
   });
 
   const update = useMutation({
-    mutationFn: ({ id, body }: { id: number; body: FormData }) =>
-      apiMensura.put(`/api/delivery/banners/${id}`, body, {
-        headers: { "Content-Type": "multipart/form-data" },
-      }),
+    mutationFn: ({ id, body }: { id: number; body: FormData | object }) => {
+      const isFormData = body instanceof FormData;
+      return apiMensura.put(`/api/delivery/parceiros/admin/banners/${id}`, body,
+        isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : {}
+      );
+    },
     onSuccess: () => {
       toast({ title: "Banner atualizado!", description: "O banner foi atualizado com sucesso." });
       invalidate();
@@ -84,7 +88,7 @@ export function useMutateBanner() {
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/banners/${id}`),
+    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/parceiros/admin/banners/${id}`),
     onSuccess: () => {
       toast({ title: "Banner removido!", description: "O banner foi removido com sucesso." });
       invalidate();

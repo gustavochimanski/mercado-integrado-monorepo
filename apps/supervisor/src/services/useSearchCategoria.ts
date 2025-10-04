@@ -1,4 +1,4 @@
-import apiPublic from "@supervisor/lib/api/apiPublic";
+import apiMensura from "@supervisor/lib/api/apiMensura";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
@@ -65,8 +65,8 @@ export function useCategoriasSearch(
     queryFn: async () => {
       const params: Record<string, any> = { limit, offset };
       if (allowEmpty || hasTerm) params.q = qDeb.trim(); // não manda q vazio
-      const { data } = await apiPublic.get<CategoriaSearchItem[]>(
-        "/api/delivery/categorias/search",
+      const { data } = await apiMensura.get<CategoriaSearchItem[]>(
+        "/api/delivery/categorias/admin/search",
         { params }
       );
       return data;

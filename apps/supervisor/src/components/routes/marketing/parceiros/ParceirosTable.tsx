@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { GridColDef } from "@mui/x-data-grid";
-import { Pen, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
 import { Button } from "@supervisor/components/ui/button";
 import DataTableComponentMui from "@supervisor/components/shared/table/mui-data-table";
 import ConfirmModal from "@supervisor/components/shared/modals/modalConfirm";
@@ -66,7 +66,7 @@ export default function ParceirosTable() {
                   setModalOpen(true);
                 }}
               >
-                <Pen className="w-4 h-4" />
+                <Edit className="w-4 h-4" />
               </Button>
               <Button
                 variant="destructive"
@@ -112,6 +112,9 @@ export default function ParceirosTable() {
             columns={columns}
             getRowId={(row) => row.id}
             sx={{ height: "100%", width: "100%" }}
+            localeText={{
+              noRowsLabel: "Nenhum parceiro cadastrado. Clique em 'Adicionar Parceiro' para começar.",
+            }}
           />
         )}
       </div>
