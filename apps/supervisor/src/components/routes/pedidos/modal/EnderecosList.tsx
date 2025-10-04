@@ -15,6 +15,7 @@ interface EnderecosListProps {
   onAddNewEndereco: () => void;
   isEditing: boolean;
   isLoading?: boolean;
+  showSelectionMessage?: boolean;
 }
 
 export function EnderecosList({
@@ -24,7 +25,8 @@ export function EnderecosList({
   onEditEndereco,
   onAddNewEndereco,
   isEditing,
-  isLoading = false
+  isLoading = false,
+  showSelectionMessage = true
 }: EnderecosListProps) {
 
   // Função para formatar endereço
@@ -191,7 +193,7 @@ export function EnderecosList({
       </div>
 
       {/* Informações adicionais */}
-      {enderecos.length > 0 && (
+      {enderecos.length > 0 && showSelectionMessage && (
         <div className="text-xs text-gray-500 text-center pt-2 border-t">
           {enderecoSelecionado ? (
             <span className="text-blue-600 font-medium">
