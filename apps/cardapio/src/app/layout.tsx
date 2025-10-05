@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { UserProvider } from "@cardapio/hooks/auth/userContext";
 import { Toaster } from "@cardapio/components/Shared/ui/sonner";
 import { CartGlobalClient } from "@cardapio/components/Shared/cart/CartGlobalClient";
+import { ThemeProvider } from "@cardapio/components/Shared/theme/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
       >
         <Suspense />
         <ReactQueryProvider>
+          <ThemeProvider />
           <UserProvider>
             <div className="min-h-screen bg-gray-50 flex justify-center">
               <div className="w-full max-w-md bg-white min-h-screen shadow-xl relative flex flex-col">
