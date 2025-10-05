@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import { X, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { X, XCircle } from "lucide-react";
 
 interface PedidoConfirmOverlayProps {
   show: boolean;
@@ -40,15 +40,15 @@ export default function PedidoConfirmOverlay({
     <AnimatePresence>
       {show && (
         <motion.div
-          className={`fixed inset-0 z-50 flex items-center justify-center ${
-            type === "success" ? "bg-green-600" : "bg-red-600"
-          }`}
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/20`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="flex flex-col items-center gap-6 p-8 text-center"
+            className={`flex flex-col items-center justify-center gap-6 p-8 text-center w-full max-w-md mx-auto min-h-screen rounded-none ${
+              type === "success" ? "bg-green-600" : "bg-red-600"
+            }`}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}

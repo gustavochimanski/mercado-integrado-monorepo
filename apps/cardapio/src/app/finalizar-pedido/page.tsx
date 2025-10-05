@@ -32,6 +32,7 @@ export default function FinalizarPedidoPage() {
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
   const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
+  const [trocoPara, setTrocoPara] = useState<number | null>(null);
   const [currentTab, setCurrentTab] = useState<"endereco" | "pagamento" | "observacao" | "revisao">("endereco");
 
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
@@ -40,7 +41,7 @@ export default function FinalizarPedidoPage() {
 
   const { data: enderecos = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
   const { create, update, remove } = useMutateEndereco();
-  const { data: meiosPagamento = [] } = useMeiosPagamento(!!cliente?.tokenCliente);
+  const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(!!cliente?.tokenCliente);
   const { updatePedido } = useMutatePedido();
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function FinalizarPedidoPage() {
       );
     } else {
       // Modo normal: cria novo pedido
-      const result = await finalizarPedido();
+      const result = await finalizarPedido(trocoPara);
 
       setTimeout(() => {
         if (result === "sucesso") {
@@ -216,7 +217,7 @@ export default function FinalizarPedidoPage() {
 
       {/* MODAL DE CONFIRMAÇÃO DE ENDEREÇO */}
       <Dialog open={confirmEnderecoOpen} onOpenChange={setConfirmEnderecoOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="!max-w-md">
           <DialogHeader>
             <DialogTitle>Confirmar Endereço</DialogTitle>
             <strong className="text-primary">Você realmente está aqui?</strong>
@@ -258,7 +259,7 @@ export default function FinalizarPedidoPage() {
 
       {/* CONTEÚDO PRINCIPAL */}
       {cliente && (
-        <div className="relative h-[80vh] flex flex-col">
+        <div className="relative h-[calc(100vh-4rem)] flex flex-col">
           <CardContent className="flex-1 overflow-auto p-0">
             <Tabs
               value={currentTab}
@@ -285,16 +286,41 @@ export default function FinalizarPedidoPage() {
                 {
                   value: "pagamento",
                   label: "Pagamento",
-                  Component: () => (
-                    <PagamentoStep
-                      meios={meiosPagamento}
-                      selecionado={meioPagamentoId}
-                      onSelect={(id: number) => {
-                        setMeioPagamentoId(id);
-                        setPagamentoId(id);
-                      }}
-                    />
-                  ),
+                  Component: () => {
+                    if (isLoadingPagamento) {
+                      return (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <p className="text-sm text-muted-foreground">Carregando formas de pagamento...</p>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    if (errorPagamento) {
+                      return (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="text-center space-y-2">
+                            <p className="text-destructive font-medium">Erro ao carregar formas de pagamento</p>
+                            <p className="text-sm text-muted-foreground">Tente novamente mais tarde</p>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <PagamentoStep
+                        meios={meiosPagamento}
+                        selecionado={meioPagamentoId}
+                        onSelect={(id: number) => {
+                          setMeioPagamentoId(id);
+                          setPagamentoId(id);
+                        }}
+                        onTrocoChange={(valor) => setTrocoPara(valor)}
+                      />
+                    );
+                  },
                 },
                 {
                   value: "observacao",
@@ -315,6 +341,7 @@ export default function FinalizarPedidoPage() {
                       observacao={observacao}
                       endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
                       pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
+                      trocoPara={trocoPara}
                       total={totalPrice() || 0}
                       inc={useCart.getState().inc}
                       dec={useCart.getState().dec}
@@ -331,7 +358,7 @@ export default function FinalizarPedidoPage() {
             <span>R$ {totalPrice().toFixed(2)}</span>
           </div>
 
-          <CardFooter className="w-full">{renderFooterButton()}</CardFooter>
+          <CardFooter className="w-full p-2 pb-2">{renderFooterButton()}</CardFooter>
         </div>
       )}
     </div>

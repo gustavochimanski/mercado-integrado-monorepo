@@ -28,7 +28,9 @@ interface RevisaoStepProps {
   };
   pagamento?: {
     nome?: string;
+    tipo?: string;
   };
+  trocoPara?: number | null;
   total: number;
   inc?: (cod_barras: string) => void;
   dec?: (cod_barras: string) => void;
@@ -40,6 +42,7 @@ export default function RevisaoStep({
   observacao,
   endereco,
   pagamento,
+  trocoPara,
   total,
   inc,
   dec,
@@ -79,8 +82,13 @@ export default function RevisaoStep({
         <CardHeader>
           <CardTitle className="text-base">Pagamento</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-gray-700">
-          {pagamento?.nome || "Não informado"}
+        <CardContent className="text-sm text-gray-700 space-y-1">
+          <div>{pagamento?.nome || "Não informado"}</div>
+          {pagamento?.tipo === "DINHEIRO" && trocoPara && (
+            <div className="text-muted-foreground">
+              Troco para: <strong className="text-gray-700">R$ {trocoPara.toFixed(2)}</strong>
+            </div>
+          )}
         </CardContent>
       </Card>
 

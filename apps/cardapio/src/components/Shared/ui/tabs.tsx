@@ -97,7 +97,7 @@ const Tabs: React.FC<TabsProps> = ({
             disabled={item.disabled}
             aria-disabled={item.disabled || undefined}
             className={cn(
-              "hover:bg-background h-10 rounded-t-xl px-5 text-xs font-bold whitespace-nowrap text-center cursor-pointer",
+              "flex-1 hover:bg-background h-10 rounded-t-xl px-2 text-xs font-bold whitespace-nowrap text-center cursor-pointer",
               "data-[state=active]:text-primary data-[state=active]:bg-card data-[state=active]:border-b-2 border-none",
               "data-[disabled]:opacity-50 data-[disabled]:pointer-events-none" // 👈 estilo p/ disabled
             )}

@@ -9,7 +9,49 @@ import { Pen, Trash2, Plus, MapPin } from "lucide-react";
 import { SearchEndereco } from "@cardapio/components/Shared/SearchEndereco";
 import type { EnderecoSearchResult } from "@cardapio/services/useQueryEndereco";
 
-export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, onUpdate, onDelete }: any) {
+interface Endereco {
+  id: number;
+  logradouro: string;
+  numero: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  complemento?: string;
+  distrito?: string;
+  codigo_estado?: string;
+  pais?: string;
+  latitude?: number;
+  longitude?: number;
+  ponto_referencia?: string;
+}
+
+interface EnderecoCreate {
+  logradouro: string;
+  numero: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  complemento?: string;
+  distrito?: string;
+  codigo_estado?: string;
+  pais?: string;
+  latitude?: number;
+  longitude?: number;
+  ponto_referencia?: string;
+}
+
+interface EnderecoStepProps {
+  enderecos: Endereco[];
+  enderecoId: number | null;
+  onSelect: (id: number) => void;
+  onAdd: (novo: EnderecoCreate) => void;
+  onUpdate: (atualizado: Endereco) => void;
+  onDelete: (id: number) => void;
+}
+
+export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, onUpdate, onDelete }: EnderecoStepProps) {
   const [selected, setSelected] = useState<number | null>(enderecoId ?? null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [novo, setNovo] = useState({ 
@@ -31,7 +73,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
   const [searchAddress, setSearchAddress] = useState("");
   useEffect(() => setSelected(enderecoId ?? null), [enderecoId]);
 
-  const startEdit = (e: any) => {
+  const startEdit = (e: Endereco) => {
     setEditingId(e.id);
     setNovo({
       logradouro: e.logradouro || "",
@@ -155,7 +197,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
       <h2 className="text-base font-semibold">Escolha o Endereço</h2>
 
       <div className="grid gap-3">
-        {enderecos.map((e: any) => {
+        {enderecos.map((e: Endereco) => {
           const isSelected = selected === e.id;
           return (
             <div
@@ -230,7 +272,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
 
       {/* Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="!max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base">{editingId !== null ? "Editar Endereço" : "Novo Endereço"}</DialogTitle>
           </DialogHeader>

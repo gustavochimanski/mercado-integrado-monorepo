@@ -23,7 +23,7 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="max-w-full p-2 gap-0 h-[80%]">
+      <SheetContent side="bottom" className="!max-w-md p-2 gap-0 h-[80%] rounded-t-3xl rounded-b-none">
         <SheetHeader>
           <SheetTitle>
             {isEditingMode ? (

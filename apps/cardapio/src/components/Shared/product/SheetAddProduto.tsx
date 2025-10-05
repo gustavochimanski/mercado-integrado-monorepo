@@ -85,7 +85,7 @@ export function SheetAdicionarProduto({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="pb-6 h-fit max-h-[80vh] overflow-y-auto w-full max-w-md mx-auto">
+      <SheetContent side="bottom" className="pb-6 h-fit max-h-[80vh] overflow-y-auto !max-w-md rounded-t-3xl rounded-b-none">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <SheetHeader>
             <SheetTitle className="flex gap-4 items-center">

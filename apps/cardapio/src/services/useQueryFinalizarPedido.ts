@@ -13,7 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
-  finalizarPedido: () => Promise<"sucesso" | { status: "erro"; message: string }>;
+  finalizarPedido: (trocoPara?: number | null) => Promise<"sucesso" | { status: "erro"; message: string }>;
 }
 
 export function useFinalizarPedido(): UseFinalizarPedidoResult {
@@ -21,7 +21,7 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  async function finalizarPedido(): Promise<"sucesso" | { status: "erro"; message: string }> {
+  async function finalizarPedido(trocoPara?: number | null): Promise<"sucesso" | { status: "erro"; message: string }> {
     setLoading(true);
 
     try {
@@ -55,6 +55,7 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
         tipo_entrega: "DELIVERY",
         origem: "WEB",
         observacao_geral: observacao || undefined,
+        troco_para: trocoPara || undefined,
         itens: items.map((i) => ({
           produto_cod_barras: i.cod_barras,
           quantidade: i.quantity,
