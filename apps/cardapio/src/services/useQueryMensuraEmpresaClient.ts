@@ -11,11 +11,13 @@ export interface EmpresaMensuraClient {
 }
 
 // ✅ Buscar dados da empresa (sem autenticação)
-export function useQueryMensuraEmpresaClient(enabled = true) {
+export function useQueryMensuraEmpresaClient(enabled = true, empresaId: number | undefined,) {
   return useQuery<EmpresaMensuraClient>({
     queryKey: ["mensura-empresa-client"],
     queryFn: async () => {
-      const { data } = await api.get<EmpresaMensuraClient>("/api/mensura/client/emp/");
+      const { data } = await api.get<EmpresaMensuraClient>("/api/mensura/client/emp/", {
+         params: { empresa_id: empresaId }, 
+      });
       return data;
     },
     enabled,
