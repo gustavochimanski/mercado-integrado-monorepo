@@ -32,7 +32,6 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm)
     }, 300)
-
     return () => clearTimeout(timer)
   }, [searchTerm])
 
@@ -42,17 +41,16 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
     queryFn: async () => {
       const response = await mensuraApi.produtosAdminDelivery.searchProdutosApiDeliveryProdutosSearchGet(
         empresaId,
-        debouncedSearch || undefined, // Se vazio, busca todos
+        debouncedSearch || undefined,
         1,
         30,
-        true // apenas disponíveis
+        true
       )
       return response
     },
-    enabled: !!empresaId && isOpen, // Busca quando modal abre
+    enabled: !!empresaId && isOpen,
   })
 
-  // A API retorna { data: [...], total, page, limit, has_more }
   const produtos = produtosData?.data || []
 
   const handleAdicionarProduto = (produto: any) => {
@@ -96,7 +94,7 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
 
         {/* Campo de pesquisa */}
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
             type="text"
             placeholder="Pesquisar produtos por nome ou código..."
@@ -108,7 +106,7 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="w-5 h-5" />
             </button>
@@ -129,14 +127,15 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
               <p>Nenhum produto encontrado</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4 pb-4">
+            // ⬇️ Grid responsiva para controlar largura dos cards (e a altura do aspect)
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
               {produtos.map((produto: any) => (
                 <div
                   key={produto.cod_barras}
                   className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white flex flex-col"
                 >
-                  {/* Imagem compacta - aspect ratio 16:9 */}
-                  <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+                  {/* Imagem vertical harmoniosa */}
+                  <div className="relative w-full aspect-[4/4] flex-none overflow-hidden">
                     {produto.imagem ? (
                       <Image
                         src={produto.imagem}
@@ -146,7 +145,7 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
-                      <div className="absolute top-0 left-0 w-full h-full bg-gray-100 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
                         <span className="text-gray-400 text-4xl">📦</span>
                       </div>
                     )}

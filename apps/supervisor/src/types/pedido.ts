@@ -73,7 +73,7 @@ export type PedidoKanban = {
   nome_cliente?: string | null
   valor_total: number
   data_criacao: string
-  endereco_cliente?: string | null
+  endereco?: string | null
   meio_pagamento_id?: number | null // Alterado de meio_pagamento_descricao para meio_pagamento_id
   observacao_geral?: string | null
   motoboy?: string | null // Mapeia para entregador.nome

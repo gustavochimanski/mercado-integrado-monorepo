@@ -33,10 +33,16 @@ export const ItensTab: React.FC<ItensTabProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Itens do Pedido</h3>
           {canEdit() && !isEditingItens && (
-            <Button variant="outline" size="sm" onClick={handleEditarItens}>
-              <Edit className="w-4 h-4 mr-2" />
-              Editar Itens
-            </Button>
+            <div className="flex gap-4">
+              <Button variant="outline" size="sm" onClick={handleEditarItens}>
+                <Edit className="w-4 h-4 mr-2" />
+                Editar Itens
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setIsModalAdicionarOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Item
+              </Button>
+            </div>
           )}
 
           {/* Botões de Cancelar, Adicionar e Salvar */}
@@ -45,10 +51,6 @@ export const ItensTab: React.FC<ItensTabProps> = ({
               <Button variant="outline" size="sm" onClick={handleCancelarEdicaoItens}>
                 <X className="w-4 h-4 mr-2" />
                 Cancelar
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setIsModalAdicionarOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Item
               </Button>
               <Button size="sm" onClick={handleSalvarItens} disabled={isSavingItens}>
                 <Save className="w-4 h-4 mr-2" />

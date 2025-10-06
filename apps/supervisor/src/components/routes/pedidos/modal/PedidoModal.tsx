@@ -485,7 +485,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
             {/* Botões de ação */}
             <div className="flex gap-2 shrink-0 ml-4 mr-4">
               {canEdit() && !isEditing && (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
                   <Edit className="w-4 h-4 mr-1" />
                   <span className="hidden sm:inline">Editar</span>
                 </Button>
