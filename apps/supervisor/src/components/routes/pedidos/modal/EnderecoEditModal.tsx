@@ -16,6 +16,8 @@ interface EnderecoEditModalProps {
   endereco: Endereco | null;
   onSave: (endereco: Endereco) => void;
   isSaving?: boolean;
+  isNewAddress?: boolean;
+  clienteId?: number;
 }
 
 export function EnderecoEditModal({
@@ -23,7 +25,9 @@ export function EnderecoEditModal({
   onOpenChange,
   endereco,
   onSave,
-  isSaving = false
+  isSaving = false,
+  isNewAddress = false,
+  clienteId
 }: EnderecoEditModalProps) {
   const [formData, setFormData] = useState<Endereco>({
     cep: "",
@@ -111,7 +115,7 @@ export function EnderecoEditModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-green-600" />
-            Editar Endereço de Entrega
+            {isNewAddress ? "Adicionar Novo Endereço" : "Editar Endereço de Entrega"}
           </DialogTitle>
         </DialogHeader>
 
@@ -236,7 +240,7 @@ export function EnderecoEditModal({
               disabled={isSaving}
             >
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? "Salvando..." : "Salvar Endereço"}
+              {isSaving ? "Salvando..." : (isNewAddress ? "Criar Endereço" : "Salvar Endereço")}
             </Button>
           </div>
         </div>

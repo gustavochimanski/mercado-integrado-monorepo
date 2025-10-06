@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/di
 import { Button } from "../../../ui/button"
 import { Badge } from "../../../ui/badge"
 import { Edit, Save, X, Building2 } from "lucide-react"
-import type { PedidoKanban } from "../../../../types/pedido"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../ui/tabs"
 import { useToast } from "../../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
@@ -395,15 +394,22 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
 
       // Chamar a mutação para atualizar itens
       await updateItensMutation.mutateAsync({ pedidoId: pedido.id, itens: itensParaAPI })
+
+      // Atualizar cache local do pedidoDetalhes com os novos itens
+      queryClient.setQueryData(["pedidoDetalhes", pedido.id], (oldData: any) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          itens: itensEditados.filter(item => item.action !== "remove")
+        }
+      })
+
       setIsEditingItens(false)
 
-      // Invalidar cache em background (não bloquear a UI)
       toast({
         title: "Itens salvos com sucesso",
         description: "Os itens do pedido foram atualizados."
       })
-
-      // Invalidar cache em background 
     } catch (error) {
       toast({
         title: "Erro ao salvar itens",
@@ -450,6 +456,11 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     })
   }
 
+  // Manipulador para adicionar novo item ao pedido
+  const handleAdicionarItem = (produto: any) => {
+    setItensEditados(prev => [...prev, produto])
+  }
+
   if (!pedido) return null
 
   // Renderização do modal
@@ -474,7 +485,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
             {/* Botões de ação */}
             <div className="flex gap-2 shrink-0 ml-4 mr-4">
               {canEdit() && !isEditing && (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
                   <Edit className="w-4 h-4 mr-1" />
                   <span className="hidden sm:inline">Editar</span>
                 </Button>
@@ -585,6 +596,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
                 handleQuantidadeChange={handleQuantidadeChange}
                 handleObservacaoChange={handleObservacaoChange}
                 handleRemoverItem={handleRemoverItem}
+                handleAdicionarItem={handleAdicionarItem}
                 formatCurrency={formatCurrency}
               />
             </TabsContent>

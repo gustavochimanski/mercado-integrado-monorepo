@@ -78,7 +78,7 @@ export function useParceiros(enabled = true) {
   return useQuery<Parceiro[]>({
     queryKey: ["parceiros"],
     queryFn: async () => {
-      const { data } = await apiMensura.get<Parceiro[]>("/api/delivery/parceiros");
+      const { data } = await apiMensura.get<Parceiro[]>("/api/delivery/parceiros/admin/");
       return data;
     },
     enabled,
@@ -95,7 +95,7 @@ export function useParceiroFull(parceiroId?: number) {
     queryKey: ["parceiro-full", parceiroId],
     queryFn: async () => {
       if (!parceiroId) throw new Error("ID do parceiro não fornecido");
-      const { data } = await apiMensura.get<ParceiroCompletoOut>(`/api/delivery/parceiros/${parceiroId}/full`);
+      const { data } = await apiMensura.get<ParceiroCompletoOut>(`/api/delivery/parceiros/admin/${parceiroId}`);
       return data;
     },
     enabled: !!parceiroId,
@@ -114,7 +114,7 @@ export function useMutateParceiro() {
 
   const create = useMutation({
     mutationFn: (body: Omit<Parceiro, "id" | "created_at" | "updated_at">) =>
-      apiMensura.post("/api/delivery/parceiros", body),
+      apiMensura.post("/api/delivery/parceiros/admin/", body),
     onSuccess: () => {
       toast({ title: "Parceiro criado!", description: "O parceiro foi criado com sucesso." });
       invalidate();
@@ -125,7 +125,7 @@ export function useMutateParceiro() {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: Partial<Parceiro> & { id: number }) =>
-      apiMensura.put(`/api/delivery/parceiros/${id}`, body),
+      apiMensura.put(`/api/delivery/parceiros/admin/${id}`, body),
     onSuccess: () => {
       toast({ title: "Parceiro atualizado!", description: "O parceiro foi atualizado com sucesso." });
       invalidate();
@@ -135,7 +135,7 @@ export function useMutateParceiro() {
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/parceiros/${id}`),
+    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/parceiros/admin/${id}`),
     onSuccess: () => {
       toast({ title: "Parceiro removido!", description: "O parceiro foi removido com sucesso." });
       invalidate();

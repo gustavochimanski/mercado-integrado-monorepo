@@ -38,7 +38,7 @@ export function BannerForm({
   }, [imagemFile, banner]);
 
   return (
-    <div className="flex flex-col gap-6 mt-6 border-t pt-4">
+    <div className="flex flex-col gap-6">
       {/* Nome */}
       <div className="flex items-center gap-4">
 
@@ -69,16 +69,18 @@ export function BannerForm({
 
       </div>
 
-      {/* Imagem */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="imagem">Imagem</Label>
-        <Input
-          id="imagem"
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImagemFile(e.target.files?.[0] ?? null)}
-        />
-      </div>
+      {/* Imagem - só mostra no criar, não no editar */}
+      {!banner && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="imagem">Imagem</Label>
+          <Input
+            id="imagem"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImagemFile(e.target.files?.[0] ?? null)}
+          />
+        </div>
+      )}
     </div>
   );
 }

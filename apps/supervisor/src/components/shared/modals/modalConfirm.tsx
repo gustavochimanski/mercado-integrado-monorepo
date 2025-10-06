@@ -1,9 +1,17 @@
 "use client";
 
 import React from "react";
-import { Modal } from "../../ui/modal";
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "../../ui/card";
-import { Button } from "../../ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../ui/alert-dialog";
+import { AlertTriangle } from "lucide-react";
 
 interface ConfirmModalProps {
   // Controla se o modal está visível
@@ -20,6 +28,8 @@ interface ConfirmModalProps {
   confirmLabel?: string;
   // Rótulo opcional para o botão de cancelamento (padrão: "Cancelar")
   cancelLabel?: string;
+  // Variante do botão de confirmação (padrão: "destructive")
+  variant?: "default" | "destructive";
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -30,24 +40,34 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   confirmLabel = "Confirmar",
   cancelLabel = "Cancelar",
+  variant = "destructive",
 }) => {
-  if (!isOpen) return null;
+  const handleConfirm = () => {
+    onConfirm();
+    onClose();
+  };
 
   return (
-    <Modal onClose={onClose} style={{ width: "350px", textAlign: "center" }}>
-      <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardFooter className="flex gap-4 justify-center">
-          <Button onClick={() => {onConfirm(); onClose();}} variant="destructive">
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onClose}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className={variant === "destructive" ? "bg-red-600 hover:bg-red-700" : ""}
+          >
             {confirmLabel}
-          </Button>
-          <Button onClick={onClose}>{cancelLabel}</Button>
-        </CardFooter>
-      </Card>
-    </Modal>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

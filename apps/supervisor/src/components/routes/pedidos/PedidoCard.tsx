@@ -88,9 +88,9 @@ export const PedidoCard = React.memo(
             <span>
               <strong>Telefone:</strong> {pedido.telefone_cliente || "—"}
             </span>
-            {pedido.endereco_cliente && (
+            {pedido.endereco && (
               <span>
-                <strong>Endereço:</strong> {pedido.endereco_cliente}
+                <strong>Endereço:</strong> {pedido.endereco}
               </span>
             )}
             <span>

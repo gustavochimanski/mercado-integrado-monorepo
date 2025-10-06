@@ -1,8 +1,11 @@
 import { Button } from "../../../ui/button"
 import { Input } from "../../../ui/input"
 import { Label } from "../../../ui/label"
-import { Edit, Save, X } from "lucide-react"
+import { Edit, Save, X, Plus } from "lucide-react"
 import { ItensTabProps } from "@supervisor/types/pedidos/modal"
+import { AdicionarItemModal } from "./AdicionarItemModal"
+import { useState } from "react"
+import Image from "next/image"
 
 
 // Componente funcional ItensTab
@@ -18,8 +21,10 @@ export const ItensTab: React.FC<ItensTabProps> = ({
   handleQuantidadeChange,
   handleObservacaoChange,
   handleRemoverItem,
+  handleAdicionarItem,
   formatCurrency
 }) => {
+  const [isModalAdicionarOpen, setIsModalAdicionarOpen] = useState(false)
   return (
     <div className="space-y-6 mt-6">
       <div className="bg-gray-50 rounded-lg p-6">
@@ -28,13 +33,19 @@ export const ItensTab: React.FC<ItensTabProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Itens do Pedido</h3>
           {canEdit() && !isEditingItens && (
-            <Button variant="outline" size="sm" onClick={handleEditarItens}>
-              <Edit className="w-4 h-4 mr-2" />
-              Editar Itens
-            </Button>
+            <div className="flex gap-4">
+              <Button variant="outline" size="sm" onClick={handleEditarItens}>
+                <Edit className="w-4 h-4 mr-2" />
+                Editar Itens
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setIsModalAdicionarOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Item
+              </Button>
+            </div>
           )}
 
-          {/* Botões de Cancelar e Salvar */}
+          {/* Botões de Cancelar, Adicionar e Salvar */}
           {isEditingItens && (
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleCancelarEdicaoItens}>
@@ -54,31 +65,53 @@ export const ItensTab: React.FC<ItensTabProps> = ({
           <div className="space-y-3">
             {itensEditados
               .filter(item => item.action !== "remove")
-              .map((item, index) => {
-                const originalIndex = itensEditados.findIndex(i => i.id === item.id)
+              .map((item) => {
+                const originalIndex = itensEditados.findIndex(i =>
+                  i.id ? i.id === item.id : i.produto_cod_barras === item.produto_cod_barras
+                )
                 return (
-                  <div key={item.id || index} className="bg-white rounded-lg p-4 border">
+                  <div key={item.id || item.produto_cod_barras} className="bg-white rounded-lg p-4 border">
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium">{item.produto_descricao_snapshot}</h4>
-                        <p className="text-sm text-muted-foreground">Código: {item.produto_cod_barras}</p>
-
-                        {/* Campo de Observação do Item */}
-                        {isEditingItens ? (
-                          <div className="mt-3 space-y-2">
-                            <div className="space-y-1">
-                              <Label className="text-xs font-medium">Observação</Label>
-                              <Input
-                                value={item.observacao}
-                                onChange={(e) => handleObservacaoChange(originalIndex, e.target.value)}
-                                placeholder="Observação do item..."
-                                className="text-sm"
-                              />
+                      <div className="flex-1 flex gap-3">
+                        {/* Imagem do produto */}
+                        <div className="relative w-12 h-12 flex-shrink-0">
+                          {item.produto_imagem_snapshot ? (
+                            <Image
+                              src={item.produto_imagem_snapshot}
+                              alt={item.produto_descricao_snapshot}
+                              fill
+                              className="object-cover rounded"
+                              sizes="48px"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-100 rounded flex items-center justify-center">
+                              <span className="text-gray-400 text-xl">📦</span>
                             </div>
-                          </div>
-                        ) : (
-                          item.observacao && <p className="text-sm text-muted-foreground mt-1">{item.observacao}</p>
-                        )}
+                          )}
+                        </div>
+
+                        {/* Informações do produto */}
+                        <div className="flex-1">
+                          <h4 className="font-medium">{item.produto_descricao_snapshot}</h4>
+                          <p className="text-sm text-muted-foreground">Código: {item.produto_cod_barras}</p>
+
+                          {/* Campo de Observação do Item */}
+                          {isEditingItens ? (
+                            <div className="mt-3 space-y-2">
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">Observação</Label>
+                                <Input
+                                  value={item.observacao}
+                                  onChange={(e) => handleObservacaoChange(originalIndex, e.target.value)}
+                                  placeholder="Observação do item..."
+                                  className="text-sm"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            item.observacao && <p className="text-sm text-muted-foreground mt-1">{item.observacao}</p>
+                          )}
+                        </div>
                       </div>
 
                       {/* Campo de Quantidade e Preço do Item */}
@@ -101,7 +134,7 @@ export const ItensTab: React.FC<ItensTabProps> = ({
                                 type="number"
                                 value={item.quantidade}
                                 onChange={(e) => handleQuantidadeChange(originalIndex, Number(e.target.value))}
-                                className="w-16 text-center text-sm"
+                                className="w-16 text-center text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 min={1}
                               />
                               <Button
@@ -156,6 +189,17 @@ export const ItensTab: React.FC<ItensTabProps> = ({
           </div>
         )}
       </div>
+
+      {/* Modal de Adicionar Item */}
+      <AdicionarItemModal
+        isOpen={isModalAdicionarOpen}
+        onClose={() => setIsModalAdicionarOpen(false)}
+        onAdicionarItem={(produto) => {
+          handleAdicionarItem(produto)
+          setIsModalAdicionarOpen(false)
+        }}
+        empresaId={pedidoCompleto?.empresa?.id || 0}
+      />
     </div>
   )
 }
