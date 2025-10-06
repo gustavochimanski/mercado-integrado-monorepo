@@ -8,7 +8,7 @@ export interface ClienteTabProps {
   isEditing: boolean
   pedidoCompleto: any
   getEnderecoCompleto: () => string
-  onEnderecoUpdate?: (endereco: any) => void
+  onEnderecoUpdate?: (endereco: any, isNew?: boolean) => void
   isUpdatingEndereco?: boolean
 }
 

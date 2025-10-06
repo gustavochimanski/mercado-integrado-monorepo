@@ -11,6 +11,7 @@ import { useToast } from "../../../../hooks/use-toast"
 import { useMeiosPagamento } from "@supervisor/services/useQueryMeioPagamento"
 import { useFetchPedidoDetalhes } from "@supervisor/services/useQueryPedidoAdmin"
 import { useUpdatePedido, useUpdateCliente, useUpdateItens, useUpdateEndereco, useMutatePedidoAdmin } from "@supervisor/services/useQueryPedidoAdmin"
+import { useUpdateEnderecoCliente, useCreateEnderecoCliente } from "@supervisor/services/useQueryEnderecoCliente"
 import { useQueryClient } from "@tanstack/react-query"
 import { User, CreditCard, Truck, Package, History } from "lucide-react"
 import { ClienteTab } from "./ClienteTab"
@@ -42,7 +43,8 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const updatePedidoMutation = useUpdatePedido()
   const updateClienteMutation = useUpdateCliente()
   const updateItensMutation = useUpdateItens()
-  const updateEnderecoMutation = useUpdateEndereco()
+  const updateEnderecoMutation = useUpdateEnderecoCliente()
+  const createEnderecoMutation = useCreateEnderecoCliente()
   const { vincularEntregador } = useMutatePedidoAdmin()
   const queryClient = useQueryClient()
   const { toast } = useToast()
@@ -109,8 +111,8 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
 
   // Função para obter endereço completo do cliente
   const getEnderecoCompleto = () => {
-    if (!pedidoCompleto?.endereco) return "Não informado"
-    const { logradouro, numero, complemento, bairro, cidade, estado, cep } = pedidoCompleto.endereco
+    if (!pedidoCompleto?.endereco?.endereco_selecionado) return "Não informado"
+    const { logradouro, numero, complemento, bairro, cidade, estado, cep } = pedidoCompleto.endereco.endereco_selecionado
     const parts = [
       logradouro,
       numero,
@@ -123,12 +125,12 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
     return parts || "Não informado"
   }
 
-  // Função para atualizar endereço
-  const handleEnderecoUpdate = async (endereco: any) => {
-    if (!pedidoCompleto?.id || !pedidoCompleto?.cliente?.id || !pedidoCompleto?.endereco?.id) {
+  // Função para atualizar/criar endereço
+  const handleEnderecoUpdate = async (endereco: any, isNew: boolean = false) => {
+    if (!pedidoCompleto?.id || !pedidoCompleto?.cliente?.id) {
       toast({
         title: "Erro",
-        description: "Dados insuficientes para atualizar o endereço.",
+        description: "Dados insuficientes para salvar o endereço.",
         variant: "destructive"
       })
       return
@@ -136,25 +138,66 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
 
     setIsUpdatingEndereco(true)
     try {
-      // Atualizar endereço no servidor
-      await updateEnderecoMutation.mutateAsync({
-        clienteId: pedidoCompleto.cliente.id,
-        enderecoId: pedidoCompleto.endereco.id,
-        endereco: endereco
-      })
-      
-      // Atualizar cache localmente para manter consistência sem recarregar
-      queryClient.setQueryData(["pedidoDetalhes", pedidoCompleto.id], (oldData: any) => {
-        if (!oldData) return oldData
-        return {
-          ...oldData,
-          endereco: {
-            ...oldData.endereco,
-            ...endereco
+      if (isNew) {
+        // Criar novo endereço
+        await createEnderecoMutation.mutateAsync({
+          clienteId: pedidoCompleto.cliente.id,
+          enderecoData: {
+            cep: endereco.cep || "",
+            logradouro: endereco.logradouro || "",
+            numero: endereco.numero || "",
+            complemento: endereco.complemento || "",
+            bairro: endereco.bairro || "",
+            cidade: endereco.cidade || "",
+            estado: endereco.estado || "",
+            ponto_referencia: endereco.ponto_referencia || "",
+            latitude: endereco.latitude,
+            longitude: endereco.longitude,
+            is_principal: endereco.is_principal || false
           }
+        })
+      } else {
+        // Atualizar endereço existente
+        if (!endereco?.id) {
+          toast({
+            title: "Erro",
+            description: "ID do endereço não encontrado.",
+            variant: "destructive"
+          })
+          return
         }
+
+        await updateEnderecoMutation.mutateAsync({
+          clienteId: pedidoCompleto.cliente.id,
+          enderecoId: endereco.id,
+          enderecoData: {
+            cep: endereco.cep || "",
+            logradouro: endereco.logradouro || "",
+            numero: endereco.numero || "",
+            complemento: endereco.complemento || "",
+            bairro: endereco.bairro || "",
+            cidade: endereco.cidade || "",
+            estado: endereco.estado || "",
+            ponto_referencia: endereco.ponto_referencia || "",
+            latitude: endereco.latitude,
+            longitude: endereco.longitude,
+            is_principal: endereco.is_principal || false
+          }
+        })
+      }
+
+      // Invalidar cache (React Query refetch automaticamente)
+      queryClient.invalidateQueries({
+        queryKey: ["pedidoDetalhes", pedidoCompleto.id]
       })
-      
+      queryClient.invalidateQueries({
+        queryKey: ["enderecosCliente", pedidoCompleto.cliente.id]
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["pedidosAdminKanban"],
+        exact: false
+      })
+
     } catch (error) {
       console.error("Erro ao atualizar endereço:", error)
       // O toast de erro já é mostrado pela mutação
@@ -209,24 +252,26 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
       }
 
       // Gerenciar entregador separadamente
-      const entregadorAnterior = pedidoCompleto.entregador?.id
+      const entregadorAnterior = pedidoCompleto.entregador?.id || null
       const entregadorNovo = formData.entregador_id
 
       // Se mudou o entregador, usar endpoint específico
       if (entregadorAnterior !== entregadorNovo) {
-        if (entregadorNovo === null) {
-          // Desvincular entregador
-          await vincularEntregador.mutateAsync({ 
-            pedidoId: pedido.id, 
-            entregadorId: null 
-          })
-        } else {
-          // Vincular novo entregador
-          await vincularEntregador.mutateAsync({ 
-            pedidoId: pedido.id, 
-            entregadorId: entregadorNovo 
+        // Só desvincular se tinha entregador antes e agora é null
+        if (entregadorAnterior && entregadorNovo === null) {
+          await vincularEntregador.mutateAsync({
+            pedidoId: pedido.id,
+            entregadorId: null
           })
         }
+        // Só vincular se está selecionando um entregador
+        else if (entregadorNovo !== null && entregadorNovo !== undefined) {
+          await vincularEntregador.mutateAsync({
+            pedidoId: pedido.id,
+            entregadorId: entregadorNovo
+          })
+        }
+        // Se ambos são null, não faz nada (não chama API)
       }
 
       // Atualizar dados do cliente (se tiver cliente_id)
@@ -256,32 +301,9 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
         description: "Pedido e cliente atualizados com sucesso!",
       })
 
-      // Atualizar cache localmente para manter consistência
-      queryClient.setQueryData(["pedidoDetalhes", pedido.id], (oldData: any) => {
-        if (!oldData) return oldData
-        return {
-          ...oldData,
-          // Atualizar apenas campos específicos do pedido (não sobrescrever endereço)
-          meio_pagamento_id: formData.meio_pagamento_id,
-          observacao_geral: formData.observacao_geral,
-          troco_para: formData.troco_para,
-          entregador_id: formData.entregador_id,
-          cliente: {
-            ...oldData.cliente,
-            nome: formData.nome_cliente,
-            cpf: formData.cpf_cliente,
-            telefone: formData.telefone_cliente,
-            email: formData.email_cliente,
-            data_nascimento: formData.data_nascimento_cliente
-          }
-          // Preservar endereço atualizado (não sobrescrever)
-        }
-      })
-      
-      // Invalidar apenas o cache do Kanban em background (não afeta o modal)
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["pedidosAdminKanban"] })
-      }, 100)
+      // Invalidar cache (React Query refetch automaticamente)
+      queryClient.invalidateQueries({ queryKey: ["pedidoDetalhes", pedido.id] })
+      queryClient.invalidateQueries({ queryKey: ["pedidosAdminKanban"] })
 
       // Removido: não fechar modal automaticamente
     } catch (error) {
@@ -459,6 +481,10 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   // Manipulador para adicionar novo item ao pedido
   const handleAdicionarItem = (produto: any) => {
     setItensEditados(prev => [...prev, produto])
+    // Ativar modo de edição automaticamente ao adicionar item
+    if (!isEditingItens) {
+      setIsEditingItens(true)
+    }
   }
 
   if (!pedido) return null

@@ -77,7 +77,7 @@ export function EnderecosList({
       </div>
 
       {/* Lista de endereços */}
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {enderecos.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-8 text-center">
@@ -100,12 +100,12 @@ export function EnderecosList({
             </CardContent>
           </Card>
         ) : (
-          enderecos.map((endereco) => {
+          enderecos.map((endereco, index) => {
             const isSelected = enderecoSelecionado?.id === endereco.id;
 
             return (
               <Card
-                key={endereco.id}
+                key={endereco.id || `endereco-${index}`}
                 className={cn(
                   "cursor-pointer transition-all duration-200 hover:shadow-md border",
                   isSelected

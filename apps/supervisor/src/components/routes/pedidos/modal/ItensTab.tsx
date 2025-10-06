@@ -48,6 +48,10 @@ export const ItensTab: React.FC<ItensTabProps> = ({
           {/* Botões de Cancelar, Adicionar e Salvar */}
           {isEditingItens && (
             <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setIsModalAdicionarOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Item
+              </Button>
               <Button variant="outline" size="sm" onClick={handleCancelarEdicaoItens}>
                 <X className="w-4 h-4 mr-2" />
                 Cancelar
