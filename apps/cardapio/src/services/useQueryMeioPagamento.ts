@@ -4,16 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import React from "react";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
+import type { MeioPagamentoResponse } from "@cardapio/api/models/MeioPagamentoResponse";
+import type { MeioPagamentoCreate } from "@cardapio/api/models/MeioPagamentoCreate";
 
-// 🔎 Tipo do resultado do endpoint /api/delivery/meios-pagamento
-export interface MeioPagamento {
-  id: number;
-  nome: string;
-  tipo: "CARTAO_ENTREGA" | "PIX_ENTREGA" | "DINHEIRO" | "CARTAO_ONLINE" | "PIX_ONLINE";
-  ativo: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// 🔎 Usar tipo gerado da API
+export type MeioPagamento = MeioPagamentoResponse;
 
 // ⏳ Debounce simples
 function useDebounced<T>(value: T, delay = 300) {
@@ -25,14 +20,15 @@ function useDebounced<T>(value: T, delay = 300) {
   return debounced;
 }
 
-// ✅ Buscar todos os meios de pagamento
+// ✅ Buscar todos os meios de pagamento (apenas ativos)
 export function useMeiosPagamento(enabled = true) {
   const qc = useQueryClient();
   return useQuery<MeioPagamento[]>({
     queryKey: ["meios_pagamento"],
     queryFn: async () => {
       const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/api/delivery/cliente/meios-pagamento/");
-      return data;
+      // Filtrar apenas meios de pagamento ativos
+      return data.filter(m => m.ativo !== false);
     },
     enabled,
     staleTime: 10 * 60 * 1000,
@@ -51,7 +47,7 @@ export function useMutateMeioPagamento() {
   };
 
   const create = useMutation({
-    mutationFn: (body: Omit<MeioPagamento, "id" | "created_at" | "updated_at">) =>
+    mutationFn: (body: MeioPagamentoCreate) =>
       apiAdmin.post("/api/delivery/meios-pagamento", body),
     onSuccess: () => {
       toast.success("Meio de pagamento criado!");

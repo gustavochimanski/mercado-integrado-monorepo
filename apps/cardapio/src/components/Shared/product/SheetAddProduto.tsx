@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Badge } from "../ui/badge";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
+import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 
 const schema = z.object({
   quantity: z
@@ -85,19 +85,16 @@ export function SheetAdicionarProduto({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="pb-6 h-fit max-h-[80vh] overflow-y-auto w-full max-w-md mx-auto">
+      <SheetContent side="bottom" className="pb-6 h-fit max-h-[80vh] overflow-y-auto !max-w-md rounded-t-3xl rounded-b-none">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <SheetHeader>
             <SheetTitle className="flex gap-4 items-center">
-              <div className="relative w-20 h-20 shrink-0">
-                <Image
-                  src={imagem}
-                  alt={descricao}
-                  fill
-                  priority
-                  className="object-contain rounded-md"
-                />
-              </div>
+              <ImageZoomDialog
+                src={imagem}
+                alt={descricao}
+                className="w-20 h-20 shrink-0 rounded-md"
+                priority
+              />
               <span className="flex flex-col max-w-[60%] gap-2">
                 <span className="font-semibold leading-tight">{descricao}</span>
                 <Badge
