@@ -7,7 +7,7 @@ import { Label } from "@supervisor/components/ui/label";
 import { Switch } from "@supervisor/components/ui/switch";
 import { useMutateProduto } from "@supervisor/services/useQueryProduto";
 import { useEffect, useState } from "react";
-import { Package, DollarSign, Image, Hash } from "lucide-react";
+import { Package, DollarSign, Image as ImageIcon, Hash } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -192,7 +192,7 @@ export const ModalNovoProduto = ({ open, onOpenChange, empresaId }: Props) => {
           {/* Imagem */}
           <div className="space-y-2">
             <Label htmlFor="imagem" className="flex items-center gap-2">
-              <Image size={16} />
+              <ImageIcon size={16} />
               Imagem
             </Label>
             <Input

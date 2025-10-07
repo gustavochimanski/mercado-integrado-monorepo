@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import { getCookie } from "cookies-next"
 import { jwtDecode } from "jwt-decode"
 import { useReauthContext } from "@supervisor/providers/ReauthProvider"
@@ -15,7 +15,7 @@ export function useTokenExpiration() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const isCheckingRef = useRef(false)
 
-  const checkTokenExpiration = async () => {
+  const checkTokenExpiration = useCallback(async () => {
     // Evitar múltiplas verificações simultâneas
     if (isCheckingRef.current) {
       return
@@ -41,11 +41,11 @@ export function useTokenExpiration() {
       if (timeUntilExpiry <= 4140 && timeUntilExpiry > 3600) { // Entre 69 e 60 min restantes
         const result = await showReauthModal()
       }
-    } catch (error) {      
+    } catch (error) {
     } finally {
       isCheckingRef.current = false
     }
-  }
+  }, [showReauthModal])
 
   useEffect(() => {
     // Verificar a cada 1 minuto
@@ -60,7 +60,7 @@ export function useTokenExpiration() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [showReauthModal])
+  }, [checkTokenExpiration])
 
   return { checkTokenExpiration }
 }

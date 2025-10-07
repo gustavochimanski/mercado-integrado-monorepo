@@ -33,30 +33,34 @@ export function useReauth() {
   }, [])
 
   const handleReauthSuccess = useCallback(() => {
-    setReauthState(prev => ({
-      ...prev,
-      isOpen: false,
-      attempts: 0,
-      resolveReauth: null
-    }))
-    
-    if (reauthState.resolveReauth) {
-      reauthState.resolveReauth(true)
-    }
-  }, [reauthState.resolveReauth])
+    setReauthState(prev => {
+      if (prev.resolveReauth) {
+        prev.resolveReauth(true)
+      }
+
+      return {
+        ...prev,
+        isOpen: false,
+        attempts: 0,
+        resolveReauth: null
+      }
+    })
+  }, [])
 
   const handleReauthCancel = useCallback(() => {
-    setReauthState(prev => ({
-      ...prev,
-      isOpen: false,
-      attempts: 0,
-      resolveReauth: null
-    }))
-    
-    if (reauthState.resolveReauth) {
-      reauthState.resolveReauth(false)
-    }
-  }, [reauthState.resolveReauth])
+    setReauthState(prev => {
+      if (prev.resolveReauth) {
+        prev.resolveReauth(false)
+      }
+
+      return {
+        ...prev,
+        isOpen: false,
+        attempts: 0,
+        resolveReauth: null
+      }
+    })
+  }, [])
 
   const handleReauthError = useCallback(() => {
     setReauthState(prev => {
