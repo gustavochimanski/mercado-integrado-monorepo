@@ -13,8 +13,6 @@ export function useEnderecosCliente(clienteId?: number) {
     queryFn: async (): Promise<EnderecoOut[]> => {
       if (!clienteId) return [];
 
-      console.log('🔍 Buscando endereços do cliente:', clienteId);
-
       // Usar a API mais adequada para listar endereços
       const response = await mensuraApi.endereOsAdminDelivery.listarEnderecosAdminApiDeliveryEnderecosAdminClienteClienteIdGet(clienteId);
 
@@ -71,18 +69,11 @@ export function useUpdateEnderecoEntrega() {
 
       // Usa o endpoint correto para atualizar o pedido
       try {
-        console.log('🔧 Atualizando endereço do pedido:', {
-          pedidoId,
-          enderecoId,
-          payload
-        });
-
         const response = await mensuraApi.pedidosAdminDelivery.atualizarPedidoApiDeliveryPedidosAdminPedidoIdPut(
           pedidoId,
           payload
         );
-        
-        console.log('✅ Resposta da API:', response);
+
         return { success: true, data: response, enderecoId };
       } catch (err: any) {
         // Verificar se é um erro de região de entrega (regra de negócio válida)
@@ -144,9 +135,6 @@ export function useUpdateEnderecoEntrega() {
         qc.setQueryData(["pedidoDetalhes", variables.pedidoId], context.previousPedido);
       }
 
-      // Apenas erros técnicos reais chegam aqui
-      console.error("Erro técnico ao atualizar endereço:", err);
-
       const errorMessage = err?.body?.detail || err?.response?.data?.detail || getErrorMessage(err);
 
       toast({
@@ -199,39 +187,31 @@ export function useCreateEnderecoCliente() {
       clienteId: number;
       enderecoData: any;
     }) => {
-      // Usar a API de update do cliente, passando o endereço com acao: "add"
-      const payload = {
-        endereco: {
-          ...enderecoData,
-          acao: "add"
-        }
-      };
-
-      const response = await mensuraApi.clienteAdminDelivery.updateClienteAdminApiDeliveryClienteAdminUpdateClienteIdPut(
+      // ✅ Usar o endpoint correto POST /criar-endereco
+      const response = await mensuraApi.clienteAdminDelivery.criarEnderecoClienteApiDeliveryClienteAdminClienteIdCriarEnderecoPost(
         clienteId,
-        payload
+        enderecoData
       );
       return response;
     },
     onSuccess: (data, variables) => {
       toast({
         title: "Endereço criado",
-        description: "O novo endereço foi criado com sucesso."
+        description: `Endereço #${data?.id || ''} criado com sucesso.`
       });
 
       // Invalida cache específico para o cliente
-      qc.invalidateQueries({ 
-        queryKey: ["enderecosCliente", variables.clienteId] 
+      qc.invalidateQueries({
+        queryKey: ["enderecosCliente", variables.clienteId]
       });
-      
+
       // Invalida cache de pedidos de forma mais específica
-      qc.invalidateQueries({ 
+      qc.invalidateQueries({
         queryKey: ["pedidosAdminKanban"],
-        exact: false 
+        exact: false
       });
     },
     onError: (err: any) => {
-      console.error("Error creating address:", err);
       toast({
         title: "Erro ao criar endereço",
         description: getErrorMessage(err),
@@ -289,7 +269,6 @@ export function useUpdateEnderecoCliente() {
       });
     },
     onError: (err: any) => {
-      console.error("Error updating address:", err);
       toast({
         title: "Erro ao atualizar endereço",
         description: getErrorMessage(err),

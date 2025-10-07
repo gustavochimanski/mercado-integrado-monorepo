@@ -69,12 +69,6 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   // Função para confirmar troca de endereço
   const handleConfirmarTrocaEndereco = () => {
     if (pedidoCompleto?.id && enderecoParaTroca?.id) {
-      console.log('🎯 Confirmando troca de endereço:', {
-        pedidoId: pedidoCompleto.id,
-        enderecoId: enderecoParaTroca.id,
-        endereco: enderecoParaTroca
-      });
-
       // Executar a mutação (optimistic update já acontece no onMutate)
       updateEnderecoEntrega.mutate({
         pedidoId: pedidoCompleto.id,
@@ -131,8 +125,9 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   const handleSaveEndereco = async (endereco: any) => {
     if (onEnderecoUpdate) {
       try {
+        // ✅ A API agora retorna o endereço criado com ID
         const result = await onEnderecoUpdate(endereco, isNovoEndereco)
-        
+
         // Se criou novo endereço, selecionar automaticamente após salvar
         if (isNovoEndereco && pedidoCompleto?.id) {
           // Aguardar a invalidação do cache e buscar o endereço recém-criado
@@ -140,7 +135,7 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
             queryKey: ['enderecosCliente', clienteId],
             queryFn: async () => {
               if (!clienteId) return [];
-              const response = await mensuraApi.clienteAdminDelivery.getEnderecosClienteApiDeliveryClienteAdminClienteIdUpdateEnderecoGet(clienteId);
+              const response = await mensuraApi.endereOsAdminDelivery.listarEnderecosAdminApiDeliveryEnderecosAdminClienteClienteIdGet(clienteId);
               return response || [];
             }
           })
@@ -164,7 +159,7 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
           }
         }
       } catch (error) {
-        console.error('Erro ao salvar endereço:', error)
+        // Erro já tratado pelos hooks
       }
     }
     setEnderecoEditModalOpen(false)

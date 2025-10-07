@@ -198,6 +198,17 @@ export function useUpdateCliente() {
   })
 }
 
+/**
+ * Hook para atualizar itens de um pedido
+ *
+ * Conversão de actions (frontend -> backend):
+ * - "create" -> "acao": "adicionar"
+ * - "update" -> "acao": "atualizar"
+ * - "remove" -> "acao": "remover"
+ *
+ * Itens novos (sem ID) são identificados pelo campo action="create"
+ * Itens existentes (com ID) usam action="update" ou action="remove"
+ */
 export function useUpdateItens() {
   const qc = useQueryClient()
   const { toast } = useToast()
@@ -245,15 +256,15 @@ export function useUpdateItens() {
         )
       }
 
-      // Processar itens novos (sem ID - API detecta automaticamente como adicionar)
+      // Processar itens novos (sem ID - adicionar ao pedido)
       for (const item of itensNovos) {
         const itemFormatado: any = {
           produto_cod_barras: item.produto_cod_barras,
           quantidade: Number(item.quantidade),
-          observacao: item.observacao || ""
+          observacao: item.observacao || "",
+          acao: "adicionar" // ✅ Campo obrigatório para adicionar novos itens
         }
 
-        // Tentar primeiro sem acao, se não funcionar backend deve informar qual usar
         promises.push(
           apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/itens`, itemFormatado)
         )

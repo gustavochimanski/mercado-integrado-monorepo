@@ -19,7 +19,7 @@ import { PagamentoTab } from "./PagamentoTab"
 import { EntregaTab } from "./EntregaTab"
 import { ItensTab } from "./ItensTab"
 import { HistoricoTab } from "./HistoricoTab"
-import { PedidoModalProps, PedidoFormData } from "@supervisor/types/pedidos/modal"
+import { PedidoModalProps, PedidoFormData, ItemPedido } from "@supervisor/types/pedidos/modal"
 
 // Componente principal do modal de pedido
 export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClose }) => {
@@ -50,7 +50,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   const { toast } = useToast()
 
   // Estado para edição de itens
-  const [itensEditados, setItensEditados] = useState<any[]>([])
+  const [itensEditados, setItensEditados] = useState<ItemPedido[]>([])
   const [isEditingItens, setIsEditingItens] = useState(false)
   const [isSavingItens, setIsSavingItens] = useState(false)
 
@@ -479,7 +479,7 @@ export const PedidoModal: React.FC<PedidoModalProps> = ({ pedido, isOpen, onClos
   }
 
   // Manipulador para adicionar novo item ao pedido
-  const handleAdicionarItem = (produto: any) => {
+  const handleAdicionarItem = (produto: ItemPedido) => {
     setItensEditados(prev => [...prev, produto])
     // Ativar modo de edição automaticamente ao adicionar item
     if (!isEditingItens) {
