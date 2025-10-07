@@ -5,8 +5,40 @@ import { useToast } from "@supervisor/hooks/use-toast";
 import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 
 // -----------------------------
+// 🔧 Utilitários
+// -----------------------------
+/**
+ * Gera automaticamente o link do cardápio com o código do cupom como parâmetro
+ * @param codigo - Código do cupom
+ * @param cardapioLink - Link do cardápio da empresa (vem da API)
+ * @param empresaId - ID da empresa (opcional, para logs)
+ * @returns Link formatado: CARDAPIO_LINK/?cupom=CODIGO_DO_CUPOM
+ * 
+ * @example
+ * generateCupomLink("DESCONTO10", "https://cardapio.empresa.com.br", 1) 
+ * // Retorna: "https://cardapio.empresa.com.br/?cupom=DESCONTO10"
+ */
+export function generateCupomLink(codigo: string, cardapioLink?: string, empresaId?: number): string {
+  if (!cardapioLink) {
+    console.warn(`cardapio_link não fornecido para empresa ${empresaId || 'desconhecida'}, usando URL padrão`);
+    const defaultBaseUrl = process.env.NEXT_PUBLIC_CARDAPIO_URL || "https://cardapio.mensura.com.br";
+    return `${defaultBaseUrl}/?cupom=${encodeURIComponent(codigo)}`;
+  }
+  
+  // Remove barra final se existir para evitar dupla barra
+  const cleanUrl = cardapioLink.replace(/\/$/, '');
+  return `${cleanUrl}/?cupom=${encodeURIComponent(codigo)}`;
+}
+
+// -----------------------------
 // 🔎 Tipos
 // -----------------------------
+export interface EmpresaCupom {
+  id: number;
+  nome: string;
+  cardapio_link: string;
+}
+
 export interface Cupom {
   id: number;
   codigo: string;
@@ -22,15 +54,9 @@ export interface Cupom {
   monetizado: boolean;
   valor_por_lead?: number;
   parceiro_id?: number;
-  link_whatsapp?: string;
-  links?: CupomLink[];
-}
-
-export interface CupomLink {
-  id: number;
-  cupom_id: number;
-  titulo: string;
-  url: string;
+  link_redirecionamento?: string;
+  empresa_ids: number[]; // Array de IDs das empresas participantes
+  empresas?: EmpresaCupom[]; // Array completo das empresas participantes (vem da API)
 }
 
 export interface Parceiro {
@@ -56,14 +82,15 @@ export function useDebounced<T>(value: T, delay = 300) {
 // -----------------------------
 // ✅ Hooks de consulta
 // -----------------------------
-export function useCupons(enabled = true) {
+export function useCupons(empresaId?: number, enabled = true) {
   return useQuery<Cupom[]>({
-    queryKey: ["cupons"],
+    queryKey: ["cupons", empresaId],
     queryFn: async () => {
-      const { data } = await apiMensura.get<Cupom[]>("/api/delivery/cupons");
+      const params = empresaId ? { empresa_id: empresaId } : {};
+      const { data } = await apiMensura.get<Cupom[]>("/api/delivery/cupons", { params });
       return data;
     },
-    enabled,
+    enabled: enabled,
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -96,12 +123,23 @@ export function useMutateCupom() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["cupons"] });
 
   const create = useMutation({
-    mutationFn: (body: Omit<Cupom, "id" | "created_at" | "updated_at">) =>
-      apiMensura.post("/api/delivery/cupons", {
+    mutationFn: (body: Omit<Cupom, "id" | "created_at" | "updated_at">) => {
+      
+      // Validação: empresa_ids é obrigatório se monetizado
+      if (body.monetizado && (!body.empresa_ids || body.empresa_ids.length === 0)) {
+        throw new Error("Selecione pelo menos uma empresa participante para cupom monetizado");
+      }
+      
+      return apiMensura.post("/api/delivery/cupons", {
         ...body,
         // Só envia parceiro se monetizado
         parceiro_id: body.monetizado ? body.parceiro_id : undefined,
-      }),
+        // Sempre envia empresa_ids (selecionadas pelo usuário)
+        empresa_ids: body.empresa_ids || [],
+        // link_redirecionamento
+        link_redirecionamento: body.link_redirecionamento,
+      });
+    },
     onSuccess: () => {
       toast({ title: "Cupom criado!", description: "O cupom foi criado com sucesso." });
       invalidate();
@@ -115,12 +153,23 @@ export function useMutateCupom() {
   });
 
   const update = useMutation({
-    mutationFn: ({ id, ...body }: Partial<Cupom> & { id: number }) =>
-      apiMensura.put(`/api/delivery/cupons/${id}`, {
+    mutationFn: ({ id, ...body }: Partial<Cupom> & { id: number }) => {
+      
+      // Validação: empresa_ids é obrigatório se monetizado
+      if (body.monetizado && (!body.empresa_ids || body.empresa_ids.length === 0)) {
+        throw new Error("Selecione pelo menos uma empresa participante para cupom monetizado");
+      }
+      
+      return apiMensura.put(`/api/delivery/cupons/${id}`, {
         ...body,
         // Só envia parceiro se monetizado
         parceiro_id: body.monetizado ? body.parceiro_id : undefined,
-      }),
+        // Sempre envia empresa_ids (selecionadas pelo usuário)
+        empresa_ids: body.empresa_ids || [],
+        // link_redirecionamento
+        link_redirecionamento: body.link_redirecionamento,
+      });
+    },
     onSuccess: () => {
       toast({ title: "Cupom atualizado!", description: "O cupom foi atualizado com sucesso." });
       invalidate();
@@ -150,58 +199,3 @@ export function useMutateCupom() {
   return { create, update, remove };
 }
 
-// -----------------------------
-// ✅ Hooks de mutation (links de cupom)
-// -----------------------------
-export function useMutateCupomLink(cupom_id: number) {
-  const qc = useQueryClient();
-  const { toast } = useToast();
-
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["cupons"] });
-
-  const create = useMutation({
-    mutationFn: (body: Omit<CupomLink, "id" | "cupom_id">) =>
-      apiMensura.post(`/api/delivery/cupons/links/${cupom_id}`, body),
-    onSuccess: () => {
-      toast({ title: "Link criado!", description: "O link do cupom foi criado com sucesso." });
-      invalidate();
-    },
-    onError: (err) =>
-      toast({
-        title: "Erro ao criar link",
-        description: getErrorMessage(err),
-        variant: "destructive",
-      }),
-  });
-
-  const update = useMutation({
-    mutationFn: ({ id, ...body }: Partial<CupomLink> & { id: number }) =>
-      apiMensura.put(`/api/delivery/cupons/links/${id}`, body),
-    onSuccess: () => {
-      toast({ title: "Link atualizado!", description: "O link do cupom foi atualizado com sucesso." });
-      invalidate();
-    },
-    onError: (err) =>
-      toast({
-        title: "Erro ao atualizar link",
-        description: getErrorMessage(err),
-        variant: "destructive",
-      }),
-  });
-
-  const remove = useMutation({
-    mutationFn: (id: number) => apiMensura.delete(`/api/delivery/cupons/links/${id}`),
-    onSuccess: () => {
-      toast({ title: "Link removido!", description: "O link do cupom foi removido com sucesso." });
-      invalidate();
-    },
-    onError: (err) =>
-      toast({
-        title: "Erro ao remover link",
-        description: getErrorMessage(err),
-        variant: "destructive",
-      }),
-  });
-
-  return { create, update, remove };
-}

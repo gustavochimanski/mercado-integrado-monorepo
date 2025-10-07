@@ -16,6 +16,7 @@ import AdicionarParceiroModal from "../parceiros/AdcionarParceiroModal";
 import { useParceiroFull } from "@supervisor/services/useQueryParceiros"; // ✅ agora vem do full
 import { BannerParceiroOut, CupomParceiroOut } from "@supervisor/services/useQueryParceiros";
 import { useMutateBanner } from "@supervisor/services/useQueryBanners";
+import { generateCupomLink } from "@supervisor/services/useQueryCupons";
 
 interface ParceiroBannersModalProps {
   open: boolean;
@@ -111,21 +112,16 @@ export default function ParceiroBannersModal({
                       💰 R$ {c.valor_por_lead?.toFixed(2)} por lead
                     </p>
                   )}
-                  {c.links?.length > 0 && (
-                    <div className="mt-1 space-y-1">
-                      {c.links.map((l) => (
-                        <a
-                          key={l.id}
-                          href={l.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs text-blue-600 underline"
-                        >
-                          {l.titulo}
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  <div className="mt-1">
+                    <a
+                      href={generateCupomLink(c.codigo)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-blue-600 underline"
+                    >
+                      Link do Cupom
+                    </a>
+                  </div>
                 </div>
                 <span
                   className={`text-xs px-2 py-1 rounded ${

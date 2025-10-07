@@ -5,12 +5,6 @@ import { useToast } from "@supervisor/hooks/use-toast";
 import { getErrorMessage } from "@supervisor/lib/getErrorMessage";
 
 // ------------------- Tipos -------------------
-export interface CupomLinkOut {
-  id: number;
-  titulo: string;
-  url: string;
-}
-
 export interface CupomParceiroOut {
   id: number;
   codigo: string;
@@ -20,7 +14,6 @@ export interface CupomParceiroOut {
   ativo: boolean;
   monetizado: boolean;
   valor_por_lead?: number;
-  links: CupomLinkOut[];
 }
 
 // Banner vindo do parceiro full
@@ -65,20 +58,20 @@ export function useDebounced<T>(value: T, delay = 300) {
 }
 
 // ------------------- Parceiros -------------------
-export interface Parceiro {
+export interface EmpresaParticipante {
   id: number;
   nome: string;
   ativo: boolean;
-  telefone?: string 
+  telefone?: string;
   created_at: string;
   updated_at: string;
 }
 
-export function useParceiros(enabled = true) {
-  return useQuery<Parceiro[]>({
-    queryKey: ["parceiros"],
+export function useEmpresasParticipantes(enabled = true) {
+  return useQuery<EmpresaParticipante[]>({
+    queryKey: ["empresas-participantes"],
     queryFn: async () => {
-      const { data } = await apiMensura.get<Parceiro[]>("/api/delivery/parceiros/admin/");
+      const { data } = await apiMensura.get<EmpresaParticipante[]>("/api/delivery/parceiros/admin/");
       return data;
     },
     enabled,
@@ -88,6 +81,12 @@ export function useParceiros(enabled = true) {
     refetchOnReconnect: false,
   });
 }
+
+// Manter compatibilidade com código existente
+export const useParceiros = useEmpresasParticipantes;
+
+// Alias para compatibilidade
+export type Parceiro = EmpresaParticipante;
 
 // ------------------- Parceiro Full -------------------
 export function useParceiroFull(parceiroId?: number) {
