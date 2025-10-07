@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EnderecosList } from "@supervisor/components/routes/pedidos/modal/EnderecosList";
-import { useEnderecosCliente } from "@supervisor/services/useQueryEnderecoCliente";
+import { useEnderecosCliente, useCreateEnderecoCliente, useUpdateEnderecoCliente } from "@supervisor/services/useQueryEnderecoCliente";
 import { EnderecoOut } from "@supervisor/api/models/EnderecoOut";
 import dynamic from "next/dynamic";
 
@@ -21,6 +21,8 @@ export default function TabEnderecosCliente({ cliente, onSaved }: TabEnderecosCl
   const [modalEnderecoOpen, setModalEnderecoOpen] = useState(false);
 
   const { data: enderecos = [], isLoading, refetch } = useEnderecosCliente(cliente?.id);
+  const createEnderecoMutation = useCreateEnderecoCliente();
+  const updateEnderecoMutation = useUpdateEnderecoCliente();
 
   const handleEditEndereco = (endereco: EnderecoOut) => {
     setEnderecoEditando(endereco);
@@ -32,10 +34,55 @@ export default function TabEnderecosCliente({ cliente, onSaved }: TabEnderecosCl
     setModalEnderecoOpen(true);
   };
 
-  const handleEnderecoSaved = () => {
-    refetch();
-    onSaved();
-    setModalEnderecoOpen(false);
+  const handleSaveEndereco = async (endereco: any) => {
+    if (!cliente?.id) return;
+
+    try {
+      if (enderecoEditando?.id) {
+        // Atualizar endereço existente
+        await updateEnderecoMutation.mutateAsync({
+          clienteId: cliente.id,
+          enderecoId: enderecoEditando.id,
+          enderecoData: {
+            cep: endereco.cep || "",
+            logradouro: endereco.logradouro || "",
+            numero: endereco.numero || "",
+            complemento: endereco.complemento || "",
+            bairro: endereco.bairro || "",
+            cidade: endereco.cidade || "",
+            estado: endereco.estado || "",
+            ponto_referencia: endereco.ponto_referencia || "",
+            latitude: endereco.latitude,
+            longitude: endereco.longitude,
+            is_principal: endereco.is_principal || false
+          }
+        });
+      } else {
+        // Criar novo endereço
+        await createEnderecoMutation.mutateAsync({
+          clienteId: cliente.id,
+          enderecoData: {
+            cep: endereco.cep || "",
+            logradouro: endereco.logradouro || "",
+            numero: endereco.numero || "",
+            complemento: endereco.complemento || "",
+            bairro: endereco.bairro || "",
+            cidade: endereco.cidade || "",
+            estado: endereco.estado || "",
+            ponto_referencia: endereco.ponto_referencia || "",
+            latitude: endereco.latitude,
+            longitude: endereco.longitude,
+            is_principal: endereco.is_principal || false
+          }
+        });
+      }
+
+      onSaved();
+      setModalEnderecoOpen(false);
+      setEnderecoEditando(null);
+    } catch (error) {
+      console.error('Erro ao salvar endereço:', error);
+    }
   };
 
   return (
@@ -56,7 +103,8 @@ export default function TabEnderecosCliente({ cliente, onSaved }: TabEnderecosCl
         onOpenChange={setModalEnderecoOpen}
         clienteId={cliente?.id}
         endereco={enderecoEditando}
-        onEnderecoSaved={handleEnderecoSaved}
+        isNewAddress={!enderecoEditando}
+        onSave={handleSaveEndereco}
       />
     </div>
   );

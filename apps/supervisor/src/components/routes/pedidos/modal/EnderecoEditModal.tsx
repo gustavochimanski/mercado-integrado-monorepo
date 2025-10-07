@@ -14,7 +14,7 @@ interface EnderecoEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   endereco: Endereco | null;
-  onSave: (endereco: Endereco) => void;
+  onSave: (endereco: Endereco) => void | Promise<void>;
   isSaving?: boolean;
   isNewAddress?: boolean;
   clienteId?: number;
@@ -83,10 +83,21 @@ export function EnderecoEditModal({
 
   // Função para quando um endereço é selecionado na busca
   const handleEnderecoSelected = (suggestion: EnderecoSuggestion) => {
+    // Extrair logradouro do display (antes da primeira vírgula)
+    const displayParts = suggestion.display.split(',').map(p => p.trim())
+    const logradouroCompleto = displayParts[0] || ""
+
+    // Tentar separar logradouro e número
+    // Exemplo: "Rua Augusta 123" ou "Rua Augusta, 123"
+    const logradouroMatch = logradouroCompleto.match(/^(.+?)\s+(\d+)$/)
+    const logradouro = logradouroMatch ? logradouroMatch[1].trim() : logradouroCompleto
+    const numero = logradouroMatch ? logradouroMatch[2] : ""
+
     setFormData(prev => ({
       ...prev,
       cep: suggestion.cep || "",
-      logradouro: suggestion.display.split(',')[0] || "",
+      logradouro: logradouro,
+      numero: numero || prev.numero, // Manter número anterior se não encontrou
       bairro: suggestion.bairro || "",
       cidade: suggestion.cidade || "",
       estado: suggestion.uf || "",
@@ -94,14 +105,14 @@ export function EnderecoEditModal({
       endereco_formatado: suggestion.display,
       latitude: suggestion.latitude,
       longitude: suggestion.longitude,
-      rua: suggestion.display.split(',')[0] || ""
+      rua: logradouro
     }));
     setSearchValue(suggestion.display);
   };
 
   // Função para salvar
-  const handleSave = () => {
-    onSave(formData);
+  const handleSave = async () => {
+    await onSave(formData);
   };
 
   // Função para cancelar

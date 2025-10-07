@@ -9,11 +9,12 @@ import { mensuraApi } from "@supervisor/api/MensuraApi"
 import { useQuery } from "@tanstack/react-query"
 import { useToast } from "@supervisor/hooks/use-toast"
 import Image from "next/image"
+import { ItemPedido } from "@supervisor/types/pedidos/modal"
 
 interface AdicionarItemModalProps {
   isOpen: boolean
   onClose: () => void
-  onAdicionarItem: (produto: any) => void
+  onAdicionarItem: (produto: ItemPedido) => void
   empresaId: number
 }
 
@@ -63,15 +64,17 @@ export const AdicionarItemModal: React.FC<AdicionarItemModalProps> = ({
       return
     }
 
-    onAdicionarItem({
+    const novoItem: ItemPedido = {
       produto_cod_barras: produto.cod_barras,
       produto_descricao_snapshot: produto.descricao,
       produto_imagem_snapshot: produto.imagem || null,
       preco_unitario: produto.preco_delivery || produto.preco_venda,
       quantidade: 1,
       observacao: "",
-      action: "create",
-    })
+      action: "create", // ✅ Será convertido para "acao: adicionar" na API
+    }
+
+    onAdicionarItem(novoItem)
 
     toast({
       title: "Item adicionado",

@@ -6,8 +6,10 @@ import { EnderecoEditModal } from "./EnderecoEditModal"
 import { EnderecosList } from "./EnderecosList"
 import { ConfirmarTrocaEnderecoModal } from "./ConfirmarTrocaEnderecoModal"
 import { BirthDatePicker } from "../../../shared/BirthDatePicker"
-import { useState } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useEnderecosCliente, useUpdateEnderecoEntrega } from "@supervisor/services/useQueryEnderecoCliente"
+import { useQueryClient } from "@tanstack/react-query"
+import { mensuraApi } from "@supervisor/api/MensuraApi"
 import type { EnderecoOut } from "@supervisor/api/models/EnderecoOut"
 import type { Endereco } from "@supervisor/types/pedido"
 
@@ -29,7 +31,14 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
 
   // Hook para buscar endereços do cliente
   const clienteId = pedidoCompleto?.cliente?.id
-  const { data: enderecosCliente = [], isLoading: isLoadingEnderecos } = useEnderecosCliente(clienteId)
+  const { data: enderecosClienteAPI = [], isLoading: isLoadingEnderecos } = useEnderecosCliente(clienteId)
+  const queryClient = useQueryClient()
+
+  // Usar APENAS os endereços da API do cliente para melhor performance e consistência
+  const enderecosCliente = useMemo(() => {
+    // Priorizar sempre os dados da API do cliente
+    return enderecosClienteAPI || [];
+  }, [enderecosClienteAPI])
 
   // Hook para atualizar endereço de entrega
   const updateEnderecoEntrega = useUpdateEnderecoEntrega()
@@ -49,7 +58,7 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   // Função para abrir modal de confirmação de troca
   const handleEnderecoSelect = (endereco: EnderecoOut) => {
     // Verificar se está realmente trocando de endereço
-    if (endereco.id === pedidoCompleto?.endereco?.id) {
+    if (endereco.id === pedidoCompleto?.endereco?.endereco_selecionado?.id) {
       return; // Mesmo endereço, não fazer nada
     }
 
@@ -60,11 +69,15 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   // Função para confirmar troca de endereço
   const handleConfirmarTrocaEndereco = () => {
     if (pedidoCompleto?.id && enderecoParaTroca?.id) {
+      // Executar a mutação (optimistic update já acontece no onMutate)
       updateEnderecoEntrega.mutate({
         pedidoId: pedidoCompleto.id,
         enderecoId: enderecoParaTroca.id,
         pedidoCompleto: pedidoCompleto
       });
+
+      // Fechar modal de confirmação
+      setConfirmarTrocaModalOpen(false);
       setEnderecoParaTroca(null);
     }
   }
@@ -109,9 +122,45 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
   }
 
   // Função para salvar endereço
-  const handleSaveEndereco = (endereco: any) => {
+  const handleSaveEndereco = async (endereco: any) => {
     if (onEnderecoUpdate) {
-      onEnderecoUpdate(endereco)
+      try {
+        // ✅ A API agora retorna o endereço criado com ID
+        const result = await onEnderecoUpdate(endereco, isNovoEndereco)
+
+        // Se criou novo endereço, selecionar automaticamente após salvar
+        if (isNovoEndereco && pedidoCompleto?.id) {
+          // Aguardar a invalidação do cache e buscar o endereço recém-criado
+          const enderecosAtualizados = await queryClient.fetchQuery({
+            queryKey: ['enderecosCliente', clienteId],
+            queryFn: async () => {
+              if (!clienteId) return [];
+              const response = await mensuraApi.endereOsAdminDelivery.listarEnderecosAdminApiDeliveryEnderecosAdminClienteClienteIdGet(clienteId);
+              return response || [];
+            }
+          })
+
+          if (enderecosAtualizados && Array.isArray(enderecosAtualizados) && enderecosAtualizados.length > 0) {
+            // Encontrar o endereço que corresponde aos dados que criamos
+            const novoEndereco = enderecosAtualizados.find((e: any) =>
+              e.logradouro === endereco.logradouro &&
+              e.numero === endereco.numero &&
+              e.cep === endereco.cep
+            )
+
+            if (novoEndereco) {
+              // Vincular o novo endereço ao pedido
+              updateEnderecoEntrega.mutate({
+                pedidoId: pedidoCompleto.id,
+                enderecoId: novoEndereco.id,
+                pedidoCompleto: pedidoCompleto
+              })
+            }
+          }
+        }
+      } catch (error) {
+        // Erro já tratado pelos hooks
+      }
     }
     setEnderecoEditModalOpen(false)
     setEnderecoParaEdicao(null)
@@ -201,7 +250,7 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
           {/* Lista de Endereços */}
           <EnderecosList
             enderecos={enderecosCliente}
-            enderecoSelecionado={enderecosCliente.find(end => end.id === pedidoCompleto?.endereco?.id) || null}
+            enderecoSelecionado={pedidoCompleto?.endereco?.endereco_selecionado || null}
             onEnderecoSelect={handleEnderecoSelect}
             onEditEndereco={handleEditEndereco}
             onAddNewEndereco={handleAddNewEndereco}
@@ -230,7 +279,7 @@ export const ClienteTab: React.FC<ClienteTabProps> = ({
           setEnderecoParaTroca(null);
         }}
         onConfirm={handleConfirmarTrocaEndereco}
-        enderecoAtual={pedidoCompleto?.endereco ? formatarEnderecoCompleto(pedidoCompleto.endereco) : undefined}
+        enderecoAtual={pedidoCompleto?.endereco?.endereco_selecionado ? formatarEnderecoCompleto(pedidoCompleto.endereco.endereco_selecionado) : undefined}
         enderecoNovo={enderecoParaTroca ? formatarEnderecoCompleto(enderecoParaTroca) : undefined}
       />
     </div>

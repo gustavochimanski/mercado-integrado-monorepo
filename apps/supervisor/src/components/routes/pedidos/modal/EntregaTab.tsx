@@ -33,7 +33,7 @@ export const EntregaTab: React.FC<EntregaTabProps> = ({
           <div className="space-y-4">
 
             {/* Endereço de Entrega */}
-            {pedidoCompleto?.endereco ? (
+            {pedidoCompleto?.endereco?.endereco_selecionado ? (
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-start gap-3">             
                   <div className="flex-1 min-w-0">
@@ -42,32 +42,32 @@ export const EntregaTab: React.FC<EntregaTabProps> = ({
                     {/* Endereço formatado */}
                     <p className="text-sm text-gray-700 mb-2">
                       {[
-                        pedidoCompleto.endereco.logradouro,
-                        pedidoCompleto.endereco.numero,
-                        pedidoCompleto.endereco.bairro,
-                        pedidoCompleto.endereco.cidade,
-                        pedidoCompleto.endereco.estado
+                        pedidoCompleto.endereco.endereco_selecionado.logradouro,
+                        pedidoCompleto.endereco.endereco_selecionado.numero,
+                        pedidoCompleto.endereco.endereco_selecionado.bairro,
+                        pedidoCompleto.endereco.endereco_selecionado.cidade,
+                        pedidoCompleto.endereco.endereco_selecionado.estado
                       ].filter(Boolean).join(", ")}
                     </p>
 
                     {/* CEP */}
-                    {pedidoCompleto.endereco.cep && (
+                    {pedidoCompleto.endereco.endereco_selecionado.cep && (
                       <p className="text-xs text-gray-500 mb-2">
-                        CEP: {pedidoCompleto.endereco.cep}
+                        CEP: {pedidoCompleto.endereco.endereco_selecionado.cep}
                       </p>
                     )}
 
                     {/* Complemento */}
-                    {pedidoCompleto.endereco.complemento && (
+                    {pedidoCompleto.endereco.endereco_selecionado.complemento && (
                       <p className="text-xs text-gray-600">
-                        <span className="font-medium">Complemento:</span> {pedidoCompleto.endereco.complemento}
+                        <span className="font-medium">Complemento:</span> {pedidoCompleto.endereco.endereco_selecionado.complemento}
                       </p>
                     )}
 
                     {/* Ponto de referência */}
-                    {pedidoCompleto.endereco.ponto_referencia && (
+                    {pedidoCompleto.endereco.endereco_selecionado.ponto_referencia && (
                       <p className="text-xs text-gray-600">
-                        <span className="font-medium">Referência:</span> {pedidoCompleto.endereco.ponto_referencia}
+                        <span className="font-medium">Referência:</span> {pedidoCompleto.endereco.endereco_selecionado.ponto_referencia}
                       </p>
                     )}
                   </div>

@@ -370,7 +370,7 @@ const KanbanPedidos = () => {
         return false
       }
 
-      if (filtros.endereco && !pedido.endereco_cliente?.toLowerCase().includes(filtros.endereco.toLowerCase())) {
+      if (filtros.endereco && !pedido.endereco?.toLowerCase().includes(filtros.endereco.toLowerCase())) {
         return false
       }
 

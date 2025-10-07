@@ -1,6 +1,21 @@
 // Propriedades e Tipos para os Componentes do Modal de Pedidos
 import { PedidoKanban } from "@supervisor/types/pedido"
 
+// Define as ações possíveis para itens do pedido
+export type ItemPedidoAction = "create" | "update" | "remove"
+
+// Define a estrutura de um item do pedido
+export interface ItemPedido {
+  id?: number
+  produto_cod_barras: string
+  quantidade: number
+  preco_unitario: number
+  observacao?: string
+  produto_descricao_snapshot: string
+  produto_imagem_snapshot?: string | null
+  action: ItemPedidoAction
+}
+
 // Define as propriedades esperadas pelo componente ClienteTab
 export interface ClienteTabProps {
   formData: any
@@ -8,7 +23,7 @@ export interface ClienteTabProps {
   isEditing: boolean
   pedidoCompleto: any
   getEnderecoCompleto: () => string
-  onEnderecoUpdate?: (endereco: any) => void
+  onEnderecoUpdate?: (endereco: any, isNew?: boolean) => void
   isUpdatingEndereco?: boolean
 }
 
@@ -30,7 +45,7 @@ export interface HistoricoTabProps {
 // Define as propriedades esperadas pelo componente ItensTab
 export interface ItensTabProps {
   pedidoCompleto: any
-  itensEditados: any[]
+  itensEditados: ItemPedido[]
   isEditingItens: boolean
   isSavingItens: boolean
   canEdit: () => boolean
@@ -40,7 +55,7 @@ export interface ItensTabProps {
   handleQuantidadeChange: (index: number, novaQuantidade: number) => void
   handleObservacaoChange: (index: number, novaObservacao: string) => void
   handleRemoverItem: (index: number) => void
-  handleAdicionarItem: (produto: any) => void
+  handleAdicionarItem: (produto: ItemPedido) => void
   formatCurrency: (value: number) => string
 }
 

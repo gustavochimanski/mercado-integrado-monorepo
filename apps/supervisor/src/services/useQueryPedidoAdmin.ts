@@ -33,8 +33,6 @@ export function useMutatePedidoAdmin() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
     qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
-    // Forçar refetch de todas as queries relacionadas a pedidos
-    qc.refetchQueries({ queryKey: ["pedidoDetalhes"], exact: false })
   }
 
   const atualizarStatus = useMutation({
@@ -91,11 +89,10 @@ export function useMutatePedidoAdmin() {
       } else {
         toast({ title: "Entregador vinculado", description: "O entregador foi vinculado ao pedido com sucesso." })
       }
-      
-      // Invalidar e refetch específico do pedido
+
+      // Invalidar cache (React Query refetch automaticamente)
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
       qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
-      qc.refetchQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
     },
     onError: (err: any) => {
       toast({ title: "Erro ao vincular entregador", description: getErrorMessage(err), variant: "destructive" })
@@ -114,6 +111,9 @@ export function useFetchPedidoDetalhes(pedidoId: number | null) {
       return data
     },
     enabled: !!pedidoId,
+    staleTime: 1 * 60 * 1000, // 1 minuto - dados considerados frescos
+    gcTime: 5 * 60 * 1000, // 5 minutos
+    refetchOnWindowFocus: false, // Evitar refetch ao focar janela
   })
 }
 
@@ -126,11 +126,11 @@ export function useUpdatePedido() {
       const response = await apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}`, data)
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       toast({ title: "Pedido atualizado", description: "As informações do pedido foram atualizadas com sucesso." })
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
-      // Removido: não invalidar pedidoDetalhes para preservar endereço atualizado
-      // qc.invalidateQueries({ queryKey: ["pedidoDetalhes"], exact: false })
+      // Invalidar apenas o pedido específico (mantém cache de outros pedidos)
+      qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
     },
     onError: (err: any) => {
       toast({ title: "Erro ao atualizar pedido", description: getErrorMessage(err), variant: "destructive" })
@@ -198,6 +198,17 @@ export function useUpdateCliente() {
   })
 }
 
+/**
+ * Hook para atualizar itens de um pedido
+ *
+ * Conversão de actions (frontend -> backend):
+ * - "create" -> "acao": "adicionar"
+ * - "update" -> "acao": "atualizar"
+ * - "remove" -> "acao": "remover"
+ *
+ * Itens novos (sem ID) são identificados pelo campo action="create"
+ * Itens existentes (com ID) usam action="update" ou action="remove"
+ */
 export function useUpdateItens() {
   const qc = useQueryClient()
   const { toast } = useToast()
@@ -223,53 +234,52 @@ export function useUpdateItens() {
       const itensNovos = itensValidos.filter(item => !item.id && item.action !== "remove")
       const itensExistentes = itensValidos.filter(item => item.id)
 
-      // Formatar itens existentes (atualizar/remover)
-      const itensFormatados = itensExistentes.map(item => {
+      // Array para armazenar todas as promises
+      const promises = []
+
+      // Processar itens existentes (atualizar/remover)
+      for (const item of itensExistentes) {
         const itemFormatado: any = {
           id: item.id,
           produto_cod_barras: item.produto_cod_barras,
           quantidade: Number(item.quantidade),
           observacao: item.observacao || "",
           acao: "atualizar"
-        };
-
-        if (item.action === "remove") {
-          itemFormatado.remover = true;
         }
 
-        return itemFormatado;
-      })
+        if (item.action === "remove") {
+          itemFormatado.acao = "remover"
+        }
 
-      // Adicionar itens novos com formato diferente (sem id, sem acao)
-      itensNovos.forEach(item => {
-        itensFormatados.push({
-          produto_cod_barras: item.produto_cod_barras,
-          quantidade: Number(item.quantidade),
-          observacao: item.observacao || ""
-        });
-      })
-
-      // Validar se todos os campos obrigatórios estão presentes
-      const itensComErros = itensFormatados.filter(item =>
-        !item.produto_cod_barras ||
-        !item.quantidade ||
-        item.quantidade <= 0
-      )
-
-      if (itensComErros.length > 0) {
-        throw new Error(`Itens com dados inválidos: ${itensComErros.length} de ${itensFormatados.length}`)
+        promises.push(
+          apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/itens`, itemFormatado)
+        )
       }
 
-      const response = await apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/itens`, itensFormatados)
-      return response.data
+      // Processar itens novos (sem ID - adicionar ao pedido)
+      for (const item of itensNovos) {
+        const itemFormatado: any = {
+          produto_cod_barras: item.produto_cod_barras,
+          quantidade: Number(item.quantidade),
+          observacao: item.observacao || "",
+          acao: "adicionar" // ✅ Campo obrigatório para adicionar novos itens
+        }
+
+        promises.push(
+          apiMensura.put(`/api/delivery/pedidos/admin/${pedidoId}/itens`, itemFormatado)
+        )
+      }
+
+      // Executar todas as requisições em paralelo
+      const responses = await Promise.all(promises)
+      return responses[responses.length - 1]?.data
     },
     onSuccess: (data, variables) => {
       toast({ title: "Itens atualizados", description: "Os itens do pedido foram atualizados com sucesso." })
 
-      // Invalidar apenas o kanban (preservar endereço atualizado)
+      // Invalidar kanban e pedido específico
       qc.invalidateQueries({ queryKey: ["pedidosAdminKanban"], exact: false })
-      // Removido: não invalidar pedidoDetalhes para preservar endereço atualizado
-      // qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
+      qc.invalidateQueries({ queryKey: ["pedidoDetalhes", variables.pedidoId] })
     },
     onError: (err: any) => {
       // Extrair mensagem de erro mais específica
