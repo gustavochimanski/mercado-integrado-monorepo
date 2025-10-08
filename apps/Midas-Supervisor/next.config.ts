@@ -4,11 +4,21 @@ import path from "path";
 const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname, "../.."),
-  },  
-  reactStrictMode: true,  
-  poweredByHeader: false,  
+    resolveAlias: {
+      'zod/v4/core': 'zod',
+    },
+  },
+  reactStrictMode: true,
+  poweredByHeader: false,
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'zod/v4/core': 'zod',
+    };
+    return config;
+  },
   experimental: {
-    externalDir: true, 
+    externalDir: true,
   },  
   images: {
     
