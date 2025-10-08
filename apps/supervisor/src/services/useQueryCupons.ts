@@ -30,9 +30,9 @@ export function generateCupomLink(codigo: string, cardapioLink?: string, empresa
   return `${cleanUrl}/?cupom=${encodeURIComponent(codigo)}`;
 }
 
-// -----------------------------
+// ----------------------------
 // 🔎 Tipos
-// -----------------------------
+// ----------------------------
 export interface EmpresaCupom {
   id: number;
   nome: string;
