@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-// ============================================
+
 // HELPERS
-// ============================================
 function toPascalCase(str: string): string {
   return str
     .replace(/\w+/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
@@ -27,11 +26,14 @@ function toSingular(str: string): string {
   return str;
 }
 
-// ============================================
+
 // TEMPLATES DAS ACTIONS
-// ============================================
+interface TemplateContext {
+  [key: string]: string
+}
+
 const TEMPLATES = {
-  'get-list': (ctx: any) => `'use server'
+  'get-list': (ctx: TemplateContext) => `'use server'
 
 import { cache } from 'react'
 import { cookies } from 'next/headers'
@@ -70,7 +72,7 @@ export const get${ctx.moduleName} = cache(async (params: Get${ctx.moduleName}Par
 })
 `,
 
-  'get-by-id': (ctx: any) => `'use server'
+  'get-by-id': (ctx: TemplateContext) => `'use server'
 
 import { cache } from 'react'
 import { cookies } from 'next/headers'
@@ -101,7 +103,7 @@ export const get${ctx.moduleNameSingular}ById = cache(async (id: string) => {
 })
 `,
 
-  'create': (ctx: any) => `'use server'
+  'create': (ctx: TemplateContext) => `'use server'
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
@@ -141,7 +143,7 @@ export async function create${ctx.moduleNameSingular}Action(data: any) {
 }
 `,
 
-  'update': (ctx: any) => `'use server'
+  'update': (ctx: TemplateContext) => `'use server'
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
@@ -182,7 +184,7 @@ export async function update${ctx.moduleNameSingular}Action(id: string, data: an
 }
 `,
 
-  'delete': (ctx: any) => `'use server'
+  'delete': (ctx: TemplateContext) => `'use server'
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
@@ -219,9 +221,8 @@ export async function delete${ctx.moduleNameSingular}Action(id: string) {
 `,
 };
 
-// ============================================
+
 // GERAR ARQUIVO
-// ============================================
 function generateFile(content: string, filePath: string) {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
@@ -231,9 +232,8 @@ function generateFile(content: string, filePath: string) {
   console.log(`  ✓ ${filePath.replace(process.cwd(), '')}`);
 }
 
-// ============================================
+
 // MAIN
-// ============================================
 function main() {
   const moduleName = process.argv[2];
 

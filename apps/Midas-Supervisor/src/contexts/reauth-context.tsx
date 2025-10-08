@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 interface ReauthContextType {
   isReauthModalOpen: boolean
@@ -9,11 +9,16 @@ interface ReauthContextType {
   resolveReauth: (success: boolean) => void
 }
 
-const ReauthContext = createContext<ReauthContextType | undefined>(undefined)
+const ReauthContext = createContext<ReauthContextType>({
+  isReauthModalOpen: false,
+  showReauthModal: async () => false,
+  hideReauthModal: () => {},
+  resolveReauth: () => {},
+})
 
 const LOCK_STORAGE_KEY = 'screen_locked'
 
-export function ReauthProvider({ children }: { children: ReactNode }) {
+export function ReauthProvider({ children }: { children: React.ReactNode }) {
   const [isReauthModalOpen, setIsReauthModalOpen] = useState(false)
   const [resolveCallback, setResolveCallback] = useState<((value: boolean) => void) | null>(null)
 
@@ -62,8 +67,5 @@ export function ReauthProvider({ children }: { children: ReactNode }) {
 
 export function useReauthContext() {
   const context = useContext(ReauthContext)
-  if (context === undefined) {
-    throw new Error('useReauthContext must be used within a ReauthProvider')
-  }
   return context
 }
