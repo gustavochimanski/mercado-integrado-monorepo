@@ -30,6 +30,9 @@ NEXT_PUBLIC_API_URL=https://teste2.mensuraapi.com.br
 # URL da documentação da API para geração do client TypeScript
 API_DOC_URL=https://teste2.mensuraapi.com.br/openapi.json
 
+# Ambiente de desenvolvimento
+NODE_ENV=development
+
 ```
 
 ### Executando o Projeto
