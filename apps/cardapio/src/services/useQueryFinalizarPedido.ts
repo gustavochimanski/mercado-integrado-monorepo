@@ -6,14 +6,17 @@ import {
   getEnderecoPadraoId,
   getMeioPagamentoId,
 } from "@cardapio/stores/client/ClientStore";
-import { FinalizarPedidoRequest } from "@cardapio/types/pedido";
+import { FinalizarPedidoRequest, PedidoCheckoutResponse } from "@cardapio/types/pedido";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
-  finalizarPedido: (trocoPara?: number | null) => Promise<"sucesso" | { status: "erro"; message: string }>;
+  finalizarPedido: (trocoPara?: number | null) => Promise<
+    | { status: "erro"; message: string }
+    | { status: "sucesso"; pedido: PedidoCheckoutResponse }
+  >;
 }
 
 export function useFinalizarPedido(): UseFinalizarPedidoResult {
@@ -21,7 +24,12 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  async function finalizarPedido(trocoPara?: number | null): Promise<"sucesso" | { status: "erro"; message: string }> {
+  async function finalizarPedido(
+    trocoPara?: number | null,
+  ): Promise<
+    | { status: "erro"; message: string }
+    | { status: "sucesso"; pedido: PedidoCheckoutResponse }
+  > {
     setLoading(true);
 
     try {
@@ -69,7 +77,9 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
         clear();
         // Invalida o cache de pedidos para mostrar o novo pedido na lista
         queryClient.invalidateQueries({ queryKey: ["pedidos"] });
-        return "sucesso";
+        const pedido = response.data as PedidoCheckoutResponse;
+        // Manter dados do pedido no retorno para a UI (ex: PIX)
+        return { status: "sucesso", pedido };
       }
       
       return { status: "erro", message: "Erro interno do servidor. Tente novamente em alguns minutos." };

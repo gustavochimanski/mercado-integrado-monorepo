@@ -1,6 +1,0 @@
-export { PedidoModal } from './PedidoModal'
-export { ClienteTab } from './ClienteTab'
-export { PagamentoTab } from './PagamentoTab'
-export { EntregaTab } from './EntregaTab'
-export { ItensTab } from './ItensTab'
-export { HistoricoTab } from './HistoricoTab'
