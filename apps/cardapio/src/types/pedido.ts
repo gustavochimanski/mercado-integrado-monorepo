@@ -1,6 +1,3 @@
-import type { PedidoResponse as ApiPedidoResponse } from "@cardapio/api/models/PedidoResponse";
-import type { TransacaoOut } from "@cardapio/api/models/TransacaoOut";
-
 // ================= Enums =================
 export type PedidoStatus = "P" | "R" | "E" | "S" | "C" | "I" | "D"; // Pendente,  Em preparo, Entregue, Saiu para entrega, cancelado, Pendente Impressão, Em Edição
 export type TipoEntrega = "DELIVERY" | "RETIRADA";
@@ -45,7 +42,7 @@ export interface Pedido {
   itens: ItemPedido[];
   meio_pagamento_nome: string
   cliente_nome: string
-  transacao?: TransacaoOut | null;
+
 }
 
 // ================= Request de finalizar pedido =================
@@ -67,10 +64,6 @@ export interface FinalizarPedidoRequest {
   troco_para?: number;
   itens: ItemPedidoRequest[];
 }
-
-export type PedidoCheckoutResponse = ApiPedidoResponse & {
-  transacao?: TransacaoOut | null;
-};
 
 // ================= Request de confirmar pagamento =================
 export interface ConfirmarPagamentoRequest {

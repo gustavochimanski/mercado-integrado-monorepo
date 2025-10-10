@@ -1,0 +1,61 @@
+"use client";
+
+import { Banknote, Handshake, Monitor, Truck, MapPin } from "lucide-react";
+import TabsWrapper from "@supervisor/components/shared/tabs/tabsWrapper";
+import MeiosPagamentoTable from "@supervisor/components/routes/configuracoes/meioPagamento/MeioPagamentoTable";
+import EmpresaTabWrapper from "@supervisor/components/routes/configuracoes/empresa/TabWrapperEmpresa";
+import EntregadoresTable from "@supervisor/components/routes/configuracoes/entregadores/EntregadoresTable";
+import RegioesEntregaTable from "@supervisor/components/routes/configuracoes/regioesEntrega/RegioesEntregaTable";
+import TableCupons from "@supervisor/components/routes/marketing/cupons/TableCupons";
+
+const ComponentConfiguracoes = () => {
+    const nestedTabItems = [
+      {
+        value: "empresa",
+        label: (
+          <span className="flex items-center gap-2">
+            <Monitor size={14} /> Empresa
+          </span>
+        ),
+        Component: () => <EmpresaTabWrapper />,
+      },
+      {
+        value: "meio-pagamento",
+        label: (
+          <span className="flex items-center gap-2">
+            <Banknote size={14} /> Meios de Pagamento
+          </span>
+        ),
+        Component: () => <MeiosPagamentoTable />
+      },
+
+      {
+        value: "entregadores",
+        label: (
+          <span className="flex items-center gap-2">
+            <Truck size={14} /> Entregadores
+          </span>
+        ),
+        Component: () => <EntregadoresTable />
+      },
+
+      {
+        value: "regioes-entrega",
+        label: (
+          <span className="flex items-center gap-2">
+            <MapPin size={14} /> Regiões de Entrega
+          </span>
+        ),
+        Component: () => <RegioesEntregaTable />
+      },
+
+    ];
+  
+    return (
+      <div className="flex-1 h-full ">
+        <TabsWrapper items={nestedTabItems}/>
+      </div>
+    );
+  };
+
+  export default ComponentConfiguracoes

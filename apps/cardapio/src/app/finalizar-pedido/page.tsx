@@ -8,11 +8,6 @@ import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
 import { useQueryEnderecos, useMutateEndereco, EnderecoCreate } from "@cardapio/services/useQueryEndereco";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
 import { useMutatePedido } from "@cardapio/services/useQueryPedido";
-import { useGatewayPaymentPolling } from "@cardapio/services/useGatewayPaymentPolling";
-import { PagamentoMetodoEnum } from "@cardapio/api/models/PagamentoMetodoEnum";
-import { PagamentoGatewayEnum } from "@cardapio/api/models/PagamentoGatewayEnum";
-import { PagamentoStatusEnum } from "@cardapio/api/models/PagamentoStatusEnum";
-import type { PedidoCheckoutResponse } from "@cardapio/types/pedido";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
@@ -25,15 +20,6 @@ import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/Pagament
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
 import ObservacaoStep from "@cardapio/components/Shared/finalizar-pedido/ObservacaoStep";
 import PedidoConfirmOverlay from "@cardapio/components/Shared/finalizar-pedido/PedidoConfirmOverlay";
-import { apiClienteAdmin } from "../api/apiClienteAdmin";
-
-const FINAL_STATUSES = new Set<PagamentoStatusEnum>([
-  PagamentoStatusEnum.PAGO,
-  PagamentoStatusEnum.AUTORIZADO,
-  PagamentoStatusEnum.CANCELADO,
-  PagamentoStatusEnum.ESTORNADO,
-  PagamentoStatusEnum.RECUSADO,
-]);
 
 export default function FinalizarPedidoPage() {
   const router = useRouter();
@@ -48,7 +34,6 @@ export default function FinalizarPedidoPage() {
   const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
   const [trocoPara, setTrocoPara] = useState<number | null>(null);
   const [currentTab, setCurrentTab] = useState<"endereco" | "pagamento" | "observacao" | "revisao">("endereco");
-  const [pedidoResult, setPedidoResult] = useState<PedidoCheckoutResponse | null>(null);
 
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
@@ -58,17 +43,6 @@ export default function FinalizarPedidoPage() {
   const { create, update, remove } = useMutateEndereco();
   const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(!!cliente?.tokenCliente);
   const { updatePedido } = useMutatePedido();
-  const [iniciandoPix, setIniciandoPix] = useState(false);
-  const [erroIniciarPix, setErroIniciarPix] = useState<string | null>(null);
-
-  const polling = useGatewayPaymentPolling({
-    pedidoId: pedidoResult?.id ?? null,
-    transacao: pedidoResult?.transacao,
-    ativo:
-      !!pedidoResult?.transacao &&
-      !!pedidoResult.transacao.status &&
-      !FINAL_STATUSES.has(pedidoResult.transacao.status as PagamentoStatusEnum),
-  });
 
   useEffect(() => {
     const c = getCliente();
@@ -81,56 +55,7 @@ export default function FinalizarPedidoPage() {
     }
   }, [items, router]);
 
-  useEffect(() => {
-    if (!polling.status || !FINAL_STATUSES.has(polling.status)) {
-      return;
-    }
-
-    setOverlayStatus("sucesso");
-    const timeout = setTimeout(() => {
-      useCart.getState().clear();
-      router.push("/pedidos");
-    }, 2000);
-
-    return () => clearTimeout(timeout);
-  }, [polling.status, router]);
-
   const [errorMessage, setErrorMessage] = useState("");
-
-  const iniciarPagamentoPix = async () => {
-    if (!pedidoResult?.id || iniciandoPix) return;
-    setIniciandoPix(true);
-    setErroIniciarPix(null);
-
-    try {
-      const { data } = await apiClienteAdmin.post(
-        `/api/delivery/cliente/pagamentos/${pedidoResult.id}`,
-        null,
-        {
-          params: {
-            metodo: PagamentoMetodoEnum.PIX_ONLINE,
-            gateway: PagamentoGatewayEnum.MERCADOPAGO,
-          },
-        }
-      );
-
-      setPedidoResult((prev) =>
-        prev
-          ? {
-              ...prev,
-              transacao: data,
-            }
-          : prev
-      );
-    } catch (error: any) {
-      setErroIniciarPix(
-        error?.response?.data?.message ||
-          (typeof error?.message === "string" ? error.message : "Não foi possível iniciar o pagamento PIX")
-      );
-    } finally {
-      setIniciandoPix(false);
-    }
-  };
 
   const handleFinalizar = async () => {
     setOverlayStatus("loading");
@@ -180,45 +105,19 @@ export default function FinalizarPedidoPage() {
       const result = await finalizarPedido(trocoPara);
 
       setTimeout(() => {
-        if (typeof result === "object" && result.status === "sucesso") {
-          setPedidoResult(result.pedido);
-      
-          const transacao = result.pedido.transacao;
-          const meioPagamentoId = result.pedido.meio_pagamento_id;
-      
-          // ✅ Verifica se o pedido terminou ou não tem transação
-          if (
-            !transacao ||
-            !transacao.status ||
-            FINAL_STATUSES.has(transacao.status as PagamentoStatusEnum)
-          ) {
-            setOverlayStatus("sucesso");
-      
-            setTimeout(() => {
-              useCart.getState().clear();
-              router.push("/pedidos");
-            }, 2500);
-          } else {
-            // 🕓 Ainda aguardando pagamento
-            setOverlayStatus("idle");
-            setCurrentTab("revisao");
-      
-            if (typeof meioPagamentoId === "number") {
-              setMeioPagamentoId(meioPagamentoId);
-            }
-          }
+        if (result === "sucesso") {
+          setOverlayStatus("sucesso");
+          setTimeout(() => router.push("/pedidos"), 3000);
+        } else if (typeof result === "object" && result.status === "erro") {
+          setOverlayStatus("erro");
+          setOverlayMessage(result.message);
+          setErrorMessage(result.message);
         }
       }, 1500);
-      
-        }
-      };
-    
-    const renderFooterButton = () => {
-      const estaEmFluxoPix =
-      !!pedidoResult?.transacao &&
-      !!pedidoResult.transacao.status &&
-      !FINAL_STATUSES.has(pedidoResult.transacao.status as PagamentoStatusEnum);
+    }
+  };
 
+  const renderFooterButton = () => {
     if (loading || overlayStatus === "loading") {
       return (
         <Button disabled className="w-full text-lg p-6 bg-gray-200 text-gray-700">
@@ -255,12 +154,7 @@ export default function FinalizarPedidoPage() {
         return (
           <Button onClick={handleFinalizar} disabled={items.length === 0} className="w-full text-lg p-6 bg-green-600">
             <div className="flex gap-3 items-center">
-              {isEditingMode
-                ? "Atualizar Pedido"
-                : estaEmFluxoPix
-                ? "Verificar pagamento"
-                : "Confirmar Pedido"}
-              <CircleCheck strokeWidth={3} />
+              {isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"} <CircleCheck strokeWidth={3} />
             </div>
           </Button>
         );
@@ -377,17 +271,7 @@ export default function FinalizarPedidoPage() {
                   label: "Endereço",
                   Component: () => (
                     <EnderecoStep
-                      enderecos={enderecos.map(e => ({
-                        ...e,
-                        numero: e.numero ?? "",
-                        bairro: e.bairro ?? "",
-                        cep: e.cep ?? "",
-                        complemento: e.complemento ?? "",
-                        latitude: e.latitude ?? 0,
-                        longitude: e.longitude ?? 0,
-                        ponto_referencia: e.ponto_referencia ?? "",
-                        padrao: e.padrao ?? false,
-                      }))}
+                      enderecos={enderecos}
                       enderecoId={enderecoId}
                       onSelect={(id: number) => {
                         setEnderecoPadraoId(id);
@@ -462,18 +346,6 @@ export default function FinalizarPedidoPage() {
                       inc={useCart.getState().inc}
                       dec={useCart.getState().dec}
                       remove={useCart.getState().remove}
-                      transacao={pedidoResult?.transacao}
-                      statusPagamento={
-                        pedidoResult?.transacao?.status as PagamentoStatusEnum | undefined
-                      }
-                      onAtualizarStatus={polling.forcarConsulta}
-                      atualizandoStatus={polling.carregando}
-                      erroStatus={polling.erro}
-                      isPolling={polling.isPolling}
-                      onGerarPix={iniciarPagamentoPix}
-                      gerandoPix={iniciandoPix}
-                      erroGerarPix={erroIniciarPix || errorMessage}
-                      podeGerarPix={!pedidoResult?.transacao && !iniciandoPix && overlayStatus !== "loading"}
                     />
                   ),
                 },
