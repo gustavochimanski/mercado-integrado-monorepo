@@ -5,7 +5,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Checkbox } from '@/components/ui/checkbox'
 import { StatusBadge } from '@/components/pedidos/status-badge'
-import { Eye } from 'lucide-react'
+import { Eye, Phone, MapPin, Bike } from 'lucide-react'
 import type { Pedido } from '@/types/pedido'
 
 interface KanbanCardProps {
@@ -69,15 +69,18 @@ export const KanbanCard = memo(function KanbanCard({
         </div>
 
         <div className="text-xs text-muted-foreground space-y-1.5">
-          <p className="flex items-center gap-1">
-            📞 {pedido.telefone_cliente}
+          <p className="flex items-center gap-1.5">
+            <Phone className="h-3.5 w-3.5 text-red-500" />
+            {pedido.telefone_cliente}
           </p>
-          <p className="flex items-center gap-1 line-clamp-1">
-            📍 {pedido.endereco}
+          <p className="flex items-center gap-1.5 line-clamp-1">
+            <MapPin className="h-3.5 w-3.5 text-red-500" />
+            {pedido.endereco}
           </p>
           {pedido.entregador_nome && (
-            <p className="flex items-center gap-1">
-              🏍️ {pedido.entregador_nome}
+            <p className="flex items-center gap-1.5">
+              <Bike className="h-3.5 w-3.5 text-red-500" />
+              {pedido.entregador_nome}
             </p>
           )}
         </div>

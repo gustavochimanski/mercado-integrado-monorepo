@@ -32,7 +32,7 @@ export default function DashboardLayout({
   return (
     <ReauthProvider>
       <SidebarProvider>
-        <LockScreenProvider timeout={20}>
+        <LockScreenProvider timeout={2}>
           <DashboardContent>{children}</DashboardContent>
         </LockScreenProvider>
       </SidebarProvider>
