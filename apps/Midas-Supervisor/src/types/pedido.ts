@@ -29,10 +29,31 @@ export interface Pedido {
 }
 
 /**
+ * Endereço selecionado do pedido
+ */
+export interface EnderecoSelecionado {
+  logradouro: string
+  numero?: string
+  complemento?: string
+  bairro: string
+  cidade: string
+  estado: string
+  cep: string
+  ponto_referencia?: string
+}
+
+/**
  * Pedido com detalhes completos
  */
 export interface PedidoDetalhado extends Pedido {
   itens: PedidoItem[]
+  cliente?: {
+    nome: string
+    telefone: string
+  }
+  endereco: string | {
+    endereco_selecionado?: EnderecoSelecionado
+  }
   entregador?: {
     id: number
     nome: string

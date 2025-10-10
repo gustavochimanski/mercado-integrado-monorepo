@@ -19,12 +19,12 @@ export const PEDIDO_STATUS = {
   },
   S: {
     label: 'Pronto',
-    color: 'bg-orange-500',
+    color: 'bg-primary',
     textColor: 'text-white',
   },
   E: {
     label: 'Saiu para entrega',
-    color: 'bg-primary',
+    color: 'bg-orange-500',
     textColor: 'text-white',
   },
   C: {

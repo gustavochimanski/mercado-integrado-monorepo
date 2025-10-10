@@ -1,4 +1,4 @@
-import { KanbanBoard } from './_components/kanban-board'
+import { KanbanBoard } from './_components/kanban/kanban-board'
 import { buscarPedidosKanban } from '@/actions/pedidos/buscar-pedidos'
 import { buscarEmpresas } from '@/actions/empresas/buscar-empresas'
 import { getCurrentUser } from '@/actions/auth/get-current-user'

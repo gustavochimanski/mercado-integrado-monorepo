@@ -5,7 +5,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Checkbox } from '@/components/ui/checkbox'
 import { StatusBadge } from '@/components/pedidos/status-badge'
-import { Eye, Phone, MapPin, Bike } from 'lucide-react'
+import { Eye, Phone, MapPin, Bike, Printer } from 'lucide-react'
 import type { Pedido } from '@/types/pedido'
 
 interface KanbanCardProps {
@@ -13,6 +13,7 @@ interface KanbanCardProps {
   selecionado: boolean
   onToggleSelecao: (id: number) => void
   onClickCard?: (pedidoId: number) => void
+  onImprimirCupom?: (pedidoId: number) => void
 }
 
 /**
@@ -24,6 +25,7 @@ export const KanbanCard = memo(function KanbanCard({
   selecionado,
   onToggleSelecao,
   onClickCard,
+  onImprimirCupom,
 }: KanbanCardProps) {
   const {
     attributes,
@@ -85,21 +87,37 @@ export const KanbanCard = memo(function KanbanCard({
           )}
         </div>
 
-        {/* Valor Total */}
+        {/* Valor Total e Ações */}
         <div className="pt-3 border-t flex items-center justify-between">
           <p className="text-sm font-bold text-primary">
             R$ {pedido.valor_total.toFixed(2)}
           </p>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onClickCard?.(pedido.id)
-            }}
-            className="p-1.5 hover:bg-muted rounded-md transition-colors cursor-pointer"
-            title="Ver detalhes"
-          >
-            <Eye className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              data-action-button
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                onClickCard?.(pedido.id)
+              }}
+              className="p-1.5 hover:bg-muted rounded-md transition-colors cursor-pointer"
+              title="Ver detalhes"
+            >
+              <Eye className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+            </button>
+            <button
+              data-action-button
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                onImprimirCupom?.(pedido.id)
+              }}
+              className="p-1.5 hover:bg-muted rounded-md transition-colors cursor-pointer"
+              title="Imprimir cupom"
+            >
+              <Printer className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
