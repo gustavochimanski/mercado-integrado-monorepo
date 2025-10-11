@@ -1,4 +1,4 @@
-import { KanbanBoard } from './_components/kanban/kanban-board'
+import { PedidosContainer } from './_components/pedido/pedidos-container'
 import { buscarPedidosKanban } from '@/actions/pedidos/buscar-pedidos'
 import { buscarEmpresas } from '@/actions/empresas/buscar-empresas'
 import { getCurrentUser } from '@/actions/auth/get-current-user'
@@ -69,11 +69,11 @@ export default async function PedidosPage({ searchParams }: PedidosPageProps) {
   }
 
   return (
-    <div className="h-[calc(100vh-70px)]">
-      <KanbanBoard
-        pedidosIniciais={resultado.data || []}
-        empresas={empresasDisponiveis}
-      />
-    </div>
+    <PedidosContainer
+      pedidosIniciais={resultado.data || []}
+      empresas={empresasDisponiveis}
+      dataInicial={dataFormatada}
+      empresaIdInicial={empresaId}
+    />
   )
 }
