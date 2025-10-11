@@ -29,9 +29,6 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
   const [pedidosPendentesVinculo, setPedidosPendentesVinculo] = useState<Pedido[]>([])
   const [novoStatusPendente, setNovoStatusPendente] = useState<PedidoStatus | null>(null)
   const [empresaIdFiltro, setEmpresaIdFiltro] = useState<number | undefined>(undefined)
-  const [statusAnteriorParaRollback, setStatusAnteriorParaRollback] = useState<
-    Map<number, PedidoStatus>
-  >(new Map())
 
   const handleVincularEntregador = useCallback(
     async (entregadorId: number) => {
@@ -62,12 +59,16 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
 
         toast.success('Entregador vinculado e status atualizado!')
 
-        // Apenas atualiza o entregador_id (status já foi atualizado otimisticamente antes do modal)
+        // Atualiza tanto o status quanto o entregador_id de uma vez
         setPedidosLocal((prev) =>
           prev.map((p) => {
             const pedidoAtualizado = pedidosPendentesVinculo.find((pp) => pp.id === p.id)
             if (pedidoAtualizado) {
-              return { ...p, entregador_id: entregadorId }
+              return {
+                ...p,
+                status: novoStatusPendente,
+                entregador_id: entregadorId
+              }
             }
             return p
           })
@@ -75,7 +76,6 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
 
         setPedidosPendentesVinculo([])
         setNovoStatusPendente(null)
-        setStatusAnteriorParaRollback(new Map()) // Clear since operation succeeded
         setModalEntregadorOpen(false)
       } catch (error) {
         console.error('Erro ao vincular entregador:', error)
@@ -113,12 +113,17 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
 
       toast.success('Entregador desvinculado e status atualizado!')
 
-      // Apenas atualiza o entregador (status já foi atualizado otimisticamente antes do modal)
+      // Atualiza tanto o status quanto o entregador de uma vez
       setPedidosLocal((prev) =>
         prev.map((p) => {
           const pedidoAtualizado = pedidosPendentesVinculo.find((pp) => pp.id === p.id)
           if (pedidoAtualizado) {
-            return { ...p, entregador_id: null, entregador_nome: undefined }
+            return {
+              ...p,
+              status: novoStatusPendente,
+              entregador_id: null,
+              entregador_nome: undefined
+            }
           }
           return p
         })
@@ -126,7 +131,6 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
 
       setPedidosPendentesVinculo([])
       setNovoStatusPendente(null)
-      setStatusAnteriorParaRollback(new Map()) // Clear since operation succeeded
       setModalDesvincularOpen(false)
     } catch (error) {
       console.error('Erro ao desvincular entregador:', error)
@@ -154,7 +158,6 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
       // Não precisa atualizar nada (status já foi atualizado otimisticamente antes do modal)
       setPedidosPendentesVinculo([])
       setNovoStatusPendente(null)
-      setStatusAnteriorParaRollback(new Map()) // Clear since operation succeeded
       setModalDesvincularOpen(false)
     } catch (error) {
       console.error('Erro ao atualizar status:', error)
@@ -170,12 +173,7 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
       const statusAtual = pedidoComStatus.status
 
       if (precisaVincularEntregador(statusAtual, novoStatus)) {
-        // Save original status for rollback
-        const rollbackMap = new Map<number, PedidoStatus>()
-        pedidos.forEach((p) => rollbackMap.set(p.id, p.status))
-        setStatusAnteriorParaRollback(rollbackMap)
-
-        // Atualização otimista: move o card ANTES de abrir o modal
+        // Atualização otimista: move o card visualmente para a nova coluna
         setPedidosLocal((prev) =>
           prev.map((p) => {
             const pedidoAtualizado = pedidos.find((pp) => pp.id === p.id)
@@ -194,12 +192,7 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
         const pedidosComEntregador = pedidos.filter((p) => p.entregador_id)
 
         if (pedidosComEntregador.length > 0) {
-          // Save original status for rollback
-          const rollbackMap = new Map<number, PedidoStatus>()
-          pedidosComEntregador.forEach((p) => rollbackMap.set(p.id, p.status))
-          setStatusAnteriorParaRollback(rollbackMap)
-
-          // Atualização otimista: move o card ANTES de abrir o modal
+          // Atualização otimista: move o card visualmente para a nova coluna
           setPedidosLocal((prev) =>
             prev.map((p) => {
               const pedidoAtualizado = pedidosComEntregador.find((pp) => pp.id === p.id)
@@ -269,21 +262,9 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
       <ModalSelecionarEntregador
         isOpen={modalEntregadorOpen}
         onClose={() => {
-          // Rollback: restore original status
-          setPedidosLocal((prev) =>
-            prev.map((p) => {
-              const originalStatus = statusAnteriorParaRollback.get(p.id)
-              if (originalStatus) {
-                return { ...p, status: originalStatus }
-              }
-              return p
-            })
-          )
-
           setModalEntregadorOpen(false)
           setPedidosPendentesVinculo([])
           setNovoStatusPendente(null)
-          setStatusAnteriorParaRollback(new Map())
         }}
         onConfirmar={handleVincularEntregador}
         pedidosComEntregador={pedidosPendentesVinculo
@@ -292,6 +273,7 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
             pedidoId: p.id,
             entregadorNome: p.entregador_nome || 'Desconhecido',
           }))}
+        todosPedidos={pedidosPendentesVinculo.map((p) => p.id)}
         empresaId={empresaIdFiltro}
       />
 
@@ -299,21 +281,9 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
       <ModalDesvincularEntregador
         isOpen={modalDesvincularOpen}
         onClose={() => {
-          // Rollback: restore original status
-          setPedidosLocal((prev) =>
-            prev.map((p) => {
-              const originalStatus = statusAnteriorParaRollback.get(p.id)
-              if (originalStatus) {
-                return { ...p, status: originalStatus }
-              }
-              return p
-            })
-          )
-
           setModalDesvincularOpen(false)
           setPedidosPendentesVinculo([])
           setNovoStatusPendente(null)
-          setStatusAnteriorParaRollback(new Map())
         }}
         onConfirmarDesvincular={handleDesvincularEntregador}
         onManterVinculo={handleManterVinculo}
