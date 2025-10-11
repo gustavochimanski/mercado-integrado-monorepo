@@ -9,7 +9,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const { isCollapsed } = useSidebar()
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <Sidebar />
 
       {/* Main Content - ajusta dinamicamente */}

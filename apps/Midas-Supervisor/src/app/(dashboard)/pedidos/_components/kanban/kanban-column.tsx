@@ -33,11 +33,11 @@ export const KanbanColumn = memo(function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <div className="flex flex-col bg-muted/30 rounded-lg h-full flex-1 min-w-0">
+    <div className="flex flex-col bg-muted/30 rounded-lg h-full flex-1 min-w-0 border border-border dark:border-transparent">
       {/* Header da Coluna */}
       <div
         className={cn(
-          'p-4 rounded-t-lg',
+          'p-4 rounded-t-lg border-b border-border dark:border-transparent',
           config.color,
           config.textColor
         )}

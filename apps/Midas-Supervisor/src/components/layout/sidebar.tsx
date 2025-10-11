@@ -19,8 +19,7 @@ import {
   MapPin,
   BarChart3,
   UserCog,
-  Gift,
-  ClipboardList
+  Gift, 
 } from 'lucide-react'
 import {
   Tooltip,
@@ -30,6 +29,7 @@ import {
 } from '@/components/ui/tooltip'
 import { logoutAction } from '@/actions/auth/logout'
 import { useSidebar } from '@/contexts/sidebar-context'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
 
 const menuItems = [
   {
@@ -81,12 +81,7 @@ const menuItems = [
     title: 'Cupons',
     href: '/cupons',
     icon: Gift,
-  },
-  {
-    title: 'Vitrines',
-    href: '/vitrines',
-    icon: ClipboardList,
-  },
+  }, 
   {
     title: 'Relatórios',
     href: '/relatorios',
@@ -117,7 +112,9 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-40 h-screen bg-slate-900 border-r border-slate-800
+          fixed top-0 left-0 z-40 h-screen
+          bg-slate-900 dark:bg-slate-950
+          border-r border-slate-800 dark:border-slate-700
           transition-all duration-300 ease-in-out
           ${isCollapsed ? 'w-20' : 'w-64'}
         `}
@@ -201,7 +198,12 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Logout Button */}
+        {/* Theme Toggle - Acima da linha */}
+        <div className="absolute bottom-20 left-0 right-0 px-3">
+          <ThemeToggle isCollapsed={isCollapsed} />
+        </div>
+
+        {/* Logout Button - Abaixo da linha */}
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-800">
           {isCollapsed ? (
             <Tooltip>
