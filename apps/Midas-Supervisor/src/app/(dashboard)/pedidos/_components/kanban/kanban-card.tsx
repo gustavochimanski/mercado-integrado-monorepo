@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Checkbox } from '@/components/ui/checkbox'
-import { StatusBadge } from '@/components/pedidos/status-badge'
+import { TempoPedidoBadge } from '@/components/pedidos/tempo-pedido-badge'
 import { Eye, Phone, MapPin, Bike, Printer } from 'lucide-react'
 import type { Pedido } from '@/types/pedido'
 
@@ -50,15 +50,17 @@ export const KanbanCard = memo(function KanbanCard({
       {...listeners}
       className="bg-card border rounded-lg p-5 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing"
     >
-      {/* Header: Checkbox + Status */}
+      {/* Header: Checkbox + Tempo */}
       <div className="flex items-start justify-between mb-3">
         <Checkbox
           checked={selecionado}
           onCheckedChange={() => onToggleSelecao(pedido.id)}
           onClick={(e) => e.stopPropagation()}
-          className="mt-1"
+          className="mt-1 h-4.5 w-4.5"
         />
-        <StatusBadge status={pedido.status} />
+        {pedido.status !== 'C' && pedido.status !== 'D' && (
+          <TempoPedidoBadge dataCriacao={pedido.data_pedido} limiteMinutos={30} />
+        )}
       </div>
 
       {/* Dados do Pedido */}
