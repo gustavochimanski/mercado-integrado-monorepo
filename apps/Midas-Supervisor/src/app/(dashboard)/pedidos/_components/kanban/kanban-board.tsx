@@ -1,22 +1,14 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
 import { useSearchParams } from 'next/navigation'
-import { KanbanColumn } from './kanban-column'
-import { KanbanCard } from './kanban-card'
+import { KanbanGrid } from './kanban-grid'
+import { KanbanWithDnd } from './kanban-with-dnd'
+import { KanbanWithEntregador } from './kanban-with-entregador'
 import { FiltrosAvancados } from '../filtros/filtros-avancados'
 import { FooterSelecaoLote } from '../footer/footer-selecao-lote'
 import { ModalDetalhesPedido } from '../modal/modal-detalhes-pedido'
 import { STATUS_ORDER } from '@/lib/constants/pedido-status'
-import { atualizarStatusPedido } from '@/actions/pedidos/atualizar-status'
 import type { Pedido, PedidoStatus } from '@/types/pedido'
 import { toast } from 'sonner'
 import { useImprimirPedido } from '@/hooks/use-imprimir-pedido'
@@ -33,54 +25,35 @@ interface KanbanBoardProps {
 }
 
 /**
- * Kanban Board - Container principal com drag-and-drop
+ * Kanban Board - Container principal (REFATORADO)
+ * Agora muito mais limpo, delegando lógica para componentes wrapper
  */
 export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
   const searchParams = useSearchParams()
   const [selecionados, setSelecionados] = useState<Set<number>>(new Set())
-  const [activePedido, setActivePedido] = useState<Pedido | null>(null)
-  const [pedidoSelecionadoId, setPedidoSelecionadoId] = useState<number | null>(
-    null
-  )
+  const [pedidoSelecionadoId, setPedidoSelecionadoId] = useState<number | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pedidosLocal, setPedidosLocal] = useState<Pedido[]>(pedidosIniciais)
-  const [isDndReady, setIsDndReady] = useState(false)
 
-  // Hook de impressão
   const { imprimirCupom, dadosImpressao, error: impressaoError } = useImprimirPedido()
 
-  // Handler para imprimir cupom
-  const handleImprimirCupom = useCallback(async (pedidoId: number) => {
-    try {
-      await imprimirCupom(pedidoId)
-      // Não mostramos toast de sucesso pois não sabemos se o usuário
-      // realmente imprimiu ou cancelou a janela de impressão
-    } catch {
-      toast.error('Erro ao imprimir cupom')
-    }
-  }, [imprimirCupom])
+  const handleImprimirCupom = useCallback(
+    async (pedidoId: number) => {
+      try {
+        await imprimirCupom(pedidoId)
+      } catch {
+        toast.error('Erro ao imprimir cupom')
+      }
+    },
+    [imprimirCupom]
+  )
 
-  // Mostrar toast de erro se houver
   useEffect(() => {
     if (impressaoError) {
       toast.error(impressaoError)
     }
   }, [impressaoError])
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  )
-
-  // Habilitar DndContext apenas no cliente para evitar hydration errors
-  useEffect(() => {
-    setIsDndReady(true)
-  }, [])
-
-  // Sincronizar pedidos locais quando os pedidos iniciais mudarem
   useEffect(() => {
     setPedidosLocal(pedidosIniciais)
   }, [pedidosIniciais])
@@ -130,145 +103,66 @@ export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
     })
   }, [])
 
-  // Limpar todas as seleções
   const limparSelecao = useCallback(() => {
     setSelecionados(new Set())
   }, [])
 
-  // Abrir modal de detalhes
   const handleClickCard = useCallback((pedidoId: number) => {
     setPedidoSelecionadoId(pedidoId)
     setIsModalOpen(true)
   }, [])
 
-  // Fechar modal
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setPedidoSelecionadoId(null)
   }, [])
 
-  // Quando começa a arrastar
-  const handleDragStart = useCallback((event: DragEndEvent) => {
-    const pedido = pedidos.find((p) => p.id === event.active.id)
-    setActivePedido(pedido || null)
-  }, [pedidos])
-
-  // Quando solta o card
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event
-    setActivePedido(null)
-
-    // Se não soltou sobre nada ou soltou sobre si mesmo, não faz nada
-    if (!over || active.id === over.id) return
-
-    // Validar se o drop foi em uma coluna válida (STATUS_ORDER)
-    const novoStatus = over.id as string
-    if (!STATUS_ORDER.includes(novoStatus as PedidoStatus)) {
-      // Soltou fora de uma coluna válida, apenas ignora
-      return
-    }
-
-    const pedidoId = Number(active.id)
-
-    // Atualização otimista: atualiza UI imediatamente
-    setPedidosLocal((prev) =>
-      prev.map((pedido) =>
-        pedido.id === pedidoId ? { ...pedido, status: novoStatus as PedidoStatus } : pedido
-      )
-    )
-
-    // Atualizar via Server Action
-    const result = await atualizarStatusPedido(pedidoId, novoStatus as PedidoStatus)
-
-    if (result.success) {
-      toast.success('Status atualizado com sucesso!')
-    } else {
-      // Se falhar, reverte a mudança otimista
-      setPedidosLocal(pedidosIniciais)
-      toast.error(result.error || 'Erro ao atualizar status')
-    }
-  }, [pedidosIniciais])
-
-  // Memoizar array de selecionados para evitar re-renders desnecessários
   const pedidosSelecionadosArray = useMemo(
     () => Array.from(selecionados),
     [selecionados]
   )
 
   return (
-    <div className="h-full flex flex-col gap-4">
-      {/* Filtros */}
-      <div className="flex-shrink-0">
-        <FiltrosAvancados empresas={empresas} />
-      </div>
-
-      {/* Kanban Board */}
-      {isDndReady ? (
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="flex-1 min-h-0">
-            <div className="flex gap-4 h-full">
-              {STATUS_ORDER.map((status) => (
-                <KanbanColumn
-                  key={status}
-                  status={status}
-                  pedidos={pedidosPorStatus[status]}
-                  selecionados={selecionados}
-                  onToggleSelecao={toggleSelecao}
-                  onClickCard={handleClickCard}
-                  onImprimirCupom={handleImprimirCupom}
-                />
-              ))}
-            </div>
+    <KanbanWithEntregador setPedidosLocal={setPedidosLocal}>
+      {({ handleMudancaStatus }) => (
+        <div className="h-full flex flex-col gap-4">
+          <div className="flex-shrink-0">
+            <FiltrosAvancados empresas={empresas} />
           </div>
 
-          {/* Overlay - Card que aparece enquanto arrasta */}
-          <DragOverlay>
-            {activePedido && (
-              <KanbanCard
-                pedido={activePedido}
-                selecionado={false}
-                onToggleSelecao={() => {}}
-              />
-            )}
-          </DragOverlay>
-        </DndContext>
-      ) : (
-        <div className="flex-1 min-h-0">
-          <div className="flex gap-4 h-full">
-            {STATUS_ORDER.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                pedidos={pedidosPorStatus[status]}
+          <KanbanWithDnd
+            pedidos={pedidos}
+            pedidosLocal={pedidosLocal}
+            handleMudancaStatus={handleMudancaStatus}
+          >
+            {({ handleAvancarStatus }) => (
+              <KanbanGrid
+                pedidosPorStatus={pedidosPorStatus}
                 selecionados={selecionados}
                 onToggleSelecao={toggleSelecao}
                 onClickCard={handleClickCard}
                 onImprimirCupom={handleImprimirCupom}
+                onAvancarStatus={handleAvancarStatus}
               />
-            ))}
-          </div>
+            )}
+          </KanbanWithDnd>
+
+          <FooterSelecaoLote
+            pedidosSelecionados={pedidosSelecionadosArray}
+            onLimparSelecao={limparSelecao}
+            onMudancaStatusLote={handleMudancaStatus}
+            pedidos={pedidosLocal}
+          />
+
+          <ModalDetalhesPedido
+            pedidoId={pedidoSelecionadoId}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+          />
+
+          {dadosImpressao && <CupomImpressao dados={dadosImpressao} />}
         </div>
       )}
-
-      {/* Footer de Seleção em Lote */}
-      <FooterSelecaoLote
-        pedidosSelecionados={pedidosSelecionadosArray}
-        onLimparSelecao={limparSelecao}
-      />
-
-      {/* Modal de Detalhes */}
-      <ModalDetalhesPedido
-        pedidoId={pedidoSelecionadoId}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-      />
-
-      {/* Template de Cupom para Impressão (oculto, só aparece no print) */}
-      {dadosImpressao && <CupomImpressao dados={dadosImpressao} />}
-    </div>
+    </KanbanWithEntregador>
   )
 }

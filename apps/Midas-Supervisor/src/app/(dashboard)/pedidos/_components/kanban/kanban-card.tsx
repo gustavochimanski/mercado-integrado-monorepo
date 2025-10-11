@@ -17,6 +17,7 @@ interface KanbanCardProps {
   onToggleSelecao: (id: number) => void
   onClickCard?: (pedidoId: number) => void
   onImprimirCupom?: (pedidoId: number) => void
+  onAvancarStatus?: (pedido: Pedido, proximoStatus: PedidoStatus) => Promise<void>
 }
 
 /**
@@ -29,6 +30,7 @@ export const KanbanCard = memo(function KanbanCard({
   onToggleSelecao,
   onClickCard,
   onImprimirCupom,
+  onAvancarStatus,
 }: KanbanCardProps) {
   const [isPending, startTransition] = useTransition()
 
@@ -69,12 +71,18 @@ export const KanbanCard = memo(function KanbanCard({
     }
 
     startTransition(async () => {
-      const result = await atualizarStatusPedido(pedido.id, proximoStatus)
-
-      if (result.success) {
-        toast.success('Status atualizado com sucesso!')
+      // Se tem callback de avançar status (para lidar com entregador), usa ele
+      if (onAvancarStatus) {
+        await onAvancarStatus(pedido, proximoStatus)
       } else {
-        toast.error(result.error || 'Erro ao atualizar status')
+        // Senão, usa a lógica padrão
+        const result = await atualizarStatusPedido(pedido.id, proximoStatus)
+
+        if (result.success) {
+          toast.success('Status atualizado com sucesso!')
+        } else {
+          toast.error(result.error || 'Erro ao atualizar status')
+        }
       }
     })
   }
@@ -97,9 +105,7 @@ export const KanbanCard = memo(function KanbanCard({
           onClick={(e) => e.stopPropagation()}
           className="mt-1 h-4.5 w-4.5"
         />
-        {pedido.status !== 'C' && pedido.status !== 'D' && (
-          <TempoPedidoBadge dataCriacao={pedido.data_pedido} limiteMinutos={30} />
-        )}
+        <TempoPedidoBadge dataCriacao={pedido.data_pedido} limiteMinutos={30} />
       </div>
 
       {/* Dados do Pedido */}

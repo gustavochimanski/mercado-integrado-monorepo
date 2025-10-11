@@ -15,6 +15,7 @@ interface KanbanColumnProps {
   onToggleSelecao: (id: number) => void
   onClickCard?: (pedidoId: number) => void
   onImprimirCupom?: (pedidoId: number) => void
+  onAvancarStatus?: (pedido: Pedido, proximoStatus: PedidoStatus) => Promise<void>
 }
 
 /**
@@ -28,6 +29,7 @@ export const KanbanColumn = memo(function KanbanColumn({
   onToggleSelecao,
   onClickCard,
   onImprimirCupom,
+  onAvancarStatus,
 }: KanbanColumnProps) {
   const config = PEDIDO_STATUS[status]
   const { setNodeRef, isOver } = useDroppable({ id: status })
@@ -68,6 +70,7 @@ export const KanbanColumn = memo(function KanbanColumn({
               onToggleSelecao={onToggleSelecao}
               onClickCard={onClickCard}
               onImprimirCupom={onImprimirCupom}
+              onAvancarStatus={onAvancarStatus}
             />
           ))}
         </SortableContext>

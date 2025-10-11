@@ -25,6 +25,7 @@ export interface Pedido {
   data_pedido: string
   empresa_id: number
   empresa_nome?: string
+  entregador_id?: number | null
   entregador_nome?: string
 }
 

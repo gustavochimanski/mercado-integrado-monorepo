@@ -16,9 +16,13 @@ import { CheckCircle2, X, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSidebar } from '@/contexts/sidebar-context'
 
+import type { Pedido } from '@/types/pedido'
+
 interface FooterSelecaoLoteProps {
   pedidosSelecionados: number[]
   onLimparSelecao: () => void
+  onMudancaStatusLote?: (pedidos: Pedido[], novoStatus: PedidoStatus) => Promise<void>
+  pedidos?: Pedido[]
 }
 
 /**
@@ -28,6 +32,8 @@ interface FooterSelecaoLoteProps {
 export const FooterSelecaoLote = memo(function FooterSelecaoLote({
   pedidosSelecionados,
   onLimparSelecao,
+  onMudancaStatusLote,
+  pedidos = [],
 }: FooterSelecaoLoteProps) {
   const [novoStatus, setNovoStatus] = useState<PedidoStatus | ''>('')
   const [isLoading, setIsLoading] = useState(false)
@@ -50,14 +56,25 @@ export const FooterSelecaoLote = memo(function FooterSelecaoLote({
     setIsLoading(true)
 
     try {
-      const result = await atualizarStatusEmLote(pedidosSelecionados, novoStatus)
-
-      if (result.success) {
-        toast.success(result.message || 'Pedidos atualizados com sucesso!')
+      // Se tem callback customizado (com lógica de entregador), usa ele
+      if (onMudancaStatusLote && pedidos.length > 0) {
+        const pedidosSelecionadosObj = pedidos.filter((p) =>
+          pedidosSelecionados.includes(p.id)
+        )
+        await onMudancaStatusLote(pedidosSelecionadosObj, novoStatus)
         onLimparSelecao()
         setNovoStatus('')
       } else {
-        toast.error(result.error || 'Erro ao atualizar pedidos')
+        // Senão, usa a lógica padrão (sem validação de entregador)
+        const result = await atualizarStatusEmLote(pedidosSelecionados, novoStatus)
+
+        if (result.success) {
+          toast.success(result.message || 'Pedidos atualizados com sucesso!')
+          onLimparSelecao()
+          setNovoStatus('')
+        } else {
+          toast.error(result.error || 'Erro ao atualizar pedidos')
+        }
       }
     } catch (error) {
       toast.error('Erro ao atualizar pedidos')
