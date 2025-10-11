@@ -15,7 +15,7 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ isCollapsed = false }: ThemeToggleProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   // Evitar hydration mismatch
