@@ -1,12 +1,15 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useTransition } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TempoPedidoBadge } from '@/components/pedidos/tempo-pedido-badge'
-import { Eye, Phone, MapPin, Bike, Printer } from 'lucide-react'
-import type { Pedido } from '@/types/pedido'
+import { Eye, Phone, MapPin, Bike, Printer, ChevronRight } from 'lucide-react'
+import { atualizarStatusPedido } from '@/actions/pedidos/atualizar-status'
+import { STATUS_ORDER } from '@/lib/constants/pedido-status'
+import { toast } from 'sonner'
+import type { Pedido, PedidoStatus } from '@/types/pedido'
 
 interface KanbanCardProps {
   pedido: Pedido
@@ -27,6 +30,8 @@ export const KanbanCard = memo(function KanbanCard({
   onClickCard,
   onImprimirCupom,
 }: KanbanCardProps) {
+  const [isPending, startTransition] = useTransition()
+
   const {
     attributes,
     listeners,
@@ -41,6 +46,40 @@ export const KanbanCard = memo(function KanbanCard({
     transition,
     opacity: isDragging ? 0.5 : 1,
   }
+
+  // Determina o próximo status baseado no STATUS_ORDER
+  const getProximoStatus = (): PedidoStatus | null => {
+    const currentIndex = STATUS_ORDER.indexOf(pedido.status)
+    // Se não encontrar ou for o último, não tem próximo
+    if (currentIndex === -1 || currentIndex === STATUS_ORDER.length - 1) {
+      return null
+    }
+    return STATUS_ORDER[currentIndex + 1]
+  }
+
+  // Handler para avançar status
+  const handleProximoStatus = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+
+    const proximoStatus = getProximoStatus()
+    if (!proximoStatus) {
+      toast.error('Pedido já está no status final')
+      return
+    }
+
+    startTransition(async () => {
+      const result = await atualizarStatusPedido(pedido.id, proximoStatus)
+
+      if (result.success) {
+        toast.success('Status atualizado com sucesso!')
+      } else {
+        toast.error(result.error || 'Erro ao atualizar status')
+      }
+    })
+  }
+
+  const proximoStatus = getProximoStatus()
 
   return (
     <div
@@ -119,6 +158,17 @@ export const KanbanCard = memo(function KanbanCard({
             >
               <Printer className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
             </button>
+            {proximoStatus && (
+              <button
+                data-action-button
+                onClick={handleProximoStatus}
+                disabled={isPending}
+                className="p-1.5 hover:bg-muted rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                title={`Avançar para ${proximoStatus}`}
+              >
+                <ChevronRight className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+              </button>
+            )}
           </div>
         </div>
       </div>
