@@ -52,7 +52,7 @@ export const PEDIDO_STATUS = {
 
 // Ordem de exibição das colunas no Kanban 
 export const STATUS_ORDER: PedidoStatus[] = [
-  'I',    
+  'P',    
   'R',  
   'E',
   'C',

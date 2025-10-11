@@ -158,20 +158,27 @@ export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
     const { active, over } = event
     setActivePedido(null)
 
+    // Se não soltou sobre nada ou soltou sobre si mesmo, não faz nada
     if (!over || active.id === over.id) return
 
+    // Validar se o drop foi em uma coluna válida (STATUS_ORDER)
+    const novoStatus = over.id as string
+    if (!STATUS_ORDER.includes(novoStatus as PedidoStatus)) {
+      // Soltou fora de uma coluna válida, apenas ignora
+      return
+    }
+
     const pedidoId = Number(active.id)
-    const novoStatus = over.id as PedidoStatus
 
     // Atualização otimista: atualiza UI imediatamente
     setPedidosLocal((prev) =>
       prev.map((pedido) =>
-        pedido.id === pedidoId ? { ...pedido, status: novoStatus } : pedido
+        pedido.id === pedidoId ? { ...pedido, status: novoStatus as PedidoStatus } : pedido
       )
     )
 
     // Atualizar via Server Action
-    const result = await atualizarStatusPedido(pedidoId, novoStatus)
+    const result = await atualizarStatusPedido(pedidoId, novoStatus as PedidoStatus)
 
     if (result.success) {
       toast.success('Status atualizado com sucesso!')
@@ -191,7 +198,9 @@ export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
   return (
     <div className="h-full flex flex-col gap-4">
       {/* Filtros */}
-      <FiltrosAvancados empresas={empresas} />
+      <div className="flex-shrink-0">
+        <FiltrosAvancados empresas={empresas} />
+      </div>
 
       {/* Kanban Board */}
       {isDndReady ? (
@@ -200,7 +209,7 @@ export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex-1 h-full">
+          <div className="flex-1 min-h-0">
             <div className="flex gap-4 h-full">
               {STATUS_ORDER.map((status) => (
                 <KanbanColumn
@@ -228,7 +237,7 @@ export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="flex-1 h-full">
+        <div className="flex-1 min-h-0">
           <div className="flex gap-4 h-full">
             {STATUS_ORDER.map((status) => (
               <KanbanColumn

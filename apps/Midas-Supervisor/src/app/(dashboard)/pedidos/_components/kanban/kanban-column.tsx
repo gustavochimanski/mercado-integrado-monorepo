@@ -37,7 +37,7 @@ export const KanbanColumn = memo(function KanbanColumn({
       {/* Header da Coluna */}
       <div
         className={cn(
-          'p-4 rounded-t-lg border-b border-border dark:border-transparent',
+          'p-4 rounded-t-lg border-b border-border dark:border-transparent flex-shrink-0',
           config.color,
           config.textColor
         )}
@@ -52,7 +52,7 @@ export const KanbanColumn = memo(function KanbanColumn({
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 p-3 space-y-3 overflow-y-auto',
+          'flex-1 p-3 space-y-3 overflow-y-auto min-h-0 scrollbar-custom',
           isOver && 'bg-primary/10 border-2 border-primary border-dashed'
         )}
       >
