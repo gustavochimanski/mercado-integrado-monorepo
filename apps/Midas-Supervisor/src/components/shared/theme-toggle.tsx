@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
@@ -69,33 +68,29 @@ export function ThemeToggle({ isCollapsed = false }: ThemeToggleProps) {
 
   if (isCollapsed) {
     // Quando colapsada, mostra apenas o ícone sem fundo
-    const collapsedButton = (
-      <button
-        onClick={toggleTheme}
-        className="w-full flex items-center justify-center px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer group"
-        aria-label={`Trocar para ${isDark ? 'modo claro' : 'modo escuro'}`}
-      >
-        {isDark ? (
-          <Moon className="h-5 w-5 text-slate-400 group-hover:text-white transition-colors" />
-        ) : (
-          <Sun className="h-5 w-5 text-slate-400 group-hover:text-white transition-colors" />
-        )}
-      </button>
-    )
-
     return (
-      <TooltipProvider delayDuration={0}>
-        <Tooltip>
-          <TooltipTrigger asChild>{collapsedButton}</TooltipTrigger>
-          <TooltipContent
-            side="right"
-            className="bg-slate-800 text-white border border-slate-700 shadow-xl px-3 py-2 text-sm font-medium"
-            sideOffset={10}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer group"
+            aria-label={`Trocar para ${isDark ? 'modo claro' : 'modo escuro'}`}
           >
-            {isDark ? 'Modo Escuro' : 'Modo Claro'}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+            {isDark ? (
+              <Moon className="h-5 w-5 text-slate-400 group-hover:text-white transition-colors" />
+            ) : (
+              <Sun className="h-5 w-5 text-slate-400 group-hover:text-white transition-colors" />
+            )}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className="bg-slate-800 text-white border border-slate-700 shadow-xl px-3 py-2 text-sm font-medium"
+          sideOffset={10}
+        >
+          {isDark ? 'Modo Escuro' : 'Modo Claro'}
+        </TooltipContent>
+      </Tooltip>
     )
   }
 
