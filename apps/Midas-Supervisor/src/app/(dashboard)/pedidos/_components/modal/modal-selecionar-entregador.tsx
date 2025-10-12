@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils'
 interface ModalSelecionarEntregadorProps {
   isOpen: boolean
   onClose: () => void
-  onConfirmar: (entregadorId: number) => Promise<void>
+  onConfirmar: (entregadorId: number, entregadorNome?: string) => Promise<void>
   pedidosComEntregador?: Array<{
     pedidoId: number
     entregadorNome: string
@@ -105,7 +105,9 @@ export function ModalSelecionarEntregador({
     setErro(null)
 
     try {
-      await onConfirmar(Number(entregadorSelecionado))
+      // Busca o nome do entregador selecionado
+      const entregador = entregadores.find((e) => e.id.toString() === entregadorSelecionado)
+      await onConfirmar(Number(entregadorSelecionado), entregador?.nome)
       onClose()
     } catch (error) {
       console.error('Erro ao vincular entregador:', error)

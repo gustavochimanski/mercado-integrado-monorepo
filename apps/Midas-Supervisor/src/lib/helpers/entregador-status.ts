@@ -3,12 +3,12 @@ import type { PedidoStatus } from '@/types/pedido'
 /**
  * Status que REQUEREM entregador vinculado
  */
-export const STATUS_COM_ENTREGADOR: PedidoStatus[] = ['E', 'F']
+export const STATUS_COM_ENTREGADOR: PedidoStatus[] = ['E', 'C']
 
 /**
  * Status que NÃO requerem entregador vinculado
  */
-export const STATUS_SEM_ENTREGADOR: PedidoStatus[] = ['P', 'A']
+export const STATUS_SEM_ENTREGADOR: PedidoStatus[] = ['P', 'R']
 
 /**
  * Verifica se um status requer entregador vinculado

@@ -31,7 +31,7 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
   const [empresaIdFiltro, setEmpresaIdFiltro] = useState<number | undefined>(undefined)
 
   const handleVincularEntregador = useCallback(
-    async (entregadorId: number) => {
+    async (entregadorId: number, entregadorNome?: string) => {
       if (!novoStatusPendente) return
 
       try {
@@ -59,7 +59,7 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
 
         toast.success('Entregador vinculado e status atualizado!')
 
-        // Atualiza tanto o status quanto o entregador_id de uma vez
+        // Atualiza tanto o status quanto o entregador_id e entregador_nome de uma vez
         setPedidosLocal((prev) =>
           prev.map((p) => {
             const pedidoAtualizado = pedidosPendentesVinculo.find((pp) => pp.id === p.id)
@@ -67,7 +67,8 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
               return {
                 ...p,
                 status: novoStatusPendente,
-                entregador_id: entregadorId
+                entregador_id: entregadorId,
+                entregador_nome: entregadorNome
               }
             }
             return p
@@ -189,7 +190,7 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
         setEmpresaIdFiltro(pedidos[0].empresa_id)
         setModalEntregadorOpen(true)
       } else if (podeDesvincularEntregador(statusAtual, novoStatus)) {
-        const pedidosComEntregador = pedidos.filter((p) => p.entregador_id)
+        const pedidosComEntregador = pedidos.filter((p) => p.entregador_id !== null && p.entregador_id !== undefined)
 
         if (pedidosComEntregador.length > 0) {
           // Atualização otimista: move o card visualmente para a nova coluna
