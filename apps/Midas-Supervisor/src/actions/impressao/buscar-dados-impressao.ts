@@ -87,7 +87,7 @@ export async function buscarDadosImpressao(pedidoId: number) {
     })) || []
 
     // Calcular subtotal: soma de (quantidade × preço) de todos os itens
-    const subtotal = itens.reduce((soma, item) => {
+    const subtotal = itens.reduce((soma: number, item: { quantidade: number; preco: number }) => {
       return soma + (item.quantidade * item.preco)
     }, 0)
 

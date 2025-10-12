@@ -124,7 +124,7 @@ export const KanbanCard = memo(function KanbanCard({
           </p>
           <p className="flex items-center gap-1.5 line-clamp-1">
             <MapPin className="h-3.5 w-3.5 text-red-500" />
-            {pedido.endereco}
+            {pedido.endereco.toString()}
           </p>
           {pedido.entregador_nome && (
             <p className="flex items-center gap-1.5">

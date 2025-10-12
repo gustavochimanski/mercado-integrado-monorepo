@@ -68,7 +68,7 @@ export function KanbanBoard({ pedidosIniciais, empresas }: KanbanBoardProps) {
       if (numero && !pedido.id.toString().includes(numero)) return false
       if (telefone && !pedido.telefone_cliente.includes(telefone)) return false
       if (nome && !pedido.nome_cliente.toLowerCase().includes(nome)) return false
-      if (endereco && !pedido.endereco.toLowerCase().includes(endereco)) return false
+      if (endereco && !pedido.endereco.toString().toLowerCase().includes(endereco)) return false
       return true
     })
   }, [pedidosLocal, searchParams])

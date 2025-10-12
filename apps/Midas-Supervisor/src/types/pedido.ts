@@ -1,6 +1,6 @@
 /**
  * Status disponíveis para um pedido
- * A - AGUARDANDO/ABERTO
+ * A - AGUARDANDO PAGAMENTO
  * P - PENDENTE
  * I - CONFIRMADO
  * R - PREPARANDO
@@ -20,7 +20,7 @@ export interface Pedido {
   status: PedidoStatus
   nome_cliente: string
   telefone_cliente: string
-  endereco: string
+  endereco: string | { endereco_selecionado?: EnderecoSelecionado }
   valor_total: number
   data_pedido: string
   empresa_id: number
