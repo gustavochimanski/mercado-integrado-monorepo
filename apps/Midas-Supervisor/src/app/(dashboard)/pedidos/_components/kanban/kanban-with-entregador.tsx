@@ -190,45 +190,21 @@ export function KanbanWithEntregador({ setPedidosLocal, children }: KanbanWithEn
         setEmpresaIdFiltro(pedidos[0].empresa_id)
         setModalEntregadorOpen(true)
       } else if (podeDesvincularEntregador(statusAtual, novoStatus)) {
-        const pedidosComEntregador = pedidos.filter((p) => p.entregador_id !== null && p.entregador_id !== undefined)
+        // Atualização otimista: move o card visualmente para a nova coluna
+        setPedidosLocal((prev) =>
+          prev.map((p) => {
+            const pedidoAtualizado = pedidos.find((pp) => pp.id === p.id)
+            if (pedidoAtualizado) {
+              return { ...p, status: novoStatus }
+            }
+            return p
+          })
+        )
 
-        if (pedidosComEntregador.length > 0) {
-          // Atualização otimista: move o card visualmente para a nova coluna
-          setPedidosLocal((prev) =>
-            prev.map((p) => {
-              const pedidoAtualizado = pedidosComEntregador.find((pp) => pp.id === p.id)
-              if (pedidoAtualizado) {
-                return { ...p, status: novoStatus }
-              }
-              return p
-            })
-          )
-
-          setPedidosPendentesVinculo(pedidosComEntregador)
-          setNovoStatusPendente(novoStatus)
-          setModalDesvincularOpen(true)
-        } else {
-          // Atualização otimista ANTES de chamar API
-          setPedidosLocal((prev) =>
-            prev.map((p) => {
-              const pedidoAtualizado = pedidos.find((pp) => pp.id === p.id)
-              if (pedidoAtualizado) {
-                return { ...p, status: novoStatus }
-              }
-              return p
-            })
-          )
-
-          const promises = pedidos.map((p) => atualizarStatusPedido(p.id, novoStatus))
-          const results = await Promise.all(promises)
-          const errors = results.filter((r) => !r.success)
-
-          if (errors.length > 0) {
-            toast.error(`Erro ao atualizar ${errors.length} pedido(s)`)
-          } else {
-            toast.success('Status atualizado com sucesso!')
-          }
-        }
+        // Sempre abre o modal quando está voltando de E/C para P/R
+        setPedidosPendentesVinculo(pedidos)
+        setNovoStatusPendente(novoStatus)
+        setModalDesvincularOpen(true)
       } else {
         // Atualização otimista ANTES de chamar API
         setPedidosLocal((prev) =>
