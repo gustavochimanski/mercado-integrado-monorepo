@@ -20,8 +20,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { listarEntregadores } from '@/actions/entregadores/listar-entregadores'
 import type { Entregador } from '@/types/entregador'
-import { Bike, AlertCircle, User, Phone, CarFront } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Bike, AlertCircle, User } from 'lucide-react'
 
 interface ModalSelecionarEntregadorProps {
   isOpen: boolean

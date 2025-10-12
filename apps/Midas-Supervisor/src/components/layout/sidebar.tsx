@@ -30,6 +30,7 @@ import {
 import { logoutAction } from '@/actions/auth/logout'
 import { useSidebar } from '@/contexts/sidebar-context'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { useTheme } from 'next-themes'
 
 const menuItems = [
   {
@@ -102,10 +103,13 @@ const menuItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const { isCollapsed, setIsCollapsed } = useSidebar()
+  const { resolvedTheme } = useTheme()
 
   const handleLogout = async () => {
     await logoutAction()
   }
+
+  const isDark = resolvedTheme === 'dark'
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -200,7 +204,24 @@ export function Sidebar() {
 
         {/* Theme Toggle - Acima da linha */}
         <div className="absolute bottom-20 left-0 right-0 px-3">
-          <ThemeToggle isCollapsed={isCollapsed} />
+          {isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <ThemeToggle isCollapsed={isCollapsed} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-slate-800 text-white border border-slate-700 shadow-xl px-3 py-2 text-sm font-medium"
+                sideOffset={10}
+              >
+                {isDark ? 'Modo Escuro' : 'Modo Claro'}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <ThemeToggle isCollapsed={isCollapsed} />
+          )}
         </div>
 
         {/* Logout Button - Abaixo da linha */}

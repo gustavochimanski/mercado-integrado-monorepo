@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { buscarDadosImpressao } from '@/actions/impressao/buscar-dados-impressao'
-import { marcarComoImpresso } from '@/actions/impressao/marcar-como-impresso'
 import type { PedidoImpressao } from '@/types/impressao'
 
 interface UseImprimirPedidoReturn {
