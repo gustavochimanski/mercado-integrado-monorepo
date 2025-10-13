@@ -41,7 +41,7 @@ export async function atualizarCliente(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/cliente/admin/update/${clienteId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/cliente/update/${clienteId}`,
       {
         method: 'PUT',
         headers: {

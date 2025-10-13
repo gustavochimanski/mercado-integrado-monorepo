@@ -23,7 +23,7 @@ export async function listarEntregadores(): Promise<ListarEntregadoresResult> {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/entregadores`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/entregadores`,
       {
         method: 'GET',
         headers: {

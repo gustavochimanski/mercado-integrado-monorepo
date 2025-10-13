@@ -58,7 +58,7 @@ export async function buscarDadosImpressao(pedidoId: number) {
   try {
     // Busca os detalhes completos do pedido
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/admin/${pedidoId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/pedidos/${pedidoId}`,
       {
         method: 'GET',
         headers: {

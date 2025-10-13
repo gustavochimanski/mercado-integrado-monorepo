@@ -24,7 +24,7 @@ export async function deletarEntregador(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/entregadores/${entregadorId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/entregadores/${entregadorId}`,
       {
         method: 'DELETE',
         headers: {

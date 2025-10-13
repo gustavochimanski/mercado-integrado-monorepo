@@ -39,7 +39,7 @@ export async function atualizarEndereco(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/enderecos/admin/cliente/${clienteId}/endereco/${enderecoId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/enderecos/cliente/${clienteId}/endereco/${enderecoId}`,
       {
         method: 'PUT',
         headers: {

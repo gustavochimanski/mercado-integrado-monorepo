@@ -22,7 +22,7 @@ export async function atualizarStatusEmLote(
     // Atualizar cada pedido individualmente
     const promises = pedidoIds.map((pedidoId) =>
       fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/admin/status/${pedidoId}?novo_status=${novoStatus}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/pedidos/status/${pedidoId}?novo_status=${novoStatus}`,
         {
           method: 'PUT',
           headers: {

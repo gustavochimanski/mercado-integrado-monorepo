@@ -17,7 +17,7 @@ export async function buscarEmpresas() {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/mensura/empresas/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/mensura/admin/empresas/`,
       {
         method: 'GET',
         headers: {

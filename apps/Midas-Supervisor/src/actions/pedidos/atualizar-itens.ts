@@ -31,7 +31,7 @@ export async function atualizarItensPedido(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/admin/${pedidoId}/itens`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/pedidos/${pedidoId}/itens`,
       {
         method: 'PUT',
         headers: {

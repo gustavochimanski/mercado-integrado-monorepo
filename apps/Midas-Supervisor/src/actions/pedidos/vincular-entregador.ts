@@ -23,7 +23,7 @@ export async function vincularEntregador(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/admin/${pedidoId}/entregador?entregador_id=${entregadorId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/pedidos/${pedidoId}/entregador?entregador_id=${entregadorId}`,
       {
         method: 'PUT',
         headers: {
@@ -68,7 +68,7 @@ export async function desvincularEntregador(pedidoId: number) {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/admin/${pedidoId}/entregador`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/pedidos/${pedidoId}/entregador`,
       {
         method: 'DELETE',
         headers: {

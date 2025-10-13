@@ -25,7 +25,7 @@ export async function vincularEntregadorEmpresa(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/entregadores/${entregadorId}/vincular_empresa?empresa_id=${empresaId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/entregadores/${entregadorId}/vincular_empresa?empresa_id=${empresaId}`,
       {
         method: 'POST',
         headers: {

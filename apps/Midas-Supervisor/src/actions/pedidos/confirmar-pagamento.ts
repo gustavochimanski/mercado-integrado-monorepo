@@ -28,7 +28,7 @@ export async function confirmarPagamento(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/${pedidoId}/confirmar-pagamento`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/client/pagamentos/${pedidoId}/confirmar`,
       {
         method: 'POST',
         headers: {

@@ -20,7 +20,7 @@ export async function buscarPedidosKanban(data: string, empresaId: string) {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/pedidos/admin/kanban?date_filter=${data}&empresa_id=${empresaId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/delivery/admin/pedidos/kanban?date_filter=${data}&empresa_id=${empresaId}`,
       {
         method: 'GET',
         headers: {
