@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ItemPedidoResponse } from './ItemPedidoResponse';
+import type { PedidoPagamentoResumo } from './PedidoPagamentoResumo';
 import type { PedidoStatusEnum } from './PedidoStatusEnum';
 /**
  * Schema simplificado para listagem de pedidos do cliente
@@ -25,5 +26,6 @@ export type PedidoResponseSimplificado = {
     data_atualizacao: string;
     itens: Array<ItemPedidoResponse>;
     meio_pagamento_nome?: (string | null);
+    pagamento?: (PedidoPagamentoResumo | null);
 };
 

@@ -53,7 +53,7 @@ export type PedidoPendenteImpressaoResponse = {
      */
     tipo_pagamento: string;
     /**
-     * Valor do troco
+     * Valor do troco (valor pago - valor total do pedido)
      */
     troco?: (number | null);
     /**

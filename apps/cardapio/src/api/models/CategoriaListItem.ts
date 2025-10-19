@@ -2,11 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BannerParceiroOut } from './BannerParceiroOut';
-export type ParceiroOut = {
+export type CategoriaListItem = {
     id: number;
-    nome: string;
+    descricao: string;
     ativo: boolean;
-    banners?: Array<BannerParceiroOut>;
+    parent_id?: (number | null);
+    parent_descricao?: (string | null);
+    total_filhos?: number;
 };
 

@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CupomLinkOut } from './CupomLinkOut';
 export type CupomParceiroOut = {
     id: number;
     codigo: string;
@@ -12,6 +11,6 @@ export type CupomParceiroOut = {
     ativo: boolean;
     monetizado: boolean;
     valor_por_lead: (number | null);
-    links?: Array<CupomLinkOut>;
+    link_redirecionamento: (string | null);
 };
 

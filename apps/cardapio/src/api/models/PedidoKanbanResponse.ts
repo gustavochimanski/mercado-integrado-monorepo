@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PedidoPagamentoResumo } from './PedidoPagamentoResumo';
 import type { PedidoStatusEnum } from './PedidoStatusEnum';
 export type PedidoKanbanResponse = {
     id: number;
@@ -12,8 +13,10 @@ export type PedidoKanbanResponse = {
     valor_total: number;
     data_criacao: string;
     observacao_geral?: (string | null);
-    endereco_cliente?: (string | null);
-    meio_pagamento_id: number;
+    endereco?: (string | null);
+    meio_pagamento_id?: (number | null);
     meio_pagamento_descricao?: (string | null);
+    entregador?: (Record<string, any> | null);
+    pagamento?: (PedidoPagamentoResumo | null);
 };
 

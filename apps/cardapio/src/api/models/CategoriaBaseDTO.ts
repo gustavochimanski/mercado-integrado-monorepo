@@ -2,11 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BannerParceiroOut } from './BannerParceiroOut';
-export type ParceiroOut = {
+export type CategoriaBaseDTO = {
     id: number;
-    nome: string;
+    descricao: string;
     ativo: boolean;
-    banners?: Array<BannerParceiroOut>;
+    parent_id?: (number | null);
+    created_at: string;
+    updated_at: string;
 };
 

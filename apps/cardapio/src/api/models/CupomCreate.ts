@@ -13,5 +13,7 @@ export type CupomCreate = {
     monetizado?: boolean;
     valor_por_lead?: (number | null);
     parceiro_id?: (number | null);
+    link_redirecionamento?: (string | null);
+    empresa_ids: Array<number>;
 };
 

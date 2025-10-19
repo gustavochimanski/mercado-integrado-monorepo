@@ -2,11 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BannerParceiroOut } from './BannerParceiroOut';
-export type ParceiroOut = {
+export type EmpresaCardapioLinkResponse = {
     id: number;
     nome: string;
-    ativo: boolean;
-    banners?: Array<BannerParceiroOut>;
+    cardapio_link?: (string | null);
+    cardapio_tema?: (string | null);
 };
 

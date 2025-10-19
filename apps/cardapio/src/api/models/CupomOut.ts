@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CupomLinkOut } from './CupomLinkOut';
+import type { EmpresaCardapioLinkResponse } from './EmpresaCardapioLinkResponse';
 export type CupomOut = {
     id: number;
     codigo: string;
@@ -16,6 +16,7 @@ export type CupomOut = {
     updated_at: string;
     monetizado: boolean;
     valor_por_lead: (number | null);
-    links?: Array<CupomLinkOut>;
+    link_redirecionamento: (string | null);
+    empresas: Array<EmpresaCardapioLinkResponse>;
 };
 

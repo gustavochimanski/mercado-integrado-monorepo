@@ -11,4 +11,5 @@ export enum PedidoStatusEnum {
     C = 'C',
     D = 'D',
     X = 'X',
+    A = 'A',
 }

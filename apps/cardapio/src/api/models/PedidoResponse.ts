@@ -4,8 +4,10 @@
 /* eslint-disable */
 import type { ItemPedidoResponse } from './ItemPedidoResponse';
 import type { OrigemPedidoEnum } from './OrigemPedidoEnum';
+import type { PedidoPagamentoResumo } from './PedidoPagamentoResumo';
 import type { PedidoStatusEnum } from './PedidoStatusEnum';
 import type { TipoEntregaEnum } from './TipoEntregaEnum';
+import type { TransacaoResponse } from './TransacaoResponse';
 export type PedidoResponse = {
     id: number;
     status: PedidoStatusEnum;
@@ -32,5 +34,7 @@ export type PedidoResponse = {
     data_criacao: string;
     data_atualizacao: string;
     itens: Array<ItemPedidoResponse>;
+    transacao?: (TransacaoResponse | null);
+    pagamento?: (PedidoPagamentoResumo | null);
 };
 

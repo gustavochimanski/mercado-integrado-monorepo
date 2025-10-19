@@ -7,5 +7,6 @@ export enum PagamentoGatewayEnum {
     PAGSEGURO = 'PAGSEGURO',
     STRIPE = 'STRIPE',
     PIX_INTERNO = 'PIX_INTERNO',
+    MOCK = 'MOCK',
     OUTRO = 'OUTRO',
 }

@@ -5,25 +5,26 @@
 import type { ClienteOut } from './ClienteOut';
 import type { CupomOut } from './CupomOut';
 import type { EmpresaResponse } from './EmpresaResponse';
-import type { EnderecoOut } from './EnderecoOut';
+import type { EnderecoPedidoDetalhe } from './EnderecoPedidoDetalhe';
 import type { EntregadorOut } from './EntregadorOut';
 import type { ItemPedidoResponse } from './ItemPedidoResponse';
 import type { MeioPagamentoResponse } from './MeioPagamentoResponse';
 import type { OrigemPedidoEnum } from './OrigemPedidoEnum';
+import type { PedidoPagamentoResumo } from './PedidoPagamentoResumo';
 import type { PedidoStatusEnum } from './PedidoStatusEnum';
 import type { PedidoStatusHistoricoOut } from './PedidoStatusHistoricoOut';
 import type { TipoEntregaEnum } from './TipoEntregaEnum';
-import type { TransacaoOut } from './TransacaoOut';
+import type { TransacaoResponse } from './TransacaoResponse';
 export type PedidoResponseCompletoTotal = {
     id: number;
     status: PedidoStatusEnum;
     cliente?: (ClienteOut | null);
-    endereco?: (EnderecoOut | null);
+    endereco?: (EnderecoPedidoDetalhe | null);
     empresa?: (EmpresaResponse | null);
     entregador?: (EntregadorOut | null);
     meio_pagamento?: (MeioPagamentoResponse | null);
     cupom?: (CupomOut | null);
-    transacao?: (TransacaoOut | null);
+    transacao?: (TransacaoResponse | null);
     historicos?: Array<PedidoStatusHistoricoOut>;
     tipo_entrega: TipoEntregaEnum;
     origem: OrigemPedidoEnum;
@@ -41,5 +42,6 @@ export type PedidoResponseCompletoTotal = {
     data_criacao: string;
     data_atualizacao: string;
     itens: Array<ItemPedidoResponse>;
+    pagamento?: (PedidoPagamentoResumo | null);
 };
 
