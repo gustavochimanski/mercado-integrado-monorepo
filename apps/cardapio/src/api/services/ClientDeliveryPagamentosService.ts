@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ConsultarTransacaoResponse } from '../models/ConsultarTransacaoResponse';
-import type { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
-import type { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
+import { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
+import { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
 import type { PedidoResponse } from '../models/PedidoResponse';
 import type { TransacaoResponse } from '../models/TransacaoResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -23,8 +23,8 @@ export class ClientDeliveryPagamentosService {
     public confirmarPagamentoApiDeliveryClientPagamentosPedidoIdConfirmarPost(
         pedidoId: number,
         xSuperToken: string,
-        metodo: PagamentoMetodoEnum = 'PIX',
-        gateway: PagamentoGatewayEnum = 'PIX_INTERNO',
+        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX,
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.PIX_INTERNO,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',
@@ -56,8 +56,8 @@ export class ClientDeliveryPagamentosService {
     public iniciarPagamentoApiDeliveryClientPagamentosPedidoIdPost(
         pedidoId: number,
         xSuperToken: string,
-        metodo: PagamentoMetodoEnum = 'PIX_ONLINE',
-        gateway: PagamentoGatewayEnum = 'MERCADOPAGO',
+        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX_ONLINE,
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.MERCADOPAGO,
     ): CancelablePromise<TransacaoResponse> {
         return this.httpRequest.request({
             method: 'POST',
@@ -90,7 +90,7 @@ export class ClientDeliveryPagamentosService {
         pedidoId: number,
         providerId: string,
         xSuperToken: string,
-        gateway: PagamentoGatewayEnum = 'MERCADOPAGO',
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.MERCADOPAGO,
     ): CancelablePromise<ConsultarTransacaoResponse> {
         return this.httpRequest.request({
             method: 'GET',

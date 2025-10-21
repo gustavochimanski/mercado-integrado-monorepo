@@ -4,6 +4,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage"
 
+export interface Endereco {
+  id: number;
+  logradouro: string;
+  numero: string; // obrigatório no front
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  latitude: number;
+  longitude: number;
+  ponto_referencia?: string;
+  padrao?: boolean;
+}
+
 export interface EnderecoSearchResult {
   endereco_formatado: string
   logradouro: string
@@ -62,7 +77,7 @@ export function useQueryEnderecos(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["enderecos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get("/api/delivery/cliente/enderecos")
+      const { data } = await apiClienteAdmin.get("/api/delivery/client/enderecos")
       return data as EnderecoOut[]
     },
     enabled: options?.enabled !== false,

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
 import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
-import { useQueryEnderecos, useMutateEndereco, EnderecoCreate } from "@cardapio/services/useQueryEndereco";
+import { useQueryEnderecos, useMutateEndereco, EnderecoCreate, Endereco } from "@cardapio/services/useQueryEndereco";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
 import { useMutatePedido } from "@cardapio/services/useQueryPedido";
 import { Button } from "@cardapio/components/Shared/ui/button";
@@ -39,10 +39,27 @@ export default function FinalizarPedidoPage() {
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
   const [overlayMessage, setOverlayMessage] = useState("");
 
-  const { data: enderecos = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
   const { create, update, remove } = useMutateEndereco();
   const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(!!cliente?.tokenCliente);
   const { updatePedido } = useMutatePedido();
+
+  const { data: enderecosOut = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
+
+const enderecos: Endereco[] = enderecosOut.map((e) => ({
+  id: e.id,
+  logradouro: e.logradouro || "",
+  numero: e.numero || "", // <- corrige aqui
+  bairro: e.bairro || "",
+  cidade: e.cidade || "",
+  estado: e.estado || "",
+  cep: e.cep || "",
+  complemento: e.complemento || "",
+  latitude: e.latitude ?? 0,
+  longitude: e.longitude ?? 0,
+  ponto_referencia: e.ponto_referencia || "",
+  padrao: e.padrao ?? false,
+}));
+
 
   useEffect(() => {
     const c = getCliente();

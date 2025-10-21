@@ -77,7 +77,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     setEditingId(e.id);
     setNovo({
       logradouro: e.logradouro || "",
-      numero: e.numero || "",
+      numero: e.numero ,
       bairro: e.bairro || "",
       cidade: e.cidade || "",
       estado: e.estado || "",
