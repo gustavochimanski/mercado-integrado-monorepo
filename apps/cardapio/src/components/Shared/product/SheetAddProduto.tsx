@@ -17,6 +17,8 @@ import { z } from "zod";
 import { Badge } from "../ui/badge";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
+import Image from "next/image";
+import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 
 const schema = z.object({
   quantity: z
@@ -80,85 +82,175 @@ export function SheetAdicionarProduto({
     onClose();
   }
 
-  const imagem = produto.produto.imagem || "/placeholder.jpg";
+  const imagem = produto.produto.imagem || "/semimagem.png";
   const descricao = produto.produto.descricao || "Sem nome";
+  const precoTotal = produto.preco_venda * quantity;
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="pb-6 min-h-[50vh] max-h-[90vh] overflow-y-auto w-full max-w-full rounded-t-3xl rounded-b-none">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 h-full">
-          <SheetHeader>
-            <SheetTitle className="flex gap-4 items-center">
-              <ImageZoomDialog
-                src={imagem}
-                alt={descricao}
-                className="w-20 h-20 shrink-0 rounded-md"
-                priority
-              />
-              <span className="flex flex-col max-w-[60%] gap-2">
-                <span className="font-semibold leading-tight">{descricao}</span>
-                <Badge
-                  className="w-fit text-xs max-w-full whitespace-nowrap overflow-hidden text-ellipsis"
-                  variant="secondary"
-                >
-                  A partir de 5 Un pague 19,90
-                </Badge>
-              </span>
-            </SheetTitle>
-          </SheetHeader>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <SheetContent 
+        side="bottom" 
+        className="min-h-[75vh] max-h-[95vh] overflow-y-auto w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background"
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+          {/* Botão de fechar customizado */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 z-50 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm p-2 text-white transition-colors"
+            aria-label="Fechar"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-          <div className="flex flex-col gap-2 p-2">
-            <Label htmlFor="quantity" className="text-lg">
-              Quantidade
-            </Label>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Button type="button" className="w-16" onClick={decrement}>
-                  -
+          {/* Imagem Hero no Topo */}
+          <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
+            <ImageZoomDialog
+              src={imagem}
+              alt={descricao}
+              priority
+              className="w-full h-full relative"
+            />
+            <div className="absolute inset-0 pointer-events-none z-10" />
+            
+            {/* Badge de desconto flutuante */}
+            <div className="absolute top-4 left-4 z-30 pointer-events-auto">
+              <Badge className="bg-red-500 text-white font-bold text-sm px-3 py-1 shadow-lg">
+                -20% OFF
+              </Badge>
+            </div>
+          </div>
+
+          {/* Conteúdo Scrollável */}
+          <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+            <SheetHeader className="mb-6">
+              <SheetTitle className="text-2xl font-bold leading-tight text-left mb-2">
+                {descricao}
+              </SheetTitle>
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">Preço unitário</span>
+                  <span className="text-2xl font-bold text-primary">
+                    R$ {produto.preco_venda.toFixed(2).replace(".", ",")}
+                  </span>
+                </div>
+                {quantity > 1 && (
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm text-muted-foreground">Total</span>
+                    <span className="text-xl font-semibold text-foreground">
+                      R$ {precoTotal.toFixed(2).replace(".", ",")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </SheetHeader>
+
+            {/* Seção de Quantidade */}
+            <div className="space-y-4 mb-6">
+              <Label htmlFor="quantity" className="text-base font-semibold">
+                Quantidade
+              </Label>
+              
+              {/* Controles de Quantidade */}
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-full border-2 hover:bg-muted transition-all"
+                  onClick={decrement}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="h-5 w-5" />
                 </Button>
-                <Input
-                  type="number"
-                  id="quantity"
-                  {...register("quantity", { valueAsNumber: true })}
-                  className="text-center w-full"
-                />
-                <Button type="button" className="w-16" onClick={increment}>
-                  +
+                
+                <div className="flex-1 flex flex-col items-center">
+                  <Input
+                    type="number"
+                    id="quantity"
+                    {...register("quantity", { valueAsNumber: true })}
+                    className="text-center text-2xl font-bold h-14 border-2 focus-visible:ring-2 focus-visible:ring-primary"
+                  />
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {quantity === 1 ? "unidade" : "unidades"}
+                  </span>
+                </div>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-full border-2 hover:bg-muted transition-all"
+                  onClick={increment}
+                  disabled={quantity >= 99}
+                >
+                  <Plus className="h-5 w-5" />
                 </Button>
               </div>
 
+              {/* Botão de Adição Rápida */}
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs px-3 py-1"
+                className="w-full border-dashed hover:border-solid hover:bg-muted/50 transition-all"
                 onClick={addQuickQuantity}
               >
-                +{quickAddQuantity} unidades
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar {quickAddQuantity} unidades
               </Button>
 
               {errors.quantity && (
-                <p className="text-destructive text-sm">{errors.quantity.message}</p>
+                <p className="text-destructive text-sm font-medium">{errors.quantity.message}</p>
+              )}
+            </div>
+
+            {/* Divisor */}
+            <div className="border-t border-border my-6" />
+
+            {/* Campo de Observação */}
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="observacao" className="text-base font-semibold">
+                  Observações
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  Opcional
+                </span>
+              </div>
+              <Textarea
+                id="observacao"
+                placeholder="Ex: sem cebola, ponto médio, embalagem separada, sem tomate..."
+                {...register("observacao")}
+                maxLength={200}
+                className="min-h-[100px] resize-none border-2 focus-visible:ring-2 focus-visible:ring-primary"
+                rows={4}
+              />
+              <div className="flex justify-end">
+                <span className="text-xs text-muted-foreground">
+                  {watch("observacao")?.length || 0}/200 caracteres
+                </span>
+              </div>
+              {errors.observacao && (
+                <p className="text-destructive text-sm font-medium">{errors.observacao.message}</p>
               )}
             </div>
           </div>
 
-          {/* Campo de observação */}
-          <div className="flex flex-col gap-2 px-2">
-            <Label htmlFor="observacao">Observação</Label>
-            <Textarea
-              id="observacao"
-              placeholder="Ex: sem cebola, ponto médio, embalagem separada..."
-              {...register("observacao")}
-              maxLength={200}
-            />
-            {errors.observacao && (
-              <p className="text-destructive text-sm">{errors.observacao.message}</p>
-            )}
-          </div>
-
-          <SheetFooter>
-            <Button type="submit" className="w-full bg-primary text-background">
-              Adicionar R$ {(produto.preco_venda * quantity).toFixed(2)}
+          {/* Footer Fixo */}
+          <SheetFooter className="border-t border-border bg-background px-4 pt-4 pb-6 sticky bottom-0">
+            <Button 
+              type="submit" 
+              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 text-background"
+              size="lg"
+            >
+              <ShoppingCart className="h-5 w-5 mr-2" />
+              Adicionar ao Carrinho • R$ {precoTotal.toFixed(2).replace(".", ",")}
             </Button>
           </SheetFooter>
         </form>

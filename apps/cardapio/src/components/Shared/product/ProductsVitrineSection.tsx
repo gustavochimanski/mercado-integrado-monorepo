@@ -30,9 +30,11 @@ export default function ProductsVitrineSection({
   onOpenSheet,
   sectionRef,
   hrefCategoria,
-  isHome
+  isHome,
+  vitrineIsHome
 }: Props) {
-  // ---- NOVO: só renderiza se isHome === vitrineIsHome ----
+  // A filtragem por is_home é feita nos componentes pai (ProductsSection ou página de categoria)
+  // Este componente apenas renderiza a vitrine quando é chamado
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -78,7 +80,7 @@ export default function ProductsVitrineSection({
     <section
       id={`secao-${vitrineId}`}
       ref={sectionRef}
-      className="relative p-2 bg-muted rounded-xl scroll-mt-20"
+      className="relative pt-2 px-2 pb-2 bg-muted rounded-xl scroll-mt-20 overflow-hidden"
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
@@ -108,9 +110,9 @@ export default function ProductsVitrineSection({
         )}
 
         <div className="relative">
-          <div ref={scrollRef} className={`flex gap-2 overflow-x-auto ${isAdmin ? "": "hide-scrollbar"} `}>
+          <div ref={scrollRef} className={`flex overflow-x-auto -mr-2 ${isAdmin ? "": "hide-scrollbar"} `}>
             {produtos.map((produto) => (
-              <div key={produto.cod_barras} className="shrink-0 w-[140px] h-[200px]">
+              <div key={produto.cod_barras} className="shrink-0 w-[120px] h-[180px] mr-2">
                 <ProductCard
                   produto={produto}
                   onOpenSheet={() => onOpenSheet?.(produto)} 
@@ -121,7 +123,7 @@ export default function ProductsVitrineSection({
             ))}
 
             {isHome && hrefCategoria && (
-              <div className="shrink-0 w-[140px] h-[200px]">
+              <div className="shrink-0 w-[140px] h-[200px] mr-2">
                 <CardVerMais href={hrefCategoria} />
               </div>
             )}

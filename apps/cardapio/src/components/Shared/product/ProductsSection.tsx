@@ -46,9 +46,15 @@ export default function ProductsSection({
     );
   }
 
+  // Filtrar vitrines: quando isHome=true, mostrar apenas vitrines is_home=true
+  // quando isHome=false, mostrar apenas vitrines is_home=false
+  const vitrinesFiltradas = useMemo(() => {
+    return vitrines.filter((vitrine) => vitrine.is_home === isHome);
+  }, [vitrines, isHome]);
+
   return (
     <>
-      {vitrines.map((vitrine) => (
+      {vitrinesFiltradas.map((vitrine) => (
         // ProductsSection.tsx
         <ProductsVitrineSection
           key={vitrine.id}

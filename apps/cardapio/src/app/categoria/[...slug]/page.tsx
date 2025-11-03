@@ -42,10 +42,10 @@ export default function RouteCategoryPage() {
     document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // Filtrar vitrines para evitar duplicação
-  // Vitrines com is_home=true aparecem apenas na home, não nas categorias
+  // Mostrar todas as vitrines da categoria atual, independente de is_home
+  // Vitrines com is_home=true aparecem tanto na home quanto na categoria
   const vitrinesFiltradas = useMemo(
-    () => data?.vitrines?.filter((v) => !v.is_home) ?? [],
+    () => data?.vitrines ?? [],
     [data?.vitrines]
   );
 
@@ -59,13 +59,13 @@ export default function RouteCategoryPage() {
     () =>
       subcategorias && data?.vitrines_filho
         ? data.vitrines_filho.filter(
-            (vit) => !vit.is_home && !vitrineIdsJaExibidas.has(vit.id)
+            (vit) => !vitrineIdsJaExibidas.has(vit.id)
           )
         : [],
     [subcategorias, data?.vitrines_filho, vitrineIdsJaExibidas]
   );
 
-  // Atualiza meta das vitrines quando data muda (apenas vitrines que não são is_home)
+  // Atualiza meta das vitrines quando data muda
   useEffect(() => {
     const vitrinesParaMeta = vitrinesFiltradas.concat(vitrinesFilhoFiltradas);
     if (vitrinesParaMeta.length > 0) {
@@ -106,7 +106,7 @@ export default function RouteCategoryPage() {
     <div className="min-h-screen flex flex-col gap-4">
       <HeaderComponent/>
 
-      <main className="flex-1 p-2">
+      <main className="flex-1 px-2 pt-2 pb-2">
         {vitrinesMeta.length > 0 && (
           <HorizontalSpy
             key={`spy-${categoriaAtual.id}-${vitrinesMeta.length}`}
@@ -123,7 +123,7 @@ export default function RouteCategoryPage() {
         />
 
         {/* Usar vitrines já carregadas ao invés de ProductsSection */}
-        {/* Filtrar vitrines que não são is_home, pois essas aparecem apenas na home */}
+        {/* Mostrar todas as vitrines da categoria atual */}
         {vitrinesFiltradas.map((vitrine) => (
           <ProductsVitrineSection
             key={vitrine.id}
@@ -141,7 +141,7 @@ export default function RouteCategoryPage() {
         ))}
 
         {/* Vitrines das subcategorias (apenas as primeiras de cada subcategoria) */}
-        {/* Filtrar is_home=true e também evitar duplicatas já exibidas em vitrines acima */}
+        {/* Evitar duplicatas já exibidas em vitrines acima */}
         {vitrinesFilhoFiltradas.map((vit) => (
           <ProductsVitrineSection
             key={vit.id}
