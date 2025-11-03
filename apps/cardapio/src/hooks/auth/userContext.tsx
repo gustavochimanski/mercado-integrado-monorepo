@@ -13,6 +13,13 @@ import axios from "axios";
 import { getToken, setToken, clearToken } from "../../stores/token/tokenStore";
 import { loginService, logoutService } from "./authenticate";
 import { useReceiveTokenFromParent } from "../../stores/token/UseReceiveTokenFromParent";
+import { getTokenCliente } from "../../stores/client/ClientStore";
+import { getCookie } from "cookies-next";
+
+// Instância axios com baseURL configurada
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+});
 
 export interface User {
   id: string;
@@ -28,6 +35,7 @@ interface UserContextValue {
   isUser: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -38,23 +46,53 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // ✅ Memoiza a função pra não recriar em cada render
   const fetchUser = useCallback(async () => {
-    const token = getToken();
+    // Pequeno delay para garantir que cookies foram persistidos
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Primeiro tenta o token normal (admin)
+    let token = getToken();
+    let headers: Record<string, string> = {};
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    } else {
+      // Se não tiver token normal, tenta usar o super_token do cliente
+      // Tenta do cookie primeiro (mais rápido após salvar)
+      const cookieToken = getCookie("super_token");
+      const storeToken = getTokenCliente();
+      const superToken = (typeof cookieToken === "string" ? cookieToken : null) || storeToken;
+      
+      if (superToken && superToken.trim()) {
+        // Também pode precisar do header x-super-token
+        headers["x-super-token"] = superToken;
+        token = superToken;
+      }
+    }
 
     if (!token) {
-      // Sem logs de warning para limpar o console
+      setUser(null);
       return;
     }
 
     try {
-      const res = await axios.get<User>(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // Usa a instância axios com baseURL já configurada (igual ao authenticate.ts)
+      const res = await api.get<User>("api/auth/client/me", { headers });
       setUser(res.data);
+      
+      // Se o super_token funcionou e o usuário é admin, salva como token normal também
+      if (res.data && res.data.type_user === "admin" && token && !getToken()) {
+        setToken(token);
+      }
     } catch (err) {
-      console.warn("❌ Erro ao buscar usuário:", err);
-      clearToken();
-      setUser(null);
+      // Se falhou com super_token, não limpa tudo (pode ser apenas cliente normal)
+      if (getToken()) {
+        console.warn("❌ Erro ao buscar usuário:", err);
+        clearToken();
+        setUser(null);
+      } else {
+        // Se não tinha token normal e falhou, apenas limpa o estado (cliente não admin)
+        setUser(null);
+      }
     }
   }, []);
 
@@ -87,6 +125,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isUser: user?.type_user === "user",
         login,
         logout,
+        refreshUser: fetchUser,
       }}
     >
       {children}

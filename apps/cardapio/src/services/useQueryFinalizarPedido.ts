@@ -5,15 +5,18 @@ import {
   getTokenCliente,
   getEnderecoPadraoId,
   getMeioPagamentoId,
+  getCliente,
 } from "@cardapio/stores/client/ClientStore";
-import { FinalizarPedidoRequest } from "@cardapio/types/pedido";
-import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useQueryClient } from "@tanstack/react-query";
+import { checkoutGateway } from "@cardapio/services/useGatewayCheckout";
+import type { TipoPedidoGateway, CheckoutGatewayRequest } from "@cardapio/types/pedido";
+
+type TipoPedido = "DELIVERY" | "MESA" | "BALCAO";
 
 interface UseFinalizarPedidoResult {
   loading: boolean;
-  finalizarPedido: (trocoPara?: number | null) => Promise<"sucesso" | { status: "erro"; message: string }>;
+  finalizarPedido: (trocoPara?: number | null, tipoPedido?: TipoPedido | null, mesaId?: number) => Promise<"sucesso" | { status: "erro"; message: string }>;
 }
 
 export function useFinalizarPedido(): UseFinalizarPedidoResult {
@@ -21,7 +24,11 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  async function finalizarPedido(trocoPara?: number | null): Promise<"sucesso" | { status: "erro"; message: string }> {
+  async function finalizarPedido(
+    trocoPara?: number | null,
+    tipoPedido: TipoPedido | null = "DELIVERY",
+    mesaId?: number
+  ): Promise<"sucesso" | { status: "erro"; message: string }> {
     setLoading(true);
 
     try {
@@ -31,48 +38,104 @@ export function useFinalizarPedido(): UseFinalizarPedidoResult {
 
       const empresa_id = getEmpresaId();
       const telefone_cliente = getTokenCliente();
+      const cliente = getCliente();
       const endereco_id = getEnderecoPadraoId();
       const meio_pagamento_id = getMeioPagamentoId();
 
       if (!empresa_id) {
         return { status: "erro", message: "Empresa não encontrada. Recarregue a página e tente novamente." };
       }
-      if (!telefone_cliente) {
+
+      const tipo = tipoPedido || "DELIVERY";
+
+      // Token obrigatório apenas para DELIVERY
+      if (tipo === "DELIVERY" && !telefone_cliente) {
         return { status: "erro", message: "Cliente não identificado. Faça login novamente." };
       }
-      if (!endereco_id) {
-        return { status: "erro", message: "Endereço não selecionado. Selecione um endereço de entrega." };
+
+      // Validações específicas por tipo
+      if (tipo === "DELIVERY") {
+        if (!endereco_id) {
+          return { status: "erro", message: "Endereço não selecionado. Selecione um endereço de entrega." };
+        }
       }
-      if (!meio_pagamento_id) {
+
+      // Validação de mesa: apenas para MESA (BALCAO não precisa)
+      if (tipo === "MESA") {
+        if (!mesaId) {
+          return { status: "erro", message: "Mesa não selecionada. Selecione uma mesa." };
+        }
+      }
+
+      // Validação de meios de pagamento apenas para DELIVERY
+      if (tipo === "DELIVERY" && !meio_pagamento_id) {
         return { status: "erro", message: "Forma de pagamento não selecionada. Escolha uma forma de pagamento." };
       }
 
-      const payload: FinalizarPedidoRequest = {
-        telefone_cliente,
+      // Monta os itens do pedido
+      const itensPedido = items.map((i) => ({
+        produto_cod_barras: i.cod_barras,
+        quantidade: i.quantity,
+        observacao: i.observacao || undefined,
+      }));
+
+      // Prepara payload base para o gateway
+      const payloadBase: CheckoutGatewayRequest = {
+        tipo_pedido: tipo as TipoPedidoGateway,
         empresa_id,
-        endereco_id,
-        meio_pagamento_id,
-        tipo_entrega: "DELIVERY",
-        origem: "WEB",
-        observacao_geral: observacao || undefined,
-        troco_para: trocoPara || undefined,
-        itens: items.map((i) => ({
-          produto_cod_barras: i.cod_barras,
-          quantidade: i.quantity,
-          observacao: i.observacao,
-        })),
+        itens: itensPedido,
+        observacao_geral: observacao || null,
+        cliente_id: cliente?.id ? Number(cliente.id) : null,
       };
 
-      const response = await apiClienteAdmin.post("/api/delivery/client/pedidos/checkout", payload);
+      // Adiciona campos específicos por tipo de pedido
+      if (tipo === "DELIVERY") {
+        payloadBase.endereco_id = endereco_id;
+        payloadBase.meio_pagamento_id = meio_pagamento_id || null;
+        payloadBase.tipo_entrega = "DELIVERY";
+        payloadBase.origem = "WEB";
+        payloadBase.cupom_id = null; // Pode ser expandido no futuro
+        payloadBase.troco_para = trocoPara || null;
+      } else if (tipo === "MESA") {
+        payloadBase.mesa_id = mesaId || null;
+        payloadBase.num_pessoas = null; // Pode ser expandido no futuro
+        payloadBase.meio_pagamento_id = meio_pagamento_id || null;
+        payloadBase.troco_para = trocoPara || null;
+      } else if (tipo === "BALCAO") {
+        // BALCAO não precisa de mesa_id (ou usa mesa reservada para balcão se informada)
+        payloadBase.mesa_id = mesaId || null;
+        payloadBase.meio_pagamento_id = meio_pagamento_id || null;
+        payloadBase.troco_para = trocoPara || null;
+      }
 
-      if (response.status === 200 || response.status === 201) {
+      // Remove campos undefined (mas mantém null explicitamente)
+      Object.keys(payloadBase).forEach(key => {
+        if (payloadBase[key as keyof CheckoutGatewayRequest] === undefined) {
+          delete payloadBase[key as keyof CheckoutGatewayRequest];
+        }
+      });
+
+      // Chama o gateway orquestrador
+      // Endpoint: POST /api/gateway/pedidos/checkout
+      // O gateway redireciona automaticamente para o sistema apropriado baseado no tipo_pedido
+      const response = await checkoutGateway(payloadBase);
+
+      if (response.success) {
         clear();
-        // Invalida o cache de pedidos para mostrar o novo pedido na lista
         queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+        
+        // Invalida cache de mesas para pedidos de MESA/BALCAO
+        if (tipo === "MESA" || tipo === "BALCAO") {
+          queryClient.invalidateQueries({ queryKey: ["mesas"] });
+        }
+        
         return "sucesso";
       }
       
-      return { status: "erro", message: "Erro interno do servidor. Tente novamente em alguns minutos." };
+      return { 
+        status: "erro", 
+        message: response.message || "Erro ao processar pedido. Tente novamente." 
+      };
     } catch (error: any) {
       console.error("Erro ao finalizar pedido:", error);
 

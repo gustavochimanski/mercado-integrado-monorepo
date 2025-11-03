@@ -15,26 +15,14 @@ export const CardVerMais = ({ href }: Props) => {
   return (
     <Card
       onClick={() => router.push(href)}
-      className="min-w-[100px] w-[100px] h-[180px] snap-start flex flex-col justify-between overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-colors cursor-pointer"
+      className="w-[140px] h-[200px] snap-start flex flex-col justify-center items-center overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-all duration-200 rounded-lg shadow-md hover:shadow-lg cursor-pointer bg-gray-50"
     >
-      <div className="flex flex-col items-center gap-2 px-3 pt-3 flex-grow justify-center ">
-        <ArrowRightCircle className="w-8 h-8 text-muted-foreground" />
-        <div className="text-sm font-medium text-center w-full">
+      <div className="flex flex-col items-center gap-3 px-3 flex-grow justify-center">
+        <ArrowRightCircle className="w-10 h-10 text-primary" />
+        <div className="text-sm font-medium text-center text-gray-700">
           Ver mais
         </div>
-        <div className="text-sm text-center text-muted-foreground">Categoria completa</div>
       </div>
-
-      <CardFooter className="p-0">
-        <Button
-          size="sm"
-          className="w-full rounded-none text-sm"
-          variant="secondary"
-          onClick={() => router.push(href)}
-        >
-          Abrir
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

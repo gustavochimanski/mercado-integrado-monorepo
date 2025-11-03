@@ -1,4 +1,6 @@
 // ClientStore.ts
+import { getCookie, setCookie, deleteCookie } from "cookies-next";
+
 export interface ClienteStore {
   id?: number;               // id do cliente (quando vem da API)
   nome?: string;
@@ -10,6 +12,8 @@ export interface ClienteStore {
   enderecoPadraoId?: number; // último endereço usado/salvo
   meioPagamentoId?: number;  // último meio de pagamento escolhido
 }
+
+const SUPER_TOKEN_COOKIE_KEY = "super_token";
 
 let clienteCache: ClienteStore = {}; // cache em memória
 const STORAGE_KEY = "clienteStore";
@@ -39,24 +43,53 @@ function saveToStorage(data: ClienteStore) {
 // --- API do Store ---
 
 export function getCliente(): ClienteStore {
-  return loadFromStorage();
+  const cliente = loadFromStorage();
+  
+  // Se não tiver tokenCliente no storage, tenta buscar do cookie
+  if (!cliente.tokenCliente) {
+    const cookieToken = getCookie(SUPER_TOKEN_COOKIE_KEY);
+    if (typeof cookieToken === "string" && cookieToken) {
+      cliente.tokenCliente = cookieToken;
+      // Sincroniza com storage
+      saveToStorage({ ...cliente, tokenCliente: cookieToken });
+    }
+  }
+  
+  return cliente;
 }
 
 export function setCliente(partial: Partial<ClienteStore>) {
   const current = loadFromStorage();
   const updated = { ...current, ...partial };
   saveToStorage(updated);
+  
+  // Se o super_token foi atualizado, salva também no cookie
+  if (partial.tokenCliente) {
+    setCookie(SUPER_TOKEN_COOKIE_KEY, partial.tokenCliente, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
 }
 
 export function clearCliente() {
   clienteCache = {};
   localStorage.removeItem(STORAGE_KEY);
+  deleteCookie(SUPER_TOKEN_COOKIE_KEY, { path: "/" });
 }
 
 // Helpers individuais para super token
 export function getTokenCliente(): string {
-  return getCliente().tokenCliente ?? "";
+  const cliente = getCliente();
+  if (cliente.tokenCliente) return cliente.tokenCliente;
+  
+  // Fallback: busca do cookie diretamente
+  const cookieToken = getCookie(SUPER_TOKEN_COOKIE_KEY);
+  return typeof cookieToken === "string" ? cookieToken : "";
 }
+
 export function setTokenCliente(token: string) {
   if (!token || token.trim().length < 8) return;
   setCliente({ tokenCliente: token });

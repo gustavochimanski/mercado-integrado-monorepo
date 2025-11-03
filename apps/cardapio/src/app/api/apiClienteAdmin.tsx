@@ -1,5 +1,6 @@
-import { getCliente, clearCliente } from "@cardapio/stores/client/ClientStore"
+import { getCliente, clearCliente, getTokenCliente } from "@cardapio/stores/client/ClientStore"
 import axios from "axios"
+import { getCookie } from "cookies-next"
 
 export const apiClienteAdmin = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -7,11 +8,20 @@ export const apiClienteAdmin = axios.create({
 
 // Interceptor de request → adiciona o token
 apiClienteAdmin.interceptors.request.use((config) => {
-  const cliente = getCliente()
+  // Tenta buscar do ClientStore primeiro, depois do cookie
+  let superToken = getTokenCliente()
+  
+  if (!superToken) {
+    const cookieToken = getCookie("super_token")
+    if (typeof cookieToken === "string" && cookieToken.trim()) {
+      superToken = cookieToken
+    }
+  }
 
-  if (cliente?.tokenCliente) {
+  // Só adiciona o header se o token existir e não estiver vazio
+  if (superToken && superToken.trim()) {
     config.headers = config.headers ?? {}
-    config.headers["x-super-token"] = cliente.tokenCliente
+    config.headers["x-super-token"] = superToken.trim()
   }
 
   return config

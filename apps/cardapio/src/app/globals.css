@@ -121,6 +121,17 @@
   scrollbar-width: thin;
 }
 
+/* ===== Seleção de texto global - cinza fraco ===== */
+::selection {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+::-moz-selection {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
 /* Toaster fixo dentro do container max-w-md */
 [data-sonner-toaster] {
   position: fixed !important;

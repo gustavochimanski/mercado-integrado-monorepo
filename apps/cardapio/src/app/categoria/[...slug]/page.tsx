@@ -35,12 +35,45 @@ export default function RouteCategoryPage() {
   const categoriaAtual = data?.categoria ?? null;
   const subcategorias = data?.subcategorias ?? [];
 
-  // Atualiza meta das vitrines quando data muda
+  // ScrollSpy
+  const { activeId, register } = useScrollSpy<number>();
+  const [vitrinesMeta, setVitrinesMeta] = useState<{ id: number; titulo: string }[]>([]);
+  const scrollToSection = useCallback((id: number) => {
+    document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  // Filtrar vitrines para evitar duplicação
+  // Vitrines com is_home=true aparecem apenas na home, não nas categorias
+  const vitrinesFiltradas = useMemo(
+    () => data?.vitrines?.filter((v) => !v.is_home) ?? [],
+    [data?.vitrines]
+  );
+
+  // Vitrines das subcategorias, excluindo is_home=true e duplicatas
+  const vitrineIdsJaExibidas = useMemo(
+    () => new Set(vitrinesFiltradas.map((v) => v.id)),
+    [vitrinesFiltradas]
+  );
+
+  const vitrinesFilhoFiltradas = useMemo(
+    () =>
+      subcategorias && data?.vitrines_filho
+        ? data.vitrines_filho.filter(
+            (vit) => !vit.is_home && !vitrineIdsJaExibidas.has(vit.id)
+          )
+        : [],
+    [subcategorias, data?.vitrines_filho, vitrineIdsJaExibidas]
+  );
+
+  // Atualiza meta das vitrines quando data muda (apenas vitrines que não são is_home)
   useEffect(() => {
-    if (data?.vitrines) {
-      setVitrinesMeta(data.vitrines.map(v => ({ id: v.id, titulo: v.titulo })));
+    const vitrinesParaMeta = vitrinesFiltradas.concat(vitrinesFilhoFiltradas);
+    if (vitrinesParaMeta.length > 0) {
+      setVitrinesMeta(vitrinesParaMeta.map(v => ({ id: v.id, titulo: v.titulo })));
+    } else {
+      setVitrinesMeta([]);
     }
-  }, [data?.vitrines]);
+  }, [vitrinesFiltradas, vitrinesFilhoFiltradas]);
 
   // Sheet
   const openSheet = useCallback((p: ProdutoEmpMini) => {
@@ -56,13 +89,6 @@ export default function RouteCategoryPage() {
     },
     [add]
   );
-
-  // ScrollSpy
-  const { activeId, register } = useScrollSpy<number>();
-  const [vitrinesMeta, setVitrinesMeta] = useState<{ id: number; titulo: string }[]>([]);
-  const scrollToSection = useCallback((id: number) => {
-    document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   if (isLoading) {
     return (
@@ -97,7 +123,8 @@ export default function RouteCategoryPage() {
         />
 
         {/* Usar vitrines já carregadas ao invés de ProductsSection */}
-        {data?.vitrines?.map((vitrine) => (
+        {/* Filtrar vitrines que não são is_home, pois essas aparecem apenas na home */}
+        {vitrinesFiltradas.map((vitrine) => (
           <ProductsVitrineSection
             key={vitrine.id}
             vitrineId={vitrine.id}
@@ -113,7 +140,9 @@ export default function RouteCategoryPage() {
           />
         ))}
 
-        {subcategorias && data?.vitrines_filho?.map((vit) => (
+        {/* Vitrines das subcategorias (apenas as primeiras de cada subcategoria) */}
+        {/* Filtrar is_home=true e também evitar duplicatas já exibidas em vitrines acima */}
+        {vitrinesFilhoFiltradas.map((vit) => (
           <ProductsVitrineSection
             key={vit.id}
             vitrineId={vit.id}
@@ -122,8 +151,10 @@ export default function RouteCategoryPage() {
             codCategoria={vit.cod_categoria}
             empresaId={empresa_id!}
             onOpenSheet={openSheet}
+            sectionRef={register(vit.id)}
             hrefCategoria={vit.href_categoria}
-            isHome={true}  
+            isHome={false}
+            vitrineIsHome={vit.is_home}
           />
         ))}
 

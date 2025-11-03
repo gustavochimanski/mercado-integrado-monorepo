@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { useMutateCliente } from "@cardapio/services/useQueryCliente";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 interface Props {
   open: boolean;
@@ -17,12 +18,11 @@ interface Props {
 export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, forceLoginMode }: Props) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [codigo, setCodigo] = useState("");
   const [erro, setErro] = useState("");
   const [jaTenhoCadastro, setJaTenhoCadastro] = useState(forceLoginMode ?? false);
-  const [aguardandoCodigo, setAguardandoCodigo] = useState(false);
 
-  const { create, enviarCodigoNovoDispositivo, confirmarCodigo } = useMutateCliente();
+  const { create, loginDireto } = useMutateCliente();
+  const { refreshUser } = useUserContext();
 
   // Reset estado quando modal abrir com modo forçado
   useEffect(() => {
@@ -30,9 +30,7 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
       setJaTenhoCadastro(forceLoginMode);
       setNome("");
       setTelefone("");
-      setCodigo("");
       setErro("");
-      setAguardandoCodigo(false);
     }
   }, [open, forceLoginMode]);
 
@@ -44,28 +42,37 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
       return setErro("Digite um telefone válido (com DDD).");
     }
 
-    if (jaTenhoCadastro && !aguardandoCodigo) {
-      enviarCodigoNovoDispositivo.mutate({ telefone: telefoneLimpo }, {
-        onSuccess: () => setAguardandoCodigo(true),
-        onError: () => setErro("Erro ao enviar código. Tente novamente."),
-      });
-    } else if (jaTenhoCadastro && aguardandoCodigo) {
-      if (codigo.trim().length !== 6) {
-        return setErro("Digite o código de 6 dígitos recebido.");
-      }
-      confirmarCodigo.mutate({ telefone: telefoneLimpo, codigo }, {
-        onSuccess: () => {
+    if (jaTenhoCadastro) {
+      // Login direto apenas com telefone
+      loginDireto.mutate({ telefone: telefoneLimpo }, {
+        onSuccess: async () => {
+          try {
+            // Atualiza o contexto do usuário para verificar se é admin
+            await refreshUser();
+            // Pequeno delay para garantir que o estado foi atualizado
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (error) {
+            console.warn("Erro ao atualizar contexto do usuário:", error);
+          }
           onConfirm?.();
           onClose();
         },
-        onError: () => setErro("Código inválido ou expirado."),
+        onError: () => setErro("Erro ao fazer login. Verifique se o telefone está correto."),
       });
     } else {
       if (!nome || nome.trim().length < 2) {
         return setErro("Digite um nome válido.");
       }
       create.mutate({ nome, telefone: telefoneLimpo }, {
-        onSuccess: () => {
+        onSuccess: async () => {
+          try {
+            // Atualiza o contexto do usuário para verificar se é admin
+            await refreshUser();
+            // Pequeno delay para garantir que o estado foi atualizado
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (error) {
+            console.warn("Erro ao atualizar contexto do usuário:", error);
+          }
           onConfirm?.();
           onClose();
         },
@@ -79,11 +86,7 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
       <DialogContent className="max-w-sm sm:max-w-xs mx-auto">
         <DialogHeader>
           <DialogTitle>
-            {jaTenhoCadastro
-              ? aguardandoCodigo
-                ? "Digite o código"
-                : "Autenticação"
-              : "Identifique-se"}
+            {jaTenhoCadastro ? "Autenticação" : "Identifique-se"}
           </DialogTitle>
         </DialogHeader>
 
@@ -108,34 +111,18 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
               onChange={(e) => setTelefone(e.target.value)}
               placeholder="Ex: (11) 91234-5678"
               inputMode="tel"
-              disabled={aguardandoCodigo}
             />
           </div>
 
-          {jaTenhoCadastro && aguardandoCodigo && (
-            <div>
-              <Label htmlFor="codigo">Código</Label>
-              <Input
-                id="codigo"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
-                placeholder="000000"
-                inputMode="numeric"
-              />
-            </div>
-          )}
-
           {erro && <p className="text-sm text-red-500">{erro}</p>}
 
-          {!aguardandoCodigo && forceLoginMode === undefined && (
+          {forceLoginMode === undefined && (
             <p
               className="text-sm text-blue-500 cursor-pointer hover:underline"
               onClick={() => {
                 setJaTenhoCadastro(!jaTenhoCadastro);
                 setErro("");
                 setNome("");
-                setCodigo("");
-                setAguardandoCodigo(false);
               }}
             >
               {jaTenhoCadastro ? "Criar novo cadastro" : "Já tenho cadastro"}

@@ -35,6 +35,12 @@ export interface ConfirmacaoCodigoRequest {
   codigo: string;
 }
 
+export interface NovoDispositivoResponse {
+  super_token: string;
+  nome: string;
+  telefone: string;
+}
+
 export function useMutateCliente() {
   const qc = useQueryClient();
 
@@ -64,7 +70,7 @@ export function useMutateCliente() {
   /** Atualizar cliente */
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number } & ClienteUpdate) =>
-      apiClienteAdmin.put<ClienteOut>(`/api/delivery/client/clientes/${id}`, body),
+      apiClienteAdmin.put<ClienteOut>(`/api/delivery/client/clientes/me`, body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
@@ -83,7 +89,7 @@ export function useMutateCliente() {
   /** Enviar código OTP para telefone existente */
   const enviarCodigoNovoDispositivo = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
-      api.post("/api/delivery/cliente/novo-dispositivo", body),
+      api.post("/api/delivery/client/clientes/novo-dispositivo", body),
     onSuccess: () => {
       toast.success("Código enviado com sucesso!");
     },
@@ -111,5 +117,24 @@ export function useMutateCliente() {
     },
   });
 
-  return { create, update, enviarCodigoNovoDispositivo, confirmarCodigo };
+  /** Login direto apenas com telefone (sem código) */
+  const loginDireto = useMutation({
+    mutationFn: (body: NovoDispositivoRequest) =>
+      api.post<NovoDispositivoResponse>("/api/delivery/client/clientes/novo-dispositivo", body),
+    onSuccess: (response) => {
+      const data = response.data;
+      setCliente({
+        nome: data.nome,
+        telefone: data.telefone || undefined,
+        tokenCliente: data.super_token,
+      });
+      invalidate();
+      toast.success("Login realizado com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(extractErrorMessage(error));
+    },
+  });
+
+  return { create, update, enviarCodigoNovoDispositivo, confirmarCodigo, loginDireto };
 }

@@ -4,10 +4,8 @@ import { useCart } from "@cardapio/stores/cart/useCart";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@cardapio/components/Shared/ui/sheet";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { Separator } from "../ui/separator";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
 import { useRouter } from "next/navigation";
-import { CardDescription } from "../ui/card";
+import { Trash2 } from "lucide-react";
 
 export function CartSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, totalPrice, clear, inc, dec, remove, observacao, setObservacao, editingPedidoId } = useCart();
@@ -23,7 +21,7 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="!max-w-md p-2 gap-0 h-[80%] rounded-t-3xl rounded-b-none">
+      <SheetContent side="bottom" className="!max-w-full w-full p-2 gap-0 h-[80%] rounded-t-3xl rounded-b-none">
         <SheetHeader>
           <SheetTitle>
             {isEditingMode ? (
@@ -68,7 +66,7 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                 </div>
 
                 <Button size="icon" variant="ghost" onClick={() => remove(i.cod_barras)}>
-                  x
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
               <Separator />

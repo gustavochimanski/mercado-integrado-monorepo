@@ -135,7 +135,7 @@ export default function VitrineDestaques({
           </button>
         )}
 
-        <div ref={scrollRef} className={`flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth px-4 pb-2 items-start ${!hasOverflow ? 'justify-evenly' : 'justify-start'}`}>
+        <div ref={scrollRef} className={`flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth pb-2 items-start ${!hasOverflow ? 'justify-evenly' : 'justify-start'}`}>
           {lista.map((p) => (
             <ProductCard
               key={p.cod_barras}

@@ -1,5 +1,5 @@
 // ================= Enums =================
-export type PedidoStatus = "P" | "R" | "E" | "S" | "C" | "I" | "D"; // Pendente,  Em preparo, Entregue, Saiu para entrega, cancelado, Pendente Impressão, Em Edição
+export type PedidoStatus = "P" | "R" | "E" | "S" | "C" | "I" | "D" | "X" | "A"; // Pendente, Em preparo, Entregue, Saiu para entrega, Cancelado, Pendente Impressão, Editado, EM_EDICAO, Aguardando Pagamento
 export type TipoEntrega = "DELIVERY" | "RETIRADA";
 export type OrigemPedido = "WEB" | "APP" | "PDV";
 export type PagamentoMetodo = "DINHEIRO" | "CARTAO" | "PIX";
@@ -70,4 +70,91 @@ export interface ConfirmarPagamentoRequest {
   pedido_id: number;
   metodo?: PagamentoMetodo;
   gateway?: PagamentoGateway;
+}
+
+// ================= Gateway Orquestrador =================
+export type TipoPedidoGateway = "DELIVERY" | "MESA" | "BALCAO";
+
+export interface MeioPagamentoParcialRequest {
+  meio_pagamento_id: number;
+  valor: number;
+}
+
+export interface CheckoutGatewayRequest {
+  tipo_pedido: TipoPedidoGateway;
+  empresa_id: number;
+  itens: ItemPedidoRequest[];
+  
+  // Campos comuns (todos os tipos)
+  observacao_geral?: string | null;
+  cliente_id?: number | null;
+  
+  // Campos específicos para DELIVERY
+  endereco_id?: number | null;
+  meio_pagamento_id?: number | null;
+  meios_pagamento?: MeioPagamentoParcialRequest[];
+  tipo_entrega?: "DELIVERY" | "RETIRADA";
+  origem?: "WEB" | "APP" | "BALCAO";
+  cupom_id?: number | null;
+  troco_para?: number | null;
+  
+  // Campos específicos para MESA
+  mesa_id?: number | null;
+  num_pessoas?: number | null;
+  
+  // BALCAO usa mesa_id também
+}
+
+export interface CheckoutGatewayResponse {
+  tipo_pedido: TipoPedidoGateway;
+  success: boolean;
+  message: string | null;
+  data: any; // PedidoResponse | PedidoMesaOut | object
+}
+
+// ================= Gateway - Editar Pedido =================
+export interface EditarPedidoGatewayRequest {
+  observacao_geral?: string | null;
+  meio_pagamento_id?: number | null;
+  endereco_id?: number | null;
+  cupom_id?: number | null;
+  troco_para?: number | null;
+  tipo_entrega?: TipoEntrega | null;
+  [key: string]: any; // Permite campos adicionais
+}
+
+export interface EditarPedidoGatewayResponse {
+  success: boolean;
+  message: string | null;
+  data: any; // PedidoResponse | PedidoMesaOut | object
+}
+
+// ================= Gateway - Atualizar Item =================
+export interface AtualizarItemGatewayRequest {
+  acao: "adicionar" | "atualizar" | "remover";
+  id?: number | null;
+  produto_cod_barras?: string | null;
+  quantidade?: number | null;
+  observacao?: string | null;
+}
+
+export interface AtualizarItemGatewayResponse {
+  success: boolean;
+  message: string | null;
+  data: any; // PedidoResponse | PedidoMesaOut | object
+}
+
+// ================= Gateway - Atualizar Status =================
+export interface AtualizarStatusGatewayRequest {
+  status?: string | null; // Opcional se usar query parameter
+  motivo?: string | null;
+  observacoes?: string | null;
+  ip_origem?: string | null;
+  user_agent?: string | null;
+}
+
+export interface AtualizarStatusGatewayResponse {
+  success: boolean;
+  message: string | null;
+  data: any; // PedidoResponse | PedidoMesaOut | object
 }

@@ -59,7 +59,7 @@ interface Props {
 export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   const router = useRouter();
   const { startEditingPedido } = useCart();
-  const { toggleModoEdicao, updatePedido } = useMutatePedido();
+  const { toggleModoEdicao, updatePedido, updateStatus } = useMutatePedido();
   const { data: meiosPagamento = [] } = useMeiosPagamento();
   const { data: enderecos = [] } = useQueryEnderecos();
   const [showEnderecoModal, setShowEnderecoModal] = useState(false);
@@ -68,6 +68,10 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   const modoEdicaoJaAtivado = useRef(false);
   const [loadingGeral, setLoadingGeral] = useState(false);
   const [loadingItens, setLoadingItens] = useState(false);
+  
+  // Rastreia status original do pedido e se houve alterações
+  const statusOriginalRef = useRef<string | null>(null);
+  const houveAlteracoesRef = useRef<boolean>(false);
 
   // Form para dados gerais do pedido
   const formGeral = useForm<EditarPedidoGeralData>({
@@ -98,6 +102,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     itens[index].quantidade = novaQuantidade;
     itens[index].acao = "EDITAR";
     formItens.setValue("itens", itens);
+    houveAlteracoesRef.current = true; // Marca que houve alteração
   };
 
   const atualizarObservacao = (index: number, observacao: string) => {
@@ -105,12 +110,14 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     itens[index].observacao = observacao;
     itens[index].acao = "EDITAR";
     formItens.setValue("itens", itens);
+    houveAlteracoesRef.current = true; // Marca que houve alteração
   };
 
   const removerItem = (index: number) => {
     const itens = formItens.getValues("itens");
     itens[index].acao = "REMOVER";
     formItens.setValue("itens", itens);
+    houveAlteracoesRef.current = true; // Marca que houve alteração
   };
 
   const restaurarItem = (index: number) => {
@@ -136,7 +143,9 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     // Inicia modo edição no carrinho
     startEditingPedido(pedido.id, cartItems, pedido.observacao_geral || "");
 
-    // Fecha o modal
+    // Fecha o modal sem desativar modo edição (mantém status X)
+    // O status só muda para D quando finalizar o checkout
+    setModoEdicaoAtivo(false);
     onClose();
 
     // Redireciona para home
@@ -173,39 +182,67 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   // Carrega dados do pedido quando abre o modal
   useEffect(() => {
-    if (pedido && isOpen) {
-      // Carrega dados gerais - preenche com valores atuais do pedido
+    if (!pedido || !isOpen || modoEdicaoJaAtivado.current) return;
 
-      // Busca o meio de pagamento pelo nome
-      const meioPagamentoAtual = meiosPagamento.find(mp => mp.nome === pedido.meio_pagamento_nome);
-      formGeral.setValue("meio_pagamento_id", meioPagamentoAtual?.id || undefined);
+    // Salva o status original do pedido
+    statusOriginalRef.current = pedido.status;
+    houveAlteracoesRef.current = false;
+    
+    // Carrega dados gerais - preenche com valores atuais do pedido
 
-      formGeral.setValue("endereco_id", pedido.endereco_id || undefined);
-      formGeral.setValue("cupom_id", pedido.cupom_id || undefined);
-      formGeral.setValue("observacao_geral", pedido.observacao_geral || "");
-      formGeral.setValue("troco_para", pedido.troco_para || undefined);
+    // Busca o meio de pagamento pelo nome
+    const meioPagamentoAtual = meiosPagamento.find(mp => mp.nome === pedido.meio_pagamento_nome);
+    formGeral.setValue("meio_pagamento_id", meioPagamentoAtual?.id || undefined);
 
-      // Carrega os itens do pedido para edição
-      const itensEditaveis = pedido.itens.map(item => ({
-        id: item.id,
-        produto_cod_barras: item.produto_cod_barras,
-        quantidade: item.quantidade,
-        observacao: item.observacao || "",
-        acao: "MANTER" as const,
-      }));
-      formItens.setValue("itens", itensEditaveis);
+    formGeral.setValue("endereco_id", pedido.endereco_id || undefined);
+    formGeral.setValue("cupom_id", pedido.cupom_id || undefined);
+    formGeral.setValue("observacao_geral", pedido.observacao_geral || "");
+    formGeral.setValue("troco_para", pedido.troco_para || undefined);
 
-      setModoEdicaoAtivo(true);
-      setIsLoading(false);
-    } else if (!isOpen) {
+    // Carrega os itens do pedido para edição
+    const itensEditaveis = pedido.itens.map(item => ({
+      id: item.id,
+      produto_cod_barras: item.produto_cod_barras,
+      quantidade: item.quantidade,
+      observacao: item.observacao || "",
+      acao: "MANTER" as const,
+    }));
+    formItens.setValue("itens", itensEditaveis);
+
+    // Ativa modo edição e muda status para X (EM_EDICAO)
+    setIsLoading(true);
+    modoEdicaoJaAtivado.current = true; // Marca como ativado ANTES de chamar mutate para evitar loop
+    toggleModoEdicao.mutate(
+      { id: pedido.id, modo: true },
+      {
+        onSuccess: () => {
+          setModoEdicaoAtivo(true);
+          setIsLoading(false);
+        },
+        onError: () => {
+          setIsLoading(false);
+          modoEdicaoJaAtivado.current = false; // Reseta em caso de erro
+          toast.error("Erro ao ativar modo edição");
+        },
+      }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedido?.id, isOpen]); // Usar apenas pedido.id e isOpen como dependências
+
+  // Reset ao fechar modal - useEffect separado para evitar conflitos
+  useEffect(() => {
+    if (!isOpen) {
       setModoEdicaoAtivo(false);
       modoEdicaoJaAtivado.current = false;
+      statusOriginalRef.current = null;
+      houveAlteracoesRef.current = false;
     }
-  }, [pedido, isOpen, formGeral, formItens, meiosPagamento]);
+  }, [isOpen]);
 
   // Recarrega os itens do formulário quando o pedido mudar (após salvar)
+  // Apenas se já não estiver no processo inicial de carregamento
   useEffect(() => {
-    if (!pedido || !isOpen) return;
+    if (!pedido || !isOpen || !modoEdicaoAtivo) return;
 
     const itensEditaveis = pedido.itens.map(item => ({
       id: item.id,
@@ -215,17 +252,59 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       acao: "MANTER" as const,
     }));
     formItens.setValue("itens", itensEditaveis);
-  }, [pedido, isOpen, formItens]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedido?.id, isOpen, modoEdicaoAtivo]); // Usar apenas pedido.id para evitar loop
+
+  /**
+   * Verifica se houve alterações comparando valores atuais com valores originais
+   */
+  const verificarAlteracoes = (): boolean => {
+    if (!pedido) return false;
+
+    // Verifica alterações nos dados gerais
+    const valoresGeral = formGeral.getValues();
+    const valoresOriginais = {
+      meio_pagamento_id: meiosPagamento.find(mp => mp.nome === pedido.meio_pagamento_nome)?.id,
+      endereco_id: pedido.endereco_id,
+      cupom_id: pedido.cupom_id,
+      observacao_geral: pedido.observacao_geral || "",
+      troco_para: pedido.troco_para,
+    };
+
+    if (valoresGeral.meio_pagamento_id !== valoresOriginais.meio_pagamento_id) return true;
+    if (valoresGeral.endereco_id !== valoresOriginais.endereco_id) return true;
+    if (valoresGeral.cupom_id !== valoresOriginais.cupom_id) return true;
+    if (valoresGeral.observacao_geral !== valoresOriginais.observacao_geral) return true;
+    if (valoresGeral.troco_para !== valoresOriginais.troco_para) return true;
+
+    // Verifica alterações nos itens
+    const itensAtuais = formItens.getValues("itens");
+    const temAlteracaoItens = itensAtuais.some(item => item.acao !== "MANTER");
+    if (temAlteracaoItens) return true;
+
+    return houveAlteracoesRef.current;
+  };
 
   const handleClose = async () => {
     if (pedido && modoEdicaoAtivo) {
       setIsLoading(true);
+      
+      // Verifica se houve alterações
+      const houveAlteracoes = verificarAlteracoes();
+      
+      // Se não houve alterações, volta status para o original (R)
+      // Se houve alterações, mantém X (será mudado para D ao finalizar checkout)
+      const statusParaVoltar = houveAlteracoes ? undefined : (statusOriginalRef.current || "R");
+      
       toggleModoEdicao.mutate(
-        { id: pedido.id, modo: false },
+        { id: pedido.id, modo: false, statusAnterior: statusParaVoltar },
         {
           onSuccess: () => {
             setModoEdicaoAtivo(false);
             setIsLoading(false);
+            modoEdicaoJaAtivado.current = false;
+            statusOriginalRef.current = null;
+            houveAlteracoesRef.current = false;
             onClose();
           },
           onError: () => {
@@ -246,6 +325,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     if (!pedido) return;
 
     setLoadingGeral(true);
+    houveAlteracoesRef.current = true; // Marca que houve alteração
 
     const dadosCompletos: Record<string, unknown> = {};
 
@@ -264,7 +344,30 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       {
         onSuccess: () => {
           setLoadingGeral(false);
-          handleClose(); // Fecha o modal após sucesso
+          // Após salvar alterações, muda status para D (EDITADO)
+          updateStatus.mutate(
+            { id: pedido.id, status: "D" },
+            {
+              onSuccess: () => {
+                // Desativa modo edição e fecha modal
+                toggleModoEdicao.mutate(
+                  { id: pedido.id, modo: false },
+                  {
+                    onSuccess: () => {
+                      setModoEdicaoAtivo(false);
+                      modoEdicaoJaAtivado.current = false;
+                      statusOriginalRef.current = null;
+                      houveAlteracoesRef.current = false;
+                      onClose();
+                    },
+                  }
+                );
+              },
+              onError: () => {
+                handleClose();
+              },
+            }
+          );
         },
         onError: () => {
           setLoadingGeral(false);
@@ -278,6 +381,7 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     if (!pedido) return;
 
     setLoadingItens(true);
+    houveAlteracoesRef.current = true; // Marca que houve alteração
 
     // Formata itens para o endpoint conforme schema da API
     const itensParaEnviar = data.itens.map(item => ({
@@ -296,8 +400,27 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       {
         onSuccess: () => {
           setLoadingItens(false);
-          // Não fecha o modal para ver a atualização
-          toast.success("Itens atualizados! Verifique as alterações.");
+          // Após salvar alterações nos itens, muda status para D (EDITADO)
+          updateStatus.mutate(
+            { id: pedido.id, status: "D" },
+            {
+              onSuccess: () => {
+                // Desativa modo edição
+                toggleModoEdicao.mutate(
+                  { id: pedido.id, modo: false },
+                  {
+                    onSuccess: () => {
+                      setModoEdicaoAtivo(false);
+                      modoEdicaoJaAtivado.current = false;
+                      statusOriginalRef.current = null;
+                      houveAlteracoesRef.current = false;
+                      toast.success("Itens atualizados! Pedido marcado como editado.");
+                    },
+                  }
+                );
+              },
+            }
+          );
         },
         onError: () => {
           setLoadingItens(false);
@@ -457,7 +580,6 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
           <Label className="text-lg font-semibold">Itens do Pedido</Label>
           <Button
             type="button"
-            variant="outline"
             size="sm"
             onClick={handleAdicionarProdutos}
             className="text-xs gap-1 m-3"

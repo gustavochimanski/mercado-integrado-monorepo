@@ -52,7 +52,7 @@ export function useCategoriaById(catId: number | null, opts?: { enabled?: boolea
   return useQuery({
     queryKey: ["categoria", catId],
     queryFn: async () => {
-      const { data } = await apiAdmin.get<CategoriaMini>(`/api/delivery/categorias/${catId}`);
+      const { data } = await apiAdmin.get<CategoriaMini>(`/api/delivery/admin/categorias/${catId}`);
       return data;
     },
     initialData: seed,                             // usa cache se já tiver
@@ -97,7 +97,7 @@ export function useCategoriasSearch(
       const params: Record<string, any> = { limit, offset };
       if (allowEmpty || hasTerm) params.q = qDeb.trim(); // não manda q vazio
       const { data } = await apiAdmin.get<CategoriaSearchItem[]>(
-        "/api/delivery/categorias/search",
+        "/api/delivery/admin/categorias/search",
         { params }
       );
       return data;
@@ -127,7 +127,7 @@ export function useMutateCategoria() {
   };
 
   const create = useMutation({
-    mutationFn: (body: CreateCategoriaBody) => apiAdmin.post("/api/delivery/categorias", body),
+    mutationFn: (body: CreateCategoriaBody) => apiAdmin.post("/api/delivery/admin/categorias", body),
     onSuccess: () => {
       toast.success("Categoria criada com sucesso!");
       reloadPage();
@@ -137,7 +137,7 @@ export function useMutateCategoria() {
 
   const update = useMutation({
     mutationFn: ({ id, ...body }: UpdateCategoriaBody) =>
-      apiAdmin.put(`/api/delivery/categorias/${id}`, body),
+      apiAdmin.put(`/api/delivery/admin/categorias/${id}`, body),
     onSuccess: () => {
       toast.success("Categoria atualizada com sucesso!");
       reloadPage();
@@ -150,7 +150,7 @@ export function useMutateCategoria() {
       const fd = new FormData();
       fd.append("cod_empresa", String(cod_empresa));
       fd.append("imagem", imagem);
-      return apiAdmin.patch(`/api/delivery/categorias/${id}/imagem`, fd);
+      return apiAdmin.patch(`/api/delivery/admin/categorias/${id}/imagem`, fd);
     },
     onSuccess: () => {
       toast.success("Imagem atualizada!");
@@ -160,7 +160,7 @@ export function useMutateCategoria() {
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => apiAdmin.delete(`/api/delivery/categorias/${id}`),
+    mutationFn: (id: number) => apiAdmin.delete(`/api/delivery/admin/categorias/${id}`),
     onSuccess: () => {
       toast.success("Categoria removida com sucesso!");
       reloadPage();
@@ -169,7 +169,7 @@ export function useMutateCategoria() {
   });
 
   const moveRight = useMutation({
-    mutationFn: (id: number) => apiAdmin.post(`/api/delivery/categorias/${id}/move-right`),
+    mutationFn: (id: number) => apiAdmin.post(`/api/delivery/admin/categorias/${id}/move-right`),
     onSuccess: () => {
       toast.success("Categoria movida para a direita!");
       reloadPage();
@@ -178,7 +178,7 @@ export function useMutateCategoria() {
   });
 
   const moveLeft = useMutation({
-    mutationFn: (id: number) => apiAdmin.post(`/api/delivery/categorias/${id}/move-left`),
+    mutationFn: (id: number) => apiAdmin.post(`/api/delivery/admin/categorias/${id}/move-left`),
     onSuccess: () => {
       toast.success("Categoria movida para a esquerda!");
       reloadPage();

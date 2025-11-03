@@ -145,13 +145,25 @@ export function useSearchEndereco() {
         throw new Error("Texto de busca é obrigatório")
       }
       
-      const { data } = await apiClienteAdmin.get(`/api/mensura/client/geoapify/search-endereco?text=${searchText}`)
-      // A API retorna um array de EnderecoSearchResult diretamente
-      return data as EnderecoSearchResult[]
+      try {
+        const { data } = await apiClienteAdmin.get(`/api/mensura/client/geoapify/search-endereco?text=${encodeURIComponent(searchText)}`)
+        // A API retorna um array de EnderecoSearchResult diretamente
+        return data as EnderecoSearchResult[]
+      } catch (error: any) {
+        // Se o erro for relacionado a token faltando, mostra mensagem específica
+        if (error.response?.status === 422 || error.response?.status === 401) {
+          const errorDetail = error.response?.data?.detail
+          if (Array.isArray(errorDetail) && errorDetail.some((d: any) => d.loc?.includes("x-super-token"))) {
+            throw new Error("Por favor, identifique-se primeiro para buscar endereços")
+          }
+        }
+        throw error
+      }
     },
     onError: (err: any) => {
       console.error("Error searching address:", err)
-      toast.error(extractErrorMessage(err, "Erro ao buscar endereço"))
+      const message = err.message || extractErrorMessage(err, "Erro ao buscar endereço")
+      toast.error(message)
     },
   })
 }

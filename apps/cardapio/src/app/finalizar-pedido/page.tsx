@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
 import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
 import { useQueryEnderecos, useMutateEndereco, EnderecoCreate, Endereco } from "@cardapio/services/useQueryEndereco";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
 import { useMutatePedido } from "@cardapio/services/useQueryPedido";
+import { usePreviewCheckout } from "@cardapio/services/usePreviewCheckout";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
@@ -15,6 +16,9 @@ import { CircleArrowRight, CircleCheck, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion"; // <--- IMPORT FRAMER MOTION
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-pedido/ClienteIdentificacaoModal";
+import TipoPedidoStep, { TipoPedido } from "@cardapio/components/Shared/finalizar-pedido/TipoPedidoStep";
+import MesaStep from "@cardapio/components/Shared/finalizar-pedido/MesaStep";
+import BalcaoStep from "@cardapio/components/Shared/finalizar-pedido/BalcaoStep";
 import EnderecoStep from "@cardapio/components/Shared/finalizar-pedido/EnderecoStep";
 import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/PagamentoStep";
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
@@ -23,17 +27,34 @@ import PedidoConfirmOverlay from "@cardapio/components/Shared/finalizar-pedido/P
 
 export default function FinalizarPedidoPage() {
   const router = useRouter();
-  const { items, totalPrice, observacao, editingPedidoId, stopEditingPedido } = useCart();
+  const searchParams = useSearchParams();
+  const { items, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
   const { finalizarPedido, loading } = useFinalizarPedido();
+  const { updatePedido, updateStatus } = useMutatePedido();
 
   const isEditingMode = editingPedidoId !== null;
 
   const [cliente, setCliente] = useState<any>(null);
   const [showClienteModal, setShowClienteModal] = useState(false);
+  const [tipoPedido, setTipoPedido] = useState<TipoPedido>(null);
+  const [mesaId, setMesaId] = useState<number | null>(null);
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
   const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
   const [trocoPara, setTrocoPara] = useState<number | null>(null);
-  const [currentTab, setCurrentTab] = useState<"endereco" | "pagamento" | "observacao" | "revisao">("endereco");
+  const [currentTab, setCurrentTab] = useState<"tipo" | "mesa" | "balcao" | "endereco" | "pagamento" | "observacao" | "revisao">("tipo");
+
+  // Lê parâmetro ?mesa=X da URL e pré-seleciona
+  useEffect(() => {
+    const mesaParam = searchParams.get("mesa");
+    if (mesaParam) {
+      const mesaIdFromUrl = parseInt(mesaParam, 10);
+      if (!isNaN(mesaIdFromUrl) && mesaIdFromUrl > 0) {
+        setMesaId(mesaIdFromUrl);
+        setTipoPedido("MESA"); // Define automaticamente como pedido de mesa
+        setCurrentTab("mesa"); // Vai direto para a aba de mesa
+      }
+    }
+  }, [searchParams]);
 
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
@@ -41,9 +62,15 @@ export default function FinalizarPedidoPage() {
 
   const { create, update, remove } = useMutateEndereco();
   const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(!!cliente?.tokenCliente);
-  const { updatePedido } = useMutatePedido();
 
   const { data: enderecosOut = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
+
+  // Busca preview do checkout quando estiver na aba de revisão
+  const { data: previewData, isLoading: isLoadingPreview } = usePreviewCheckout(
+    enderecoId,
+    meioPagamentoId,
+    currentTab === "revisao" // Só busca quando está na aba de revisão
+  );
 
 const enderecos: Endereco[] = enderecosOut.map((e) => ({
   id: e.id,
@@ -59,7 +86,6 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   ponto_referencia: e.ponto_referencia || "",
   padrao: e.padrao ?? false,
 }));
-
 
   useEffect(() => {
     const c = getCliente();
@@ -101,11 +127,27 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         },
         {
           onSuccess: () => {
-            setTimeout(() => {
-              setOverlayStatus("sucesso");
-              stopEditingPedido(); // Limpa o modo edição
-              setTimeout(() => router.push("/pedidos"), 3000);
-            }, 1500);
+            // Após atualizar pedido editado, muda status para D (EDITADO) e desativa modo edição
+            updateStatus.mutate(
+              { id: editingPedidoId, status: "D" },
+              {
+                onSuccess: () => {
+                  setTimeout(() => {
+                    setOverlayStatus("sucesso");
+                    stopEditingPedido(); // Limpa o modo edição
+                    setTimeout(() => router.push("/pedidos"), 3000);
+                  }, 1500);
+                },
+                onError: (error: any) => {
+                  // Mesmo se falhar mudar status, considera sucesso e limpa
+                  setTimeout(() => {
+                    setOverlayStatus("sucesso");
+                    stopEditingPedido();
+                    setTimeout(() => router.push("/pedidos"), 3000);
+                  }, 1500);
+                },
+              }
+            );
           },
           onError: (error: any) => {
             setTimeout(() => {
@@ -119,7 +161,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
       );
     } else {
       // Modo normal: cria novo pedido
-      const result = await finalizarPedido(trocoPara);
+      // BALCAO não precisa de mesa_id obrigatório (opcional se quiser associar uma mesa)
+      const mesaIdToSend = tipoPedido === "MESA" && mesaId ? mesaId : (tipoPedido === "BALCAO" && mesaId ? mesaId : undefined);
+      const result = await finalizarPedido(trocoPara, tipoPedido, mesaIdToSend);
 
       setTimeout(() => {
         if (result === "sucesso") {
@@ -145,6 +189,43 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
     }
 
     switch (currentTab) {
+      case "tipo":
+        return (
+          <Button 
+            className="w-full text-lg p-6 bg-primary" 
+            onClick={() => {
+              if (tipoPedido === "MESA") {
+                setCurrentTab("mesa");
+              } else if (tipoPedido === "BALCAO") {
+                setCurrentTab("balcao");
+              } else if (tipoPedido === "DELIVERY") {
+                setCurrentTab("endereco");
+              }
+            }}
+            disabled={!tipoPedido}
+          >
+            Continuar <CircleArrowRight strokeWidth={3} />
+          </Button>
+        );
+      case "mesa":
+        return (
+          <Button 
+            className="w-full text-lg p-6 bg-blue-600" 
+            onClick={() => setCurrentTab("pagamento")}
+            disabled={!mesaId}
+          >
+            Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
+          </Button>
+        );
+      case "balcao":
+        return (
+          <Button 
+            className="w-full text-lg p-6 bg-green-600" 
+            onClick={() => setCurrentTab("pagamento")}
+          >
+            Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
+          </Button>
+        );
       case "endereco":
         return (
           <Button className="w-full text-lg p-6 bg-yellow-500" onClick={() => setConfirmEnderecoOpen(true)} disabled={!enderecoId}>
@@ -280,9 +361,42 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           <CardContent className="flex-1 overflow-auto p-0">
             <Tabs
               value={currentTab}
-              onValueChange={(v) => setCurrentTab(v as any)}
+              onValueChange={(v) => {
+                // Impede navegação direta via tabs, apenas permite programática
+                // Se quiser permitir navegação livre, pode remover esta validação
+                if (v === "tipo" || v === currentTab) {
+                  setCurrentTab(v as any);
+                }
+              }}
               triggerClassName="rounded-b-none"
               items={[
+                {
+                  value: "tipo",
+                  label: "Tipo",
+                  Component: () => (
+                    <TipoPedidoStep
+                      tipoSelecionado={tipoPedido}
+                      onSelect={(tipo) => setTipoPedido(tipo)}
+                    />
+                  ),
+                },
+                {
+                  value: "mesa",
+                  label: "Mesa",
+                  Component: () => (
+                    <MesaStep
+                      mesaId={mesaId}
+                      onSelect={(id) => setMesaId(id)}
+                    />
+                  ),
+                  hidden: tipoPedido !== "MESA",
+                },
+                {
+                  value: "balcao",
+                  label: "Balcão",
+                  Component: () => <BalcaoStep />,
+                  hidden: tipoPedido !== "BALCAO",
+                },
                 {
                   value: "endereco",
                   label: "Endereço",
@@ -299,6 +413,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                       onDelete={(id: number) => remove.mutate(id)}
                     />
                   ),
+                  hidden: tipoPedido !== "DELIVERY",
                 },
                 {
                   value: "pagamento",
@@ -356,23 +471,27 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                     <RevisaoStep
                       items={items}
                       observacao={observacao}
-                      endereco={enderecos.find((e) => e.id === enderecoId) ?? undefined}
+                      endereco={tipoPedido === "DELIVERY" ? enderecos.find((e) => e.id === enderecoId) ?? undefined : undefined}
                       pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
                       trocoPara={trocoPara}
-                      total={totalPrice() || 0}
+                      total={(previewData?.valor_total ?? totalPrice()) || 0}
+                      previewData={previewData ?? undefined}
+                      isLoadingPreview={isLoadingPreview}
                       inc={useCart.getState().inc}
                       dec={useCart.getState().dec}
                       remove={useCart.getState().remove}
+                      tipoPedido={tipoPedido}
+                      mesaId={tipoPedido === "MESA" && mesaId ? mesaId : undefined}
                     />
                   ),
                 },
-              ]}
+              ].filter(item => !item.hidden)}
             />
           </CardContent>
 
           <div className="flex font-bold bg-muted text-end text-primary gap-2 m-2 p-2">
             <span className="ml-auto">Total:</span>
-            <span>R$ {totalPrice().toFixed(2)}</span>
+            <span>R$ {((previewData?.valor_total ?? totalPrice()) || 0).toFixed(2)}</span>
           </div>
 
           <CardFooter className="w-full p-2 pb-2">{renderFooterButton()}</CardFooter>

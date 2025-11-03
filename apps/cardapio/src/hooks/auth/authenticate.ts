@@ -17,7 +17,7 @@ export async function loginService(
   password: string
 ): Promise<LoginResponse> {
   const { data } = await api.post<LoginResponse>(
-    "/auth/token",
+    "api/auth/token",
     { username, password }
   );
 

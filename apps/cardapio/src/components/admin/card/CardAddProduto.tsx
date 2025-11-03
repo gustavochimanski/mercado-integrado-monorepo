@@ -27,26 +27,14 @@ export const CardAddProduto = ({
     <>
       <Card
         onClick={() => setModalOpen(true)}
-        className={`min-w-[90px] max-w-[90px] h-[180px] snap-start flex flex-col justify-between overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-colors cursor-pointer`}
+        className={`w-full h-full min-w-[140px] max-w-[140px] flex flex-col justify-center items-center overflow-hidden p-0 border-dashed border-2 border-gray-300 hover:border-primary transition-all duration-200 rounded-lg shadow-md hover:shadow-lg cursor-pointer bg-gray-50`}
       >
-        <div className="flex flex-col items-center gap-2 px-3 pt-3 flex-grow justify-center">
-          <PlusCircle className="w-8 h-8 text-primary" />
-          <div className="text-sm font-medium text-center line-clamp-1 w-full">
-            Adicionar
+        <div className="flex flex-col items-center gap-2 px-3 flex-grow justify-center">
+          <PlusCircle className="w-10 h-10 text-primary" />
+          <div className="text-sm font-medium text-center text-gray-700">
+            Adicionar produto
           </div>
-          <div className="text-sm text-center text-muted-foreground">Novo item</div>
         </div>
-
-        <CardFooter className="p-0">
-          <Button
-            size="sm"
-            className="w-full rounded-none text-background bg-primary text-sm"
-            variant="secondary"
-            onClick={() => setModalOpen(true)}
-          >
-            Novo
-          </Button>
-        </CardFooter>
       </Card>
 
       <ModalNovoProduto

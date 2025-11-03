@@ -58,7 +58,7 @@ function SheetContent({
 <SheetPrimitive.Content
   data-slot="sheet-content"
   className={cn(
-    "bg-background fixed z-50 flex flex-col shadow-lg transition duration-300 ease-in-out",
+    "bg-background fixed z-50 flex flex-col shadow-lg transition duration-150 ease-in-out",
     side === "right" &&
       "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right",
     side === "left" &&
@@ -66,7 +66,7 @@ function SheetContent({
     side === "top" &&
       "inset-x-0 top-0 h-auto border-b data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top",
     side === "bottom" &&
-      "inset-x-0 bottom-0 h-auto border-t data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom left-1/2 -translate-x-1/2",
+      "inset-x-0 bottom-0 h-auto border-t data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
     className
   )}
   {...props}

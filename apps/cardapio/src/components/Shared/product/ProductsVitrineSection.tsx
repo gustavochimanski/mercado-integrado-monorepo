@@ -110,7 +110,7 @@ export default function ProductsVitrineSection({
         <div className="relative">
           <div ref={scrollRef} className={`flex gap-2 overflow-x-auto ${isAdmin ? "": "hide-scrollbar"} `}>
             {produtos.map((produto) => (
-              <div key={produto.cod_barras} className="shrink-0 w-[90px] h-[200px]">
+              <div key={produto.cod_barras} className="shrink-0 w-[140px] h-[200px]">
                 <ProductCard
                   produto={produto}
                   onOpenSheet={() => onOpenSheet?.(produto)} 
@@ -121,13 +121,17 @@ export default function ProductsVitrineSection({
             ))}
 
             {isHome && hrefCategoria && (
-              <CardVerMais href={hrefCategoria} />
+              <div className="shrink-0 w-[140px] h-[200px]">
+                <CardVerMais href={hrefCategoria} />
+              </div>
             )}
 
-            <CardAddProduto
-              vitrineId={vitrineId}
-              empresaId={empresaId}
-            />
+            <div className="shrink-0 w-[140px] h-[200px]">
+              <CardAddProduto
+                vitrineId={vitrineId}
+                empresaId={empresaId}
+              />
+            </div>
           </div>
         </div>
       </div>
