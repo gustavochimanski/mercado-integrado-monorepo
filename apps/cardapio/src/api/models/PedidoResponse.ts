@@ -36,5 +36,6 @@ export type PedidoResponse = {
     itens: Array<ItemPedidoResponse>;
     transacao?: (TransacaoResponse | null);
     pagamento?: (PedidoPagamentoResumo | null);
+    acertado_entregador?: (boolean | null);
 };
 

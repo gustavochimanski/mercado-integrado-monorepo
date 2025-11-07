@@ -10,5 +10,6 @@ export type ProdutoEmpMiniDTO = {
     vitrine_id?: (number | null);
     disponivel?: boolean;
     produto: ProdutoMiniDTO;
+    adicionais?: null;
 };
 

@@ -2,9 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AlterarStatusPedidoBody } from '../models/AlterarStatusPedidoBody';
 import type { EditarPedidoRequest } from '../models/EditarPedidoRequest';
+import type { HistoricoDoPedidoResponse } from '../models/HistoricoDoPedidoResponse';
 import type { ItemPedidoEditar } from '../models/ItemPedidoEditar';
-import type { PedidoKanbanResponse } from '../models/PedidoKanbanResponse';
+import type { KanbanAgrupadoResponse } from '../models/KanbanAgrupadoResponse';
 import type { PedidoResponse } from '../models/PedidoResponse';
 import type { PedidoResponseCompletoTotal } from '../models/PedidoResponseCompletoTotal';
 import type { PedidoStatusEnum } from '../models/PedidoStatusEnum';
@@ -16,21 +18,27 @@ export class AdminDeliveryPedidosService {
      * Listar Pedidos Admin Kanban
      * Lista pedidos do sistema para visualização no Kanban (admin).
      *
+     * **Retorno agrupado por categoria:**
+     * - `delivery`: Array de pedidos de delivery
+     * - `balcao`: Array de pedidos de balcão
+     * - `mesas`: Array de pedidos de mesas
+     *
+     * Cada categoria mantém seus IDs originais (sem conflitos).
+     *
      * - **date_filter**: Filtra pedidos por data específica (formato YYYY-MM-DD)
      * - **empresa_id**: ID da empresa (obrigatório, deve ser maior que 0)
-     *
-     * Retorna lista de pedidos com informações resumidas para o Kanban.
+     * - **limit**: Limite de pedidos por categoria (padrão: 500)
      * @param empresaId ID da empresa para filtrar pedidos
      * @param dateFilter Filtrar pedidos por data (YYYY-MM-DD)
      * @param limit
-     * @returns PedidoKanbanResponse Successful Response
+     * @returns KanbanAgrupadoResponse Successful Response
      * @throws ApiError
      */
     public listarPedidosAdminKanbanApiDeliveryAdminPedidosKanbanGet(
         empresaId: number,
         dateFilter?: (string | null),
         limit: number = 500,
-    ): CancelablePromise<Array<PedidoKanbanResponse>> {
+    ): CancelablePromise<KanbanAgrupadoResponse> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/delivery/admin/pedidos/kanban',
@@ -71,6 +79,15 @@ export class AdminDeliveryPedidosService {
     }
     /**
      * Atualizar Pedido
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/editar)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/editar`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
      * Atualiza dados de um pedido existente (admin).
      *
      * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
@@ -107,6 +124,15 @@ export class AdminDeliveryPedidosService {
     }
     /**
      * Atualizar Status Pedido
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/status)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/status?novo_status={status}`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
      * Atualiza o status de um pedido (somente admin).
      *
      * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
@@ -137,7 +163,86 @@ export class AdminDeliveryPedidosService {
         });
     }
     /**
+     * Alterar Status Pedido Com Historico
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/status)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/status` com payload completo
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
+     * Altera o status de um pedido com histórico detalhado (admin).
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     * - **payload**: Dados para alteração do status incluindo motivo e observações
+     *
+     * Campos do payload:
+     * - **status**: Novo status do pedido (obrigatório)
+     * - **motivo**: Motivo da alteração (opcional)
+     * - **observacoes**: Observações adicionais (opcional)
+     * - **criado_por**: Quem fez a alteração (opcional, padrão: "admin")
+     * - **ip_origem**: IP de origem (opcional)
+     * - **user_agent**: User agent do cliente (opcional)
+     * @param pedidoId ID do pedido
+     * @param requestBody
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public alterarStatusPedidoComHistoricoApiDeliveryAdminPedidosStatusPedidoIdHistoricoPut(
+        pedidoId: number,
+        requestBody: AlterarStatusPedidoBody,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/delivery/admin/pedidos/status/{pedido_id}/historico',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Obter Historico Pedido
+     * Obtém o histórico completo de alterações de status de um pedido.
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     *
+     * Retorna todos os registros de mudança de status com timestamps, motivos e observações.
+     * @param pedidoId ID do pedido
+     * @returns HistoricoDoPedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public obterHistoricoPedidoApiDeliveryAdminPedidosPedidoIdHistoricoGet(
+        pedidoId: number,
+    ): CancelablePromise<HistoricoDoPedidoResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/delivery/admin/pedidos/{pedido_id}/historico',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Atualizar Item
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/itens)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/itens`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
      * Executa uma única ação sobre os itens do pedido (adicionar, atualizar ou remover).
      *
      * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)

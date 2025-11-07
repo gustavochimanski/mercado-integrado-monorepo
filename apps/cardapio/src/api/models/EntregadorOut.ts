@@ -11,6 +11,7 @@ export type EntregadorOut = {
     veiculo_tipo: (string | null);
     placa: (string | null);
     acrescimo_taxa: (number | null);
+    valor_diaria: (number | null);
     created_at: string;
     updated_at: string;
     empresas?: Array<EmpresaMiniOut>;

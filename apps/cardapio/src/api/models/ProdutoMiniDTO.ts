@@ -9,5 +9,6 @@ export type ProdutoMiniDTO = {
     cod_categoria?: (number | null);
     ativo?: boolean;
     unidade_medida?: (string | null);
+    diretivas?: (Array<string> | null);
 };
 

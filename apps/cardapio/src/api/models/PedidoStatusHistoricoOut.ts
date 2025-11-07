@@ -8,7 +8,10 @@ export type PedidoStatusHistoricoOut = {
     pedido_id: number;
     status: PedidoStatusEnum;
     motivo: (string | null);
+    observacoes: (string | null);
     criado_em: string;
     criado_por: (string | null);
+    ip_origem: (string | null);
+    user_agent: (string | null);
 };
 

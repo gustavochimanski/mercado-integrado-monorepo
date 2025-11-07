@@ -1,0 +1,179 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import type { BannerParceiroIn } from '../models/BannerParceiroIn';
+import type { BannerParceiroOut } from '../models/BannerParceiroOut';
+import type { Body_create_banner_api_cadastros_admin_parceiros_banners_post } from '../models/Body_create_banner_api_cadastros_admin_parceiros_banners_post';
+import type { ParceiroIn } from '../models/ParceiroIn';
+import type { ParceiroOut } from '../models/ParceiroOut';
+import type { CancelablePromise } from '../core/CancelablePromise';
+import type { BaseHttpRequest } from '../core/BaseHttpRequest';
+export class AdminCadastrosParceirosService {
+    constructor(public readonly httpRequest: BaseHttpRequest) {}
+    /**
+     * List Parceiros
+     * Lista parceiros cadastrados (endpoint admin)
+     * @returns ParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public listParceirosApiCadastrosAdminParceirosGet(): CancelablePromise<Array<ParceiroOut>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/parceiros/',
+        });
+    }
+    /**
+     * Create Parceiro
+     * Cria um novo parceiro (endpoint admin)
+     * @param requestBody
+     * @returns ParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public createParceiroApiCadastrosAdminParceirosPost(
+        requestBody: ParceiroIn,
+    ): CancelablePromise<ParceiroOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cadastros/admin/parceiros/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get Parceiro
+     * Retorna dados de um parceiro específico (endpoint admin)
+     * @param parceiroId
+     * @returns ParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public getParceiroApiCadastrosAdminParceirosParceiroIdGet(
+        parceiroId: number,
+    ): CancelablePromise<ParceiroOut> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/parceiros/{parceiro_id}',
+            path: {
+                'parceiro_id': parceiroId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Update Parceiro
+     * Atualiza um parceiro existente (endpoint admin)
+     * @param parceiroId
+     * @param requestBody
+     * @returns ParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public updateParceiroApiCadastrosAdminParceirosParceiroIdPut(
+        parceiroId: number,
+        requestBody: ParceiroIn,
+    ): CancelablePromise<ParceiroOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cadastros/admin/parceiros/{parceiro_id}',
+            path: {
+                'parceiro_id': parceiroId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Delete Parceiro
+     * Deleta um parceiro (endpoint admin)
+     * @param parceiroId
+     * @returns void
+     * @throws ApiError
+     */
+    public deleteParceiroApiCadastrosAdminParceirosParceiroIdDelete(
+        parceiroId: number,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cadastros/admin/parceiros/{parceiro_id}',
+            path: {
+                'parceiro_id': parceiroId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Create Banner
+     * Cria um novo banner para parceiro (endpoint admin)
+     * @param formData
+     * @returns BannerParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public createBannerApiCadastrosAdminParceirosBannersPost(
+        formData: Body_create_banner_api_cadastros_admin_parceiros_banners_post,
+    ): CancelablePromise<BannerParceiroOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cadastros/admin/parceiros/banners',
+            formData: formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Update Banner
+     * Atualiza um banner existente (endpoint admin)
+     * @param bannerId
+     * @param requestBody
+     * @returns BannerParceiroOut Successful Response
+     * @throws ApiError
+     */
+    public updateBannerApiCadastrosAdminParceirosBannersBannerIdPut(
+        bannerId: number,
+        requestBody: BannerParceiroIn,
+    ): CancelablePromise<BannerParceiroOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cadastros/admin/parceiros/banners/{banner_id}',
+            path: {
+                'banner_id': bannerId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Delete Banner
+     * Deleta um banner (endpoint admin)
+     * @param bannerId
+     * @returns void
+     * @throws ApiError
+     */
+    public deleteBannerApiCadastrosAdminParceirosBannersBannerIdDelete(
+        bannerId: number,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cadastros/admin/parceiros/banners/{banner_id}',
+            path: {
+                'banner_id': bannerId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+}

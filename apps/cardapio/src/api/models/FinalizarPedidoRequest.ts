@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ItemPedidoRequest } from './ItemPedidoRequest';
+import type { MeioPagamentoParcialRequest } from './MeioPagamentoParcialRequest';
 import type { OrigemPedidoEnum } from './OrigemPedidoEnum';
 import type { TipoEntregaEnum } from './TipoEntregaEnum';
 export type FinalizarPedidoRequest = {
@@ -10,6 +11,7 @@ export type FinalizarPedidoRequest = {
     cliente_id?: (string | null);
     endereco_id?: (number | null);
     meio_pagamento_id?: (number | null);
+    meios_pagamento?: (Array<MeioPagamentoParcialRequest> | null);
     tipo_entrega?: TipoEntregaEnum;
     origem?: OrigemPedidoEnum;
     observacao_geral?: (string | null);

@@ -9,6 +9,7 @@ export type ProdutoBaseDTO = {
     cod_categoria?: (number | null);
     ativo: boolean;
     unidade_medida?: (string | null);
+    diretivas?: (Array<string> | null);
     exibir_delivery?: boolean;
     created_at: string;
     updated_at: string;

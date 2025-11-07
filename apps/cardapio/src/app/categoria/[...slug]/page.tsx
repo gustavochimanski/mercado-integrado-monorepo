@@ -83,8 +83,8 @@ export default function RouteCategoryPage() {
 
   const add = useCart((s) => s.add);
   const handleAdd = useCallback(
-    (produto: ProdutoEmpMini, quantity: number) => {
-      add(mapProdutoToCartItem(produto, quantity));
+    (produto: ProdutoEmpMini, quantity: number, observacao?: string) => {
+      add(mapProdutoToCartItem(produto, quantity, observacao));
       setSheetOpen(false);
     },
     [add]

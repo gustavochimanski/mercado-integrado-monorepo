@@ -1,5 +1,6 @@
 import { api } from "@cardapio/app/api/api";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
+import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { setCliente } from "@cardapio/stores/client/ClientStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
@@ -51,7 +52,7 @@ export function useMutateCliente() {
   /** Criar cliente novo */
   const create = useMutation({
     mutationFn: (body: ClienteCreate) =>
-      api.post<ClienteOut>("/api/delivery/client/clientes/", body),
+      apiAdmin.post<ClienteOut>("/api/delivery/client/clientes/", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
@@ -120,7 +121,7 @@ export function useMutateCliente() {
   /** Login direto apenas com telefone (sem código) */
   const loginDireto = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
-      api.post<NovoDispositivoResponse>("/api/delivery/client/clientes/novo-dispositivo", body),
+      apiAdmin.post<NovoDispositivoResponse>("/api/delivery/client/clientes/novo-dispositivo", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({

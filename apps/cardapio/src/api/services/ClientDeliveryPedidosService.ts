@@ -8,24 +8,29 @@ import type { ItemPedidoEditar } from '../models/ItemPedidoEditar';
 import type { ModoEdicaoRequest } from '../models/ModoEdicaoRequest';
 import type { PedidoResponse } from '../models/PedidoResponse';
 import type { PedidoResponseSimplificado } from '../models/PedidoResponseSimplificado';
+import type { PreviewCheckoutResponse } from '../models/PreviewCheckoutResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ClientDeliveryPedidosService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * Checkout
+     * Preview Checkout
+     * Calcula o preview do checkout (subtotal, taxas, desconto, total)
+     * sem criar o pedido no banco de dados.
+     *
+     * Este endpoint é útil para mostrar ao cliente os valores antes de finalizar o pedido.
      * @param xSuperToken
      * @param requestBody
-     * @returns PedidoResponse Successful Response
+     * @returns PreviewCheckoutResponse Successful Response
      * @throws ApiError
      */
-    public checkoutApiDeliveryClientPedidosCheckoutPost(
+    public previewCheckoutApiDeliveryClientPedidosCheckoutPreviewPost(
         xSuperToken: string,
         requestBody: FinalizarPedidoRequest,
-    ): CancelablePromise<PedidoResponse> {
+    ): CancelablePromise<PreviewCheckoutResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pedidos/checkout',
+            url: '/api/delivery/client/pedidos/checkout/preview',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -67,7 +72,10 @@ export class ClientDeliveryPedidosService {
     }
     /**
      * Atualizar Item Cliente
-     * Executa uma única ação sobre os itens do pedido do cliente: adicionar, atualizar ou remover.
+     * Atualiza itens de um pedido do cliente.
+     *
+     * - **pedido_id**: ID do pedido
+     * - **item**: Objeto com a ação a ser executada (adicionar, atualizar, remover)
      * @param pedidoId ID do pedido
      * @param xSuperToken
      * @param requestBody
@@ -97,7 +105,14 @@ export class ClientDeliveryPedidosService {
     }
     /**
      * Atualizar Pedido Cliente
-     * Atualiza dados de um pedido existente, mas somente se for do próprio cliente.
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/editar)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/editar`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
      * @param pedidoId ID do pedido a ser atualizado
      * @param xSuperToken
      * @param requestBody

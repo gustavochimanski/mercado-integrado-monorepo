@@ -8,7 +8,8 @@ export type BannerParceiroOut = {
     ativo: boolean;
     tipo_banner: string;
     imagem: (string | null);
-    categoria_id: number;
+    categoria_id?: (number | null);
+    link_redirecionamento?: (string | null);
     href_destino: string;
 };
 

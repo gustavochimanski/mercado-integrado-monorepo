@@ -21,7 +21,7 @@ export function useBanners(enabled = true) {
   return useQuery<Banner[]>({
     queryKey: ["banners"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<Banner[]>("/api/delivery/public/parceiros/banners");
+      const { data } = await apiClienteAdmin.get<Banner[]>("/api/cadastros/public/parceiros/banners");
       return data;
     },
     enabled,

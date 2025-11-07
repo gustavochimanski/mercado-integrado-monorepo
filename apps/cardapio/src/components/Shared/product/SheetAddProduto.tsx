@@ -77,8 +77,11 @@ export function SheetAdicionarProduto({
   }
 
   function onSubmit(data: FormData) {
-    onAdd?.(produto, data.quantity, data.observacao);
+    // Converte string vazia para undefined para evitar enviar null ou ""
+    const observacao = data.observacao?.trim() || undefined;
+    onAdd?.(produto, data.quantity, observacao);
     setValue("quantity", 1);
+    setValue("observacao", "");
     onClose();
   }
 

@@ -10,7 +10,9 @@ export type ProdutoListItem = {
     custo?: (number | null);
     cod_categoria?: (number | null);
     label_categoria?: (string | null);
+    diretivas?: (Array<string> | null);
     disponivel: boolean;
     exibir_delivery?: boolean;
+    adicionais?: null;
 };
 

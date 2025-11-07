@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ClienteMeResponse } from '../models/ClienteMeResponse';
 import type { LoginRequest } from '../models/LoginRequest';
 import type { TokenResponse } from '../models/TokenResponse';
 import type { UserResponse } from '../models/UserResponse';
@@ -38,6 +39,27 @@ export class AuthService {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/auth/me',
+        });
+    }
+    /**
+     * Retorna o Cliente atual baseado no x-super-token
+     * Puxa o Cliente já autenticado pelo get_cliente_by_super_token (header X-Super-Token) e retorna apenas nome, token e telefone.
+     * @param xSuperToken
+     * @returns ClienteMeResponse Successful Response
+     * @throws ApiError
+     */
+    public obterClienteAtualApiAuthClientMeGet(
+        xSuperToken: string,
+    ): CancelablePromise<ClienteMeResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/auth/client/me',
+            headers: {
+                'x-super-token': xSuperToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 }

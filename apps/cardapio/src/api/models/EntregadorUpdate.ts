@@ -9,5 +9,6 @@ export type EntregadorUpdate = {
     veiculo_tipo?: (string | null);
     placa?: (string | null);
     acrescimo_taxa?: (number | null);
+    valor_diaria?: (number | null);
 };
 
