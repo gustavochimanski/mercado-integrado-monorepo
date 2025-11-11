@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AdicionalResponse } from '../models/AdicionalResponse';
-import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
-import type { app__api__delivery__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoUpdate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoOut';
 import type { AtualizarAdicionalRequest } from '../models/AtualizarAdicionalRequest';
-import type { AtualizarVitrineRequest } from '../models/AtualizarVitrineRequest';
+import type { AtualizarCategoriaRequest } from '../models/AtualizarCategoriaRequest';
 import type { BannerParceiroIn } from '../models/BannerParceiroIn';
 import type { BannerParceiroOut } from '../models/BannerParceiroOut';
 import type { Body_atualizar_combo_api_cadastros_admin_combos__combo_id__put } from '../models/Body_atualizar_combo_api_cadastros_admin_combos__combo_id__put';
@@ -14,19 +14,21 @@ import type { Body_atualizar_produto_api_cadastros_admin_produtos__cod_barras__p
 import type { Body_create_banner_api_cadastros_admin_parceiros_banners_post } from '../models/Body_create_banner_api_cadastros_admin_parceiros_banners_post';
 import type { Body_criar_combo_api_cadastros_admin_combos__post } from '../models/Body_criar_combo_api_cadastros_admin_combos__post';
 import type { Body_criar_produto_api_cadastros_admin_produtos__post } from '../models/Body_criar_produto_api_cadastros_admin_produtos__post';
-import type { Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch } from '../models/Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch';
-import type { CategoriaDeliveryIn } from '../models/CategoriaDeliveryIn';
+import type { CategoriaArvoreResponse } from '../models/CategoriaArvoreResponse';
 import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
+import type { CategoriaListItem } from '../models/CategoriaListItem';
+import type { CategoriaResponse } from '../models/CategoriaResponse';
 import type { CategoriaSearchOut } from '../models/CategoriaSearchOut';
+import type { CategoriasPaginadasResponse } from '../models/CategoriasPaginadasResponse';
 import type { ClienteAdminUpdate } from '../models/ClienteAdminUpdate';
 import type { ClienteCreate } from '../models/ClienteCreate';
 import type { ClienteOut } from '../models/ClienteOut';
 import type { ClienteUpdate } from '../models/ClienteUpdate';
 import type { ComboDTO } from '../models/ComboDTO';
 import type { CriarAdicionalRequest } from '../models/CriarAdicionalRequest';
+import type { CriarCategoriaRequest } from '../models/CriarCategoriaRequest';
 import type { CriarNovoProdutoResponse } from '../models/CriarNovoProdutoResponse';
-import type { CriarVitrineRequest } from '../models/CriarVitrineRequest';
-import type { EnderecoOut } from '../models/EnderecoOut';
+import type { EnderecoUpdate } from '../models/EnderecoUpdate';
 import type { EntregadorCreate } from '../models/EntregadorCreate';
 import type { EntregadorOut } from '../models/EntregadorOut';
 import type { EntregadorUpdate } from '../models/EntregadorUpdate';
@@ -42,14 +44,253 @@ import type { ProdutosPaginadosResponse } from '../models/ProdutosPaginadosRespo
 import type { RegiaoEntregaCreate } from '../models/RegiaoEntregaCreate';
 import type { RegiaoEntregaOut } from '../models/RegiaoEntregaOut';
 import type { RegiaoEntregaUpdate } from '../models/RegiaoEntregaUpdate';
-import type { ToggleHomeRequest } from '../models/ToggleHomeRequest';
 import type { VincularAdicionaisProdutoRequest } from '../models/VincularAdicionaisProdutoRequest';
-import type { VinculoRequest } from '../models/VinculoRequest';
-import type { VitrineOut } from '../models/VitrineOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ApiCadastrosService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
+    /**
+     * Criar Categoria
+     * Cria uma nova categoria.
+     *
+     * - **descricao**: Descrição da categoria (obrigatório)
+     * - **parent_id**: ID da categoria pai para subcategorias (opcional)
+     * - **ativo**: Status ativo/inativo da categoria (padrão: True)
+     * @param requestBody
+     * @returns CategoriaResponse Successful Response
+     * @throws ApiError
+     */
+    public criarCategoriaApiCadastrosAdminCategoriasPost(
+        requestBody: CriarCategoriaRequest,
+    ): CancelablePromise<CategoriaResponse> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cadastros/admin/categorias/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Listar Categorias Paginado
+     * Lista categorias com paginação.
+     *
+     * - **page**: Número da página (padrão: 1)
+     * - **limit**: Itens por página (padrão: 10, máximo: 100)
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * - **parent_id**: Filtrar por categoria pai (opcional)
+     * @param page Número da página
+     * @param limit Itens por página
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @param parentId Filtrar por categoria pai
+     * @returns CategoriasPaginadasResponse Successful Response
+     * @throws ApiError
+     */
+    public listarCategoriasPaginadoApiCadastrosAdminCategoriasGet(
+        page: number = 1,
+        limit: number = 10,
+        apenasAtivas: boolean = true,
+        parentId?: (number | null),
+    ): CancelablePromise<CategoriasPaginadasResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/',
+            query: {
+                'page': page,
+                'limit': limit,
+                'apenas_ativas': apenasAtivas,
+                'parent_id': parentId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Categoria Por Id
+     * Busca uma categoria específica por ID.
+     * @param categoriaId
+     * @returns CategoriaResponse Successful Response
+     * @throws ApiError
+     */
+    public buscarCategoriaPorIdApiCadastrosAdminCategoriasCategoriaIdGet(
+        categoriaId: number,
+    ): CancelablePromise<CategoriaResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Categoria
+     * Atualiza uma categoria existente.
+     *
+     * - **descricao**: Nova descrição da categoria (opcional)
+     * - **parent_id**: Novo ID da categoria pai (opcional)
+     * - **ativo**: Novo status ativo/inativo (opcional)
+     * @param categoriaId
+     * @param requestBody
+     * @returns CategoriaResponse Successful Response
+     * @throws ApiError
+     */
+    public atualizarCategoriaApiCadastrosAdminCategoriasCategoriaIdPut(
+        categoriaId: number,
+        requestBody: AtualizarCategoriaRequest,
+    ): CancelablePromise<CategoriaResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Deletar Categoria
+     * Deleta uma categoria (soft delete).
+     *
+     * **Nota**: Só é possível deletar categorias que não possuem subcategorias ativas.
+     * @param categoriaId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public deletarCategoriaApiCadastrosAdminCategoriasCategoriaIdDelete(
+        categoriaId: number,
+    ): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Categorias Por Termo
+     * Busca categorias por termo de pesquisa.
+     *
+     * - **termo**: Termo para buscar na descrição das categorias
+     * - **page**: Número da página (padrão: 1)
+     * - **limit**: Itens por página (padrão: 10, máximo: 100)
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param termo Termo de busca
+     * @param page Número da página
+     * @param limit Itens por página
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriasPaginadasResponse Successful Response
+     * @throws ApiError
+     */
+    public buscarCategoriasPorTermoApiCadastrosAdminCategoriasBuscarTermoGet(
+        termo: string,
+        page: number = 1,
+        limit: number = 10,
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<CategoriasPaginadasResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/buscar/termo',
+            query: {
+                'termo': termo,
+                'page': page,
+                'limit': limit,
+                'apenas_ativas': apenasAtivas,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Arvore Categorias
+     * Busca todas as categorias organizadas em estrutura de árvore.
+     *
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriaArvoreResponse Successful Response
+     * @throws ApiError
+     */
+    public buscarArvoreCategoriasApiCadastrosAdminCategoriasArvoreEstruturaGet(
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<CategoriaArvoreResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/arvore/estrutura',
+            query: {
+                'apenas_ativas': apenasAtivas,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Categorias Raiz
+     * Busca apenas categorias raiz (sem categoria pai).
+     *
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriaListItem Successful Response
+     * @throws ApiError
+     */
+    public buscarCategoriasRaizApiCadastrosAdminCategoriasRaizListaGet(
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<Array<CategoriaListItem>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/raiz/lista',
+            query: {
+                'apenas_ativas': apenasAtivas,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Filhos Da Categoria
+     * Busca filhos de uma categoria específica.
+     *
+     * - **parent_id**: ID da categoria pai
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param parentId
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriaListItem Successful Response
+     * @throws ApiError
+     */
+    public buscarFilhosDaCategoriaApiCadastrosAdminCategoriasParentIdFilhosGet(
+        parentId: number,
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<Array<CategoriaListItem>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/{parent_id}/filhos',
+            path: {
+                'parent_id': parentId,
+            },
+            query: {
+                'apenas_ativas': apenasAtivas,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
      * List Parceiros
      * Lista todos os parceiros (endpoint público)
@@ -147,7 +388,7 @@ export class ApiCadastrosService {
      * @returns CategoriaSearchOut Successful Response
      * @throws ApiError
      */
-    public searchCategoriasApiCadastrosClientCategoriasSearchGet(
+    public searchCategoriasApiCardapioClientCategoriasSearchGet(
         xSuperToken: string,
         q?: (string | null),
         limit: number = 30,
@@ -155,7 +396,7 @@ export class ApiCadastrosService {
     ): CancelablePromise<Array<CategoriaSearchOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cadastros/client/categorias/search',
+            url: '/api/cardapio/client/categorias/search',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -176,13 +417,13 @@ export class ApiCadastrosService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public getCategoriaApiCadastrosClientCategoriasCatIdGet(
+    public getCategoriaApiCardapioClientCategoriasCatIdGet(
         catId: number,
         xSuperToken: string,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cadastros/client/categorias/{cat_id}',
+            url: '/api/cardapio/client/categorias/{cat_id}',
             path: {
                 'cat_id': catId,
             },
@@ -281,12 +522,12 @@ export class ApiCadastrosService {
     /**
      * Listar Enderecos
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listarEnderecosApiCadastrosClientEnderecosGet(
         xSuperToken: string,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/client/enderecos',
@@ -302,13 +543,13 @@ export class ApiCadastrosService {
      * Criar Endereco
      * @param xSuperToken
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoApiCadastrosClientEnderecosPost(
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/client/enderecos',
@@ -326,13 +567,13 @@ export class ApiCadastrosService {
      * Get Endereco
      * @param enderecoId
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecoApiCadastrosClientEnderecosEnderecoIdGet(
         enderecoId: number,
         xSuperToken: string,
-    ): CancelablePromise<EnderecoOut> {
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/client/enderecos/{endereco_id}',
@@ -352,14 +593,14 @@ export class ApiCadastrosService {
      * @param enderecoId
      * @param xSuperToken
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public atualizarEnderecoApiCadastrosClientEnderecosEnderecoIdPut(
         enderecoId: number,
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/cadastros/client/enderecos/{endereco_id}',
@@ -405,13 +646,13 @@ export class ApiCadastrosService {
      * Set Endereco Padrao
      * @param enderecoId
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public setEnderecoPadraoApiCadastrosClientEnderecosEnderecoIdSetPadraoPost(
         enderecoId: number,
         xSuperToken: string,
-    ): CancelablePromise<EnderecoOut> {
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/client/enderecos/{endereco_id}/set-padrao',
@@ -609,179 +850,6 @@ export class ApiCadastrosService {
         });
     }
     /**
-     * Search Categorias
-     * @param q Termo de busca por descrição/slug
-     * @param limit
-     * @param offset
-     * @returns CategoriaSearchOut Successful Response
-     * @throws ApiError
-     */
-    public searchCategoriasApiCadastrosAdminCategoriasSearchGet(
-        q?: (string | null),
-        limit: number = 30,
-        offset?: number,
-    ): CancelablePromise<Array<CategoriaSearchOut>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/categorias/search',
-            query: {
-                'q': q,
-                'limit': limit,
-                'offset': offset,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Get Categoria
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public getCategoriaApiCadastrosAdminCategoriasCatIdGet(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Editar Categoria
-     * @param catId
-     * @param requestBody
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public editarCategoriaApiCadastrosAdminCategoriasCatIdPut(
-        catId: number,
-        requestBody: CategoriaDeliveryIn,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'PUT',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Deletar Categoria
-     * @param catId
-     * @returns void
-     * @throws ApiError
-     */
-    public deletarCategoriaApiCadastrosAdminCategoriasCatIdDelete(
-        catId: number,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'DELETE',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Criar Categoria
-     * @param requestBody
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public criarCategoriaApiCadastrosAdminCategoriasPost(
-        requestBody: CategoriaDeliveryIn,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Move Categoria Direita
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public moveCategoriaDireitaApiCadastrosAdminCategoriasCatIdMoveRightPost(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias/{cat_id}/move-right',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Move Categoria Esquerda
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public moveCategoriaEsquerdaApiCadastrosAdminCategoriasCatIdMoveLeftPost(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias/{cat_id}/move-left',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Upload Imagem Categoria
-     * @param catId
-     * @param formData
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public uploadImagemCategoriaApiCadastrosAdminCategoriasCatIdImagemPatch(
-        catId: number,
-        formData: Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/cadastros/admin/categorias/{cat_id}/imagem',
-            path: {
-                'cat_id': catId,
-            },
-            formData: formData,
-            mediaType: 'multipart/form-data',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Listar Clientes
      * Endpoint para listar todos os clientes.
      * Requer autenticação de admin.
@@ -898,13 +966,13 @@ export class ApiCadastrosService {
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para adicionar endereço
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoClienteApiCadastrosAdminClientesClienteIdCriarEnderecoPost(
         clienteId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/admin/clientes/{cliente_id}/criar-endereco',
@@ -923,12 +991,12 @@ export class ApiCadastrosService {
      * Endpoint para consultar endereços de um cliente específico.
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para consultar endereços
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecosClienteApiCadastrosAdminClientesClienteIdUpdateEnderecoGet(
         clienteId: number,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/admin/clientes/{cliente_id}/update-endereco',
@@ -1054,12 +1122,12 @@ export class ApiCadastrosService {
      * Endpoint para admin listar endereços de um cliente específico.
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para listar endereços
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listarEnderecosAdminApiCadastrosAdminEnderecosClienteClienteIdGet(
         clienteId: number,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}',
@@ -1078,13 +1146,13 @@ export class ApiCadastrosService {
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para criar endereço
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoAdminApiCadastrosAdminEnderecosClienteClienteIdPost(
         clienteId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}',
@@ -1107,14 +1175,14 @@ export class ApiCadastrosService {
      * @param clienteId ID do cliente
      * @param enderecoId ID do endereço para atualizar
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public atualizarEnderecoAdminApiCadastrosAdminEnderecosClienteClienteIdEnderecoEnderecoIdPut(
         clienteId: number,
         enderecoId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}/endereco/{endereco_id}',
@@ -1762,177 +1830,6 @@ export class ApiCadastrosService {
             url: '/api/cadastros/admin/regioes-entrega/{regiao_id}',
             path: {
                 'regiao_id': regiaoId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Search Vitrines
-     * @param q Busca por título/slug
-     * @param codCategoria Filtra por categoria vinculada
-     * @param isHome Filtra por destaque da home
-     * @param limit
-     * @param offset
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public searchVitrinesApiCadastrosAdminVitrinesSearchGet(
-        q?: (string | null),
-        codCategoria?: (number | null),
-        isHome?: (boolean | null),
-        limit: number = 30,
-        offset?: number,
-    ): CancelablePromise<Array<VitrineOut>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/vitrines/search',
-            query: {
-                'q': q,
-                'cod_categoria': codCategoria,
-                'is_home': isHome,
-                'limit': limit,
-                'offset': offset,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Toggle Home Vitrine
-     * @param vitrineId ID da vitrine
-     * @param requestBody
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public toggleHomeVitrineApiCadastrosAdminVitrinesVitrineIdHomePatch(
-        vitrineId: number,
-        requestBody: ToggleHomeRequest,
-    ): CancelablePromise<VitrineOut> {
-        return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}/home',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Criar Vitrine
-     * @param requestBody
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public criarVitrineApiCadastrosAdminVitrinesPost(
-        requestBody: CriarVitrineRequest,
-    ): CancelablePromise<VitrineOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/vitrines',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Atualizar Vitrine
-     * @param vitrineId ID da vitrine
-     * @param requestBody
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public atualizarVitrineApiCadastrosAdminVitrinesVitrineIdPut(
-        vitrineId: number,
-        requestBody: AtualizarVitrineRequest,
-    ): CancelablePromise<VitrineOut> {
-        return this.httpRequest.request({
-            method: 'PUT',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Deletar Vitrine
-     * @param vitrineId ID da vitrine
-     * @returns void
-     * @throws ApiError
-     */
-    public deletarVitrineApiCadastrosAdminVitrinesVitrineIdDelete(
-        vitrineId: number,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'DELETE',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Vincular Produto
-     * @param vitrineId ID da vitrine
-     * @param requestBody
-     * @returns void
-     * @throws ApiError
-     */
-    public vincularProdutoApiCadastrosAdminVitrinesVitrineIdVincularPost(
-        vitrineId: number,
-        requestBody: VinculoRequest,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}/vincular',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Desvincular Produto
-     * @param vitrineId ID da vitrine
-     * @param codBarras Código de barras do produto
-     * @param empresaId Empresa do vínculo
-     * @returns void
-     * @throws ApiError
-     */
-    public desvincularProdutoApiCadastrosAdminVitrinesVitrineIdVincularCodBarrasDelete(
-        vitrineId: number,
-        codBarras: string,
-        empresaId: number,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'DELETE',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}/vincular/{cod_barras}',
-            path: {
-                'vitrine_id': vitrineId,
-                'cod_barras': codBarras,
-            },
-            query: {
-                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

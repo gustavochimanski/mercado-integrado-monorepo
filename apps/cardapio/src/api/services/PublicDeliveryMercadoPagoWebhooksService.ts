@@ -13,10 +13,10 @@ export class PublicDeliveryMercadoPagoWebhooksService {
      * @returns string Successful Response
      * @throws ApiError
      */
-    public mercadopagoWebhookHealthcheckApiDeliveryPublicWebhooksPagamentosMercadopagoGet(): CancelablePromise<Record<string, string>> {
+    public mercadopagoWebhookHealthcheckApiCardapioPublicWebhooksPagamentosMercadopagoGet(): CancelablePromise<Record<string, string>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/webhooks/pagamentos/mercadopago',
+            url: '/api/cardapio/public/webhooks/pagamentos/mercadopago',
         });
     }
     /**
@@ -27,14 +27,14 @@ export class PublicDeliveryMercadoPagoWebhooksService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public mercadopagoWebhookApiDeliveryPublicWebhooksPagamentosMercadopagoPost(
+    public mercadopagoWebhookApiCardapioPublicWebhooksPagamentosMercadopagoPost(
         id?: (string | null),
         topic?: (string | null),
         requestBody?: (MercadoPagoWebhookPayload | null),
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/public/webhooks/pagamentos/mercadopago',
+            url: '/api/cardapio/public/webhooks/pagamentos/mercadopago',
             query: {
                 'id': id,
                 'topic': topic,

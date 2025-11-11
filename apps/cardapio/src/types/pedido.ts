@@ -40,9 +40,11 @@ export interface Pedido {
   data_criacao: string; // ISO string
   data_atualizacao: string; // ISO string
   itens: ItemPedido[];
-  meio_pagamento_nome: string
-  cliente_nome: string
-
+  meio_pagamento_nome: string;
+  cliente_nome: string;
+  tipo_pedido?: TipoPedidoGateway;
+  numero_pedido?: string;
+  status_descricao?: string;
 }
 
 // ================= Request de finalizar pedido =================
@@ -52,16 +54,24 @@ export interface ItemPedidoRequest {
   observacao?: string;
 }
 
+export type TipoPedidoGateway = "DELIVERY" | "MESA" | "BALCAO";
+export type TipoPedidoCheckout = TipoPedidoGateway;
+
 export interface FinalizarPedidoRequest {
-  empresa_id: number;
+  empresa_id?: number;
+  tipo_pedido: TipoPedidoCheckout;
   telefone_cliente?: string; // será setado pelo token
-  endereco_id: number;
-  meio_pagamento_id: number;
+  cliente_id?: number | null;
+  endereco_id?: number | null;
+  mesa_codigo?: string | null;
+  num_pessoas?: number | null;
+  meio_pagamento_id?: number | null;
+  meios_pagamento?: MeioPagamentoParcialRequest[] | null;
   tipo_entrega?: TipoEntrega;
   origem?: OrigemPedido;
   observacao_geral?: string;
-  cupom_id?: number;
-  troco_para?: number;
+  cupom_id?: number | null;
+  troco_para?: number | null;
   itens: ItemPedidoRequest[];
 }
 
@@ -73,8 +83,6 @@ export interface ConfirmarPagamentoRequest {
 }
 
 // ================= Gateway Orquestrador =================
-export type TipoPedidoGateway = "DELIVERY" | "MESA" | "BALCAO";
-
 export interface MeioPagamentoParcialRequest {
   meio_pagamento_id: number;
   valor: number;
@@ -92,24 +100,22 @@ export interface CheckoutGatewayRequest {
   // Campos específicos para DELIVERY
   endereco_id?: number | null;
   meio_pagamento_id?: number | null;
-  meios_pagamento?: MeioPagamentoParcialRequest[];
-  tipo_entrega?: "DELIVERY" | "RETIRADA";
-  origem?: "WEB" | "APP" | "BALCAO";
+  meios_pagamento?: MeioPagamentoParcialRequest[] | null;
+  tipo_entrega?: TipoEntrega | "RETIRADA";
+  origem?: OrigemPedido | "BALCAO";
   cupom_id?: number | null;
   troco_para?: number | null;
   
-  // Campos específicos para MESA
-  mesa_id?: number | null;
+  // Campos específicos para MESA/BALCAO
+  mesa_codigo?: string | null;
   num_pessoas?: number | null;
-  
-  // BALCAO usa mesa_id também
 }
 
-export interface CheckoutGatewayResponse {
+export interface CheckoutGatewayResponse<T = any> {
   tipo_pedido: TipoPedidoGateway;
   success: boolean;
   message: string | null;
-  data: any; // PedidoResponse | PedidoMesaOut | object
+  data: T;
 }
 
 // ================= Gateway - Editar Pedido =================
@@ -123,10 +129,10 @@ export interface EditarPedidoGatewayRequest {
   [key: string]: any; // Permite campos adicionais
 }
 
-export interface EditarPedidoGatewayResponse {
+export interface EditarPedidoGatewayResponse<T = any> {
   success: boolean;
   message: string | null;
-  data: any; // PedidoResponse | PedidoMesaOut | object
+  data: T;
 }
 
 // ================= Gateway - Atualizar Item =================
@@ -138,10 +144,10 @@ export interface AtualizarItemGatewayRequest {
   observacao?: string | null;
 }
 
-export interface AtualizarItemGatewayResponse {
+export interface AtualizarItemGatewayResponse<T = any> {
   success: boolean;
   message: string | null;
-  data: any; // PedidoResponse | PedidoMesaOut | object
+  data: T;
 }
 
 // ================= Gateway - Atualizar Status =================
@@ -153,8 +159,8 @@ export interface AtualizarStatusGatewayRequest {
   user_agent?: string | null;
 }
 
-export interface AtualizarStatusGatewayResponse {
+export interface AtualizarStatusGatewayResponse<T = any> {
   success: boolean;
   message: string | null;
-  data: any; // PedidoResponse | PedidoMesaOut | object
+  data: T;
 }

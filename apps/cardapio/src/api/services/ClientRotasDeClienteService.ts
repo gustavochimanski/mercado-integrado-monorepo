@@ -7,8 +7,8 @@ import type { EditarPedidoRequest } from '../models/EditarPedidoRequest';
 import type { FinalizarPedidoRequest } from '../models/FinalizarPedidoRequest';
 import type { ItemPedidoEditar } from '../models/ItemPedidoEditar';
 import type { ModoEdicaoRequest } from '../models/ModoEdicaoRequest';
-import type { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
-import type { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
+import { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
+import { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
 import type { PedidoResponse } from '../models/PedidoResponse';
 import type { PedidoResponseSimplificado } from '../models/PedidoResponseSimplificado';
 import type { PreviewCheckoutResponse } from '../models/PreviewCheckoutResponse';
@@ -28,13 +28,38 @@ export class ClientRotasDeClienteService {
      * @returns PreviewCheckoutResponse Successful Response
      * @throws ApiError
      */
-    public previewCheckoutApiDeliveryClientPedidosCheckoutPreviewPost(
+    public previewCheckoutApiCardapioClientPedidosCheckoutPreviewPost(
         xSuperToken: string,
         requestBody: FinalizarPedidoRequest,
     ): CancelablePromise<PreviewCheckoutResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pedidos/checkout/preview',
+            url: '/api/cardapio/client/pedidos/checkout/preview',
+            headers: {
+                'x-super-token': xSuperToken,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Finalizar Checkout
+     * Finaliza o checkout criando o pedido no banco de dados.
+     * @param xSuperToken
+     * @param requestBody
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public finalizarCheckoutApiCardapioClientPedidosCheckoutPost(
+        xSuperToken: string,
+        requestBody: FinalizarPedidoRequest,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/client/pedidos/checkout',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -54,14 +79,14 @@ export class ClientRotasDeClienteService {
      * @returns PedidoResponseSimplificado Successful Response
      * @throws ApiError
      */
-    public listarPedidosApiDeliveryClientPedidosGet(
+    public listarPedidosApiCardapioClientPedidosGet(
         xSuperToken: string,
         skip?: number,
         limit: number = 50,
     ): CancelablePromise<Array<PedidoResponseSimplificado>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/client/pedidos/',
+            url: '/api/cardapio/client/pedidos/',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -86,14 +111,14 @@ export class ClientRotasDeClienteService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarItemClienteApiDeliveryClientPedidosPedidoIdItensPut(
+    public atualizarItemClienteApiCardapioClientPedidosPedidoIdItensPut(
         pedidoId: number,
         xSuperToken: string,
         requestBody: ItemPedidoEditar,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/client/pedidos/{pedido_id}/itens',
+            url: '/api/cardapio/client/pedidos/{pedido_id}/itens',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -123,14 +148,14 @@ export class ClientRotasDeClienteService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarPedidoClienteApiDeliveryClientPedidosPedidoIdEditarPut(
+    public atualizarPedidoClienteApiCardapioClientPedidosPedidoIdEditarPut(
         pedidoId: number,
         xSuperToken: string,
         requestBody: EditarPedidoRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/client/pedidos/{pedido_id}/editar',
+            url: '/api/cardapio/client/pedidos/{pedido_id}/editar',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -154,14 +179,14 @@ export class ClientRotasDeClienteService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public alterarModoEdicaoApiDeliveryClientPedidosPedidoIdModoEdicaoPut(
+    public alterarModoEdicaoApiCardapioClientPedidosPedidoIdModoEdicaoPut(
         pedidoId: number,
         xSuperToken: string,
         requestBody: ModoEdicaoRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/client/pedidos/{pedido_id}/modo-edicao',
+            url: '/api/cardapio/client/pedidos/{pedido_id}/modo-edicao',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -184,15 +209,15 @@ export class ClientRotasDeClienteService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public confirmarPagamentoApiDeliveryClientPagamentosPedidoIdConfirmarPost(
+    public confirmarPagamentoApiCardapioClientPagamentosPedidoIdConfirmarPost(
         pedidoId: number,
         xSuperToken: string,
-        metodo: PagamentoMetodoEnum = 'PIX',
-        gateway: PagamentoGatewayEnum = 'PIX_INTERNO',
+        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX,
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.PIX_INTERNO,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pagamentos/{pedido_id}/confirmar',
+            url: '/api/cardapio/client/pagamentos/{pedido_id}/confirmar',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -217,15 +242,15 @@ export class ClientRotasDeClienteService {
      * @returns TransacaoResponse Successful Response
      * @throws ApiError
      */
-    public iniciarPagamentoApiDeliveryClientPagamentosPedidoIdPost(
+    public iniciarPagamentoApiCardapioClientPagamentosPedidoIdPost(
         pedidoId: number,
         xSuperToken: string,
-        metodo: PagamentoMetodoEnum = 'PIX_ONLINE',
-        gateway: PagamentoGatewayEnum = 'MERCADOPAGO',
+        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX_ONLINE,
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.MERCADOPAGO,
     ): CancelablePromise<TransacaoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pagamentos/{pedido_id}',
+            url: '/api/cardapio/client/pagamentos/{pedido_id}',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -250,15 +275,15 @@ export class ClientRotasDeClienteService {
      * @returns ConsultarTransacaoResponse Successful Response
      * @throws ApiError
      */
-    public consultarPagamentoApiDeliveryClientPagamentosPedidoIdProviderIdGet(
+    public consultarPagamentoApiCardapioClientPagamentosPedidoIdProviderIdGet(
         pedidoId: number,
         providerId: string,
         xSuperToken: string,
-        gateway: PagamentoGatewayEnum = 'MERCADOPAGO',
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.MERCADOPAGO,
     ): CancelablePromise<ConsultarTransacaoResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/client/pagamentos/{pedido_id}/{provider_id}',
+            url: '/api/cardapio/client/pagamentos/{pedido_id}/{provider_id}',
             path: {
                 'pedido_id': pedidoId,
                 'provider_id': providerId,
@@ -284,13 +309,13 @@ export class ClientRotasDeClienteService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public searchEnderecoApiMensuraClientGeoapifySearchEnderecoGet(
+    public searchEnderecoApiClientGeoapifySearchEnderecoGet(
         text: string,
         xSuperToken: string,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/client/geoapify/search-endereco',
+            url: '/api/client/geoapify/search-endereco',
             headers: {
                 'x-super-token': xSuperToken,
             },

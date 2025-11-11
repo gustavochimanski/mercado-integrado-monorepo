@@ -13,8 +13,6 @@ import axios from "axios";
 import { getToken, setToken, clearToken } from "../../stores/token/tokenStore";
 import { loginService, logoutService } from "./authenticate";
 import { useReceiveTokenFromParent } from "../../stores/token/UseReceiveTokenFromParent";
-import { getTokenCliente } from "../../stores/client/ClientStore";
-import { getCookie } from "cookies-next";
 
 // Instância axios com baseURL configurada
 const api = axios.create({
@@ -50,49 +48,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
     await new Promise(resolve => setTimeout(resolve, 50));
     
     // Primeiro tenta o token normal (admin)
-    let token = getToken();
-    let headers: Record<string, string> = {};
+    const authToken = getToken();
 
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    } else {
-      // Se não tiver token normal, tenta usar o super_token do cliente
-      // Tenta do cookie primeiro (mais rápido após salvar)
-      const cookieToken = getCookie("super_token");
-      const storeToken = getTokenCliente();
-      const superToken = (typeof cookieToken === "string" ? cookieToken : null) || storeToken;
-      
-      if (superToken && superToken.trim()) {
-        // Também pode precisar do header x-super-token
-        headers["x-super-token"] = superToken;
-        token = superToken;
-      }
-    }
-
-    if (!token) {
+    if (!authToken) {
       setUser(null);
       return;
     }
 
     try {
       // Usa a instância axios com baseURL já configurada (igual ao authenticate.ts)
-      const res = await api.get<User>("api/auth/client/me", { headers });
+      const res = await api.get<User>("api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
       setUser(res.data);
-      
-      // Se o super_token funcionou e o usuário é admin, salva como token normal também
-      if (res.data && res.data.type_user === "admin" && token && !getToken()) {
-        setToken(token);
-      }
     } catch (err) {
-      // Se falhou com super_token, não limpa tudo (pode ser apenas cliente normal)
-      if (getToken()) {
-        console.warn("❌ Erro ao buscar usuário:", err);
-        clearToken();
-        setUser(null);
-      } else {
-        // Se não tinha token normal e falhou, apenas limpa o estado (cliente não admin)
-        setUser(null);
-      }
+      console.warn("❌ Erro ao buscar usuário:", err);
+      clearToken();
+      setUser(null);
     }
   }, []);
 

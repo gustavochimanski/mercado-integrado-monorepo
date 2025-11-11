@@ -16,13 +16,13 @@ export class PublicDeliveryHomeService {
      * @returns HomeResponse Successful Response
      * @throws ApiError
      */
-    public listarHomeApiDeliveryPublicHomeHomeGet(
+    public listarHomeApiCardapioPublicHomeHomeGet(
         empresaId: number,
         isHome: boolean,
     ): CancelablePromise<HomeResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home',
+            url: '/api/cardapio/public/home/home',
             query: {
                 'empresa_id': empresaId,
                 'is_home': isHome,
@@ -40,14 +40,14 @@ export class PublicDeliveryHomeService {
      * @returns VitrineComProdutosResponse Successful Response
      * @throws ApiError
      */
-    public listarVitrinesEProdutosPorCategoriaApiDeliveryPublicHomeHomeVitrinePorCategoriaGet(
+    public listarVitrinesEProdutosPorCategoriaApiCardapioPublicHomeHomeVitrinePorCategoriaGet(
         empresaId: number,
         codCategoria?: (number | null),
         slug?: (string | null),
     ): CancelablePromise<Array<VitrineComProdutosResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home/vitrine-por-categoria',
+            url: '/api/cardapio/public/home/home/vitrine-por-categoria',
             query: {
                 'empresa_id': empresaId,
                 'cod_categoria': codCategoria,
@@ -65,13 +65,13 @@ export class PublicDeliveryHomeService {
      * @returns CategoryPageResponse Successful Response
      * @throws ApiError
      */
-    public getCategoriaPageApiDeliveryPublicHomeHomeCategoriaGet(
+    public getCategoriaPageApiCardapioPublicHomeHomeCategoriaGet(
         empresaId: number,
         slug: string,
     ): CancelablePromise<CategoryPageResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home/categoria',
+            url: '/api/cardapio/public/home/home/categoria',
             query: {
                 'empresa_id': empresaId,
                 'slug': slug,

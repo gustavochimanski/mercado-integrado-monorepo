@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Card } from "../ui/card";
 import CategoryOptions from "@cardapio/components/admin/options/CategoryOptions";
 import { ModalEditCategoria } from "@cardapio/components/admin/modals/ModalEditCategoria";
+import { ModalEditCategoriaImagem } from "@cardapio/components/admin/modals/ModalEditCategoriaImagem";
 
 interface CategoryCardProps {
   id: number;
@@ -16,7 +17,8 @@ interface CategoryCardProps {
 
 export function CategoryCard({ id, label, image, href, empresaId }: CategoryCardProps) {
   const src = image ?? "/placeholder-categoria.jpg";
-  const [editOpen, setEditOpen] = useState(false);
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
+  const [editImageOpen, setEditImageOpen] = useState(false);
 
   return (
     <div className="relative">
@@ -37,11 +39,23 @@ export function CategoryCard({ id, label, image, href, empresaId }: CategoryCard
         </div>
       </Link>
 
-      <CategoryOptions categoryId={id} onEdit={() => setEditOpen(true)} />
+      <CategoryOptions
+        categoryId={id}
+        onEditDetails={() => setEditDetailsOpen(true)}
+        onEditImage={() => setEditImageOpen(true)}
+        hasImage={!!image}
+      />
 
       <ModalEditCategoria
-        open={editOpen}
-        onOpenChange={setEditOpen}
+        open={editDetailsOpen}
+        onOpenChange={setEditDetailsOpen}
+        empresaId={empresaId}
+        categoriaId={id}
+      />
+
+      <ModalEditCategoriaImagem
+        open={editImageOpen}
+        onOpenChange={setEditImageOpen}
         empresaId={empresaId}
         categoriaId={id}
       />

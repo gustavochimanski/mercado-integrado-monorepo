@@ -26,7 +26,7 @@ export function useMeiosPagamento(enabled = true) {
   return useQuery<MeioPagamento[]>({
     queryKey: ["meios_pagamento"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/api/delivery/client/meios-pagamento/");
+      const { data } = await apiClienteAdmin.get<MeioPagamento[]>("/api/cadastros/client/meios-pagamento/");
       // Filtrar apenas meios de pagamento ativos
       return data.filter(m => m.ativo !== false);
     },

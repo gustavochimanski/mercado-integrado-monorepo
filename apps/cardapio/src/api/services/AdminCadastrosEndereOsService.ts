@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
-import type { app__api__delivery__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoUpdate';
-import type { EnderecoOut } from '../models/EnderecoOut';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoOut';
+import type { EnderecoUpdate } from '../models/EnderecoUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class AdminCadastrosEndereOsService {
@@ -14,12 +14,12 @@ export class AdminCadastrosEndereOsService {
      * Endpoint para admin listar endereços de um cliente específico.
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para listar endereços
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listarEnderecosAdminApiCadastrosAdminEnderecosClienteClienteIdGet(
         clienteId: number,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}',
@@ -38,13 +38,13 @@ export class AdminCadastrosEndereOsService {
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para criar endereço
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoAdminApiCadastrosAdminEnderecosClienteClienteIdPost(
         clienteId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}',
@@ -67,14 +67,14 @@ export class AdminCadastrosEndereOsService {
      * @param clienteId ID do cliente
      * @param enderecoId ID do endereço para atualizar
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public atualizarEnderecoAdminApiCadastrosAdminEnderecosClienteClienteIdEnderecoEnderecoIdPut(
         clienteId: number,
         enderecoId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}/endereco/{endereco_id}',

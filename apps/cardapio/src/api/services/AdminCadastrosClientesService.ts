@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoOut';
 import type { ClienteAdminUpdate } from '../models/ClienteAdminUpdate';
 import type { ClienteCreate } from '../models/ClienteCreate';
 import type { ClienteOut } from '../models/ClienteOut';
-import type { EnderecoOut } from '../models/EnderecoOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class AdminCadastrosClientesService {
@@ -128,13 +128,13 @@ export class AdminCadastrosClientesService {
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para adicionar endereço
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoClienteApiCadastrosAdminClientesClienteIdCriarEnderecoPost(
         clienteId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/admin/clientes/{cliente_id}/criar-endereco',
@@ -153,12 +153,12 @@ export class AdminCadastrosClientesService {
      * Endpoint para consultar endereços de um cliente específico.
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para consultar endereços
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecosClienteApiCadastrosAdminClientesClienteIdUpdateEnderecoGet(
         clienteId: number,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/admin/clientes/{cliente_id}/update-endereco',

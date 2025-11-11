@@ -18,6 +18,8 @@ export type MesaListOut = {
     ativa: string;
     label: string;
     num_pessoas_atual?: (number | null);
+    cliente_atual_id?: (number | null);
+    cliente_atual_nome?: (string | null);
     pedidos_abertos?: Array<MesaPedidoResumo>;
 };
 

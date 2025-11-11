@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useQueryMensuraEmpresaClient } from "@cardapio/services/useQueryMensuraEmpresaClient";
+import { useQueryEmpresaPublic } from "@cardapio/services/useQueryEmpresaPublic";
 
 export function ThemeProvider() {
-  const { data: empresa } = useQueryMensuraEmpresaClient(true, 1);
+  const { data: empresa } = useQueryEmpresaPublic(true, 1);
 
   useEffect(() => {
     const tema = empresa?.cardapio_tema?.trim();

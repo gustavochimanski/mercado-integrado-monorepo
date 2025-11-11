@@ -1,9 +1,9 @@
 // components/LoginWrapper.tsx
 "use client";
 
-import { useModoSupervisor } from "@cardapio/hooks/useModoSupervisor";
 import LoginComponent from "@cardapio/components/auth/SupervisorLoginModal";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
 
 export function LoginWrapper() {
   const isSupervisor = useModoSupervisor();

@@ -1,56 +1,148 @@
 "use client";
 
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { useState } from "react";
+import { useState, useTransition, type ChangeEvent, type FormEvent } from "react";
+import Image from "next/image";
+import { Eye, EyeOff, Lock, User } from "lucide-react";
+import { toast } from "sonner";
 
-export default function LoginComponent() {
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { Input } from "@cardapio/components/Shared/ui/input";
+import { Label } from "@cardapio/components/Shared/ui/label";
+import { Button } from "@cardapio/components/Shared/ui/button";
+
+export default function SupervisorLoginModal() {
   const { login } = useUserContext();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-  async function handleLogin() {
-    try {
-      setError("");
-      await login(username, password); 
-    } catch {
-      setError("Credenciais inválidas. Tente novamente.");
-    }
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    startTransition(async () => {
+      try {
+        setError("");
+        await login(username, password);
+        toast.success("Login realizado com sucesso!");
+      } catch {
+        const message = "Credenciais inválidas. Tente novamente.";
+        setError(message);
+        toast.error(message);
+      }
+    });
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg w-full max-w-sm space-y-4">
-        <h2 className="text-xl font-bold text-center">Login do Supervisor</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm px-4">
+      <div className="relative w-full max-w-md px-8 py-10 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/60">
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/logo.png"
+            alt="Logo UNITEC"
+            width={84}
+            height={84}
+            className="object-contain"
+            draggable={false}
+            priority
+            style={{ width: "auto", height: "auto" }}
+          />
+        </div>
 
-        <input
-          type="text"
-          className="border p-2 w-full"
-          placeholder="Usuário"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          className="border p-2 w-full"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="text-center mb-8">
+          <p className="text-xs text-slate-500 font-medium tracking-widest mb-2">
+            GESTÃO E TECNOLOGIA
+          </p>
+          <h2 className="text-xl font-semibold text-slate-700">
+            Login do Supervisor
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">Insira suas credenciais para continuar</p>
+        </div>
 
-        {error && (
-          <div className="text-red-600 text-sm text-center bg-red-50 p-2 rounded">
-            {error}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="username" className="text-slate-700 font-medium">
+              Usuário
+            </Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <Input
+                id="username"
+                type="text"
+                autoComplete="off"
+                placeholder="Digite seu usuário"
+                disabled={isPending}
+                className="pl-10"
+                value={username}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => setUsername(event.target.value)}
+              />
+            </div>
           </div>
-        )}
 
-        <button
-          onClick={handleLogin}
-          className="bg-blue-500 text-white w-full py-2 rounded"
-        >
-          Entrar
-        </button>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-slate-700 font-medium">
+              Senha
+            </Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="Digite sua senha"
+                disabled={isPending}
+                className="pl-10 pr-11"
+                value={password}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors"
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              {error}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full font-semibold h-11 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+            disabled={isPending}
+          >
+            {isPending && (
+              <svg
+                className="mr-2 h-5 w-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
+            {isPending ? "Entrando..." : "Entrar"}
+          </Button>
+        </form>
       </div>
     </div>
   );

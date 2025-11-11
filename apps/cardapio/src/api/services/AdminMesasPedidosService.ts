@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AdicionarItemRequest } from '../models/AdicionarItemRequest';
+import type { AtualizarObservacoesRequest } from '../models/AtualizarObservacoesRequest';
 import type { FecharContaMesaRequest } from '../models/FecharContaMesaRequest';
 import type { PedidoMesaCreate } from '../models/PedidoMesaCreate';
 import type { PedidoMesaOut } from '../models/PedidoMesaOut';
@@ -196,6 +197,31 @@ export class AdminMesasPedidosService {
             path: {
                 'pedido_id': pedidoId,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Observacoes Pedido
+     * Atualiza as observações de um pedido
+     * @param pedidoId ID do pedido
+     * @param requestBody
+     * @returns PedidoMesaOut Successful Response
+     * @throws ApiError
+     */
+    public atualizarObservacoesPedidoApiMesasAdminPedidosPedidoIdPut(
+        pedidoId: number,
+        requestBody: AtualizarObservacoesRequest,
+    ): CancelablePromise<PedidoMesaOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/mesas/admin/pedidos/{pedido_id}',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

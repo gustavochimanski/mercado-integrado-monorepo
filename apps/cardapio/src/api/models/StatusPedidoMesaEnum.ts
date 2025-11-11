@@ -4,9 +4,9 @@
 /* eslint-disable */
 export enum StatusPedidoMesaEnum {
     P = 'P',
-    C = 'C',
+    O = 'O',
     R = 'R',
     T = 'T',
     E = 'E',
-    X = 'X',
+    C = 'C',
 }

@@ -87,13 +87,13 @@ export class PublicRotasPBlicasService {
      * @returns HomeResponse Successful Response
      * @throws ApiError
      */
-    public listarHomeApiDeliveryPublicHomeHomeGet(
+    public listarHomeApiCardapioPublicHomeHomeGet(
         empresaId: number,
         isHome: boolean,
     ): CancelablePromise<HomeResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home',
+            url: '/api/cardapio/public/home/home',
             query: {
                 'empresa_id': empresaId,
                 'is_home': isHome,
@@ -111,14 +111,14 @@ export class PublicRotasPBlicasService {
      * @returns VitrineComProdutosResponse Successful Response
      * @throws ApiError
      */
-    public listarVitrinesEProdutosPorCategoriaApiDeliveryPublicHomeHomeVitrinePorCategoriaGet(
+    public listarVitrinesEProdutosPorCategoriaApiCardapioPublicHomeHomeVitrinePorCategoriaGet(
         empresaId: number,
         codCategoria?: (number | null),
         slug?: (string | null),
     ): CancelablePromise<Array<VitrineComProdutosResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home/vitrine-por-categoria',
+            url: '/api/cardapio/public/home/home/vitrine-por-categoria',
             query: {
                 'empresa_id': empresaId,
                 'cod_categoria': codCategoria,
@@ -136,13 +136,13 @@ export class PublicRotasPBlicasService {
      * @returns CategoryPageResponse Successful Response
      * @throws ApiError
      */
-    public getCategoriaPageApiDeliveryPublicHomeHomeCategoriaGet(
+    public getCategoriaPageApiCardapioPublicHomeHomeCategoriaGet(
         empresaId: number,
         slug: string,
     ): CancelablePromise<CategoryPageResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home/categoria',
+            url: '/api/cardapio/public/home/home/categoria',
             query: {
                 'empresa_id': empresaId,
                 'slug': slug,
@@ -158,10 +158,10 @@ export class PublicRotasPBlicasService {
      * @returns string Successful Response
      * @throws ApiError
      */
-    public mercadopagoWebhookHealthcheckApiDeliveryPublicWebhooksPagamentosMercadopagoGet(): CancelablePromise<Record<string, string>> {
+    public mercadopagoWebhookHealthcheckApiCardapioPublicWebhooksPagamentosMercadopagoGet(): CancelablePromise<Record<string, string>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/webhooks/pagamentos/mercadopago',
+            url: '/api/cardapio/public/webhooks/pagamentos/mercadopago',
         });
     }
     /**
@@ -172,14 +172,14 @@ export class PublicRotasPBlicasService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public mercadopagoWebhookApiDeliveryPublicWebhooksPagamentosMercadopagoPost(
+    public mercadopagoWebhookApiCardapioPublicWebhooksPagamentosMercadopagoPost(
         id?: (string | null),
         topic?: (string | null),
         requestBody?: (MercadoPagoWebhookPayload | null),
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/public/webhooks/pagamentos/mercadopago',
+            url: '/api/cardapio/public/webhooks/pagamentos/mercadopago',
             query: {
                 'id': id,
                 'topic': topic,
@@ -197,12 +197,12 @@ export class PublicRotasPBlicasService {
      * @returns EmpresaClientOut Successful Response
      * @throws ApiError
      */
-    public buscarEmpresaClientApiMensuraPublicEmpGet(
+    public buscarEmpresaClientApiCadastrosPublicEmpGet(
         empresaId: number,
     ): CancelablePromise<EmpresaClientOut> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/public/emp/',
+            url: '/api/cadastros/public/emp/',
             query: {
                 'empresa_id': empresaId,
             },

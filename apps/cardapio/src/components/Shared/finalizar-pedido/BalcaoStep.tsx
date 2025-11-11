@@ -1,13 +1,133 @@
 "use client";
 
-import { Store, Clock, CheckCircle2, AlertCircle, ShoppingBag } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Store, Clock, CheckCircle2, AlertCircle, ShoppingBag, Building2 } from "lucide-react";
 import { Card, CardContent } from "@cardapio/components/Shared/ui/card";
+import { Input } from "@cardapio/components/Shared/ui/input";
+import { Label } from "@cardapio/components/Shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cardapio/components/Shared/ui/select";
+import { cn } from "@cardapio/lib/utils";
 
 interface BalcaoStepProps {
-  // Não precisa de seleção de mesa, apenas confirmação
+  mesaCodigo: string | null;
+  onMesaCodigoChange: (mesaCodigo: string | null) => void;
+  empresas: {
+    id: number;
+    nome: string;
+    distancia_km?: number | null;
+    bairro?: string | null;
+    cidade?: string | null;
+    estado?: string | null;
+  }[];
+  empresaSelecionadaId: number | null;
+  onEmpresaSelecionadaChange: (empresaId: number | null) => void;
+  isLoadingEmpresas?: boolean;
+  carregamentoFalhou?: boolean;
 }
 
-export default function BalcaoStep({}: BalcaoStepProps) {
+type EmpresaListaItem = BalcaoStepProps["empresas"][number];
+
+export default function BalcaoStep({
+  mesaCodigo,
+  onMesaCodigoChange,
+  empresas,
+  empresaSelecionadaId,
+  onEmpresaSelecionadaChange,
+  isLoadingEmpresas = false,
+  carregamentoFalhou = false,
+}: BalcaoStepProps) {
+  const [codigoLocal, setCodigoLocal] = useState<string>(mesaCodigo ?? "");
+
+  useEffect(() => {
+    if ((mesaCodigo ?? "") !== codigoLocal) {
+      setCodigoLocal(mesaCodigo ?? "");
+    }
+  }, [mesaCodigo]);
+
+  const handleChange = (value: string) => {
+    const apenasNumeros = value.replace(/\D/g, "");
+    setCodigoLocal(apenasNumeros);
+
+    if (apenasNumeros) {
+      onMesaCodigoChange(apenasNumeros);
+    } else {
+      onMesaCodigoChange(null);
+    }
+  };
+
+  const opcoesEmpresas = useMemo<Array<EmpresaListaItem & { label: string; value: string }>>(
+    () =>
+      empresas.map((empresa: EmpresaListaItem) => ({
+        ...empresa,
+        label: empresa.nome,
+        value: String(empresa.id),
+      })),
+    [empresas]
+  );
+
+  const descricaoEmpresaSelecionada = useMemo(() => {
+    if (!empresaSelecionadaId) {
+      return "Selecione a loja onde você está realizando a retirada.";
+    }
+
+    const empresa = empresas.find((item: EmpresaListaItem) => item.id === empresaSelecionadaId);
+    if (!empresa) {
+      return "Selecione a loja onde você está realizando a retirada.";
+    }
+
+    const distanciaInfo =
+      typeof empresa.distancia_km === "number"
+        ? `${empresa.distancia_km.toFixed(1)} km`
+        : null;
+
+    const localizacao = [empresa.bairro, empresa.cidade, empresa.estado]
+      .filter(Boolean)
+      .join(" • ");
+
+    const descricao = [distanciaInfo, localizacao].filter(Boolean).join(" • ");
+    return descricao || "Loja selecionada para retirada.";
+  }, [empresaSelecionadaId, empresas]);
+
+  const formatDescricaoEmpresa = (empresaId: number) => {
+    const empresa = empresas.find((item: EmpresaListaItem) => item.id === empresaId);
+    if (!empresa) {
+      return null;
+    }
+
+    const distanciaInfo =
+      typeof empresa.distancia_km === "number"
+        ? `${empresa.distancia_km.toFixed(1)} km`
+        : null;
+
+    const localizacao = [empresa.bairro, empresa.cidade, empresa.estado]
+      .filter(Boolean)
+      .join(" • ");
+
+    return [distanciaInfo, localizacao].filter(Boolean).join(" • ");
+  };
+
+  const handleEmpresaChange = (value: string) => {
+    if (value === "empty") {
+      onEmpresaSelecionadaChange(null);
+      return;
+    }
+
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      onEmpresaSelecionadaChange(null);
+    } else {
+      onEmpresaSelecionadaChange(parsed);
+    }
+  };
+
+  const nenhumaEmpresaDisponivel = !isLoadingEmpresas && empresas.length === 0;
+
   return (
     <div className="space-y-4">
       <div>
@@ -49,6 +169,79 @@ export default function BalcaoStep({}: BalcaoStepProps) {
         </CardContent>
       </Card>
 
+      <Card className="border border-dashed border-muted-foreground/40">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <Building2 className="text-primary" size={24} />
+            </div>
+            <div>
+              <p className="text-base font-medium">Onde você está?</p>
+              <p className="text-sm text-muted-foreground">
+                Escolha a unidade em que você realizará a retirada do pedido.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Unidade</Label>
+
+            <Select
+              onValueChange={handleEmpresaChange}
+              value={
+                empresaSelecionadaId ? String(empresaSelecionadaId) : "empty"
+              }
+              disabled={isLoadingEmpresas || carregamentoFalhou || nenhumaEmpresaDisponivel}
+            >
+              <SelectTrigger className={cn("w-full justify-between", !empresaSelecionadaId && "text-muted-foreground")}>
+                <SelectValue placeholder={
+                  isLoadingEmpresas
+                    ? "Carregando unidades..."
+                    : carregamentoFalhou
+                      ? "Não foi possível carregar as unidades"
+                      : nenhumaEmpresaDisponivel
+                        ? "Nenhuma unidade disponível no momento"
+                        : "Selecione a unidade para retirada"
+                } />
+              </SelectTrigger>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] max-h-72">
+                {empresas.length > 0 && (
+                  <SelectItem value="empty">
+                    <span className="text-sm text-muted-foreground">Limpar seleção</span>
+                  </SelectItem>
+                )}
+                {opcoesEmpresas.map((empresa) => (
+                  <SelectItem key={empresa.value} value={empresa.value}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{empresa.label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDescricaoEmpresa(Number(empresa.value)) || "Endereço indisponível"}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {!isLoadingEmpresas && empresaSelecionadaId && (
+              <p className="text-xs text-muted-foreground">{descricaoEmpresaSelecionada}</p>
+            )}
+
+            {carregamentoFalhou && (
+              <p className="text-xs text-destructive">
+                Não foi possível carregar as unidades. Atualize a página ou tente novamente mais tarde.
+              </p>
+            )}
+
+            {nenhumaEmpresaDisponivel && (
+              <p className="text-xs text-muted-foreground">
+                No momento não há unidades disponíveis para retirada. Volte mais tarde ou escolha outro tipo de atendimento.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
@@ -66,6 +259,23 @@ export default function BalcaoStep({}: BalcaoStepProps) {
       <div className="bg-muted/30 rounded-xl p-4 text-center">
         <p className="text-sm text-muted-foreground font-medium">
           Continue para escolher a forma de pagamento
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="codigo-balcao" className="text-base font-medium">
+          Código ou número de referência (opcional)
+        </Label>
+        <Input
+          id="codigo-balcao"
+          type="text"
+          inputMode="numeric"
+          placeholder="Informe se desejar vincular a uma mesa"
+          value={codigoLocal}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Use este campo se o estabelecimento utilizar códigos para retirada.
         </p>
       </div>
     </div>

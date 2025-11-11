@@ -13,6 +13,10 @@ import type { Pedido } from "@cardapio/types/pedido";
  * @returns Tipo do pedido: 'DELIVERY' | 'MESA' | 'BALCAO'
  */
 export function getTipoPedido(pedido: Pedido): 'DELIVERY' | 'MESA' | 'BALCAO' {
+  if (pedido.tipo_pedido) {
+    return pedido.tipo_pedido;
+  }
+
   const obs = pedido.observacao_geral || '';
   
   // Se tem endereço = delivery

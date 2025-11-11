@@ -9,5 +9,7 @@ export type MesaPedidoResumo = {
     status: StatusPedidoMesaEnum;
     num_pessoas?: (number | null);
     valor_total: number;
+    cliente_id?: (number | null);
+    cliente_nome?: (string | null);
 };
 

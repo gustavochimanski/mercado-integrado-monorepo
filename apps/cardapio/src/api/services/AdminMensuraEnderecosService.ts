@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__mensura__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__mensura__schemas__schema_endereco__EnderecoCreate';
-import type { app__api__mensura__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__mensura__schemas__schema_endereco__EnderecoUpdate';
-import type { EnderecoResponse } from '../models/EnderecoResponse';
+import type { app__api__cadastros__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cadastros__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cadastros__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cadastros__schemas__schema_endereco__EnderecoOut';
+import type { EnderecoUpdate } from '../models/EnderecoUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class AdminMensuraEnderecosService {
@@ -12,12 +12,12 @@ export class AdminMensuraEnderecosService {
     /**
      * Create Endereco
      * @param requestBody
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public createEnderecoApiMensuraAdminEnderecosPost(
-        requestBody: app__api__mensura__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoResponse> {
+        requestBody: app__api__cadastros__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cadastros__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/mensura/admin/enderecos/',
@@ -32,13 +32,13 @@ export class AdminMensuraEnderecosService {
      * List Enderecos
      * @param skip
      * @param limit
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listEnderecosApiMensuraAdminEnderecosGet(
         skip?: number,
         limit: number = 100,
-    ): CancelablePromise<Array<EnderecoResponse>> {
+    ): CancelablePromise<Array<app__api__cadastros__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/mensura/admin/enderecos/',
@@ -54,12 +54,12 @@ export class AdminMensuraEnderecosService {
     /**
      * Get Endereco
      * @param id
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecoApiMensuraAdminEnderecosIdGet(
         id: number,
-    ): CancelablePromise<EnderecoResponse> {
+    ): CancelablePromise<app__api__cadastros__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/mensura/admin/enderecos/{id}',
@@ -75,13 +75,13 @@ export class AdminMensuraEnderecosService {
      * Update Endereco
      * @param id
      * @param requestBody
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public updateEnderecoApiMensuraAdminEnderecosIdPut(
         id: number,
-        requestBody: app__api__mensura__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoResponse> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cadastros__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/mensura/admin/enderecos/{id}',

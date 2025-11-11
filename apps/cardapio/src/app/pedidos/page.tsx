@@ -13,7 +13,7 @@ import { Badge } from "@cardapio/components/Shared/ui/badge";
 import { format, isToday, isYesterday, subDays, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Pedido } from "@cardapio/types/pedido";
-import { usePedidos } from "@cardapio/services/useQueryPedido";
+import { usePedidos } from "@cardapio/services/pedidos/useQueryPedido";
 import { 
   Pencil, 
   CircleArrowLeft, 
@@ -123,21 +123,24 @@ export default function RoutePedidos() {
                 <div className="space-y-3">
                   <Accordion type="single" collapsible className="w-full space-y-2">
                     {orders.map((order) => {
-                      const date = new Date(order.data_criacao);
-                      const formattedDate = isToday(date)
-                        ? format(date, "HH:mm", { locale: ptBR })
-                        : isYesterday(date)
-                        ? `Ontem ${format(date, "HH:mm", { locale: ptBR })}`
-                        : format(date, "dd/MM/yyyy HH:mm", { locale: ptBR });
+                      const date = order.data_criacao ? new Date(order.data_criacao) : null;
+                      const formattedDate = date
+                        ? isToday(date)
+                          ? format(date, "HH:mm", { locale: ptBR })
+                          : isYesterday(date)
+                            ? `Ontem ${format(date, "HH:mm", { locale: ptBR })}`
+                            : format(date, "dd/MM/yyyy HH:mm", { locale: ptBR })
+                        : "Data indisponível";
                       
+                      const tipoPedido = order.tipo_pedido ?? getTipoPedido(order);
                       const normalizedStatus = normalizeStatus(order.status);
                       const statusInfo = getStatusConfig(normalizedStatus);
-                      const tipoPedido = getTipoPedido(order);
                       const tipoBadge = getTipoPedidoBadge(tipoPedido);
+                      const displayId = order.numero_pedido ?? String(order.id);
 
                       return (
                         <AccordionItem 
-                          key={order.id} 
+                          key={`${order.tipo_pedido ?? ""}-${order.id}`} 
                           value={String(order.id)} 
                           className={`border rounded-lg overflow-hidden hover:shadow-sm transition-all ${
                             tipoPedido === "DELIVERY" 
@@ -155,7 +158,7 @@ export default function RoutePedidos() {
                                 {/* Primeira linha: ID, Tipo e Status */}
                                 <div className="flex items-center gap-3 flex-wrap">
                                   <span className="text-sm font-medium text-primary">
-                                    #{order.id}
+                                    {displayId}
                                   </span>
                                   <Badge 
                                     variant="outline" 
@@ -178,7 +181,10 @@ export default function RoutePedidos() {
                                     <span>{formattedDate}</span>
                                     <span>•</span>
                                     <Package className="h-3.5 w-3.5 text-primary" />
-                                    <span>{order.itens.length} {order.itens.length === 1 ? 'item' : 'itens'}</span>
+                                    <span>
+                                      {Array.isArray(order.itens) ? order.itens.length : 0}{" "}
+                                      {Array.isArray(order.itens) && order.itens.length === 1 ? "item" : "itens"}
+                                    </span>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <User className="h-3.5 w-3.5 text-primary" />
@@ -196,7 +202,7 @@ export default function RoutePedidos() {
 
                               {/* Botões de ação */}
                               <div className="flex items-start gap-2 shrink-0">
-                                {(order.status === "P" || order.status === "I" || order.status === "R") && (
+                                {(tipoPedido === "DELIVERY") && (order.status === "P" || order.status === "I" || order.status === "R") && (
                                   <Button
                                     size="sm"
                                     variant="ghost"
@@ -239,7 +245,7 @@ export default function RoutePedidos() {
                                       <br />
                                       {order.endereco_snapshot.bairro}, {order.endereco_snapshot.cidade}/{order.endereco_snapshot.estado}
                                     </span>
-                                    {order.previsao_entrega && (
+                                    {order.previsao_entrega && !Number.isNaN(new Date(order.previsao_entrega).getTime()) && (
                                       <div className="mt-1 text-xs text-primary/70">
                                         Previsão: {format(new Date(order.previsao_entrega), "HH:mm", { locale: ptBR })}
                                       </div>

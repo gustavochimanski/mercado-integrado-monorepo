@@ -37,7 +37,6 @@ export default function RouteCategoryPage() {
 
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
-  const [vitrinesMeta, setVitrinesMeta] = useState<{ id: number; titulo: string }[]>([]);
   const scrollToSection = useCallback((id: number) => {
     document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
@@ -65,15 +64,14 @@ export default function RouteCategoryPage() {
     [subcategorias, data?.vitrines_filho, vitrineIdsJaExibidas]
   );
 
-  // Atualiza meta das vitrines quando data muda
-  useEffect(() => {
-    const vitrinesParaMeta = vitrinesFiltradas.concat(vitrinesFilhoFiltradas);
-    if (vitrinesParaMeta.length > 0) {
-      setVitrinesMeta(vitrinesParaMeta.map(v => ({ id: v.id, titulo: v.titulo })));
-    } else {
-      setVitrinesMeta([]);
-    }
-  }, [vitrinesFiltradas, vitrinesFilhoFiltradas]);
+  const vitrinesMeta = useMemo(
+    () =>
+      [...vitrinesFiltradas, ...vitrinesFilhoFiltradas].map((v) => ({
+        id: v.id,
+        titulo: v.titulo,
+      })),
+    [vitrinesFiltradas, vitrinesFilhoFiltradas]
+  );
 
   // Sheet
   const openSheet = useCallback((p: ProdutoEmpMini) => {

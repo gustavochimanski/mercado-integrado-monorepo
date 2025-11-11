@@ -2,76 +2,117 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch } from '../models/Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch';
-import type { CategoriaDeliveryIn } from '../models/CategoriaDeliveryIn';
-import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
-import type { CategoriaSearchOut } from '../models/CategoriaSearchOut';
+import type { AtualizarCategoriaRequest } from '../models/AtualizarCategoriaRequest';
+import type { CategoriaArvoreResponse } from '../models/CategoriaArvoreResponse';
+import type { CategoriaListItem } from '../models/CategoriaListItem';
+import type { CategoriaResponse } from '../models/CategoriaResponse';
+import type { CategoriasPaginadasResponse } from '../models/CategoriasPaginadasResponse';
+import type { CriarCategoriaRequest } from '../models/CriarCategoriaRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class AdminCadastrosCategoriasService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * Search Categorias
-     * @param q Termo de busca por descrição/slug
-     * @param limit
-     * @param offset
-     * @returns CategoriaSearchOut Successful Response
-     * @throws ApiError
-     */
-    public searchCategoriasApiCadastrosAdminCategoriasSearchGet(
-        q?: (string | null),
-        limit: number = 30,
-        offset?: number,
-    ): CancelablePromise<Array<CategoriaSearchOut>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/categorias/search',
-            query: {
-                'q': q,
-                'limit': limit,
-                'offset': offset,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Get Categoria
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public getCategoriaApiCadastrosAdminCategoriasCatIdGet(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Editar Categoria
-     * @param catId
+     * Criar Categoria
+     * Cria uma nova categoria.
+     *
+     * - **descricao**: Descrição da categoria (obrigatório)
+     * - **parent_id**: ID da categoria pai para subcategorias (opcional)
+     * - **ativo**: Status ativo/inativo da categoria (padrão: True)
      * @param requestBody
-     * @returns CategoriaDeliveryOut Successful Response
+     * @returns CategoriaResponse Successful Response
      * @throws ApiError
      */
-    public editarCategoriaApiCadastrosAdminCategoriasCatIdPut(
-        catId: number,
-        requestBody: CategoriaDeliveryIn,
-    ): CancelablePromise<CategoriaDeliveryOut> {
+    public criarCategoriaApiCadastrosAdminCategoriasPost(
+        requestBody: CriarCategoriaRequest,
+    ): CancelablePromise<CategoriaResponse> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cadastros/admin/categorias/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Listar Categorias Paginado
+     * Lista categorias com paginação.
+     *
+     * - **page**: Número da página (padrão: 1)
+     * - **limit**: Itens por página (padrão: 10, máximo: 100)
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * - **parent_id**: Filtrar por categoria pai (opcional)
+     * @param page Número da página
+     * @param limit Itens por página
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @param parentId Filtrar por categoria pai
+     * @returns CategoriasPaginadasResponse Successful Response
+     * @throws ApiError
+     */
+    public listarCategoriasPaginadoApiCadastrosAdminCategoriasGet(
+        page: number = 1,
+        limit: number = 10,
+        apenasAtivas: boolean = true,
+        parentId?: (number | null),
+    ): CancelablePromise<CategoriasPaginadasResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/',
+            query: {
+                'page': page,
+                'limit': limit,
+                'apenas_ativas': apenasAtivas,
+                'parent_id': parentId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Categoria Por Id
+     * Busca uma categoria específica por ID.
+     * @param categoriaId
+     * @returns CategoriaResponse Successful Response
+     * @throws ApiError
+     */
+    public buscarCategoriaPorIdApiCadastrosAdminCategoriasCategoriaIdGet(
+        categoriaId: number,
+    ): CancelablePromise<CategoriaResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Categoria
+     * Atualiza uma categoria existente.
+     *
+     * - **descricao**: Nova descrição da categoria (opcional)
+     * - **parent_id**: Novo ID da categoria pai (opcional)
+     * - **ativo**: Novo status ativo/inativo (opcional)
+     * @param categoriaId
+     * @param requestBody
+     * @returns CategoriaResponse Successful Response
+     * @throws ApiError
+     */
+    public atualizarCategoriaApiCadastrosAdminCategoriasCategoriaIdPut(
+        categoriaId: number,
+        requestBody: AtualizarCategoriaRequest,
+    ): CancelablePromise<CategoriaResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
             path: {
-                'cat_id': catId,
+                'categoria_id': categoriaId,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -82,18 +123,21 @@ export class AdminCadastrosCategoriasService {
     }
     /**
      * Deletar Categoria
-     * @param catId
-     * @returns void
+     * Deleta uma categoria (soft delete).
+     *
+     * **Nota**: Só é possível deletar categorias que não possuem subcategorias ativas.
+     * @param categoriaId
+     * @returns any Successful Response
      * @throws ApiError
      */
-    public deletarCategoriaApiCadastrosAdminCategoriasCatIdDelete(
-        catId: number,
-    ): CancelablePromise<void> {
+    public deletarCategoriaApiCadastrosAdminCategoriasCategoriaIdDelete(
+        categoriaId: number,
+    ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
             path: {
-                'cat_id': catId,
+                'categoria_id': categoriaId,
             },
             errors: {
                 422: `Validation Error`,
@@ -101,58 +145,34 @@ export class AdminCadastrosCategoriasService {
         });
     }
     /**
-     * Criar Categoria
-     * @param requestBody
-     * @returns CategoriaDeliveryOut Successful Response
+     * Buscar Categorias Por Termo
+     * Busca categorias por termo de pesquisa.
+     *
+     * - **termo**: Termo para buscar na descrição das categorias
+     * - **page**: Número da página (padrão: 1)
+     * - **limit**: Itens por página (padrão: 10, máximo: 100)
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param termo Termo de busca
+     * @param page Número da página
+     * @param limit Itens por página
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriasPaginadasResponse Successful Response
      * @throws ApiError
      */
-    public criarCategoriaApiCadastrosAdminCategoriasPost(
-        requestBody: CategoriaDeliveryIn,
-    ): CancelablePromise<CategoriaDeliveryOut> {
+    public buscarCategoriasPorTermoApiCadastrosAdminCategoriasBuscarTermoGet(
+        termo: string,
+        page: number = 1,
+        limit: number = 10,
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<CategoriasPaginadasResponse> {
         return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Move Categoria Direita
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public moveCategoriaDireitaApiCadastrosAdminCategoriasCatIdMoveRightPost(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias/{cat_id}/move-right',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Move Categoria Esquerda
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public moveCategoriaEsquerdaApiCadastrosAdminCategoriasCatIdMoveLeftPost(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias/{cat_id}/move-left',
-            path: {
-                'cat_id': catId,
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/buscar/termo',
+            query: {
+                'termo': termo,
+                'page': page,
+                'limit': limit,
+                'apenas_ativas': apenasAtivas,
             },
             errors: {
                 422: `Validation Error`,
@@ -160,24 +180,75 @@ export class AdminCadastrosCategoriasService {
         });
     }
     /**
-     * Upload Imagem Categoria
-     * @param catId
-     * @param formData
-     * @returns CategoriaDeliveryOut Successful Response
+     * Buscar Arvore Categorias
+     * Busca todas as categorias organizadas em estrutura de árvore.
+     *
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriaArvoreResponse Successful Response
      * @throws ApiError
      */
-    public uploadImagemCategoriaApiCadastrosAdminCategoriasCatIdImagemPatch(
-        catId: number,
-        formData: Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch,
-    ): CancelablePromise<CategoriaDeliveryOut> {
+    public buscarArvoreCategoriasApiCadastrosAdminCategoriasArvoreEstruturaGet(
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<CategoriaArvoreResponse> {
         return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/cadastros/admin/categorias/{cat_id}/imagem',
-            path: {
-                'cat_id': catId,
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/arvore/estrutura',
+            query: {
+                'apenas_ativas': apenasAtivas,
             },
-            formData: formData,
-            mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Categorias Raiz
+     * Busca apenas categorias raiz (sem categoria pai).
+     *
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriaListItem Successful Response
+     * @throws ApiError
+     */
+    public buscarCategoriasRaizApiCadastrosAdminCategoriasRaizListaGet(
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<Array<CategoriaListItem>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/raiz/lista',
+            query: {
+                'apenas_ativas': apenasAtivas,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Filhos Da Categoria
+     * Busca filhos de uma categoria específica.
+     *
+     * - **parent_id**: ID da categoria pai
+     * - **apenas_ativas**: Filtrar apenas categorias ativas (padrão: True)
+     * @param parentId
+     * @param apenasAtivas Filtrar apenas categorias ativas
+     * @returns CategoriaListItem Successful Response
+     * @throws ApiError
+     */
+    public buscarFilhosDaCategoriaApiCadastrosAdminCategoriasParentIdFilhosGet(
+        parentId: number,
+        apenasAtivas: boolean = true,
+    ): CancelablePromise<Array<CategoriaListItem>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cadastros/admin/categorias/{parent_id}/filhos',
+            path: {
+                'parent_id': parentId,
+            },
+            query: {
+                'apenas_ativas': apenasAtivas,
+            },
             errors: {
                 422: `Validation Error`,
             },

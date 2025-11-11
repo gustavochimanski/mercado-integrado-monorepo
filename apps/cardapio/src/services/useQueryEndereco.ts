@@ -3,6 +3,7 @@ import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage"
+import { getCliente } from "@cardapio/stores/client/ClientStore"
 
 export interface Endereco {
   id: number;
@@ -59,13 +60,17 @@ export interface EnderecoOut {
 }
 
 export interface EnderecoCreate {
+  cliente_id?: number
   logradouro: string
   numero?: string
   complemento?: string
   bairro?: string
+  distrito?: string
   cidade: string
   estado: string
+  codigo_estado?: string
   cep?: string
+  pais?: string
   latitude?: number
   longitude?: number
   ponto_referencia?: string
@@ -77,7 +82,7 @@ export function useQueryEnderecos(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["enderecos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get("/api/delivery/client/enderecos")
+      const { data } = await apiClienteAdmin.get("/api/cadastros/client/enderecos")
       return data as EnderecoOut[]
     },
     enabled: options?.enabled !== false,
@@ -92,7 +97,20 @@ export function useMutateEndereco() {
 
   const create = useMutation({
     mutationFn: async (enderecoData: EnderecoCreate) => {
-      const { data } = await apiClienteAdmin.post("/api/delivery/client/enderecos", enderecoData)
+      const clienteFromPayload = enderecoData.cliente_id
+      const clienteFromStore = getCliente()?.id
+      const resolvedClienteId = clienteFromPayload ?? (typeof clienteFromStore === "number" ? clienteFromStore : clienteFromStore ? Number(clienteFromStore) : undefined)
+
+      if (!resolvedClienteId || Number.isNaN(resolvedClienteId)) {
+        throw new Error("Não foi possível identificar o cliente. Faça login novamente e tente cadastrar o endereço.")
+      }
+
+      const payload = {
+        ...enderecoData,
+        cliente_id: resolvedClienteId,
+      }
+
+      const { data } = await apiClienteAdmin.post("/api/cadastros/client/enderecos", payload)
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -107,7 +125,20 @@ export function useMutateEndereco() {
 
   const update = useMutation({
     mutationFn: async ({ id, ...enderecoData }: EnderecoCreate & { id: number }) => {
-      const { data } = await apiClienteAdmin.put(`/api/delivery/client/enderecos/${id}`, enderecoData)
+      const clienteFromPayload = enderecoData.cliente_id
+      const clienteFromStore = getCliente()?.id
+      const resolvedClienteId = clienteFromPayload ?? (typeof clienteFromStore === "number" ? clienteFromStore : clienteFromStore ? Number(clienteFromStore) : undefined)
+
+      if (!resolvedClienteId || Number.isNaN(resolvedClienteId)) {
+        throw new Error("Não foi possível identificar o cliente. Faça login novamente e tente atualizar o endereço.")
+      }
+
+      const payload = {
+        ...enderecoData,
+        cliente_id: resolvedClienteId,
+      }
+
+      const { data } = await apiClienteAdmin.put(`/api/cadastros/client/enderecos/${id}`, payload)
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -122,7 +153,7 @@ export function useMutateEndereco() {
 
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await apiClienteAdmin.delete(`/api/delivery/client/enderecos/${id}`)
+      await apiClienteAdmin.delete(`/api/cadastros/client/enderecos/${id}`)
     },
     onSuccess: () => {
       toast.success("Endereço removido com sucesso!")
@@ -146,7 +177,7 @@ export function useSearchEndereco() {
       }
       
       try {
-        const { data } = await apiClienteAdmin.get(`/api/mensura/client/geoapify/search-endereco?text=${encodeURIComponent(searchText)}`)
+        const { data } = await apiClienteAdmin.get(`/api/client/geoapify/search-endereco?text=${encodeURIComponent(searchText)}`)
         // A API retorna um array de EnderecoSearchResult diretamente
         return data as EnderecoSearchResult[]
       } catch (error: any) {

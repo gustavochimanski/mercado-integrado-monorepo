@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Home, Store, UtensilsCrossed } from "lucide-react";
 
 export type TipoPedido = "DELIVERY" | "MESA" | "BALCAO" | null;
@@ -12,6 +12,10 @@ interface TipoPedidoStepProps {
 
 export default function TipoPedidoStep({ tipoSelecionado, onSelect }: TipoPedidoStepProps) {
   const [selected, setSelected] = useState<TipoPedido>(tipoSelecionado ?? null);
+
+  useEffect(() => {
+    setSelected(tipoSelecionado ?? null);
+  }, [tipoSelecionado]);
 
   const tipos = [
     {
@@ -75,7 +79,7 @@ export default function TipoPedidoStep({ tipoSelecionado, onSelect }: TipoPedido
               className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all
                 ${
                   isSelected
-                    ? `${tipo.borderColor} ${tipo.bgColor} ring-2 ring-offset-2 ${tipo.borderColor}`
+                    ? `${tipo.borderColor} ${tipo.bgColor} ${tipo.borderColor}`
                     : "border-muted hover:border-primary/50 hover:bg-muted/30"
                 }
               `}

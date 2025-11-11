@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EnderecoResponse } from './EnderecoResponse';
+import type { app__api__cadastros__schemas__schema_endereco__EnderecoOut } from './app__api__cadastros__schemas__schema_endereco__EnderecoOut';
 export type EmpresaResponse = {
     nome: string;
     cnpj?: (string | null);
@@ -14,6 +14,6 @@ export type EmpresaResponse = {
     tempo_entrega_maximo: number;
     id: number;
     endereco_id?: (number | null);
-    endereco?: (EnderecoResponse | null);
+    endereco?: (app__api__cadastros__schemas__schema_endereco__EnderecoOut | null);
 };
 

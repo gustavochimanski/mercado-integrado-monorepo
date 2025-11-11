@@ -46,7 +46,8 @@ interface RevisaoStepProps {
   dec?: (cod_barras: string) => void;
   remove?: (cod_barras: string) => void;
   tipoPedido?: "DELIVERY" | "MESA" | "BALCAO" | null;
-  mesaId?: number;
+  mesaCodigo?: string | null;
+  numPessoas?: number | null;
 }
 
 export default function RevisaoStep({
@@ -62,7 +63,8 @@ export default function RevisaoStep({
   dec,
   remove,
   tipoPedido,
-  mesaId,
+  mesaCodigo,
+  numPessoas,
 }: RevisaoStepProps) {
   // Estado para controlar a seta
   const [showArrow, setShowArrow] = useState(true);
@@ -78,15 +80,20 @@ export default function RevisaoStep({
       <h2 className="text-xl font-bold text-center">Revisão do Pedido</h2>
 
       {/* Tipo de Pedido e Info Correspondente */}
-      {tipoPedido === "MESA" && mesaId && (
+      {tipoPedido === "MESA" && mesaCodigo && (
         <Card className="gap-0 border-blue-200">
           <CardHeader>
             <CardTitle className="text-base">Mesa Selecionada</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-gray-700">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-blue-600">Mesa {mesaId}</span>
+              <span className="font-semibold text-blue-600">Mesa {mesaCodigo}</span>
             </div>
+            {numPessoas && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Número de pessoas informado: <strong>{numPessoas}</strong>
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">
               Seu atendimento será realizado nesta mesa
             </p>
@@ -106,6 +113,11 @@ export default function RevisaoStep({
             <p className="text-xs text-muted-foreground mt-1">
               Você receberá uma notificação quando o pedido estiver pronto para retirada
             </p>
+            {mesaCodigo && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Código de referência informado: <strong>{mesaCodigo}</strong>
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

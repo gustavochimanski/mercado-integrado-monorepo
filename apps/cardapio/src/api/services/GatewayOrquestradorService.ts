@@ -8,28 +8,29 @@ import type { AdicionalOut } from '../models/AdicionalOut';
 import type { AdicionalResponse } from '../models/AdicionalResponse';
 import type { AdicionarItemRequest } from '../models/AdicionarItemRequest';
 import type { AlterarStatusPedidoBody } from '../models/AlterarStatusPedidoBody';
-import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
-import type { app__api__delivery__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoUpdate';
-import type { app__api__mensura__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__mensura__schemas__schema_endereco__EnderecoCreate';
-import type { app__api__mensura__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__mensura__schemas__schema_endereco__EnderecoUpdate';
+import type { app__api__cadastros__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cadastros__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cadastros__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cadastros__schemas__schema_endereco__EnderecoOut';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoOut';
 import type { AtualizarAdicionalRequest } from '../models/AtualizarAdicionalRequest';
 import type { AtualizarCategoriaRequest } from '../models/AtualizarCategoriaRequest';
+import type { AtualizarObservacoesRequest } from '../models/AtualizarObservacoesRequest';
 import type { AtualizarVitrineRequest } from '../models/AtualizarVitrineRequest';
 import type { BannerParceiroIn } from '../models/BannerParceiroIn';
 import type { BannerParceiroOut } from '../models/BannerParceiroOut';
 import type { Body_atualizar_combo_api_cadastros_admin_combos__combo_id__put } from '../models/Body_atualizar_combo_api_cadastros_admin_combos__combo_id__put';
+import type { Body_atualizar_imagem_categoria_api_cardapio_admin_categorias__categoria_id__imagem_patch } from '../models/Body_atualizar_imagem_categoria_api_cardapio_admin_categorias__categoria_id__imagem_patch';
 import type { Body_atualizar_produto_api_cadastros_admin_produtos__cod_barras__put } from '../models/Body_atualizar_produto_api_cadastros_admin_produtos__cod_barras__put';
 import type { Body_create_banner_api_cadastros_admin_parceiros_banners_post } from '../models/Body_create_banner_api_cadastros_admin_parceiros_banners_post';
-import type { Body_create_empresa_api_mensura_admin_empresas__post } from '../models/Body_create_empresa_api_mensura_admin_empresas__post';
+import type { Body_create_empresa_api_cadastros_admin_empresas__post } from '../models/Body_create_empresa_api_cadastros_admin_empresas__post';
 import type { Body_criar_combo_api_cadastros_admin_combos__post } from '../models/Body_criar_combo_api_cadastros_admin_combos__post';
 import type { Body_criar_produto_api_cadastros_admin_produtos__post } from '../models/Body_criar_produto_api_cadastros_admin_produtos__post';
 import type { Body_notificar_novo_pedido_api_notifications_pedidos_novo_pedido_post } from '../models/Body_notificar_novo_pedido_api_notifications_pedidos_novo_pedido_post';
 import type { Body_publish_pedido_criado_api_notifications_events_pedido_criado_post } from '../models/Body_publish_pedido_criado_api_notifications_events_pedido_criado_post';
 import type { Body_registrar_auditoria_api_notifications_historico_auditoria_post } from '../models/Body_registrar_auditoria_api_notifications_historico_auditoria_post';
 import type { Body_send_bulk_notifications_rabbitmq_api_notifications_rabbitmq_send_bulk_notifications_post } from '../models/Body_send_bulk_notifications_rabbitmq_api_notifications_rabbitmq_send_bulk_notifications_post';
-import type { Body_update_empresa_api_mensura_admin_empresas__id__put } from '../models/Body_update_empresa_api_mensura_admin_empresas__id__put';
+import type { Body_update_empresa_api_cadastros_admin_empresas__id__put } from '../models/Body_update_empresa_api_cadastros_admin_empresas__id__put';
 import type { Body_update_ingrediente_api_mensura_admin_receitas_ingredientes__ingrediente_id__put } from '../models/Body_update_ingrediente_api_mensura_admin_receitas_ingredientes__ingrediente_id__put';
-import type { Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch } from '../models/Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch';
 import type { CaixaConferenciaResumoResponse } from '../models/CaixaConferenciaResumoResponse';
 import type { CaixaCreate } from '../models/CaixaCreate';
 import type { CaixaFechamentoRequest } from '../models/CaixaFechamentoRequest';
@@ -37,7 +38,8 @@ import type { CaixaResponse } from '../models/CaixaResponse';
 import type { CaixaResumoResponse } from '../models/CaixaResumoResponse';
 import type { CaixaValoresEsperadosResponse } from '../models/CaixaValoresEsperadosResponse';
 import type { CategoriaArvoreResponse } from '../models/CategoriaArvoreResponse';
-import type { CategoriaDeliveryIn } from '../models/CategoriaDeliveryIn';
+import type { CategoriaDeliveryAdminIn } from '../models/CategoriaDeliveryAdminIn';
+import type { CategoriaDeliveryAdminUpdate } from '../models/CategoriaDeliveryAdminUpdate';
 import type { CategoriaDeliveryOut } from '../models/CategoriaDeliveryOut';
 import type { CategoriaListItem } from '../models/CategoriaListItem';
 import type { CategoriaResponse } from '../models/CategoriaResponse';
@@ -65,8 +67,7 @@ import type { EditarPedidoRequest } from '../models/EditarPedidoRequest';
 import type { EmpresaCardapioLinkResponse } from '../models/EmpresaCardapioLinkResponse';
 import type { EmpresaClientOut } from '../models/EmpresaClientOut';
 import type { EmpresaResponse } from '../models/EmpresaResponse';
-import type { EnderecoOut } from '../models/EnderecoOut';
-import type { EnderecoResponse } from '../models/EnderecoResponse';
+import type { EnderecoUpdate } from '../models/EnderecoUpdate';
 import type { EntregadorCreate } from '../models/EntregadorCreate';
 import type { EntregadorOut } from '../models/EntregadorOut';
 import type { EntregadorUpdate } from '../models/EntregadorUpdate';
@@ -103,8 +104,8 @@ import type { NotificationListResponse } from '../models/NotificationListRespons
 import type { NotificationLogResponse } from '../models/NotificationLogResponse';
 import type { NotificationResponse } from '../models/NotificationResponse';
 import type { NovoDispositivoRequest } from '../models/NovoDispositivoRequest';
-import type { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
-import type { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
+import { PagamentoGatewayEnum } from '../models/PagamentoGatewayEnum';
+import { PagamentoMetodoEnum } from '../models/PagamentoMetodoEnum';
 import type { ParceiroCompletoOut } from '../models/ParceiroCompletoOut';
 import type { ParceiroIn } from '../models/ParceiroIn';
 import type { ParceiroOut } from '../models/ParceiroOut';
@@ -220,13 +221,13 @@ export class GatewayOrquestradorService {
      * @returns HomeResponse Successful Response
      * @throws ApiError
      */
-    public listarHomeApiDeliveryPublicHomeHomeGet(
+    public listarHomeApiCardapioPublicHomeHomeGet(
         empresaId: number,
         isHome: boolean,
     ): CancelablePromise<HomeResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home',
+            url: '/api/cardapio/public/home/home',
             query: {
                 'empresa_id': empresaId,
                 'is_home': isHome,
@@ -244,14 +245,14 @@ export class GatewayOrquestradorService {
      * @returns VitrineComProdutosResponse Successful Response
      * @throws ApiError
      */
-    public listarVitrinesEProdutosPorCategoriaApiDeliveryPublicHomeHomeVitrinePorCategoriaGet(
+    public listarVitrinesEProdutosPorCategoriaApiCardapioPublicHomeHomeVitrinePorCategoriaGet(
         empresaId: number,
         codCategoria?: (number | null),
         slug?: (string | null),
     ): CancelablePromise<Array<VitrineComProdutosResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home/vitrine-por-categoria',
+            url: '/api/cardapio/public/home/home/vitrine-por-categoria',
             query: {
                 'empresa_id': empresaId,
                 'cod_categoria': codCategoria,
@@ -269,13 +270,13 @@ export class GatewayOrquestradorService {
      * @returns CategoryPageResponse Successful Response
      * @throws ApiError
      */
-    public getCategoriaPageApiDeliveryPublicHomeHomeCategoriaGet(
+    public getCategoriaPageApiCardapioPublicHomeHomeCategoriaGet(
         empresaId: number,
         slug: string,
     ): CancelablePromise<CategoryPageResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/home/home/categoria',
+            url: '/api/cardapio/public/home/home/categoria',
             query: {
                 'empresa_id': empresaId,
                 'slug': slug,
@@ -291,10 +292,10 @@ export class GatewayOrquestradorService {
      * @returns string Successful Response
      * @throws ApiError
      */
-    public mercadopagoWebhookHealthcheckApiDeliveryPublicWebhooksPagamentosMercadopagoGet(): CancelablePromise<Record<string, string>> {
+    public mercadopagoWebhookHealthcheckApiCardapioPublicWebhooksPagamentosMercadopagoGet(): CancelablePromise<Record<string, string>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/public/webhooks/pagamentos/mercadopago',
+            url: '/api/cardapio/public/webhooks/pagamentos/mercadopago',
         });
     }
     /**
@@ -305,14 +306,14 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public mercadopagoWebhookApiDeliveryPublicWebhooksPagamentosMercadopagoPost(
+    public mercadopagoWebhookApiCardapioPublicWebhooksPagamentosMercadopagoPost(
         id?: (string | null),
         topic?: (string | null),
         requestBody?: (MercadoPagoWebhookPayload | null),
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/public/webhooks/pagamentos/mercadopago',
+            url: '/api/cardapio/public/webhooks/pagamentos/mercadopago',
             query: {
                 'id': id,
                 'topic': topic,
@@ -330,12 +331,12 @@ export class GatewayOrquestradorService {
      * @returns EmpresaClientOut Successful Response
      * @throws ApiError
      */
-    public buscarEmpresaClientApiMensuraPublicEmpGet(
+    public buscarEmpresaClientApiCadastrosPublicEmpGet(
         empresaId: number,
     ): CancelablePromise<EmpresaClientOut> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/public/emp/',
+            url: '/api/cadastros/public/emp/',
             query: {
                 'empresa_id': empresaId,
             },
@@ -355,13 +356,38 @@ export class GatewayOrquestradorService {
      * @returns PreviewCheckoutResponse Successful Response
      * @throws ApiError
      */
-    public previewCheckoutApiDeliveryClientPedidosCheckoutPreviewPost(
+    public previewCheckoutApiCardapioClientPedidosCheckoutPreviewPost(
         xSuperToken: string,
         requestBody: FinalizarPedidoRequest,
     ): CancelablePromise<PreviewCheckoutResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pedidos/checkout/preview',
+            url: '/api/cardapio/client/pedidos/checkout/preview',
+            headers: {
+                'x-super-token': xSuperToken,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Finalizar Checkout
+     * Finaliza o checkout criando o pedido no banco de dados.
+     * @param xSuperToken
+     * @param requestBody
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public finalizarCheckoutApiCardapioClientPedidosCheckoutPost(
+        xSuperToken: string,
+        requestBody: FinalizarPedidoRequest,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/client/pedidos/checkout',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -381,14 +407,14 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponseSimplificado Successful Response
      * @throws ApiError
      */
-    public listarPedidosApiDeliveryClientPedidosGet(
+    public listarPedidosApiCardapioClientPedidosGet(
         xSuperToken: string,
         skip?: number,
         limit: number = 50,
     ): CancelablePromise<Array<PedidoResponseSimplificado>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/client/pedidos/',
+            url: '/api/cardapio/client/pedidos/',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -413,14 +439,14 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarItemClienteApiDeliveryClientPedidosPedidoIdItensPut(
+    public atualizarItemClienteApiCardapioClientPedidosPedidoIdItensPut(
         pedidoId: number,
         xSuperToken: string,
         requestBody: ItemPedidoEditar,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/client/pedidos/{pedido_id}/itens',
+            url: '/api/cardapio/client/pedidos/{pedido_id}/itens',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -450,14 +476,14 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarPedidoClienteApiDeliveryClientPedidosPedidoIdEditarPut(
+    public atualizarPedidoClienteApiCardapioClientPedidosPedidoIdEditarPut(
         pedidoId: number,
         xSuperToken: string,
         requestBody: EditarPedidoRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/client/pedidos/{pedido_id}/editar',
+            url: '/api/cardapio/client/pedidos/{pedido_id}/editar',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -481,14 +507,14 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public alterarModoEdicaoApiDeliveryClientPedidosPedidoIdModoEdicaoPut(
+    public alterarModoEdicaoApiCardapioClientPedidosPedidoIdModoEdicaoPut(
         pedidoId: number,
         xSuperToken: string,
         requestBody: ModoEdicaoRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/client/pedidos/{pedido_id}/modo-edicao',
+            url: '/api/cardapio/client/pedidos/{pedido_id}/modo-edicao',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -511,15 +537,15 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public confirmarPagamentoApiDeliveryClientPagamentosPedidoIdConfirmarPost(
+    public confirmarPagamentoApiCardapioClientPagamentosPedidoIdConfirmarPost(
         pedidoId: number,
         xSuperToken: string,
-        metodo: PagamentoMetodoEnum = 'PIX',
-        gateway: PagamentoGatewayEnum = 'PIX_INTERNO',
+        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX,
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.PIX_INTERNO,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pagamentos/{pedido_id}/confirmar',
+            url: '/api/cardapio/client/pagamentos/{pedido_id}/confirmar',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -544,15 +570,15 @@ export class GatewayOrquestradorService {
      * @returns TransacaoResponse Successful Response
      * @throws ApiError
      */
-    public iniciarPagamentoApiDeliveryClientPagamentosPedidoIdPost(
+    public iniciarPagamentoApiCardapioClientPagamentosPedidoIdPost(
         pedidoId: number,
         xSuperToken: string,
-        metodo: PagamentoMetodoEnum = 'PIX_ONLINE',
-        gateway: PagamentoGatewayEnum = 'MERCADOPAGO',
+        metodo: PagamentoMetodoEnum = PagamentoMetodoEnum.PIX_ONLINE,
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.MERCADOPAGO,
     ): CancelablePromise<TransacaoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/client/pagamentos/{pedido_id}',
+            url: '/api/cardapio/client/pagamentos/{pedido_id}',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -577,15 +603,15 @@ export class GatewayOrquestradorService {
      * @returns ConsultarTransacaoResponse Successful Response
      * @throws ApiError
      */
-    public consultarPagamentoApiDeliveryClientPagamentosPedidoIdProviderIdGet(
+    public consultarPagamentoApiCardapioClientPagamentosPedidoIdProviderIdGet(
         pedidoId: number,
         providerId: string,
         xSuperToken: string,
-        gateway: PagamentoGatewayEnum = 'MERCADOPAGO',
+        gateway: PagamentoGatewayEnum = PagamentoGatewayEnum.MERCADOPAGO,
     ): CancelablePromise<ConsultarTransacaoResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/client/pagamentos/{pedido_id}/{provider_id}',
+            url: '/api/cardapio/client/pagamentos/{pedido_id}/{provider_id}',
             path: {
                 'pedido_id': pedidoId,
                 'provider_id': providerId,
@@ -611,13 +637,13 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public searchEnderecoApiMensuraClientGeoapifySearchEnderecoGet(
+    public searchEnderecoApiClientGeoapifySearchEnderecoGet(
         text: string,
         xSuperToken: string,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/client/geoapify/search-endereco',
+            url: '/api/client/geoapify/search-endereco',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -765,13 +791,13 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarStatusPagamentoApiDeliveryAdminPagamentosPedidoIdStatusPost(
+    public atualizarStatusPagamentoApiCardapioAdminPagamentosPedidoIdStatusPost(
         pedidoId: number,
         requestBody: TransacaoStatusUpdateRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/admin/pagamentos/{pedido_id}/status',
+            url: '/api/cardapio/admin/pagamentos/{pedido_id}/status',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -802,14 +828,14 @@ export class GatewayOrquestradorService {
      * @returns KanbanAgrupadoResponse Successful Response
      * @throws ApiError
      */
-    public listarPedidosAdminKanbanApiDeliveryAdminPedidosKanbanGet(
+    public listarPedidosAdminKanbanApiCardapioAdminPedidosKanbanGet(
         empresaId: number,
         dateFilter?: (string | null),
         limit: number = 500,
     ): CancelablePromise<KanbanAgrupadoResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/pedidos/kanban',
+            url: '/api/cardapio/admin/pedidos/kanban',
             query: {
                 'date_filter': dateFilter,
                 'empresa_id': empresaId,
@@ -831,12 +857,12 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponseCompletoTotal Successful Response
      * @throws ApiError
      */
-    public getPedidoApiDeliveryAdminPedidosPedidoIdGet(
+    public getPedidoApiCardapioAdminPedidosPedidoIdGet(
         pedidoId: number,
     ): CancelablePromise<PedidoResponseCompletoTotal> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/pedidos/{pedido_id}',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -873,13 +899,13 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarPedidoApiDeliveryAdminPedidosPedidoIdPut(
+    public atualizarPedidoApiCardapioAdminPedidosPedidoIdPut(
         pedidoId: number,
         requestBody: EditarPedidoRequest,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/admin/pedidos/{pedido_id}',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -912,13 +938,13 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarStatusPedidoApiDeliveryAdminPedidosStatusPedidoIdPut(
+    public atualizarStatusPedidoApiCardapioAdminPedidosStatusPedidoIdPut(
         pedidoId: number,
         novoStatus: PedidoStatusEnum,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/admin/pedidos/status/{pedido_id}',
+            url: '/api/cardapio/admin/pedidos/status/{pedido_id}',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -958,13 +984,13 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public alterarStatusPedidoComHistoricoApiDeliveryAdminPedidosStatusPedidoIdHistoricoPut(
+    public alterarStatusPedidoComHistoricoApiCardapioAdminPedidosStatusPedidoIdHistoricoPut(
         pedidoId: number,
         requestBody: AlterarStatusPedidoBody,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/admin/pedidos/status/{pedido_id}/historico',
+            url: '/api/cardapio/admin/pedidos/status/{pedido_id}/historico',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -986,12 +1012,12 @@ export class GatewayOrquestradorService {
      * @returns HistoricoDoPedidoResponse Successful Response
      * @throws ApiError
      */
-    public obterHistoricoPedidoApiDeliveryAdminPedidosPedidoIdHistoricoGet(
+    public obterHistoricoPedidoApiCardapioAdminPedidosPedidoIdHistoricoGet(
         pedidoId: number,
     ): CancelablePromise<HistoricoDoPedidoResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/pedidos/{pedido_id}/historico',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/historico',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -1020,13 +1046,13 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public atualizarItemApiDeliveryAdminPedidosPedidoIdItensPut(
+    public atualizarItemApiCardapioAdminPedidosPedidoIdItensPut(
         pedidoId: number,
         requestBody: ItemPedidoEditar,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/admin/pedidos/{pedido_id}/itens',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/itens',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -1051,13 +1077,13 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public vincularEntregadorApiDeliveryAdminPedidosPedidoIdEntregadorPut(
+    public vincularEntregadorApiCardapioAdminPedidosPedidoIdEntregadorPut(
         pedidoId: number,
         entregadorId?: (number | null),
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/delivery/admin/pedidos/{pedido_id}/entregador',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/entregador',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -1080,12 +1106,12 @@ export class GatewayOrquestradorService {
      * @returns PedidoResponse Successful Response
      * @throws ApiError
      */
-    public desvincularEntregadorApiDeliveryAdminPedidosPedidoIdEntregadorDelete(
+    public desvincularEntregadorApiCardapioAdminPedidosPedidoIdEntregadorDelete(
         pedidoId: number,
     ): CancelablePromise<PedidoResponse> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/delivery/admin/pedidos/{pedido_id}/entregador',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/entregador',
             path: {
                 'pedido_id': pedidoId,
             },
@@ -1101,12 +1127,12 @@ export class GatewayOrquestradorService {
      * @returns FecharPedidosDiretoResponse Successful Response
      * @throws ApiError
      */
-    public fecharPedidosApiDeliveryAdminAcertosEntregadoresFecharPost(
+    public fecharPedidosApiFinanceiroAdminAcertosEntregadoresFecharPost(
         requestBody: FecharPedidosDiretoRequest,
     ): CancelablePromise<FecharPedidosDiretoResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/admin/acertos-entregadores/fechar',
+            url: '/api/financeiro/admin/acertos-entregadores/fechar',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -1124,7 +1150,7 @@ export class GatewayOrquestradorService {
      * @returns PedidoPendenteAcertoOut Successful Response
      * @throws ApiError
      */
-    public listarPendentesApiDeliveryAdminAcertosEntregadoresPendentesGet(
+    public listarPendentesApiFinanceiroAdminAcertosEntregadoresPendentesGet(
         empresaId: number,
         inicio: string,
         fim: string,
@@ -1132,7 +1158,7 @@ export class GatewayOrquestradorService {
     ): CancelablePromise<Array<PedidoPendenteAcertoOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/acertos-entregadores/pendentes',
+            url: '/api/financeiro/admin/acertos-entregadores/pendentes',
             query: {
                 'empresa_id': empresaId,
                 'inicio': inicio,
@@ -1153,7 +1179,7 @@ export class GatewayOrquestradorService {
      * @returns PreviewAcertoResponse Successful Response
      * @throws ApiError
      */
-    public previewAcertoApiDeliveryAdminAcertosEntregadoresPreviewGet(
+    public previewAcertoApiFinanceiroAdminAcertosEntregadoresPreviewGet(
         empresaId: number,
         inicio: string,
         fim: string,
@@ -1161,7 +1187,7 @@ export class GatewayOrquestradorService {
     ): CancelablePromise<PreviewAcertoResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/acertos-entregadores/preview',
+            url: '/api/financeiro/admin/acertos-entregadores/preview',
             query: {
                 'empresa_id': empresaId,
                 'inicio': inicio,
@@ -1182,7 +1208,7 @@ export class GatewayOrquestradorService {
      * @returns AcertosPassadosResponse Successful Response
      * @throws ApiError
      */
-    public acertosPassadosApiDeliveryAdminAcertosEntregadoresPassadosGet(
+    public acertosPassadosApiFinanceiroAdminAcertosEntregadoresPassadosGet(
         empresaId: number,
         inicio: string,
         fim: string,
@@ -1190,7 +1216,7 @@ export class GatewayOrquestradorService {
     ): CancelablePromise<AcertosPassadosResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/acertos-entregadores/passados',
+            url: '/api/financeiro/admin/acertos-entregadores/passados',
             query: {
                 'empresa_id': empresaId,
                 'inicio': inicio,
@@ -1209,10 +1235,10 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public corrigirPermissoesBucketsApiDeliveryAdminMinioCorrigirPermissoesPost(): CancelablePromise<any> {
+    public corrigirPermissoesBucketsApiCardapioAdminMinioCorrigirPermissoesPost(): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/admin/minio/corrigir-permissoes',
+            url: '/api/cardapio/admin/minio/corrigir-permissoes',
         });
     }
     /**
@@ -1222,12 +1248,12 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public corrigirBucketEmpresaApiDeliveryAdminMinioCorrigirEmpresaEmpresaIdPost(
+    public corrigirBucketEmpresaApiCardapioAdminMinioCorrigirEmpresaEmpresaIdPost(
         empresaId: number,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/delivery/admin/minio/corrigir-empresa/{empresa_id}',
+            url: '/api/cardapio/admin/minio/corrigir-empresa/{empresa_id}',
             path: {
                 'empresa_id': empresaId,
             },
@@ -1243,13 +1269,382 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public verificarBucketEmpresaApiDeliveryAdminMinioVerificarBucketEmpresaIdGet(
+    public verificarBucketEmpresaApiCardapioAdminMinioVerificarBucketEmpresaIdGet(
         empresaId: number,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/delivery/admin/minio/verificar-bucket/{empresa_id}',
+            url: '/api/cardapio/admin/minio/verificar-bucket/{empresa_id}',
             path: {
+                'empresa_id': empresaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Listar Categorias
+     * @param parentId Quando informado, retorna apenas as categorias filhas do ID informado.
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public listarCategoriasApiCardapioAdminCategoriasGet(
+        parentId?: (number | null),
+    ): CancelablePromise<Array<CategoriaDeliveryOut>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/categorias/',
+            query: {
+                'parent_id': parentId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Criar Categoria
+     * @param requestBody
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public criarCategoriaApiCardapioAdminCategoriasPost(
+        requestBody: CategoriaDeliveryAdminIn,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/admin/categorias/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Buscar Categorias
+     * @param q Termo de busca por descrição ou slug.
+     * @param limit
+     * @param offset
+     * @returns CategoriaSearchOut Successful Response
+     * @throws ApiError
+     */
+    public buscarCategoriasApiCardapioAdminCategoriasSearchGet(
+        q?: (string | null),
+        limit: number = 100,
+        offset?: number,
+    ): CancelablePromise<Array<CategoriaSearchOut>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/categorias/search',
+            query: {
+                'q': q,
+                'limit': limit,
+                'offset': offset,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Obter Categoria
+     * @param categoriaId
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public obterCategoriaApiCardapioAdminCategoriasCategoriaIdGet(
+        categoriaId: number,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Categoria
+     * @param categoriaId
+     * @param requestBody
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public atualizarCategoriaApiCardapioAdminCategoriasCategoriaIdPut(
+        categoriaId: number,
+        requestBody: CategoriaDeliveryAdminUpdate,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Deletar Categoria
+     * @param categoriaId
+     * @param codEmpresa Identificador da empresa proprietária da categoria. Quando informado, remove também a imagem associada.
+     * @returns void
+     * @throws ApiError
+     */
+    public deletarCategoriaApiCardapioAdminCategoriasCategoriaIdDelete(
+        categoriaId: number,
+        codEmpresa?: (number | null),
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cardapio/admin/categorias/{categoria_id}',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Imagem Categoria
+     * @param categoriaId
+     * @param formData
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public atualizarImagemCategoriaApiCardapioAdminCategoriasCategoriaIdImagemPatch(
+        categoriaId: number,
+        formData: Body_atualizar_imagem_categoria_api_cardapio_admin_categorias__categoria_id__imagem_patch,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/api/cardapio/admin/categorias/{categoria_id}/imagem',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Mover Categoria Para Esquerda
+     * @param categoriaId
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public moverCategoriaParaEsquerdaApiCardapioAdminCategoriasCategoriaIdMoveLeftPost(
+        categoriaId: number,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/admin/categorias/{categoria_id}/move-left',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Mover Categoria Para Direita
+     * @param categoriaId
+     * @returns CategoriaDeliveryOut Successful Response
+     * @throws ApiError
+     */
+    public moverCategoriaParaDireitaApiCardapioAdminCategoriasCategoriaIdMoveRightPost(
+        categoriaId: number,
+    ): CancelablePromise<CategoriaDeliveryOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/admin/categorias/{categoria_id}/move-right',
+            path: {
+                'categoria_id': categoriaId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Search Vitrines
+     * @param q Busca por título/slug
+     * @param codCategoria Filtra por categoria vinculada
+     * @param isHome Filtra por destaque da home
+     * @param limit
+     * @param offset
+     * @returns VitrineOut Successful Response
+     * @throws ApiError
+     */
+    public searchVitrinesApiCardapioAdminVitrinesSearchGet(
+        q?: (string | null),
+        codCategoria?: (number | null),
+        isHome?: (boolean | null),
+        limit: number = 30,
+        offset?: number,
+    ): CancelablePromise<Array<VitrineOut>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/vitrines/search',
+            query: {
+                'q': q,
+                'cod_categoria': codCategoria,
+                'is_home': isHome,
+                'limit': limit,
+                'offset': offset,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Toggle Home Vitrine
+     * @param vitrineId ID da vitrine
+     * @param requestBody
+     * @returns VitrineOut Successful Response
+     * @throws ApiError
+     */
+    public toggleHomeVitrineApiCardapioAdminVitrinesVitrineIdHomePatch(
+        vitrineId: number,
+        requestBody: ToggleHomeRequest,
+    ): CancelablePromise<VitrineOut> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/api/cardapio/admin/vitrines/{vitrine_id}/home',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Criar Vitrine
+     * @param requestBody
+     * @returns VitrineOut Successful Response
+     * @throws ApiError
+     */
+    public criarVitrineApiCardapioAdminVitrinesPost(
+        requestBody: CriarVitrineRequest,
+    ): CancelablePromise<VitrineOut> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/admin/vitrines/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Vitrine
+     * @param vitrineId ID da vitrine
+     * @param requestBody
+     * @returns VitrineOut Successful Response
+     * @throws ApiError
+     */
+    public atualizarVitrineApiCardapioAdminVitrinesVitrineIdPut(
+        vitrineId: number,
+        requestBody: AtualizarVitrineRequest,
+    ): CancelablePromise<VitrineOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/vitrines/{vitrine_id}',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Deletar Vitrine
+     * @param vitrineId ID da vitrine
+     * @returns void
+     * @throws ApiError
+     */
+    public deletarVitrineApiCardapioAdminVitrinesVitrineIdDelete(
+        vitrineId: number,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cardapio/admin/vitrines/{vitrine_id}',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Vincular Produto
+     * @param vitrineId ID da vitrine
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public vincularProdutoApiCardapioAdminVitrinesVitrineIdVincularPost(
+        vitrineId: number,
+        requestBody: VinculoRequest,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/cardapio/admin/vitrines/{vitrine_id}/vincular',
+            path: {
+                'vitrine_id': vitrineId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Desvincular Produto
+     * @param vitrineId ID da vitrine
+     * @param codBarras Código de barras do produto
+     * @param empresaId Empresa do vínculo
+     * @returns void
+     * @throws ApiError
+     */
+    public desvincularProdutoApiCardapioAdminVitrinesVitrineIdVincularCodBarrasDelete(
+        vitrineId: number,
+        codBarras: string,
+        empresaId: number,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cardapio/admin/vitrines/{vitrine_id}/vincular/{cod_barras}',
+            path: {
+                'vitrine_id': vitrineId,
+                'cod_barras': codBarras,
+            },
+            query: {
                 'empresa_id': empresaId,
             },
             errors: {
@@ -1262,10 +1657,10 @@ export class GatewayOrquestradorService {
      * @returns EmpresaCardapioLinkResponse Successful Response
      * @throws ApiError
      */
-    public listCardapioLinksApiMensuraAdminEmpresasCardapiosGet(): CancelablePromise<Array<EmpresaCardapioLinkResponse>> {
+    public listCardapioLinksApiCadastrosAdminEmpresasCardapiosGet(): CancelablePromise<Array<EmpresaCardapioLinkResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/empresas/cardapios',
+            url: '/api/cadastros/admin/empresas/cardapios',
         });
     }
     /**
@@ -1274,12 +1669,12 @@ export class GatewayOrquestradorService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public createEmpresaApiMensuraAdminEmpresasPost(
-        formData: Body_create_empresa_api_mensura_admin_empresas__post,
+    public createEmpresaApiCadastrosAdminEmpresasPost(
+        formData: Body_create_empresa_api_cadastros_admin_empresas__post,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/mensura/admin/empresas/',
+            url: '/api/cadastros/admin/empresas/',
             formData: formData,
             mediaType: 'multipart/form-data',
             errors: {
@@ -1294,13 +1689,13 @@ export class GatewayOrquestradorService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public listEmpresasApiMensuraAdminEmpresasGet(
+    public listEmpresasApiCadastrosAdminEmpresasGet(
         skip?: number,
         limit: number = 100,
     ): CancelablePromise<Array<EmpresaResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/empresas/',
+            url: '/api/cadastros/admin/empresas/',
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -1317,13 +1712,13 @@ export class GatewayOrquestradorService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public updateEmpresaApiMensuraAdminEmpresasIdPut(
+    public updateEmpresaApiCadastrosAdminEmpresasIdPut(
         id: number,
-        formData?: Body_update_empresa_api_mensura_admin_empresas__id__put,
+        formData?: Body_update_empresa_api_cadastros_admin_empresas__id__put,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/mensura/admin/empresas/{id}',
+            url: '/api/cadastros/admin/empresas/{id}',
             path: {
                 'id': id,
             },
@@ -1340,12 +1735,12 @@ export class GatewayOrquestradorService {
      * @returns EmpresaResponse Successful Response
      * @throws ApiError
      */
-    public getEmpresaApiMensuraAdminEmpresasIdGet(
+    public getEmpresaApiCadastrosAdminEmpresasIdGet(
         id: number,
     ): CancelablePromise<EmpresaResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/empresas/{id}',
+            url: '/api/cadastros/admin/empresas/{id}',
             path: {
                 'id': id,
             },
@@ -1360,12 +1755,12 @@ export class GatewayOrquestradorService {
      * @returns void
      * @throws ApiError
      */
-    public deleteEmpresaApiMensuraAdminEmpresasIdDelete(
+    public deleteEmpresaApiCadastrosAdminEmpresasIdDelete(
         id: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/mensura/admin/empresas/{id}',
+            url: '/api/cadastros/admin/empresas/{id}',
             path: {
                 'id': id,
             },
@@ -1489,12 +1884,12 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public searchEnderecoApiMensuraAdminGeoapifySearchEnderecoGet(
+    public searchEnderecoApiAdminGeoapifySearchEnderecoGet(
         text: string,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/geoapify/search-endereco',
+            url: '/api/admin/geoapify/search-endereco',
             query: {
                 'text': text,
             },
@@ -1506,12 +1901,12 @@ export class GatewayOrquestradorService {
     /**
      * Create Endereco
      * @param requestBody
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public createEnderecoApiMensuraAdminEnderecosPost(
-        requestBody: app__api__mensura__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoResponse> {
+        requestBody: app__api__cadastros__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cadastros__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/mensura/admin/enderecos/',
@@ -1526,13 +1921,13 @@ export class GatewayOrquestradorService {
      * List Enderecos
      * @param skip
      * @param limit
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listEnderecosApiMensuraAdminEnderecosGet(
         skip?: number,
         limit: number = 100,
-    ): CancelablePromise<Array<EnderecoResponse>> {
+    ): CancelablePromise<Array<app__api__cadastros__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/mensura/admin/enderecos/',
@@ -1548,12 +1943,12 @@ export class GatewayOrquestradorService {
     /**
      * Get Endereco
      * @param id
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecoApiMensuraAdminEnderecosIdGet(
         id: number,
-    ): CancelablePromise<EnderecoResponse> {
+    ): CancelablePromise<app__api__cadastros__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/mensura/admin/enderecos/{id}',
@@ -1569,13 +1964,13 @@ export class GatewayOrquestradorService {
      * Update Endereco
      * @param id
      * @param requestBody
-     * @returns EnderecoResponse Successful Response
+     * @returns app__api__cadastros__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public updateEnderecoApiMensuraAdminEnderecosIdPut(
         id: number,
-        requestBody: app__api__mensura__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoResponse> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cadastros__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/mensura/admin/enderecos/{id}',
@@ -1620,12 +2015,12 @@ export class GatewayOrquestradorService {
      * @returns CategoriaResponse Successful Response
      * @throws ApiError
      */
-    public criarCategoriaApiMensuraAdminCategoriasPost(
+    public criarCategoriaApiCadastrosAdminCategoriasPost(
         requestBody: CriarCategoriaRequest,
     ): CancelablePromise<CategoriaResponse> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/mensura/admin/categorias/',
+            url: '/api/cadastros/admin/categorias/',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -1648,7 +2043,7 @@ export class GatewayOrquestradorService {
      * @returns CategoriasPaginadasResponse Successful Response
      * @throws ApiError
      */
-    public listarCategoriasPaginadoApiMensuraAdminCategoriasGet(
+    public listarCategoriasPaginadoApiCadastrosAdminCategoriasGet(
         page: number = 1,
         limit: number = 10,
         apenasAtivas: boolean = true,
@@ -1656,7 +2051,7 @@ export class GatewayOrquestradorService {
     ): CancelablePromise<CategoriasPaginadasResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/categorias/',
+            url: '/api/cadastros/admin/categorias/',
             query: {
                 'page': page,
                 'limit': limit,
@@ -1675,12 +2070,12 @@ export class GatewayOrquestradorService {
      * @returns CategoriaResponse Successful Response
      * @throws ApiError
      */
-    public buscarCategoriaPorIdApiMensuraAdminCategoriasCategoriaIdGet(
+    public buscarCategoriaPorIdApiCadastrosAdminCategoriasCategoriaIdGet(
         categoriaId: number,
     ): CancelablePromise<CategoriaResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/categorias/{categoria_id}',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
             path: {
                 'categoria_id': categoriaId,
             },
@@ -1701,13 +2096,13 @@ export class GatewayOrquestradorService {
      * @returns CategoriaResponse Successful Response
      * @throws ApiError
      */
-    public atualizarCategoriaApiMensuraAdminCategoriasCategoriaIdPut(
+    public atualizarCategoriaApiCadastrosAdminCategoriasCategoriaIdPut(
         categoriaId: number,
         requestBody: AtualizarCategoriaRequest,
     ): CancelablePromise<CategoriaResponse> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/mensura/admin/categorias/{categoria_id}',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
             path: {
                 'categoria_id': categoriaId,
             },
@@ -1727,12 +2122,12 @@ export class GatewayOrquestradorService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public deletarCategoriaApiMensuraAdminCategoriasCategoriaIdDelete(
+    public deletarCategoriaApiCadastrosAdminCategoriasCategoriaIdDelete(
         categoriaId: number,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/mensura/admin/categorias/{categoria_id}',
+            url: '/api/cadastros/admin/categorias/{categoria_id}',
             path: {
                 'categoria_id': categoriaId,
             },
@@ -1756,7 +2151,7 @@ export class GatewayOrquestradorService {
      * @returns CategoriasPaginadasResponse Successful Response
      * @throws ApiError
      */
-    public buscarCategoriasPorTermoApiMensuraAdminCategoriasBuscarTermoGet(
+    public buscarCategoriasPorTermoApiCadastrosAdminCategoriasBuscarTermoGet(
         termo: string,
         page: number = 1,
         limit: number = 10,
@@ -1764,7 +2159,7 @@ export class GatewayOrquestradorService {
     ): CancelablePromise<CategoriasPaginadasResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/categorias/buscar/termo',
+            url: '/api/cadastros/admin/categorias/buscar/termo',
             query: {
                 'termo': termo,
                 'page': page,
@@ -1785,12 +2180,12 @@ export class GatewayOrquestradorService {
      * @returns CategoriaArvoreResponse Successful Response
      * @throws ApiError
      */
-    public buscarArvoreCategoriasApiMensuraAdminCategoriasArvoreEstruturaGet(
+    public buscarArvoreCategoriasApiCadastrosAdminCategoriasArvoreEstruturaGet(
         apenasAtivas: boolean = true,
     ): CancelablePromise<CategoriaArvoreResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/categorias/arvore/estrutura',
+            url: '/api/cadastros/admin/categorias/arvore/estrutura',
             query: {
                 'apenas_ativas': apenasAtivas,
             },
@@ -1808,12 +2203,12 @@ export class GatewayOrquestradorService {
      * @returns CategoriaListItem Successful Response
      * @throws ApiError
      */
-    public buscarCategoriasRaizApiMensuraAdminCategoriasRaizListaGet(
+    public buscarCategoriasRaizApiCadastrosAdminCategoriasRaizListaGet(
         apenasAtivas: boolean = true,
     ): CancelablePromise<Array<CategoriaListItem>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/categorias/raiz/lista',
+            url: '/api/cadastros/admin/categorias/raiz/lista',
             query: {
                 'apenas_ativas': apenasAtivas,
             },
@@ -1833,13 +2228,13 @@ export class GatewayOrquestradorService {
      * @returns CategoriaListItem Successful Response
      * @throws ApiError
      */
-    public buscarFilhosDaCategoriaApiMensuraAdminCategoriasParentIdFilhosGet(
+    public buscarFilhosDaCategoriaApiCadastrosAdminCategoriasParentIdFilhosGet(
         parentId: number,
         apenasAtivas: boolean = true,
     ): CancelablePromise<Array<CategoriaListItem>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/mensura/admin/categorias/{parent_id}/filhos',
+            url: '/api/cadastros/admin/categorias/{parent_id}/filhos',
             path: {
                 'parent_id': parentId,
             },
@@ -4263,6 +4658,31 @@ export class GatewayOrquestradorService {
         });
     }
     /**
+     * Atualizar Observacoes Pedido
+     * Atualiza as observações de um pedido
+     * @param pedidoId ID do pedido
+     * @param requestBody
+     * @returns PedidoMesaOut Successful Response
+     * @throws ApiError
+     */
+    public atualizarObservacoesPedidoApiMesasAdminPedidosPedidoIdPut(
+        pedidoId: number,
+        requestBody: AtualizarObservacoesRequest,
+    ): CancelablePromise<PedidoMesaOut> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/mesas/admin/pedidos/{pedido_id}',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * List Pedidos Finalizados
      * Retorna todos os pedidos finalizados (ENTREGUE) da mesa especificada, opcionalmente filtrados por data
      * @param mesaId ID da mesa
@@ -4745,7 +5165,7 @@ export class GatewayOrquestradorService {
      * @returns CategoriaSearchOut Successful Response
      * @throws ApiError
      */
-    public searchCategoriasApiCadastrosClientCategoriasSearchGet(
+    public searchCategoriasApiCardapioClientCategoriasSearchGet(
         xSuperToken: string,
         q?: (string | null),
         limit: number = 30,
@@ -4753,7 +5173,7 @@ export class GatewayOrquestradorService {
     ): CancelablePromise<Array<CategoriaSearchOut>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cadastros/client/categorias/search',
+            url: '/api/cardapio/client/categorias/search',
             headers: {
                 'x-super-token': xSuperToken,
             },
@@ -4774,13 +5194,13 @@ export class GatewayOrquestradorService {
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
-    public getCategoriaApiCadastrosClientCategoriasCatIdGet(
+    public getCategoriaApiCardapioClientCategoriasCatIdGet(
         catId: number,
         xSuperToken: string,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cadastros/client/categorias/{cat_id}',
+            url: '/api/cardapio/client/categorias/{cat_id}',
             path: {
                 'cat_id': catId,
             },
@@ -4879,12 +5299,12 @@ export class GatewayOrquestradorService {
     /**
      * Listar Enderecos
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listarEnderecosApiCadastrosClientEnderecosGet(
         xSuperToken: string,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/client/enderecos',
@@ -4900,13 +5320,13 @@ export class GatewayOrquestradorService {
      * Criar Endereco
      * @param xSuperToken
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoApiCadastrosClientEnderecosPost(
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/client/enderecos',
@@ -4924,13 +5344,13 @@ export class GatewayOrquestradorService {
      * Get Endereco
      * @param enderecoId
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecoApiCadastrosClientEnderecosEnderecoIdGet(
         enderecoId: number,
         xSuperToken: string,
-    ): CancelablePromise<EnderecoOut> {
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/client/enderecos/{endereco_id}',
@@ -4950,14 +5370,14 @@ export class GatewayOrquestradorService {
      * @param enderecoId
      * @param xSuperToken
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public atualizarEnderecoApiCadastrosClientEnderecosEnderecoIdPut(
         enderecoId: number,
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/cadastros/client/enderecos/{endereco_id}',
@@ -5003,13 +5423,13 @@ export class GatewayOrquestradorService {
      * Set Endereco Padrao
      * @param enderecoId
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public setEnderecoPadraoApiCadastrosClientEnderecosEnderecoIdSetPadraoPost(
         enderecoId: number,
         xSuperToken: string,
-    ): CancelablePromise<EnderecoOut> {
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/client/enderecos/{endereco_id}/set-padrao',
@@ -5207,179 +5627,6 @@ export class GatewayOrquestradorService {
         });
     }
     /**
-     * Search Categorias
-     * @param q Termo de busca por descrição/slug
-     * @param limit
-     * @param offset
-     * @returns CategoriaSearchOut Successful Response
-     * @throws ApiError
-     */
-    public searchCategoriasApiCadastrosAdminCategoriasSearchGet(
-        q?: (string | null),
-        limit: number = 30,
-        offset?: number,
-    ): CancelablePromise<Array<CategoriaSearchOut>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/categorias/search',
-            query: {
-                'q': q,
-                'limit': limit,
-                'offset': offset,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Get Categoria
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public getCategoriaApiCadastrosAdminCategoriasCatIdGet(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Editar Categoria
-     * @param catId
-     * @param requestBody
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public editarCategoriaApiCadastrosAdminCategoriasCatIdPut(
-        catId: number,
-        requestBody: CategoriaDeliveryIn,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'PUT',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Deletar Categoria
-     * @param catId
-     * @returns void
-     * @throws ApiError
-     */
-    public deletarCategoriaApiCadastrosAdminCategoriasCatIdDelete(
-        catId: number,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'DELETE',
-            url: '/api/cadastros/admin/categorias/{cat_id}',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Criar Categoria
-     * @param requestBody
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public criarCategoriaApiCadastrosAdminCategoriasPost(
-        requestBody: CategoriaDeliveryIn,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Move Categoria Direita
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public moveCategoriaDireitaApiCadastrosAdminCategoriasCatIdMoveRightPost(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias/{cat_id}/move-right',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Move Categoria Esquerda
-     * @param catId
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public moveCategoriaEsquerdaApiCadastrosAdminCategoriasCatIdMoveLeftPost(
-        catId: number,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/categorias/{cat_id}/move-left',
-            path: {
-                'cat_id': catId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Upload Imagem Categoria
-     * @param catId
-     * @param formData
-     * @returns CategoriaDeliveryOut Successful Response
-     * @throws ApiError
-     */
-    public uploadImagemCategoriaApiCadastrosAdminCategoriasCatIdImagemPatch(
-        catId: number,
-        formData: Body_upload_imagem_categoria_api_cadastros_admin_categorias__cat_id__imagem_patch,
-    ): CancelablePromise<CategoriaDeliveryOut> {
-        return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/cadastros/admin/categorias/{cat_id}/imagem',
-            path: {
-                'cat_id': catId,
-            },
-            formData: formData,
-            mediaType: 'multipart/form-data',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Listar Clientes
      * Endpoint para listar todos os clientes.
      * Requer autenticação de admin.
@@ -5496,13 +5743,13 @@ export class GatewayOrquestradorService {
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para adicionar endereço
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoClienteApiCadastrosAdminClientesClienteIdCriarEnderecoPost(
         clienteId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/admin/clientes/{cliente_id}/criar-endereco',
@@ -5521,12 +5768,12 @@ export class GatewayOrquestradorService {
      * Endpoint para consultar endereços de um cliente específico.
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para consultar endereços
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecosClienteApiCadastrosAdminClientesClienteIdUpdateEnderecoGet(
         clienteId: number,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/admin/clientes/{cliente_id}/update-endereco',
@@ -5652,12 +5899,12 @@ export class GatewayOrquestradorService {
      * Endpoint para admin listar endereços de um cliente específico.
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para listar endereços
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listarEnderecosAdminApiCadastrosAdminEnderecosClienteClienteIdGet(
         clienteId: number,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}',
@@ -5676,13 +5923,13 @@ export class GatewayOrquestradorService {
      * Requer autenticação de admin.
      * @param clienteId ID do cliente para criar endereço
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoAdminApiCadastrosAdminEnderecosClienteClienteIdPost(
         clienteId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}',
@@ -5705,14 +5952,14 @@ export class GatewayOrquestradorService {
      * @param clienteId ID do cliente
      * @param enderecoId ID do endereço para atualizar
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public atualizarEnderecoAdminApiCadastrosAdminEnderecosClienteClienteIdEnderecoEnderecoIdPut(
         clienteId: number,
         enderecoId: number,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/cadastros/admin/enderecos/cliente/{cliente_id}/endereco/{endereco_id}',
@@ -6360,177 +6607,6 @@ export class GatewayOrquestradorService {
             url: '/api/cadastros/admin/regioes-entrega/{regiao_id}',
             path: {
                 'regiao_id': regiaoId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Search Vitrines
-     * @param q Busca por título/slug
-     * @param codCategoria Filtra por categoria vinculada
-     * @param isHome Filtra por destaque da home
-     * @param limit
-     * @param offset
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public searchVitrinesApiCadastrosAdminVitrinesSearchGet(
-        q?: (string | null),
-        codCategoria?: (number | null),
-        isHome?: (boolean | null),
-        limit: number = 30,
-        offset?: number,
-    ): CancelablePromise<Array<VitrineOut>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/cadastros/admin/vitrines/search',
-            query: {
-                'q': q,
-                'cod_categoria': codCategoria,
-                'is_home': isHome,
-                'limit': limit,
-                'offset': offset,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Toggle Home Vitrine
-     * @param vitrineId ID da vitrine
-     * @param requestBody
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public toggleHomeVitrineApiCadastrosAdminVitrinesVitrineIdHomePatch(
-        vitrineId: number,
-        requestBody: ToggleHomeRequest,
-    ): CancelablePromise<VitrineOut> {
-        return this.httpRequest.request({
-            method: 'PATCH',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}/home',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Criar Vitrine
-     * @param requestBody
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public criarVitrineApiCadastrosAdminVitrinesPost(
-        requestBody: CriarVitrineRequest,
-    ): CancelablePromise<VitrineOut> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/vitrines',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Atualizar Vitrine
-     * @param vitrineId ID da vitrine
-     * @param requestBody
-     * @returns VitrineOut Successful Response
-     * @throws ApiError
-     */
-    public atualizarVitrineApiCadastrosAdminVitrinesVitrineIdPut(
-        vitrineId: number,
-        requestBody: AtualizarVitrineRequest,
-    ): CancelablePromise<VitrineOut> {
-        return this.httpRequest.request({
-            method: 'PUT',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Deletar Vitrine
-     * @param vitrineId ID da vitrine
-     * @returns void
-     * @throws ApiError
-     */
-    public deletarVitrineApiCadastrosAdminVitrinesVitrineIdDelete(
-        vitrineId: number,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'DELETE',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Vincular Produto
-     * @param vitrineId ID da vitrine
-     * @param requestBody
-     * @returns void
-     * @throws ApiError
-     */
-    public vincularProdutoApiCadastrosAdminVitrinesVitrineIdVincularPost(
-        vitrineId: number,
-        requestBody: VinculoRequest,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}/vincular',
-            path: {
-                'vitrine_id': vitrineId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Desvincular Produto
-     * @param vitrineId ID da vitrine
-     * @param codBarras Código de barras do produto
-     * @param empresaId Empresa do vínculo
-     * @returns void
-     * @throws ApiError
-     */
-    public desvincularProdutoApiCadastrosAdminVitrinesVitrineIdVincularCodBarrasDelete(
-        vitrineId: number,
-        codBarras: string,
-        empresaId: number,
-    ): CancelablePromise<void> {
-        return this.httpRequest.request({
-            method: 'DELETE',
-            url: '/api/cadastros/admin/vitrines/{vitrine_id}/vincular/{cod_barras}',
-            path: {
-                'vitrine_id': vitrineId,
-                'cod_barras': codBarras,
-            },
-            query: {
-                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

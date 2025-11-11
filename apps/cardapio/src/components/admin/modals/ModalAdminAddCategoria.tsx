@@ -43,7 +43,6 @@ export const ModalAdminAddCategoria = ({
         descricao,
         cod_empresa: empresaId,
         parent_id: parentId,
-        slug: descricao.toLowerCase().replace(/\s+/g, "-"),
       });
       closeModal();
     } else {
@@ -52,7 +51,6 @@ export const ModalAdminAddCategoria = ({
         descricao,
         cod_empresa: empresaId,
         parent_id: parentId,
-        slug: descricao.toLowerCase().replace(/\s+/g, "-"),
       });
       closeModal();
     }

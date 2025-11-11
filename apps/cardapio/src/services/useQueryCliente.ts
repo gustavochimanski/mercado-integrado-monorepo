@@ -42,6 +42,22 @@ export interface NovoDispositivoResponse {
   telefone: string;
 }
 
+async function sincronizarClienteAtual() {
+  try {
+    const { data } = await apiClienteAdmin.get<ClienteOut>("/api/cadastros/client/clientes/me");
+    if (data) {
+      setCliente({
+        id: data.id,
+        nome: data.nome,
+        telefone: data.telefone || undefined,
+        tokenCliente: data.super_token,
+      });
+    }
+  } catch (error) {
+    console.warn("Não foi possível sincronizar dados completos do cliente:", error);
+  }
+}
+
 export function useMutateCliente() {
   const qc = useQueryClient();
 
@@ -52,10 +68,11 @@ export function useMutateCliente() {
   /** Criar cliente novo */
   const create = useMutation({
     mutationFn: (body: ClienteCreate) =>
-      apiAdmin.post<ClienteOut>("/api/delivery/client/clientes/", body),
+      apiAdmin.post<ClienteOut>("/api/cadastros/client/clientes/", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
+        id: data.id,
         nome: data.nome,
         telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
@@ -71,10 +88,11 @@ export function useMutateCliente() {
   /** Atualizar cliente */
   const update = useMutation({
     mutationFn: ({ id, ...body }: { id: number } & ClienteUpdate) =>
-      apiClienteAdmin.put<ClienteOut>(`/api/delivery/client/clientes/me`, body),
+      apiClienteAdmin.put<ClienteOut>(`/api/cadastros/client/clientes/me`, body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
+        id: data.id,
         nome: data.nome,
         telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
@@ -90,7 +108,7 @@ export function useMutateCliente() {
   /** Enviar código OTP para telefone existente */
   const enviarCodigoNovoDispositivo = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
-      api.post("/api/delivery/client/clientes/novo-dispositivo", body),
+      api.post("/api/cadastros/client/clientes/novo-dispositivo", body),
     onSuccess: () => {
       toast.success("Código enviado com sucesso!");
     },
@@ -102,10 +120,11 @@ export function useMutateCliente() {
   /** Confirmar código OTP e receber token */
   const confirmarCodigo = useMutation({
     mutationFn: (body: ConfirmacaoCodigoRequest) =>
-      api.post<ClienteOut>("/api/delivery/client/clientes/confirmar-codigo", body),
+      api.post<ClienteOut>("/api/cadastros/client/clientes/confirmar-codigo", body),
     onSuccess: (response) => {
       const data = response.data;
       setCliente({
+        id: data.id,
         nome: data.nome,
         telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
@@ -121,14 +140,15 @@ export function useMutateCliente() {
   /** Login direto apenas com telefone (sem código) */
   const loginDireto = useMutation({
     mutationFn: (body: NovoDispositivoRequest) =>
-      apiAdmin.post<NovoDispositivoResponse>("/api/delivery/client/clientes/novo-dispositivo", body),
-    onSuccess: (response) => {
+      apiAdmin.post<NovoDispositivoResponse>("/api/cadastros/client/clientes/novo-dispositivo", body),
+    onSuccess: async (response) => {
       const data = response.data;
       setCliente({
         nome: data.nome,
         telefone: data.telefone || undefined,
         tokenCliente: data.super_token,
       });
+      await sincronizarClienteAtual();
       invalidate();
       toast.success("Login realizado com sucesso!");
     },

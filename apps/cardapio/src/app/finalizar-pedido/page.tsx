@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
-import { useFinalizarPedido } from "@cardapio/services/useQueryFinalizarPedido";
-import { useQueryEnderecos, useMutateEndereco, EnderecoCreate, Endereco } from "@cardapio/services/useQueryEndereco";
+import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, getTokenCliente, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
+import { useQueryEnderecos, useMutateEndereco, Endereco } from "@cardapio/services/useQueryEndereco";
 import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
-import { useMutatePedido } from "@cardapio/services/useQueryPedido";
-import { usePreviewCheckout } from "@cardapio/services/usePreviewCheckout";
+import { useMutatePedido } from "@cardapio/services/pedidos/useQueryPedido";
+import { usePreviewCheckout } from "@cardapio/services/pedidos/usePreviewCheckout";
+import { finalizarCheckoutCliente } from "@cardapio/services/pedidos/checkout-finalizar-pedido";
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { useQueryClient } from "@tanstack/react-query";
+import type { FinalizarPedidoRequest, TipoPedidoCheckout } from "@cardapio/types/pedido";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
@@ -24,12 +27,19 @@ import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/Pagament
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
 import ObservacaoStep from "@cardapio/components/Shared/finalizar-pedido/ObservacaoStep";
 import PedidoConfirmOverlay from "@cardapio/components/Shared/finalizar-pedido/PedidoConfirmOverlay";
+import { getEmpresaId, setEmpresaId, getMesaInicial, clearMesaInicial } from "@cardapio/stores/empresa/empresaStore";
+import { toast } from "sonner";
+import { useQueryEmpresasDisponiveis, EmpresaDisponivel } from "@cardapio/services/useQueryEmpresasDisponiveis";
+import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
+
+const STEP_ORDER = ["tipo", "mesa", "balcao", "endereco", "pagamento", "observacao", "revisao"] as const;
+type CheckoutTab = (typeof STEP_ORDER)[number];
 
 export default function FinalizarPedidoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { items, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
-  const { finalizarPedido, loading } = useFinalizarPedido();
+  const queryClient = useQueryClient();
   const { updatePedido, updateStatus } = useMutatePedido();
 
   const isEditingMode = editingPedidoId !== null;
@@ -41,7 +51,56 @@ export default function FinalizarPedidoPage() {
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
   const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
   const [trocoPara, setTrocoPara] = useState<number | null>(null);
-  const [currentTab, setCurrentTab] = useState<"tipo" | "mesa" | "balcao" | "endereco" | "pagamento" | "observacao" | "revisao">("tipo");
+  const [mesaCodigo, setMesaCodigo] = useState<string | null>(null);
+  const [numPessoas, setNumPessoas] = useState<number | null>(null);
+  const [balcaoEmpresaId, setBalcaoEmpresaId] = useState<number | null>(null);
+  const [currentTab, setCurrentTab] = useState<CheckoutTab>("tipo");
+  useReceiveEmpresaFromQuery();
+  const [mesaPresetAplicada, setMesaPresetAplicada] = useState(false);
+
+  const ensureClienteIdentificado = useCallback(() => {
+    const clienteAtual = getCliente();
+    const tokenAtual = clienteAtual?.tokenCliente ?? getTokenCliente();
+
+    if (!tokenAtual) {
+      setShowClienteModal(true);
+      return false;
+    }
+
+    if (!clienteAtual.tokenCliente && tokenAtual) {
+      clienteAtual.tokenCliente = tokenAtual;
+    }
+
+    if (!cliente?.tokenCliente) {
+      setCliente(clienteAtual);
+      setEnderecoId(getEnderecoPadraoId());
+      setPagamentoId(getMeioPagamentoId());
+    }
+
+    return true;
+  }, [cliente?.tokenCliente]);
+
+  const handleClienteModalToggle = useCallback(
+    (openState?: boolean) => {
+      if (openState === true) {
+        setShowClienteModal(true);
+        return;
+      }
+
+      if (ensureClienteIdentificado()) {
+        setShowClienteModal(false);
+      } else {
+        setShowClienteModal(true);
+      }
+    },
+    [ensureClienteIdentificado]
+  );
+
+  const handleClienteConfirm = useCallback(() => {
+    if (ensureClienteIdentificado()) {
+      setShowClienteModal(false);
+    }
+  }, [ensureClienteIdentificado]);
 
   // Lê parâmetro ?mesa=X da URL e pré-seleciona
   useEffect(() => {
@@ -49,28 +108,136 @@ export default function FinalizarPedidoPage() {
     if (mesaParam) {
       const mesaIdFromUrl = parseInt(mesaParam, 10);
       if (!isNaN(mesaIdFromUrl) && mesaIdFromUrl > 0) {
-        setMesaId(mesaIdFromUrl);
-        setTipoPedido("MESA"); // Define automaticamente como pedido de mesa
-        setCurrentTab("mesa"); // Vai direto para a aba de mesa
+        if (ensureClienteIdentificado()) {
+          setTipoPedido("MESA"); // Define automaticamente como pedido de mesa
+          setCurrentTab("mesa"); // Vai direto para a aba de mesa
+          setMesaCodigo(mesaParam);
+        }
       }
     }
-  }, [searchParams]);
+  }, [searchParams, ensureClienteIdentificado]);
+
+  useEffect(() => {
+    if (tipoPedido !== "MESA") {
+      setNumPessoas(null);
+      setMesaId(null);
+    }
+
+    if (tipoPedido === "DELIVERY") {
+      setMesaCodigo(null);
+    }
+
+    if (tipoPedido !== "BALCAO") {
+      setBalcaoEmpresaId(null);
+    }
+  }, [tipoPedido]);
 
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
   const [overlayMessage, setOverlayMessage] = useState("");
+  const [isFinalizando, setIsFinalizando] = useState(false);
 
   const { create, update, remove } = useMutateEndereco();
   const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(!!cliente?.tokenCliente);
 
   const { data: enderecosOut = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
 
+  const {
+    data: empresasDisponiveis = [],
+    isLoading: isLoadingEmpresas,
+    isError: isErrorEmpresas,
+  } = useQueryEmpresasDisponiveis();
+
+  useEffect(() => {
+    const empresaAtual = getEmpresaId();
+    if ((!empresaAtual || empresaAtual <= 0) && empresasDisponiveis.length > 0) {
+      const primeiraEmpresa = empresasDisponiveis[0];
+      if (primeiraEmpresa?.id) {
+        setEmpresaId(primeiraEmpresa.id);
+        if (!balcaoEmpresaId) {
+          setBalcaoEmpresaId(primeiraEmpresa.id);
+        }
+      }
+    }
+  }, [empresasDisponiveis, balcaoEmpresaId]);
+
+  useEffect(() => {
+    if (tipoPedido === "BALCAO" && !balcaoEmpresaId) {
+      const empresaAtual = getEmpresaId();
+      if (empresaAtual && empresaAtual > 0) {
+        setBalcaoEmpresaId(empresaAtual);
+      }
+    }
+  }, [tipoPedido, balcaoEmpresaId]);
+
+  useEffect(() => {
+    if (
+      tipoPedido === "BALCAO" &&
+      empresasDisponiveis.length === 1 &&
+      !balcaoEmpresaId
+    ) {
+      setBalcaoEmpresaId(empresasDisponiveis[0].id);
+    }
+  }, [tipoPedido, empresasDisponiveis, balcaoEmpresaId]);
+
+  useEffect(() => {
+    if (tipoPedido !== "BALCAO") {
+      return;
+    }
+
+    if (!balcaoEmpresaId) {
+      return;
+    }
+
+    const empresaExiste = empresasDisponiveis.some(
+      (empresa: EmpresaDisponivel) => empresa.id === balcaoEmpresaId
+    );
+
+    if (!empresaExiste) {
+      setBalcaoEmpresaId(null);
+    }
+  }, [tipoPedido, empresasDisponiveis, balcaoEmpresaId]);
+
+useEffect(() => {
+  if (mesaPresetAplicada) {
+    return;
+  }
+
+  const { codigo, numPessoas: pessoas } = getMesaInicial();
+  if (!codigo) {
+    setMesaPresetAplicada(true);
+    return;
+  }
+
+  if (tipoPedido && tipoPedido !== "MESA") {
+    setMesaPresetAplicada(true);
+    return;
+  }
+
+  setTipoPedido("MESA");
+  setMesaCodigo(codigo);
+  const mesaNumero = Number(codigo);
+  if (Number.isFinite(mesaNumero) && mesaNumero > 0) {
+    setMesaId(Math.trunc(mesaNumero));
+  }
+  if (pessoas && Number.isFinite(pessoas) && pessoas > 0) {
+    setNumPessoas(Math.trunc(pessoas));
+  }
+  setCurrentTab("mesa");
+  setMesaPresetAplicada(true);
+}, [mesaPresetAplicada, tipoPedido]);
+
   // Busca preview do checkout quando estiver na aba de revisão
-  const { data: previewData, isLoading: isLoadingPreview } = usePreviewCheckout(
+  const { data: previewData, isLoading: isLoadingPreview } = usePreviewCheckout({
+    tipoPedido,
     enderecoId,
     meioPagamentoId,
-    currentTab === "revisao" // Só busca quando está na aba de revisão
-  );
+    mesaCodigo,
+    numPessoas,
+    trocoPara,
+    empresaSelecionadaId: tipoPedido === "BALCAO" ? balcaoEmpresaId : null,
+    enabled: currentTab === "revisao",
+  });
 
 const enderecos: Endereco[] = enderecosOut.map((e) => ({
   id: e.id,
@@ -88,22 +255,46 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
 }));
 
   useEffect(() => {
-    const c = getCliente();
-    if (!c?.tokenCliente) {
-      setShowClienteModal(true);
-    } else {
-      setCliente(c);
-      setEnderecoId(getEnderecoPadraoId());
-      setPagamentoId(getMeioPagamentoId());
-    }
-  }, [items, router]);
+    ensureClienteIdentificado();
+  }, [ensureClienteIdentificado, items, router]);
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  const resolveClienteId = () => {
+    const candidate = cliente?.id ?? getCliente()?.id;
+    if (candidate === undefined || candidate === null) {
+      return null;
+    }
+    const parsed = typeof candidate === "number" ? candidate : Number(candidate);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return null;
+    }
+    return parsed;
+  };
+
+  const ensurePositiveInteger = (value: number | null | undefined) => {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (!Number.isFinite(value) || value <= 0) {
+      return null;
+    }
+    return Math.trunc(value);
+  };
+
   const handleFinalizar = async () => {
+    if (!ensureClienteIdentificado()) {
+      setErrorMessage("Identifique-se para finalizar o pedido.");
+      setOverlayMessage("Identifique-se para finalizar o pedido.");
+      setOverlayStatus("erro");
+      setTimeout(() => setOverlayStatus("idle"), 1500);
+      return;
+    }
+
     setOverlayStatus("loading");
     setErrorMessage("");
     setOverlayMessage("");
+    setIsFinalizando(true);
 
     if (isEditingMode && editingPedidoId) {
       // Modo edição: atualiza pedido existente
@@ -126,7 +317,11 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           },
         },
         {
+          onSettled: () => {
+            setIsFinalizando(false);
+          },
           onSuccess: () => {
+            clearMesaInicial();
             // Após atualizar pedido editado, muda status para D (EDITADO) e desativa modo edição
             updateStatus.mutate(
               { id: editingPedidoId, status: "D" },
@@ -135,6 +330,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   setTimeout(() => {
                     setOverlayStatus("sucesso");
                     stopEditingPedido(); // Limpa o modo edição
+                    queryClient.invalidateQueries({ queryKey: ["pedidos"] });
                     setTimeout(() => router.push("/pedidos"), 3000);
                   }, 1500);
                 },
@@ -143,6 +339,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   setTimeout(() => {
                     setOverlayStatus("sucesso");
                     stopEditingPedido();
+                    queryClient.invalidateQueries({ queryKey: ["pedidos"] });
                     setTimeout(() => router.push("/pedidos"), 3000);
                   }, 1500);
                 },
@@ -152,7 +349,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           onError: (error: any) => {
             setTimeout(() => {
               setOverlayStatus("erro");
-              const message = error?.response?.data?.message || "Erro ao atualizar pedido";
+              const message = extractErrorMessage(error, "Erro ao atualizar pedido");
               setOverlayMessage(message);
               setErrorMessage(message);
             }, 1500);
@@ -161,25 +358,118 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
       );
     } else {
       // Modo normal: cria novo pedido
-      // BALCAO não precisa de mesa_id obrigatório (opcional se quiser associar uma mesa)
-      const mesaIdToSend = tipoPedido === "MESA" && mesaId ? mesaId : (tipoPedido === "BALCAO" && mesaId ? mesaId : undefined);
-      const result = await finalizarPedido(trocoPara, tipoPedido, mesaIdToSend);
+      let validationError: string | null = null;
 
-      setTimeout(() => {
-        if (result === "sucesso") {
+      if (!tipoPedido) {
+        validationError = "Selecione o tipo de pedido antes de finalizar.";
+      } else if (!getTokenCliente() && tipoPedido === "DELIVERY") {
+        validationError = "Cliente não identificado. Faça login novamente.";
+      } else if (!enderecoId && tipoPedido === "DELIVERY") {
+        validationError = "Endereço não selecionado. Selecione um endereço de entrega.";
+      } else if (!meioPagamentoId && tipoPedido === "DELIVERY") {
+        validationError = "Forma de pagamento não selecionada. Escolha uma forma de pagamento.";
+      } else if (tipoPedido === "MESA" && !mesaCodigo) {
+        validationError = "Informe o código/número da mesa.";
+      } else if (tipoPedido === "BALCAO" && !balcaoEmpresaId) {
+        validationError = "Selecione a unidade para retirada no balcão.";
+      }
+
+      if (validationError) {
+        setTimeout(() => {
+          setOverlayStatus("erro");
+          setOverlayMessage(validationError);
+          setErrorMessage(validationError);
+          setIsFinalizando(false);
+        }, 1500);
+        return;
+      }
+
+      try {
+        const empresaIdLoja = ensurePositiveInteger(getEmpresaId());
+        let empresaIdPayload: number | null = null;
+
+        const itensPedido = items.map((i) => ({
+          produto_cod_barras: i.cod_barras,
+          quantidade: i.quantity,
+          observacao: i.observacao || undefined,
+        }));
+
+        const tipoSelecionado = tipoPedido as TipoPedidoCheckout;
+
+        if (tipoSelecionado === "BALCAO") {
+          const empresaSelecionada = ensurePositiveInteger(balcaoEmpresaId);
+          if (!empresaSelecionada) {
+            throw new Error("Selecione a unidade para retirada no balcão antes de finalizar.");
+          }
+          empresaIdPayload = empresaSelecionada;
+          setEmpresaId(empresaSelecionada);
+        } else if (tipoSelecionado === "MESA") {
+          if (!empresaIdLoja) {
+            throw new Error("Empresa não encontrada. Recarregue a página e tente novamente.");
+          }
+          empresaIdPayload = empresaIdLoja;
+        }
+
+        const payload: FinalizarPedidoRequest = {
+          tipo_pedido: tipoSelecionado,
+          origem: "WEB",
+          observacao_geral: observacao || undefined,
+          itens: itensPedido,
+          cliente_id: resolveClienteId(),
+        };
+
+        if (tipoSelecionado !== "DELIVERY" && empresaIdPayload) {
+          payload.empresa_id = empresaIdPayload;
+        }
+
+        if (tipoPedido === "DELIVERY") {
+          payload.endereco_id = enderecoId as number;
+          payload.meio_pagamento_id = meioPagamentoId as number;
+          payload.troco_para = trocoPara ?? undefined;
+          payload.mesa_codigo = undefined;
+        } else if (tipoPedido === "MESA") {
+          const codigoMesa = mesaCodigo ?? (mesaId !== null ? String(mesaId) : undefined);
+          if (codigoMesa) {
+            payload.mesa_codigo = codigoMesa;
+          }
+          payload.num_pessoas = numPessoas ?? null;
+          payload.meio_pagamento_id = meioPagamentoId ?? null;
+          payload.troco_para = trocoPara ?? null;
+        } else {
+          const codigoRetirada = mesaCodigo ?? (mesaId !== null ? String(mesaId) : undefined);
+          if (codigoRetirada) {
+            payload.mesa_codigo = codigoRetirada;
+          }
+          payload.meio_pagamento_id = meioPagamentoId ?? null;
+          payload.troco_para = trocoPara ?? null;
+        }
+
+        await finalizarCheckoutCliente(payload);
+        clearMesaInicial();
+
+        clearCart();
+        queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+
+        setOverlayMessage("Pedido enviado com sucesso!");
+        setTimeout(() => {
           setOverlayStatus("sucesso");
           setTimeout(() => router.push("/pedidos"), 3000);
-        } else if (typeof result === "object" && result.status === "erro") {
+          setIsFinalizando(false);
+        }, 1500);
+      } catch (error: any) {
+        const message = extractErrorMessage(error, "Erro ao processar pedido. Tente novamente.");
+        setTimeout(() => {
           setOverlayStatus("erro");
-          setOverlayMessage(result.message);
-          setErrorMessage(result.message);
-        }
-      }, 1500);
+          setOverlayMessage(message);
+          setErrorMessage(message);
+          setIsFinalizando(false);
+        }, 1500);
+      }
     }
   };
 
   const renderFooterButton = () => {
-    if (loading || overlayStatus === "loading") {
+    if (isFinalizando || overlayStatus === "loading") {
       return (
         <Button disabled className="w-full text-lg p-6 bg-gray-200 text-gray-700">
           <Loader2 className="animate-spin mr-2" size={20} />
@@ -194,6 +484,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           <Button 
             className="w-full text-lg p-6 bg-primary" 
             onClick={() => {
+              if (!ensureClienteIdentificado()) {
+                return;
+              }
               if (tipoPedido === "MESA") {
                 setCurrentTab("mesa");
               } else if (tipoPedido === "BALCAO") {
@@ -212,7 +505,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           <Button 
             className="w-full text-lg p-6 bg-blue-600" 
             onClick={() => setCurrentTab("pagamento")}
-            disabled={!mesaId}
+            disabled={!mesaCodigo}
           >
             Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
           </Button>
@@ -222,6 +515,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           <Button 
             className="w-full text-lg p-6 bg-green-600" 
             onClick={() => setCurrentTab("pagamento")}
+            disabled={!balcaoEmpresaId}
           >
             Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
           </Button>
@@ -258,16 +552,6 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         );
       default:
         return null;
-    }
-  };
-
-  const handleClienteConfirm = () => {
-    const c = getCliente();
-    if (c) {
-      setCliente(c);
-      setEnderecoId(getEnderecoPadraoId());
-      setPagamentoId(getMeioPagamentoId());
-      setShowClienteModal(false);
     }
   };
 
@@ -362,10 +646,16 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             <Tabs
               value={currentTab}
               onValueChange={(v) => {
-                // Impede navegação direta via tabs, apenas permite programática
-                // Se quiser permitir navegação livre, pode remover esta validação
-                if (v === "tipo" || v === currentTab) {
-                  setCurrentTab(v as any);
+                if (!STEP_ORDER.includes(v as CheckoutTab)) {
+                  return;
+                }
+                const target = v as CheckoutTab;
+                const currentIndex = STEP_ORDER.indexOf(currentTab);
+                const targetIndex = STEP_ORDER.indexOf(target);
+
+                // permite voltar (ou manter) via clique; avanço continua controlado pelos botões do fluxo
+                if (targetIndex <= currentIndex) {
+                  setCurrentTab(target);
                 }
               }}
               triggerClassName="rounded-b-none"
@@ -376,7 +666,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   Component: () => (
                     <TipoPedidoStep
                       tipoSelecionado={tipoPedido}
-                      onSelect={(tipo) => setTipoPedido(tipo)}
+                      onSelect={(tipo) => {
+                        if (tipo && !ensureClienteIdentificado()) {
+                          setTipoPedido(null);
+                          return;
+                        }
+                        setTipoPedido(tipo);
+                      }}
                     />
                   ),
                 },
@@ -386,7 +682,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   Component: () => (
                     <MesaStep
                       mesaId={mesaId}
-                      onSelect={(id) => setMesaId(id)}
+                      mesaCodigo={mesaCodigo}
+                      numPessoas={numPessoas}
+                      onSelect={(id, codigo) => {
+                        setMesaId(id);
+                        setMesaCodigo(codigo ?? null);
+                      }}
+                      onNumPessoasChange={(valor) => setNumPessoas(valor)}
                     />
                   ),
                   hidden: tipoPedido !== "MESA",
@@ -394,7 +696,21 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                 {
                   value: "balcao",
                   label: "Balcão",
-                  Component: () => <BalcaoStep />,
+                  Component: () => (
+                    <BalcaoStep
+                      mesaCodigo={mesaCodigo}
+                      onMesaCodigoChange={(codigo) => {
+                        setMesaCodigo(codigo ?? null);
+                        const parsed = ensurePositiveInteger(codigo ? Number(codigo) : null);
+                        setMesaId(parsed);
+                      }}
+                      empresas={empresasDisponiveis}
+                      empresaSelecionadaId={balcaoEmpresaId}
+                      onEmpresaSelecionadaChange={setBalcaoEmpresaId}
+                      isLoadingEmpresas={isLoadingEmpresas}
+                      carregamentoFalhou={isErrorEmpresas}
+                    />
+                  ),
                   hidden: tipoPedido !== "BALCAO",
                 },
                 {
@@ -408,8 +724,22 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                         setEnderecoPadraoId(id);
                         setEnderecoId(id);
                       }}
-                      onAdd={(novo: EnderecoCreate) => create.mutate(novo)}
-                      onUpdate={(atualizado: any) => update.mutate(atualizado)}
+                      onAdd={(novo) => {
+                        const clienteId = resolveClienteId();
+                        if (!clienteId) {
+                          toast.error("Não foi possível identificar o cliente. Faça login novamente para cadastrar um endereço.");
+                          return;
+                        }
+                        create.mutate({ ...novo, cliente_id: clienteId });
+                      }}
+                      onUpdate={(atualizado) => {
+                        const clienteId = resolveClienteId();
+                        if (!clienteId) {
+                          toast.error("Não foi possível identificar o cliente. Faça login novamente para atualizar o endereço.");
+                          return;
+                        }
+                        update.mutate({ ...atualizado, cliente_id: clienteId });
+                      }}
                       onDelete={(id: number) => remove.mutate(id)}
                     />
                   ),
@@ -481,7 +811,8 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                       dec={useCart.getState().dec}
                       remove={useCart.getState().remove}
                       tipoPedido={tipoPedido}
-                      mesaId={tipoPedido === "MESA" && mesaId ? mesaId : undefined}
+                      mesaCodigo={mesaCodigo ?? undefined}
+                      numPessoas={numPessoas ?? undefined}
                     />
                   ),
                 },

@@ -13,6 +13,7 @@ import { useMutateCategoria } from "@cardapio/services/useQueryCategoria";
 import {
   CircleArrowLeft,
   CircleArrowRight,
+  ImagePlus,
   MoreVertical,
   Pencil,
   Trash2,
@@ -21,10 +22,17 @@ import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
 
 interface CategoryOptionsProps {
   categoryId: number;
-  onEdit?: (id: number) => void;
+  onEditDetails?: (id: number) => void;
+  onEditImage?: (id: number) => void;
+  hasImage?: boolean;
 }
 
-const CategoryOptions = ({ categoryId, onEdit }: CategoryOptionsProps) => {
+const CategoryOptions = ({
+  categoryId,
+  onEditDetails,
+  onEditImage,
+  hasImage = false,
+}: CategoryOptionsProps) => {
   const { isAdmin } = useUserContext();
   const { remove, moveRight, moveLeft } = useMutateCategoria();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -59,8 +67,12 @@ const CategoryOptions = ({ categoryId, onEdit }: CategoryOptionsProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="text-sm">
-            <DropdownMenuItem onClick={() => onEdit?.(categoryId)}>
-              <Pencil className="mr-2 w-4 h-4" /> Editar
+            <DropdownMenuItem onClick={() => onEditDetails?.(categoryId)}>
+              <Pencil className="mr-2 w-4 h-4" /> Editar detalhes
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => onEditImage?.(categoryId)}>
+              <ImagePlus className="mr-2 w-4 h-4" /> {hasImage ? "Trocar imagem" : "Adicionar imagem"}
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={() => setConfirmOpen(true)}>

@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { app__api__delivery__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoCreate';
-import type { app__api__delivery__schemas__schema_endereco__EnderecoUpdate } from '../models/app__api__delivery__schemas__schema_endereco__EnderecoUpdate';
-import type { EnderecoOut } from '../models/EnderecoOut';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoCreate } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoCreate';
+import type { app__api__cardapio__schemas__schema_endereco__EnderecoOut } from '../models/app__api__cardapio__schemas__schema_endereco__EnderecoOut';
+import type { EnderecoUpdate } from '../models/EnderecoUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ClientCadastrosEndereOsService {
@@ -12,12 +12,12 @@ export class ClientCadastrosEndereOsService {
     /**
      * Listar Enderecos
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public listarEnderecosApiCadastrosClientEnderecosGet(
         xSuperToken: string,
-    ): CancelablePromise<Array<EnderecoOut>> {
+    ): CancelablePromise<Array<app__api__cardapio__schemas__schema_endereco__EnderecoOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/client/enderecos',
@@ -33,13 +33,13 @@ export class ClientCadastrosEndereOsService {
      * Criar Endereco
      * @param xSuperToken
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public criarEnderecoApiCadastrosClientEnderecosPost(
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoCreate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: app__api__cardapio__schemas__schema_endereco__EnderecoCreate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/client/enderecos',
@@ -57,13 +57,13 @@ export class ClientCadastrosEndereOsService {
      * Get Endereco
      * @param enderecoId
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public getEnderecoApiCadastrosClientEnderecosEnderecoIdGet(
         enderecoId: number,
         xSuperToken: string,
-    ): CancelablePromise<EnderecoOut> {
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cadastros/client/enderecos/{endereco_id}',
@@ -83,14 +83,14 @@ export class ClientCadastrosEndereOsService {
      * @param enderecoId
      * @param xSuperToken
      * @param requestBody
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public atualizarEnderecoApiCadastrosClientEnderecosEnderecoIdPut(
         enderecoId: number,
         xSuperToken: string,
-        requestBody: app__api__delivery__schemas__schema_endereco__EnderecoUpdate,
-    ): CancelablePromise<EnderecoOut> {
+        requestBody: EnderecoUpdate,
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/api/cadastros/client/enderecos/{endereco_id}',
@@ -136,13 +136,13 @@ export class ClientCadastrosEndereOsService {
      * Set Endereco Padrao
      * @param enderecoId
      * @param xSuperToken
-     * @returns EnderecoOut Successful Response
+     * @returns app__api__cardapio__schemas__schema_endereco__EnderecoOut Successful Response
      * @throws ApiError
      */
     public setEnderecoPadraoApiCadastrosClientEnderecosEnderecoIdSetPadraoPost(
         enderecoId: number,
         xSuperToken: string,
-    ): CancelablePromise<EnderecoOut> {
+    ): CancelablePromise<app__api__cardapio__schemas__schema_endereco__EnderecoOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cadastros/client/enderecos/{endereco_id}/set-padrao',

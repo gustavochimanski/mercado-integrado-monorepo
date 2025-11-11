@@ -10,6 +10,7 @@ export type BannerParceiroOut = {
     imagem: (string | null);
     categoria_id?: (number | null);
     link_redirecionamento?: (string | null);
+    redireciona_categoria: boolean;
     href_destino: string;
 };
 

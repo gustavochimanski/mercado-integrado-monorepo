@@ -1,0 +1,329 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import type { AlterarStatusPedidoBody } from '../models/AlterarStatusPedidoBody';
+import type { EditarPedidoRequest } from '../models/EditarPedidoRequest';
+import type { HistoricoDoPedidoResponse } from '../models/HistoricoDoPedidoResponse';
+import type { ItemPedidoEditar } from '../models/ItemPedidoEditar';
+import type { KanbanAgrupadoResponse } from '../models/KanbanAgrupadoResponse';
+import type { PedidoResponse } from '../models/PedidoResponse';
+import type { PedidoResponseCompletoTotal } from '../models/PedidoResponseCompletoTotal';
+import type { PedidoStatusEnum } from '../models/PedidoStatusEnum';
+import type { CancelablePromise } from '../core/CancelablePromise';
+import type { BaseHttpRequest } from '../core/BaseHttpRequest';
+export class AdminCardPioPedidosService {
+    constructor(public readonly httpRequest: BaseHttpRequest) {}
+    /**
+     * Listar Pedidos Admin Kanban
+     * Lista pedidos do sistema para visualização no Kanban (admin).
+     *
+     * **Retorno agrupado por categoria:**
+     * - `delivery`: Array de pedidos de delivery
+     * - `balcao`: Array de pedidos de balcão
+     * - `mesas`: Array de pedidos de mesas
+     *
+     * Cada categoria mantém seus IDs originais (sem conflitos).
+     *
+     * - **date_filter**: Filtra pedidos por data específica (formato YYYY-MM-DD)
+     * - **empresa_id**: ID da empresa (obrigatório, deve ser maior que 0)
+     * - **limit**: Limite de pedidos por categoria (padrão: 500)
+     * @param empresaId ID da empresa para filtrar pedidos
+     * @param dateFilter Filtrar pedidos por data (YYYY-MM-DD)
+     * @param limit
+     * @returns KanbanAgrupadoResponse Successful Response
+     * @throws ApiError
+     */
+    public listarPedidosAdminKanbanApiCardapioAdminPedidosKanbanGet(
+        empresaId: number,
+        dateFilter?: (string | null),
+        limit: number = 500,
+    ): CancelablePromise<KanbanAgrupadoResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/pedidos/kanban',
+            query: {
+                'date_filter': dateFilter,
+                'empresa_id': empresaId,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get Pedido
+     * Busca um pedido específico com informações completas (admin).
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     *
+     * Retorna todos os dados do pedido incluindo itens, cliente, endereço, etc.
+     * @param pedidoId ID do pedido
+     * @returns PedidoResponseCompletoTotal Successful Response
+     * @throws ApiError
+     */
+    public getPedidoApiCardapioAdminPedidosPedidoIdGet(
+        pedidoId: number,
+    ): CancelablePromise<PedidoResponseCompletoTotal> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Pedido
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/editar)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/editar`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
+     * Atualiza dados de um pedido existente (admin).
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     * - **payload**: Dados para atualização
+     *
+     * Campos que podem ser atualizados:
+     * - **meio_pagamento_id**: ID do meio de pagamento
+     * - **endereco_id**: ID do endereço de entrega
+     * - **cupom_id**: ID do cupom de desconto
+     * - **observacao_geral**: Observação geral do pedido
+     * - **troco_para**: Valor do troco para
+     * - **itens**: Lista de itens do pedido
+     * @param pedidoId ID do pedido a ser atualizado
+     * @param requestBody
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public atualizarPedidoApiCardapioAdminPedidosPedidoIdPut(
+        pedidoId: number,
+        requestBody: EditarPedidoRequest,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Status Pedido
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/status)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/status?novo_status={status}`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
+     * Atualiza o status de um pedido (somente admin).
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     * - **novo_status**: Novo status do pedido (obrigatório)
+     *
+     * Status disponíveis: PENDENTE, CONFIRMADO, PREPARANDO, PRONTO, SAIU_PARA_ENTREGA, ENTREGUE, CANCELADO
+     * @param pedidoId ID do pedido
+     * @param novoStatus Novo status do pedido
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public atualizarStatusPedidoApiCardapioAdminPedidosStatusPedidoIdPut(
+        pedidoId: number,
+        novoStatus: PedidoStatusEnum,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/pedidos/status/{pedido_id}',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            query: {
+                'novo_status': novoStatus,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Alterar Status Pedido Com Historico
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/status)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/status` com payload completo
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
+     * Altera o status de um pedido com histórico detalhado (admin).
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     * - **payload**: Dados para alteração do status incluindo motivo e observações
+     *
+     * Campos do payload:
+     * - **status**: Novo status do pedido (obrigatório)
+     * - **motivo**: Motivo da alteração (opcional)
+     * - **observacoes**: Observações adicionais (opcional)
+     * - **criado_por**: Quem fez a alteração (opcional, padrão: "admin")
+     * - **ip_origem**: IP de origem (opcional)
+     * - **user_agent**: User agent do cliente (opcional)
+     * @param pedidoId ID do pedido
+     * @param requestBody
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public alterarStatusPedidoComHistoricoApiCardapioAdminPedidosStatusPedidoIdHistoricoPut(
+        pedidoId: number,
+        requestBody: AlterarStatusPedidoBody,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/pedidos/status/{pedido_id}/historico',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Obter Historico Pedido
+     * Obtém o histórico completo de alterações de status de um pedido.
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     *
+     * Retorna todos os registros de mudança de status com timestamps, motivos e observações.
+     * @param pedidoId ID do pedido
+     * @returns HistoricoDoPedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public obterHistoricoPedidoApiCardapioAdminPedidosPedidoIdHistoricoGet(
+        pedidoId: number,
+    ): CancelablePromise<HistoricoDoPedidoResponse> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/historico',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Atualizar Item
+     * ⚠️ DEPRECATED: Use o Gateway Orquestrador (/api/pedidos/{pedido_id}/itens)
+     *
+     * Este endpoint está sendo substituído pelo Gateway Orquestrador que unifica
+     * endpoints de admin e client em um único endpoint.
+     *
+     * **Recomendado:** Use `PUT /api/pedidos/{pedido_id}/itens`
+     *
+     * Este endpoint será mantido apenas para compatibilidade retroativa.
+     *
+     * Executa uma única ação sobre os itens do pedido (adicionar, atualizar ou remover).
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     * - **item**: Objeto descrevendo a ação a ser executada
+     * @param pedidoId ID do pedido
+     * @param requestBody
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public atualizarItemApiCardapioAdminPedidosPedidoIdItensPut(
+        pedidoId: number,
+        requestBody: ItemPedidoEditar,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/itens',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Vincular Entregador
+     * Vincula ou desvincula um entregador a um pedido.
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     * - **entregador_id**: ID do entregador para vincular ou null para desvincular
+     *
+     * Para vincular: envie entregador_id com o ID do entregador
+     * Para desvincular: envie entregador_id como null
+     * @param pedidoId ID do pedido
+     * @param entregadorId ID do entregador (omita para desvincular)
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public vincularEntregadorApiCardapioAdminPedidosPedidoIdEntregadorPut(
+        pedidoId: number,
+        entregadorId?: (number | null),
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/entregador',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            query: {
+                'entregador_id': entregadorId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Desvincular Entregador
+     * Desvincula o entregador atual de um pedido.
+     *
+     * - **pedido_id**: ID do pedido (obrigatório, deve ser maior que 0)
+     *
+     * Remove a vinculação do entregador com o pedido.
+     * @param pedidoId ID do pedido
+     * @returns PedidoResponse Successful Response
+     * @throws ApiError
+     */
+    public desvincularEntregadorApiCardapioAdminPedidosPedidoIdEntregadorDelete(
+        pedidoId: number,
+    ): CancelablePromise<PedidoResponse> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/api/cardapio/admin/pedidos/{pedido_id}/entregador',
+            path: {
+                'pedido_id': pedidoId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+}

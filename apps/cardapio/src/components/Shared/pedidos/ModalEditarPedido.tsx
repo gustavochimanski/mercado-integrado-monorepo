@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Pedido } from "@cardapio/types/pedido";
-import { useMutatePedido } from "@cardapio/services/useQueryPedido";
+import { useMutatePedido } from "@cardapio/services/pedidos/useQueryPedido";
 import {
   Dialog,
   DialogContent,

@@ -98,7 +98,9 @@ export default function PedidoConfirmOverlay({
                   className="text-white"
                 >
                   <h2 className="text-3xl font-bold mb-2">Pedido Confirmado!</h2>
-                  <p className="text-lg opacity-90">Seu pedido foi enviado com sucesso</p>
+                  <p className="text-lg opacity-90">
+                    {message || "Seu pedido foi enviado com sucesso"}
+                  </p>
                 </motion.div>
               </>
             ) : (
