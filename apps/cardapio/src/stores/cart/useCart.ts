@@ -80,7 +80,7 @@ export const useCart = create<CartState>()(
 
       addCombo: (combo) => {
         const combos = get().combos;
-        const index = combos.findIndex((c) => c.combo_id === combo.combo_id);
+        const index = combos.findIndex((c: CartCombo) => c.combo_id === combo.combo_id);
 
         if (index === -1) {
           set({ combos: [...combos, combo] });
@@ -93,13 +93,13 @@ export const useCart = create<CartState>()(
 
       removeCombo: (combo_id) => {
         set({
-          combos: get().combos.filter((c) => c.combo_id !== combo_id),
+          combos: get().combos.filter((c: CartCombo) => c.combo_id !== combo_id),
         });
       },
 
       updateAdicionaisItem: (cod_barras, adicionais_ids) => {
         set({
-          items: get().items.map((item) =>
+          items: get().items.map((item: { cod_barras: string; }) =>
             item.cod_barras === cod_barras
               ? { ...item, adicionais_ids }
               : item
