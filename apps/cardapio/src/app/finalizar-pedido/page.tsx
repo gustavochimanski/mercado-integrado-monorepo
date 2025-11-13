@@ -38,7 +38,7 @@ type CheckoutTab = (typeof STEP_ORDER)[number];
 export default function FinalizarPedidoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { items, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
+  const { items, combos, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
   const queryClient = useQueryClient();
   const { updatePedido, updateStatus } = useMutatePedido();
 
@@ -392,6 +392,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           produto_cod_barras: i.cod_barras,
           quantidade: i.quantity,
           observacao: i.observacao || undefined,
+          adicionais_ids: i.adicionais_ids && i.adicionais_ids.length > 0 
+            ? i.adicionais_ids 
+            : undefined,
         }));
 
         const tipoSelecionado = tipoPedido as TipoPedidoCheckout;
@@ -416,6 +419,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           observacao_geral: observacao || undefined,
           itens: itensPedido,
           cliente_id: resolveClienteId(),
+          // Incluir combos se houver
+          combos: combos && combos.length > 0
+            ? combos.map((c) => ({
+                combo_id: c.combo_id,
+                quantidade: c.quantidade || 1,
+              }))
+            : undefined,
         };
 
         if (tipoSelecionado !== "DELIVERY" && empresaIdPayload) {

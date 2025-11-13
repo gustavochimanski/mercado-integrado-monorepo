@@ -45,7 +45,7 @@ export function usePreviewCheckout({
   empresaSelecionadaId = null,
   enabled = true,
 }: UsePreviewCheckoutParams) {
-  const { items, observacao } = useCart();
+  const { items, combos, observacao } = useCart();
   
   const empresaStoreId = getEmpresaId();
   const telefone_cliente = getTokenCliente();
@@ -60,7 +60,8 @@ export function usePreviewCheckout({
     queryKey: [
       "preview-checkout",
       tipoPedido,
-      items.map(i => `${i.cod_barras}-${i.quantity}`).join(","),
+      items.map(i => `${i.cod_barras}-${i.quantity}-${i.adicionais_ids?.join(",") || ""}`).join(","),
+      combos?.map(c => `${c.combo_id}-${c.quantidade}`).join(",") || "",
       enderecoId,
       meioPagamentoId,
       mesaCodigo,
@@ -98,8 +99,18 @@ export function usePreviewCheckout({
             produto_cod_barras: i.cod_barras,
             quantidade: i.quantity,
             observacao: i.observacao || undefined,
+            adicionais_ids: i.adicionais_ids && i.adicionais_ids.length > 0 
+              ? i.adicionais_ids 
+              : undefined,
           })),
           cliente_id: cliente?.id ? Number(cliente.id) : null,
+          // Incluir combos se houver
+          combos: combos && combos.length > 0
+            ? combos.map((c) => ({
+                combo_id: c.combo_id,
+                quantidade: c.quantidade || 1,
+              }))
+            : undefined,
         };
 
         if (tipoPedido !== "DELIVERY") {

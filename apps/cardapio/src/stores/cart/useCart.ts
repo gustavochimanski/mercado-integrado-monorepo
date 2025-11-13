@@ -14,14 +14,24 @@ export interface CartItem {
   categoriaId?: number;
   subcategoriaId?: number;
   observacao?: string;
+  adicionais_ids?: number[]; // IDs dos adicionais selecionados para este item
+}
+
+export interface CartCombo {
+  combo_id: number;
+  quantidade: number;
 }
 
 interface CartState {
   items: CartItem[];
+  combos: CartCombo[]; // Lista de combos no carrinho
   observacao: string;
   editingPedidoId: number | null;
   setObservacao: (texto: string) => void;
   add: (item: CartItem) => void;
+  addCombo: (combo: CartCombo) => void;
+  removeCombo: (combo_id: number) => void;
+  updateAdicionaisItem: (cod_barras: string, adicionais_ids: number[]) => void;
   inc: (cod_barras: string, step?: number) => void;
   dec: (cod_barras: string, step?: number) => void;
   updateObservacaoItem: (cod_barras: string, observacao: string) => void;
@@ -60,11 +70,41 @@ export const useCart = create<CartState>()(
   persist(
     withLogger<CartState>((set, get) => ({
       items: [],
+      combos: [],
       observacao: "",
       editingPedidoId: null,
 
       setObservacao: (texto) => {
         set({ observacao: texto });
+      },
+
+      addCombo: (combo) => {
+        const combos = get().combos;
+        const index = combos.findIndex((c) => c.combo_id === combo.combo_id);
+
+        if (index === -1) {
+          set({ combos: [...combos, combo] });
+        } else {
+          const updated = [...combos];
+          updated[index].quantidade += combo.quantidade;
+          set({ combos: updated });
+        }
+      },
+
+      removeCombo: (combo_id) => {
+        set({
+          combos: get().combos.filter((c) => c.combo_id !== combo_id),
+        });
+      },
+
+      updateAdicionaisItem: (cod_barras, adicionais_ids) => {
+        set({
+          items: get().items.map((item) =>
+            item.cod_barras === cod_barras
+              ? { ...item, adicionais_ids }
+              : item
+          ),
+        });
       },
 
       add: (item) => {
@@ -119,7 +159,7 @@ export const useCart = create<CartState>()(
           items: get().items.filter((p: { cod_barras: string; }) => p.cod_barras !== cod_barras),
         }),
 
-      clear: () => set({ items: [], observacao: "", editingPedidoId: null }),
+      clear: () => set({ items: [], combos: [], observacao: "", editingPedidoId: null }),
 
       totalItems: () =>
         get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0),
@@ -139,6 +179,7 @@ export const useCart = create<CartState>()(
         set({
           editingPedidoId: null,
           items: [],
+          combos: [],
           observacao: ""
         });
       },
@@ -148,6 +189,7 @@ export const useCart = create<CartState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         items: s.items,
+        combos: s.combos,
         observacao: s.observacao,
         editingPedidoId: s.editingPedidoId,
       }),

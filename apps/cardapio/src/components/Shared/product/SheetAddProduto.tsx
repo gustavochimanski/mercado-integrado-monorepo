@@ -99,7 +99,7 @@ export function SheetAdicionarProduto({
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent 
         side="bottom" 
-        className="min-h-[75vh] max-h-[95vh] overflow-y-auto w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background"
+        className="min-h-[55vh] max-h-[85vh] overflow-y-auto w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
           {/* Botão de fechar customizado */}

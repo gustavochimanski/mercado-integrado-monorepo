@@ -52,6 +52,12 @@ export interface ItemPedidoRequest {
   produto_cod_barras: string;
   quantidade: number;
   observacao?: string;
+  adicionais_ids?: number[]; // IDs dos adicionais selecionados para este item
+}
+
+export interface ComboPedidoRequest {
+  combo_id: number;
+  quantidade?: number; // Default: 1
 }
 
 export type TipoPedidoGateway = "DELIVERY" | "MESA" | "BALCAO";
@@ -73,6 +79,7 @@ export interface FinalizarPedidoRequest {
   cupom_id?: number | null;
   troco_para?: number | null;
   itens: ItemPedidoRequest[];
+  combos?: ComboPedidoRequest[]; // Lista de combos opcionais
 }
 
 // ================= Request de confirmar pagamento =================
