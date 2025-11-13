@@ -562,7 +562,7 @@ export class GatewayOrquestradorService {
         });
     }
     /**
-     * Iniciar Pagamento
+     * Iniciar Pagameto
      * @param pedidoId ID do pedido
      * @param xSuperToken
      * @param metodo
