@@ -134,7 +134,7 @@ export default function RouteCategoryPage() {
             empresaId={empresa_id!}
             onOpenSheet={openSheet}
             sectionRef={register(vitrine.id)}
-            hrefCategoria={vitrine.href_categoria}
+            hrefCategoria={vitrine.href_categoria ?? undefined}
             isHome={false}
             vitrineIsHome={vitrine.is_home}
           />
@@ -154,7 +154,7 @@ export default function RouteCategoryPage() {
             empresaId={empresa_id!}
             onOpenSheet={openSheet}
             sectionRef={register(vit.id)}
-            hrefCategoria={vit.href_categoria}
+            hrefCategoria={vit.href_categoria ?? undefined}
             isHome={false}
             vitrineIsHome={vit.is_home}
           />
