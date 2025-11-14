@@ -204,6 +204,68 @@ export function useMutateVitrine() {
     },
   });
 
+  const vincularCombo = useMutation({
+    mutationFn: async (p: { vitrineId: number; combo_id: number }) => {
+      await apiAdmin.post(`/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-combo`, {
+        combo_id: p.combo_id,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Combo vinculado!");
+      reloadPage();
+    },
+    onError: (err: any) => {
+      toast.error(extractErrorMessage(err, "Erro ao vincular combo"));
+    },
+  });
+
+  const desvincularCombo = useMutation({
+    mutationFn: async (p: { vitrineId: number; combo_id: number }) => {
+      await apiAdmin.delete(
+        `/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-combo/${p.combo_id}`
+      );
+    },
+    onSuccess: () => {
+      toast.success("Combo desvinculado!");
+      reloadPage();
+    },
+    onError: (err: any) => {
+      toast.error(extractErrorMessage(err, "Erro ao desvincular combo"));
+    },
+  });
+
+  const vincularReceita = useMutation({
+    mutationFn: async (p: { vitrineId: number; empresa_id: number; cod_barras: string }) => {
+      await apiAdmin.post(`/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-receita`, {
+        empresa_id: p.empresa_id,
+        cod_barras: p.cod_barras,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Receita vinculada!");
+      reloadPage();
+    },
+    onError: (err: any) => {
+      toast.error(extractErrorMessage(err, "Erro ao vincular receita"));
+    },
+  });
+
+  const desvincularReceita = useMutation({
+    mutationFn: async (p: { vitrineId: number; empresa_id: number; cod_barras: string }) => {
+      await apiAdmin.delete(
+        `/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-receita/${encodeURIComponent(p.cod_barras)}`,
+        { params: { empresa_id: p.empresa_id } }
+      );
+    },
+    onSuccess: () => {
+      toast.success("Receita desvinculada!");
+      reloadPage();
+    },
+    onError: (err: any) => {
+      toast.error(extractErrorMessage(err, "Erro ao desvincular receita"));
+    },
+  });
+
   const markHome = useMutation({
     mutationFn: async ({ id, is_home }: { id: number; is_home: boolean }) => {
       const { data } = await apiAdmin.patch(`/api/cardapio/admin/vitrines/${id}/home`, { is_home });
@@ -218,5 +280,16 @@ export function useMutateVitrine() {
     },
   });
 
-  return { create, update, remove, vincular, desvincular, markHome };
+  return { 
+    create, 
+    update, 
+    remove, 
+    vincular, 
+    desvincular, 
+    vincularCombo,
+    desvincularCombo,
+    vincularReceita,
+    desvincularReceita,
+    markHome 
+  };
 }

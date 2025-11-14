@@ -5,16 +5,23 @@ import AdminSecaoSubCategOptions from "@cardapio/components/admin/options/Vitrin
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
+import { ComboCard } from "./ComboCard";
+import { ReceitaCard } from "./ReceitaCard";
 import { CardVerMais } from "../CardVerMais";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { ComboMiniDTO, ReceitaMiniDTO } from "@cardapio/services/useQueryHome";
 
 interface Props {
   vitrineId: number;
   titulo: string;
   produtos: ProdutoEmpMini[];
-  codCategoria: number;
+  combos?: ComboMiniDTO[] | null;
+  receitas?: ReceitaMiniDTO[] | null;
+  codCategoria: number | null;
   empresaId: number;
   onOpenSheet?: (p: ProdutoEmpMini) => void;
+  onSelectCombo?: (combo: ComboMiniDTO) => void;
+  onSelectReceita?: (receita: ReceitaMiniDTO) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
   hrefCategoria?: string;
   isHome?: boolean;         // se está renderizando em contexto de home
@@ -25,9 +32,13 @@ export default function ProductsVitrineSection({
   vitrineId,
   titulo,
   produtos,
+  combos,
+  receitas,
   codCategoria,
   empresaId,
   onOpenSheet,
+  onSelectCombo,
+  onSelectReceita,
   sectionRef,
   hrefCategoria,
   isHome,
@@ -40,6 +51,9 @@ export default function ProductsVitrineSection({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
+  
+  // Calcular total de itens para scroll
+  const totalItems = produtos.length + (combos?.length ?? 0) + (receitas?.length ?? 0);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -64,7 +78,7 @@ export default function ProductsVitrineSection({
       el.removeEventListener("scroll", checkScroll);
       ro.disconnect();
     };
-  }, [checkScroll, produtos.length]);
+  }, [checkScroll, totalItems]);
 
   const scrollBy = (offset: number) => {
     const el = scrollRef.current;
@@ -111,6 +125,7 @@ export default function ProductsVitrineSection({
 
         <div className="relative">
           <div ref={scrollRef} className={`flex overflow-x-auto -mr-2 ${isAdmin ? "": "hide-scrollbar"} `}>
+            {/* Renderizar produtos */}
             {produtos.map((produto) => (
               <div key={produto.cod_barras} className="shrink-0 w-[120px] h-[180px] mr-2">
                 <ProductCard
@@ -118,7 +133,31 @@ export default function ProductsVitrineSection({
                   onOpenSheet={() => onOpenSheet?.(produto)} 
                   empresa_id={empresaId}
                   vitrineId={vitrineId}
-                  />
+                />
+              </div>
+            ))}
+
+            {/* Renderizar combos */}
+            {combos?.map((combo) => (
+              <div key={`combo-${combo.id}`} className="shrink-0 w-[120px] h-[180px] mr-2">
+                <ComboCard
+                  combo={combo}
+                  onSelectCombo={onSelectCombo}
+                  empresa_id={empresaId}
+                  vitrineId={vitrineId}
+                />
+              </div>
+            ))}
+
+            {/* Renderizar receitas */}
+            {receitas?.map((receita) => (
+              <div key={`receita-${receita.cod_barras}`} className="shrink-0 w-[120px] h-[180px] mr-2">
+                <ReceitaCard
+                  receita={receita}
+                  onSelectReceita={onSelectReceita}
+                  empresa_id={empresaId}
+                  vitrineId={vitrineId}
+                />
               </div>
             ))}
 

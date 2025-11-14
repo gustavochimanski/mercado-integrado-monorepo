@@ -18,7 +18,11 @@ import { Badge } from "../ui/badge";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X, Check } from "lucide-react";
+import { useAdicionaisProduto } from "@cardapio/services/adicionais/useQueryAdicionais";
+import { useState, useMemo } from "react";
+import type { AdicionalResponse } from "@cardapio/api";
+import { AdicionalMini } from "@cardapio/types/Produtos";
 
 const schema = z.object({
   quantity: z
@@ -34,7 +38,7 @@ type FormData = z.infer<typeof schema>;
 
 interface SheetAdicionarProdutoProps {
   produto: ProdutoEmpMini;
-  onAdd?: (produto: ProdutoEmpMini, quantity: number, observacao?: string) => void;
+  onAdd?: (produto: ProdutoEmpMini, quantity: number, observacao?: string, adicionais_ids?: number[]) => void;
   isOpen: boolean;
   onClose: () => void;
   quickAddQuantity?: number;
@@ -53,6 +57,7 @@ export function SheetAdicionarProduto({
     setValue,
     watch,
     formState: { errors },
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -62,6 +67,126 @@ export function SheetAdicionarProduto({
   });
 
   const quantity = watch("quantity");
+  
+  // Buscar adicionais: primeiro em produto.produto.adicionais, depois em produto.adicionais, depois via API
+  const adicionaisDoProdutoInterno = produto.produto?.adicionais || [];
+  const adicionaisDoProdutoEmpresa = produto.adicionais || [];
+  const adicionaisDoProduto: AdicionalMini[] = adicionaisDoProdutoInterno.length > 0 
+    ? adicionaisDoProdutoInterno 
+    : adicionaisDoProdutoEmpresa;
+  const temAdicionaisNoProduto = adicionaisDoProduto.length > 0;
+  
+  const empresaId = produto.empresa_id ?? produto.empresa ?? 0;
+  
+  const { data: adicionaisDaAPI = [], isLoading: isLoadingAdicionais } = useAdicionaisProduto(
+    produto.cod_barras,
+    true, // apenas ativos
+    isOpen && !temAdicionaisNoProduto // só busca se não tiver adicionais no produto
+  );
+
+  // Converter adicionais do produto para formato compatível
+  const adicionais = useMemo(() => {
+    if (temAdicionaisNoProduto) {
+      // Converter AdicionalMini para formato similar ao AdicionalResponse
+      // AdicionalMini agora tem: { id, descricao, preco, obrigatorio, permite_multipla_escolha, ordem, ativo }
+      // AdicionalResponse tem: { id, nome, descricao, preco, obrigatorio, permite_multipla_escolha, ... }
+      return adicionaisDoProduto
+        .filter(a => a.ativo !== false) // Filtrar apenas ativos
+        .map(a => ({
+          id: a.id,
+          nome: a.descricao, // AdicionalMini.descricao vira AdicionalResponse.nome
+          descricao: null,
+          preco: a.preco,
+          obrigatorio: a.obrigatorio ?? false,
+          permite_multipla_escolha: a.permite_multipla_escolha ?? true,
+          empresa_id: empresaId,
+          ativo: a.ativo ?? true,
+          ordem: a.ordem ?? 0,
+          created_at: "",
+          updated_at: "",
+        } as AdicionalResponse));
+    }
+    return adicionaisDaAPI;
+  }, [adicionaisDoProduto, adicionaisDaAPI, temAdicionaisNoProduto, empresaId]);
+
+  // Estado para adicionais selecionados: mapeia ID do adicional para quantidade
+  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<Record<number, number>>({});
+
+  // Resetar seleção quando o sheet fecha
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setAdicionaisSelecionados({});
+      reset();
+      onClose();
+    }
+  };
+
+  // Agrupar adicionais por tipo (obrigatório vs opcional)
+  const adicionaisAgrupados = useMemo(() => {
+    const obrigatorios = adicionais.filter(a => a.obrigatorio);
+    const opcionais = adicionais.filter(a => !a.obrigatorio);
+    return { obrigatorios, opcionais };
+  }, [adicionais]);
+
+  // Obter quantidade de um adicional
+  const getQuantidadeAdicional = (adicionalId: number) => {
+    return adicionaisSelecionados[adicionalId] || 0;
+  };
+
+  // Incrementar quantidade de um adicional
+  const incrementarAdicional = (adicionalId: number) => {
+    setAdicionaisSelecionados(prev => ({
+      ...prev,
+      [adicionalId]: (prev[adicionalId] || 0) + 1,
+    }));
+  };
+
+  // Decrementar quantidade de um adicional
+  const decrementarAdicional = (adicionalId: number) => {
+    setAdicionaisSelecionados(prev => {
+      const quantidadeAtual = prev[adicionalId] || 0;
+      if (quantidadeAtual <= 1) {
+        const novo = { ...prev };
+        delete novo[adicionalId];
+        return novo;
+      }
+      return {
+        ...prev,
+        [adicionalId]: quantidadeAtual - 1,
+      };
+    });
+  };
+
+  // Toggle adicional (para adicionais que não permitem múltipla escolha)
+  const toggleAdicional = (adicionalId: number, permiteMultipla: boolean) => {
+    if (permiteMultipla) {
+      // Se permite múltipla, incrementa a quantidade
+      incrementarAdicional(adicionalId);
+    } else {
+      // Se não permite múltipla, apenas seleciona/deseleciona (quantidade 1 ou 0)
+      setAdicionaisSelecionados(prev => {
+        if (prev[adicionalId]) {
+          const novo = { ...prev };
+          delete novo[adicionalId];
+          return novo;
+        }
+        return {
+          ...prev,
+          [adicionalId]: 1,
+        };
+      });
+    }
+  };
+
+  // Calcular preço total incluindo adicionais (considerando quantidades)
+  const precoAdicionais = useMemo(() => {
+    return Object.entries(adicionaisSelecionados).reduce((total, [adicionalId, quantidade]) => {
+      const adicional = adicionais.find(a => a.id === Number(adicionalId));
+      return total + (adicional?.preco || 0) * quantidade;
+    }, 0);
+  }, [adicionaisSelecionados, adicionais]);
+
+  const precoTotal = (produto.preco_venda + precoAdicionais) * quantity;
 
   function increment() {
     if (quantity < 99) setValue("quantity", quantity + 1);
@@ -79,21 +204,24 @@ export function SheetAdicionarProduto({
   function onSubmit(data: FormData) {
     // Converte string vazia para undefined para evitar enviar null ou ""
     const observacao = data.observacao?.trim() || undefined;
-    onAdd?.(produto, data.quantity, observacao);
+    
+    // Converter o objeto de quantidades em array de IDs (com repetição baseada na quantidade)
+    const adicionaisIds: number[] = [];
+    Object.entries(adicionaisSelecionados).forEach(([adicionalId, quantidade]) => {
+      for (let i = 0; i < quantidade; i++) {
+        adicionaisIds.push(Number(adicionalId));
+      }
+    });
+    
+    onAdd?.(produto, data.quantity, observacao, adicionaisIds.length > 0 ? adicionaisIds : undefined);
     setValue("quantity", 1);
     setValue("observacao", "");
+    setAdicionaisSelecionados({});
     onClose();
   }
 
   const imagem = produto.produto.imagem || "/semimagem.png";
   const descricao = produto.produto.descricao || "Sem nome";
-  const precoTotal = produto.preco_venda * quantity;
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
-  };
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
@@ -142,8 +270,13 @@ export function SheetAdicionarProduto({
                   <span className="text-2xl font-bold text-primary">
                     R$ {produto.preco_venda.toFixed(2).replace(".", ",")}
                   </span>
+                  {precoAdicionais > 0 && (
+                    <span className="text-xs text-muted-foreground mt-1">
+                      + R$ {precoAdicionais.toFixed(2).replace(".", ",")} em adicionais
+                    </span>
+                  )}
                 </div>
-                {quantity > 1 && (
+                {(quantity > 1 || precoAdicionais > 0) && (
                   <div className="flex flex-col items-end">
                     <span className="text-sm text-muted-foreground">Total</span>
                     <span className="text-xl font-semibold text-foreground">
@@ -216,6 +349,62 @@ export function SheetAdicionarProduto({
             {/* Divisor */}
             <div className="border-t border-border my-6" />
 
+            {/* Seção de Adicionais */}
+            {!temAdicionaisNoProduto && isLoadingAdicionais ? (
+              <div className="space-y-3 mb-6">
+                <Label className="text-base font-semibold">Adicionais</Label>
+                <p className="text-sm text-muted-foreground">Carregando adicionais...</p>
+              </div>
+            ) : adicionais.length > 0 ? (
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base font-semibold">Adicionais</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {Object.keys(adicionaisSelecionados).length > 0 && `+ R$ ${precoAdicionais.toFixed(2).replace(".", ",")}`}
+                  </span>
+                </div>
+
+                {/* Adicionais Obrigatórios */}
+                {adicionaisAgrupados.obrigatorios.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground">Obrigatórios</Label>
+                    {adicionaisAgrupados.obrigatorios.map((adicional) => (
+                      <AdicionalItem
+                        key={adicional.id}
+                        adicional={adicional}
+                        quantidade={getQuantidadeAdicional(adicional.id)}
+                        onToggle={() => toggleAdicional(adicional.id, adicional.permite_multipla_escolha)}
+                        onIncrement={() => incrementarAdicional(adicional.id)}
+                        onDecrement={() => decrementarAdicional(adicional.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Adicionais Opcionais */}
+                {adicionaisAgrupados.opcionais.length > 0 && (
+                  <div className="space-y-2">
+                    {adicionaisAgrupados.obrigatorios.length > 0 && (
+                      <Label className="text-sm font-medium text-muted-foreground">Opcionais</Label>
+                    )}
+                    {adicionaisAgrupados.opcionais.map((adicional) => (
+                      <AdicionalItem
+                        key={adicional.id}
+                        adicional={adicional}
+                        quantidade={getQuantidadeAdicional(adicional.id)}
+                        onToggle={() => toggleAdicional(adicional.id, adicional.permite_multipla_escolha)}
+                        onIncrement={() => incrementarAdicional(adicional.id)}
+                        onDecrement={() => decrementarAdicional(adicional.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            {/* Divisor */}
+            {adicionais.length > 0 && <div className="border-t border-border my-6" />}
+
             {/* Campo de Observação */}
             <div className="space-y-3 mb-4">
               <div className="flex items-center justify-between">
@@ -259,5 +448,108 @@ export function SheetAdicionarProduto({
         </form>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// Componente para exibir um adicional
+function AdicionalItem({ 
+  adicional, 
+  quantidade,
+  onToggle,
+  onIncrement,
+  onDecrement,
+}: { 
+  adicional: AdicionalResponse; 
+  quantidade: number;
+  onToggle: () => void;
+  onIncrement: () => void;
+  onDecrement: () => void;
+}) {
+  const isSelected = quantidade > 0;
+  const permiteMultipla = adicional.permite_multipla_escolha;
+
+  return (
+    <div
+      className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+        isSelected
+          ? "border-primary bg-primary/5"
+          : "border-border hover:border-primary/50 bg-background"
+      }`}
+    >
+      <div className="flex items-center gap-3 flex-1">
+        {!permiteMultipla ? (
+          <div
+            className={`flex items-center justify-center w-5 h-5 rounded border-2 cursor-pointer ${
+              isSelected ? "border-primary bg-primary" : "border-muted-foreground"
+            }`}
+            onClick={onToggle}
+          >
+            {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 rounded-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDecrement();
+              }}
+              disabled={quantidade === 0}
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <span className="text-sm font-semibold w-6 text-center">{quantidade}</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 rounded-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                onIncrement();
+              }}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+        <div className="flex-1" onClick={!permiteMultipla ? onToggle : undefined}>
+          <div className="flex items-center gap-2">
+            <Label className={`text-sm font-medium ${!permiteMultipla ? "cursor-pointer" : ""}`}>
+              {adicional.nome}
+            </Label>
+            {adicional.obrigatorio && (
+              <Badge variant="destructive" className="text-xs px-1.5 py-0">
+                Obrigatório
+              </Badge>
+            )}
+          </div>
+          {adicional.descricao && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {adicional.descricao}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {adicional.preco > 0 && (
+          <span className="text-sm font-semibold text-primary">
+            {quantidade > 0 && permiteMultipla ? (
+              <>
+                R$ {(adicional.preco * quantidade).toFixed(2).replace(".", ",")}
+                <span className="text-xs text-muted-foreground ml-1">
+                  ({quantidade}x R$ {adicional.preco.toFixed(2).replace(".", ",")})
+                </span>
+              </>
+            ) : (
+              <>+ R$ {adicional.preco.toFixed(2).replace(".", ",")}</>
+            )}
+          </span>
+        )}
+      </div>
+    </div>
   );
 }

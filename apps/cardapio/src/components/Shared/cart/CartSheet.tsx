@@ -40,38 +40,83 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
         <main className="p-2 overflow-y-auto space-y-2">
           {items.length === 0 && <p className="text-sm text-muted-foreground">Carrinho vazio</p>}
 
-          {items.map((i) => (
-            <div key={i.cod_barras} className="space-y-2">
-              <div className="flex justify-between items-center gap-2">
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{i.nome}</p>
-                  {i.observacao && (
-                    <p className="text-xs italic text-muted-foreground break-words max-w-[200px]">
-                      {i.observacao}
+          {items.map((i) => {
+            const precoItem = i.preco * i.quantity;
+            const precoAdicionais = (i.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * i.quantity;
+            const precoTotalItem = precoItem + precoAdicionais;
+            
+            // Agrupar adicionais por ID para mostrar quantidade
+            const adicionaisAgrupados = (i.adicionais || []).reduce((acc, adic) => {
+              const key = adic.id;
+              if (!acc[key]) {
+                acc[key] = { ...adic, quantidade: 0 };
+              }
+              acc[key].quantidade += 1;
+              return acc;
+            }, {} as Record<number, { id: number; nome: string; preco: number; quantidade: number }>);
+
+            return (
+              <div key={i.cod_barras} className="space-y-2">
+                <div className="flex justify-between items-center gap-2">
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{i.nome}</p>
+                    
+                    {/* Adicionais */}
+                    {Object.values(adicionaisAgrupados).length > 0 && (
+                      <div className="mt-1 space-y-0.5">
+                        {Object.values(adicionaisAgrupados).map((adic) => (
+                          <p key={adic.id} className="text-xs text-muted-foreground pl-2">
+                            + {adic.nome}
+                            {adic.quantidade > 1 && ` (${adic.quantidade}x)`}
+                            {adic.preco > 0 && (
+                              <span className="ml-1">
+                                R$ {(adic.preco * adic.quantidade).toFixed(2).replace(".", ",")}
+                              </span>
+                            )}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {i.observacao && (
+                      <p className="text-xs italic text-muted-foreground break-words max-w-[200px] mt-1">
+                        {i.observacao}
+                      </p>
+                    )}
+                    
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {precoAdicionais > 0 ? (
+                        <>
+                          R$ {precoItem.toFixed(2).replace(".", ",")} 
+                          <span className="text-muted-foreground/70">
+                            {" + "}R$ {precoAdicionais.toFixed(2).replace(".", ",")} adicionais
+                          </span>
+                          {" = "}R$ {precoTotalItem.toFixed(2).replace(".", ",")}
+                        </>
+                      ) : (
+                        <>R$ {precoItem.toFixed(2).replace(".", ",")}</>
+                      )}
                     </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    R$ {(i.preco * i.quantity).toFixed(2)}
-                  </p>
-                </div>
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <Button size="icon" variant="outline" onClick={() => dec(i.cod_barras)}>
-                    -
-                  </Button>
-                  <span>{i.quantity}</span>
-                  <Button size="icon" variant="outline" onClick={() => inc(i.cod_barras)}>
-                    +
+                  <div className="flex items-center gap-2">
+                    <Button size="icon" variant="outline" onClick={() => dec(i.cod_barras)}>
+                      -
+                    </Button>
+                    <span>{i.quantity}</span>
+                    <Button size="icon" variant="outline" onClick={() => inc(i.cod_barras)}>
+                      +
+                    </Button>
+                  </div>
+
+                  <Button size="icon" variant="ghost" onClick={() => remove(i.cod_barras)}>
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-
-                <Button size="icon" variant="ghost" onClick={() => remove(i.cod_barras)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <Separator />
               </div>
-              <Separator />
-            </div>
-          ))}
+            );
+          })}
         </main>
 
 

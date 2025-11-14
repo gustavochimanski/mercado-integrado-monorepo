@@ -12,9 +12,7 @@ export function CartFab({ onOpen }: Props) {
   const total = useCart((s) =>
     s.items.reduce((acc, i) => acc + i.quantity, 0)
   );
-  const totalPrice = useCart((s) =>
-    s.items.reduce((acc, i) => acc + i.quantity * i.preco, 0)
-  );
+  const totalPrice = useCart((s) => s.totalPrice());
 
   const pathname = usePathname();
 

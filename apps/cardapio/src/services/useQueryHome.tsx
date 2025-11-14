@@ -3,15 +3,45 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../app/api/api";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 
+// Tipos para combos e receitas conforme documentação
+export interface ComboMiniDTO {
+  id: number;
+  empresa_id: number;
+  titulo: string;
+  descricao: string;
+  preco_total: number;
+  imagem: string | null;
+  ativo: boolean;
+  vitrine_id: number | null;
+}
+
+export interface ReceitaMiniDTO {
+  empresa_id: number;
+  cod_barras: string;
+  preco_venda: number;
+  vitrine_id: number | null;
+  disponivel: boolean;
+  produto: {
+    cod_barras: string;
+    descricao: string;
+    imagem: string | null;
+    cod_categoria: number | null;
+    ativo: boolean;
+    unidade_medida: string | null;
+  };
+}
+
 export interface VitrineComProdutosResponse {
   id: number;
   titulo: string;
   slug: string;
-  href_categoria: string
+  href_categoria: string | null;
   ordem: number;
   is_home: boolean;
-  cod_categoria: number;
+  cod_categoria: number | null;
   produtos: ProdutoEmpMini[];
+  combos: ComboMiniDTO[] | null;  // ⬅️ NOVO
+  receitas: ReceitaMiniDTO[] | null;  // ⬅️ NOVO
 }
 
 export interface HomeResponse {

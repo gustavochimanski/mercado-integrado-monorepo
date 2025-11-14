@@ -6,22 +6,29 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { Button } from "../ui/button";
 import { ProductCard } from "../product/ProductCard";
+import { ComboCard } from "../product/ComboCard";
+import { ReceitaCard } from "../product/ReceitaCard";
 import { Card } from "../ui/card";
 import { CardAddProduto } from "../../admin/card/CardAddProduto";
 import AdminVitrineOptions from "@cardapio/components/admin/options/VitrineOptions";
 import { toast } from "sonner";
+import { ComboMiniDTO, ReceitaMiniDTO } from "@cardapio/services/useQueryHome";
 
 type Props = {
   produtos: ProdutoEmpMini[];
+  combos?: ComboMiniDTO[] | null;
+  receitas?: ReceitaMiniDTO[] | null;
   titulo?: string;
   /** Se for undefined -> usa default "/vitrine".
    *  Se for null -> NÃO renderiza Link (mostra toast ao clicar). */
   verMaisHref?: string | null;
   onSelectProduto?: (produto: ProdutoEmpMini) => void;
+  onSelectCombo?: (combo: ComboMiniDTO) => void;
+  onSelectReceita?: (receita: ReceitaMiniDTO) => void;
 
   // novos
   empresaId: number;
-  codCategoria: number;      // se em alguns casos não existir, mude para number | null
+  codCategoria: number | null;      // pode ser null quando vitrine não está vinculada a categoria
   vitrineId: number;
   is_home?: boolean;
 };
@@ -31,16 +38,25 @@ const isValidHref = (v: unknown): v is string =>
 
 export default function VitrineDestaques({
   produtos,
+  combos,
+  receitas,
   titulo = "Destaques",
   verMaisHref = "/vitrine", // default só pega quando é undefined (não quando é null)
   onSelectProduto,
+  onSelectCombo,
+  onSelectReceita,
   empresaId,
   codCategoria,
   vitrineId,
   is_home = true,
 }: Props) {
-  const lista = produtos.slice(0, 4);
+  const listaProdutos = produtos.slice(0, 4);
+  const listaCombos = combos?.slice(0, 4) ?? [];
+  const listaReceitas = receitas?.slice(0, 4) ?? [];
   const hasHref = isValidHref(verMaisHref);
+  
+  // Calcular total de itens para scroll
+  const totalItems = listaProdutos.length + listaCombos.length + listaReceitas.length;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -70,7 +86,7 @@ export default function VitrineDestaques({
       el.removeEventListener("scroll", checkScroll);
       ro.disconnect();
     };
-  }, [checkScroll, produtos.length]);
+  }, [checkScroll, totalItems]);
 
   const scrollBy = (offset: number) => {
     const el = scrollRef.current;
@@ -136,12 +152,36 @@ export default function VitrineDestaques({
         )}
 
         <div ref={scrollRef} className={`flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth pb-2 items-start ${!hasOverflow ? 'justify-evenly' : 'justify-start'}`}>
-          {lista.map((p) => (
+          {/* Renderizar produtos */}
+          {listaProdutos.map((p) => (
             <ProductCard
               key={p.cod_barras}
               produto={p}
               onOpenSheet={() => onSelectProduto?.(p)}
               onEdit={() => console.log("editar", p.cod_barras)}
+              vitrineId={vitrineId}
+              empresa_id={empresaId}
+            />
+          ))}
+
+          {/* Renderizar combos */}
+          {listaCombos.map((combo) => (
+            <ComboCard
+              key={`combo-${combo.id}`}
+              combo={combo}
+              onSelectCombo={onSelectCombo}
+              empresa_id={empresaId}
+              vitrineId={vitrineId}
+            />
+          ))}
+
+          {/* Renderizar receitas */}
+          {listaReceitas.map((receita) => (
+            <ReceitaCard
+              key={`receita-${receita.cod_barras}`}
+              receita={receita}
+              onSelectReceita={onSelectReceita}
+              empresa_id={empresaId}
               vitrineId={vitrineId}
             />
           ))}

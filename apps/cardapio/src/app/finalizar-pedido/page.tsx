@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, getTokenCliente, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
@@ -54,6 +54,7 @@ export default function FinalizarPedidoPage() {
   const [mesaCodigo, setMesaCodigo] = useState<string | null>(null);
   const [numPessoas, setNumPessoas] = useState<number | null>(null);
   const [balcaoEmpresaId, setBalcaoEmpresaId] = useState<number | null>(null);
+  const balcaoEmpresaIdRef = useRef<number | null>(null);
   const [currentTab, setCurrentTab] = useState<CheckoutTab>("tipo");
   useReceiveEmpresaFromQuery();
   const [mesaPresetAplicada, setMesaPresetAplicada] = useState(false);
@@ -180,23 +181,33 @@ export default function FinalizarPedidoPage() {
     }
   }, [tipoPedido, empresasDisponiveis, balcaoEmpresaId]);
 
+  // Atualizar ref quando balcaoEmpresaId mudar
+  useEffect(() => {
+    balcaoEmpresaIdRef.current = balcaoEmpresaId;
+  }, [balcaoEmpresaId]);
+
   useEffect(() => {
     if (tipoPedido !== "BALCAO") {
       return;
     }
 
-    if (!balcaoEmpresaId) {
+    const currentBalcaoEmpresaId = balcaoEmpresaIdRef.current;
+    
+    if (!currentBalcaoEmpresaId) {
       return;
     }
 
+    // Verificar se a empresa ainda existe na lista
     const empresaExiste = empresasDisponiveis.some(
-      (empresa: EmpresaDisponivel) => empresa.id === balcaoEmpresaId
+      (empresa: EmpresaDisponivel) => empresa.id === currentBalcaoEmpresaId
     );
 
+    // Só atualizar se a empresa não existir
+    // Usar ref para evitar loop infinito
     if (!empresaExiste) {
       setBalcaoEmpresaId(null);
     }
-  }, [tipoPedido, empresasDisponiveis, balcaoEmpresaId]);
+  }, [tipoPedido, empresasDisponiveis]); // Removido balcaoEmpresaId das dependências para evitar loop
 
 useEffect(() => {
   if (mesaPresetAplicada) {
@@ -254,9 +265,27 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   padrao: e.padrao ?? false,
 }));
 
+  // Verificar identificação do cliente apenas uma vez ao montar ou quando necessário
   useEffect(() => {
-    ensureClienteIdentificado();
-  }, [ensureClienteIdentificado, items, router]);
+    const clienteAtual = getCliente();
+    const tokenAtual = clienteAtual?.tokenCliente ?? getTokenCliente();
+
+    if (!tokenAtual) {
+      setShowClienteModal(true);
+      return;
+    }
+
+    if (!cliente?.tokenCliente) {
+      if (clienteAtual) {
+        if (!clienteAtual.tokenCliente && tokenAtual) {
+          clienteAtual.tokenCliente = tokenAtual;
+        }
+        setCliente(clienteAtual);
+        setEnderecoId(getEnderecoPadraoId());
+        setPagamentoId(getMeioPagamentoId());
+      }
+    }
+  }, []); // Executar apenas uma vez ao montar
 
   const [errorMessage, setErrorMessage] = useState("");
 

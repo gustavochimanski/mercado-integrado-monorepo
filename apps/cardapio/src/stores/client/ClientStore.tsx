@@ -22,6 +22,11 @@ const STORAGE_KEY = "clienteStore";
 function loadFromStorage(): ClienteStore {
   if (Object.keys(clienteCache).length > 0) return clienteCache;
 
+  // Verificar se está no cliente antes de acessar localStorage
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) {
     try {
@@ -37,6 +42,12 @@ function loadFromStorage(): ClienteStore {
 
 function saveToStorage(data: ClienteStore) {
   clienteCache = { ...data };
+  
+  // Verificar se está no cliente antes de acessar localStorage
+  if (typeof window === 'undefined') {
+    return;
+  }
+  
   localStorage.setItem(STORAGE_KEY, JSON.stringify(clienteCache));
 }
 
@@ -76,7 +87,12 @@ export function setCliente(partial: Partial<ClienteStore>) {
 
 export function clearCliente() {
   clienteCache = {};
-  localStorage.removeItem(STORAGE_KEY);
+  
+  // Verificar se está no cliente antes de acessar localStorage
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+  
   deleteCookie(SUPER_TOKEN_COOKIE_KEY, { path: "/" });
 }
 

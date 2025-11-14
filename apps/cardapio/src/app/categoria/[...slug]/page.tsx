@@ -81,8 +81,8 @@ export default function RouteCategoryPage() {
 
   const add = useCart((s) => s.add);
   const handleAdd = useCallback(
-    (produto: ProdutoEmpMini, quantity: number, observacao?: string) => {
-      add(mapProdutoToCartItem(produto, quantity, observacao));
+    (produto: ProdutoEmpMini, quantity: number, observacao?: string, adicionais_ids?: number[]) => {
+      add(mapProdutoToCartItem(produto, quantity, observacao, adicionais_ids));
       setSheetOpen(false);
     },
     [add]
@@ -128,6 +128,8 @@ export default function RouteCategoryPage() {
             vitrineId={vitrine.id}
             titulo={vitrine.titulo}
             produtos={vitrine.produtos}
+            combos={vitrine.combos}
+            receitas={vitrine.receitas}
             codCategoria={vitrine.cod_categoria}
             empresaId={empresa_id!}
             onOpenSheet={openSheet}
@@ -146,6 +148,8 @@ export default function RouteCategoryPage() {
             vitrineId={vit.id}
             titulo={vit.titulo}
             produtos={vit.produtos}
+            combos={vit.combos}
+            receitas={vit.receitas}
             codCategoria={vit.cod_categoria}
             empresaId={empresa_id!}
             onOpenSheet={openSheet}

@@ -99,8 +99,8 @@ export default function HomePage() {
   const bannerVerticalPrincipal = bannersVerticais.length > 0 ? bannersVerticais[0] : null;
 
   const handleAdd = useCallback(
-    (produto: ProdutoEmpMini, quantity: number, observacao?: string) => {
-      add(mapProdutoToCartItem(produto, quantity, observacao));
+    (produto: ProdutoEmpMini, quantity: number, observacao?: string, adicionais_ids?: number[]) => {
+      add(mapProdutoToCartItem(produto, quantity, observacao, adicionais_ids));
       setSheetOpen(false);
     },
     [add]
@@ -143,6 +143,8 @@ export default function HomePage() {
                 key={v.id}
                 titulo={v.titulo}
                 produtos={v.produtos}
+                combos={v.combos}
+                receitas={v.receitas}
                 verMaisHref={v.href_categoria}
                 empresaId={empresa_id}
                 codCategoria={v.cod_categoria}

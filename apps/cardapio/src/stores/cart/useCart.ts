@@ -4,6 +4,12 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 /* ---------- Types ---------- */
+export interface CartItemAdicional {
+  id: number;
+  nome: string;
+  preco: number;
+}
+
 export interface CartItem {
   cod_barras: string;
   nome: string;
@@ -14,7 +20,8 @@ export interface CartItem {
   categoriaId?: number;
   subcategoriaId?: number;
   observacao?: string;
-  adicionais_ids?: number[]; // IDs dos adicionais selecionados para este item
+  adicionais_ids?: number[]; // IDs dos adicionais selecionados para este item (legado)
+  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais para exibição
 }
 
 export interface CartCombo {
@@ -109,16 +116,29 @@ export const useCart = create<CartState>()(
 
       add: (item) => {
         const items = get().items;
-        const index = items.findIndex((p: { cod_barras: string; }) => p.cod_barras === item.cod_barras);
+        // Verificar se já existe um item com o mesmo cod_barras E mesmos adicionais
+        // Comparar arrays de adicionais por IDs (ordenados)
+        const adicionaisIdsItem = (item.adicionais_ids || []).sort().join(',');
+        const index = items.findIndex((p: CartItem) => {
+          const adicionaisIdsP = (p.adicionais_ids || []).sort().join(',');
+          return p.cod_barras === item.cod_barras && adicionaisIdsP === adicionaisIdsItem;
+        });
 
         if (index === -1) {
+          // Item não existe, adicionar novo
           set({ items: [...items, item] });
         } else {
+          // Item existe, incrementar quantidade
           const updated = [...items];
           updated[index].quantity += item.quantity;
 
           if (item.observacao) {
             updated[index].observacao = item.observacao;
+          }
+
+          // Atualizar adicionais se necessário (manter os existentes)
+          if (item.adicionais && item.adicionais.length > 0) {
+            updated[index].adicionais = item.adicionais;
           }
 
           set({ items: updated });
@@ -164,8 +184,13 @@ export const useCart = create<CartState>()(
       totalItems: () =>
         get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0),
 
-      totalPrice: () =>
-        get().items.reduce((total: number, item: { quantity: number; preco: number; }) => total + item.quantity * item.preco, 0),
+      totalPrice: () => {
+        return get().items.reduce((total: number, item: CartItem) => {
+          const precoItem = item.preco * item.quantity;
+          const precoAdicionais = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
+          return total + precoItem + precoAdicionais;
+        }, 0);
+      },
 
       startEditingPedido: (pedidoId, items, observacao = "") => {
         set({

@@ -61,6 +61,8 @@ export default function ProductsSection({
           vitrineId={vitrine.id}
           titulo={vitrine.titulo}
           produtos={isHome ? vitrine.produtos.slice(0, 3) : vitrine.produtos}
+          combos={vitrine.combos}
+          receitas={vitrine.receitas}
           codCategoria={codCategoria}
           empresaId={empresaId}
           onOpenSheet={onOpenSheet}
