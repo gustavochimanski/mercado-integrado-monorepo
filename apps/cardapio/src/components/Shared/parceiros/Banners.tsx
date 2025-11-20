@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Banner } from "@cardapio/services/useQueryBanners";
+import { Banner } from "@cardapio/services/banners";
 
 interface BannersGroupedProps {
   banners: Banner[];

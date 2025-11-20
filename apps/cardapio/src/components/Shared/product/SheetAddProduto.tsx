@@ -19,7 +19,7 @@ import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart, X, Check } from "lucide-react";
-import { useAdicionaisProduto } from "@cardapio/services/adicionais/useQueryAdicionais";
+import { useAdicionaisProduto } from "@cardapio/services/adicionais";
 import { useState, useMemo } from "react";
 import type { AdicionalResponse } from "@cardapio/api";
 import { AdicionalMini } from "@cardapio/types/Produtos";

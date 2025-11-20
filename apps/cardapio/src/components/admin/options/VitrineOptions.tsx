@@ -10,7 +10,7 @@ import { useState } from "react";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
-import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { useMutateVitrine } from "@cardapio/services/vitrine";
 
 interface AdminVitrineOptionsProps {
   empresaId: number;

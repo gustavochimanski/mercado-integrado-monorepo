@@ -9,8 +9,8 @@ import {
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
 import { Input } from "@cardapio/components/Shared/ui/input";
-import { useSearchProdutos } from "@cardapio/services/useQueryProduto";
-import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { useVincularReceitaVitrine } from "@cardapio/services/receitas/vincular-receita-vitrine";
+import { useListarReceitas } from "@cardapio/services/receitas/listar-receitas";
 import Image from "next/image";
 
 interface Props {
@@ -20,7 +20,7 @@ interface Props {
   vitrineId: number;
 }
 
-export const ModalNovaReceita = ({
+export const ModalAddReceita = ({
   open,
   onOpenChange,
   empresaId,
@@ -29,26 +29,21 @@ export const ModalNovaReceita = ({
   const [busca, setBusca] = React.useState("");
   const [page, setPage] = React.useState(1);
 
-  const { data, isLoading, isFetching } = useSearchProdutos(empresaId, busca, {
+  const { data, isLoading, isFetching } = useListarReceitas(empresaId, {
     page,
     limit: 30,
-    apenas_disponiveis: false,
-    enabled: open,
+    q: busca,
+    enabled: open && !!empresaId,
   });
 
-  const items = data?.data ?? [];
-  const hasMore = !!data?.has_more;
+  const receitas = data?.receitas || [];
+  const hasMore = data?.hasMore ?? false;
 
-  // Filtrar apenas produtos que são receitas (produtos com ingredientes)
-  // Por enquanto, vamos mostrar todos os produtos e deixar o admin escolher
-  // Se houver uma forma de identificar receitas, podemos filtrar aqui
-  const receitas = items; // TODO: Filtrar receitas se houver campo específico
+  const vincularReceita = useVincularReceitaVitrine();
 
-  const { vincularReceita } = useMutateVitrine();
-
-  function handleAdd(cod_barras: string) {
+  function handleAdd(receita_id: number) {
     vincularReceita.mutate(
-      { vitrineId, empresa_id: empresaId, cod_barras },
+      { vitrineId, receita_id },
       { onSuccess: () => onOpenChange(false) }
     );
   }
@@ -71,10 +66,7 @@ export const ModalNovaReceita = ({
           <Input
             placeholder="Buscar por nome ou código de barras..."
             value={busca}
-            onChange={(e) => {
-              setBusca(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => setBusca(e.target.value)}
             autoFocus
           />
 
@@ -91,37 +83,43 @@ export const ModalNovaReceita = ({
               </div>
             )}
 
-            {receitas.map((p) => (
-              <div
-                key={p.cod_barras}
-                className="border rounded-lg p-2 flex flex-col gap-2 hover:shadow-sm transition"
-              >
-                <div className="relative w-full h-24 bg-muted rounded overflow-hidden">
-                  {p.imagem ? (
-                    <Image src={p.imagem} alt={p.descricao} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                      Sem imagem
+            {receitas
+              .filter(r => r.ativo) // Apenas receitas ativas
+              .map((receita) => (
+                <div
+                  key={receita.id}
+                  className="border rounded-lg p-2 flex flex-col gap-2 hover:shadow-sm transition"
+                >
+                  <div className="relative w-full h-24 bg-muted rounded overflow-hidden">
+                    {receita.imagem ? (
+                      <Image src={receita.imagem} alt={receita.descricao} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                        Sem imagem
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm font-medium line-clamp-2">{receita.nome || receita.descricao}</div>
+                  {receita.descricao && receita.descricao !== receita.nome && (
+                    <div className="text-xs text-muted-foreground line-clamp-1">
+                      {receita.descricao}
                     </div>
                   )}
+                  <div className="text-sm font-semibold">
+                    {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(receita.preco_venda)}
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAdd(receita.receita_id || receita.id)} 
+                    disabled={vincularReceita.isPending}
+                  >
+                    {vincularReceita.isPending ? "Adicionando..." : "Adicionar"}
+                  </Button>
                 </div>
-                <div className="text-sm font-medium line-clamp-2">{p.descricao}</div>
-                <div className="text-xs text-muted-foreground">{p.cod_barras}</div>
-                <div className="text-sm font-semibold">
-                  {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.preco_venda)}
-                </div>
-                <Button 
-                  size="sm" 
-                  onClick={() => handleAdd(p.cod_barras)} 
-                  disabled={vincularReceita.isPending}
-                >
-                  {vincularReceita.isPending ? "Adicionando..." : "Adicionar"}
-                </Button>
-              </div>
-            ))}
+              ))}
           </div>
 
-          {(receitas.length > 0 || page > 1) && (
+          {receitas.length > 0 && (
             <div className="flex items-center justify-between pt-1">
               <Button
                 variant="secondary"
@@ -147,4 +145,3 @@ export const ModalNovaReceita = ({
     </Dialog>
   );
 };
-

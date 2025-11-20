@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
 import { Label } from "@cardapio/components/Shared/ui/label";
-import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { useMutateVitrine } from "@cardapio/services/vitrine";
 
 interface Props {
   open: boolean;

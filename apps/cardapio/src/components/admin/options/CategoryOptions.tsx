@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
 } from "@cardapio/components/Shared/ui/dropdown-menu";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { useMutateCategoria } from "@cardapio/services/useQueryCategoria";
+import { useMutateCategoria } from "@cardapio/services/categoria";
 import {
   CircleArrowLeft,
   CircleArrowRight,

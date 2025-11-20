@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { CircleArrowLeft,Search } from "lucide-react";
 import { getCliente, setEnderecoPadraoId } from "@cardapio/stores/client/ClientStore";
-import { EnderecoOut, useQueryEnderecos } from "@cardapio/services/useQueryEndereco";
+import { EnderecoOut, useQueryEnderecos } from "@cardapio/services/enderecos/useQueryEndereco";
 import { Button } from "./ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { Input } from "./ui/input";

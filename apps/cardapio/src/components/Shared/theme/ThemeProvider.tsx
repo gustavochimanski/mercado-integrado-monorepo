@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useQueryEmpresaPublic } from "@cardapio/services/useQueryEmpresaPublic";
+import { useQueryEmpresaPublic } from "@cardapio/services/empresa";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 export function ThemeProvider() {
-  const { data: empresa } = useQueryEmpresaPublic(true, 1);
+  const empresaId = getEmpresaId();
+  const { data: empresa } = useQueryEmpresaPublic(true, empresaId);
 
   useEffect(() => {
     const tema = empresa?.cardapio_tema?.trim();

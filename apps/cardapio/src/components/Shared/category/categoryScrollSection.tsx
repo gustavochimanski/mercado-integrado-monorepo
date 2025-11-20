@@ -3,7 +3,7 @@
 import React from "react";
 import CardAdminAddCategoria from "@cardapio/components/admin/card/CardAdminAddCategoria";
 import { CategoryCard } from "@cardapio/components/Shared/category/CategoryCard";
-import type { CategoriaMini } from "@cardapio/services/useQueryHome";
+import type { CategoriaMini } from "@cardapio/services/home";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 interface Props {

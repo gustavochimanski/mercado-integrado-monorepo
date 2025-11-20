@@ -7,7 +7,7 @@ import { Input } from "@cardapio/components/Shared/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
 import { Pen, Trash2, Plus, MapPin } from "lucide-react";
 import { SearchEndereco } from "@cardapio/components/Shared/SearchEndereco";
-import type { EnderecoSearchResult } from "@cardapio/services/useQueryEndereco";
+import type { EnderecoSearchResult } from "@cardapio/services/enderecos/useQueryEndereco";
 
 interface Endereco {
   id: number;

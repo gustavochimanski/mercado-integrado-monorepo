@@ -10,8 +10,8 @@ import {
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
 import { Input } from "@cardapio/components/Shared/ui/input";
-import { useSearchProdutos } from "@cardapio/services/useQueryProduto";
-import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { useSearchProdutos } from "@cardapio/services/produto";
+import { useMutateVitrine } from "@cardapio/services/vitrine";
 import Image from "next/image";
 
 interface Props {

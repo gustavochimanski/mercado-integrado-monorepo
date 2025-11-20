@@ -16,7 +16,7 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 import {
   useCategoriaById,
   useMutateCategoria,
-} from "@cardapio/services/useQueryCategoria";
+} from "@cardapio/services/categoria";
 import { validateImageWithFeedback } from "@cardapio/lib/validations/imageValidation";
 
 interface ModalEditCategoriaImagemProps {

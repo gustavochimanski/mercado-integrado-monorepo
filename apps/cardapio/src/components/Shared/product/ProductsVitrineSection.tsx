@@ -9,7 +9,7 @@ import { ComboCard } from "./ComboCard";
 import { ReceitaCard } from "./ReceitaCard";
 import { CardVerMais } from "../CardVerMais";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { ComboMiniDTO, ReceitaMiniDTO } from "@cardapio/services/useQueryHome";
+import { ComboMiniDTO, ReceitaMiniDTO } from "@cardapio/services/home";
 
 interface Props {
   vitrineId: number;
@@ -151,7 +151,7 @@ export default function ProductsVitrineSection({
 
             {/* Renderizar receitas */}
             {receitas?.map((receita) => (
-              <div key={`receita-${receita.cod_barras}`} className="shrink-0 w-[120px] h-[180px] mr-2">
+              <div key={`receita-${receita.id}`} className="shrink-0 w-[120px] h-[180px] mr-2">
                 <ReceitaCard
                   receita={receita}
                   onSelectReceita={onSelectReceita}

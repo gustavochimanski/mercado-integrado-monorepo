@@ -4,12 +4,12 @@
 import { useState } from "react";
 
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { useMutateProduto } from "@cardapio/services/useQueryProduto";
+import { useMutateProduto } from "@cardapio/services/produto";
 import { Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@cardapio/components/Shared/ui/dropdown-menu";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
-import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { useMutateVitrine } from "@cardapio/services/vitrine";
 import { toast } from "sonner";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 

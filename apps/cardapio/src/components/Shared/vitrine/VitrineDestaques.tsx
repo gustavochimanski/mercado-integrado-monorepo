@@ -12,7 +12,7 @@ import { Card } from "../ui/card";
 import { CardAddProduto } from "../../admin/card/CardAddProduto";
 import AdminVitrineOptions from "@cardapio/components/admin/options/VitrineOptions";
 import { toast } from "sonner";
-import { ComboMiniDTO, ReceitaMiniDTO } from "@cardapio/services/useQueryHome";
+import { ComboMiniDTO, ReceitaMiniDTO } from "@cardapio/services/home";
 
 type Props = {
   produtos: ProdutoEmpMini[];
@@ -178,7 +178,7 @@ export default function VitrineDestaques({
           {/* Renderizar receitas */}
           {listaReceitas.map((receita) => (
             <ReceitaCard
-              key={`receita-${receita.cod_barras}`}
+              key={`receita-${receita.id}`}
               receita={receita}
               onSelectReceita={onSelectReceita}
               empresa_id={empresaId}

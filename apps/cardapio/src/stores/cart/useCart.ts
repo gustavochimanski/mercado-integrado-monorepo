@@ -20,25 +20,42 @@ export interface CartItem {
   categoriaId?: number;
   subcategoriaId?: number;
   observacao?: string;
-  adicionais_ids?: number[]; // IDs dos adicionais selecionados para este item (legado)
-  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais para exibição
+  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais
 }
 
 export interface CartCombo {
   combo_id: number;
   quantidade: number;
+  preco: number; // Preço unitário do combo
+  observacao?: string;
+  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais
+}
+
+export interface CartReceita {
+  receita_id: number;
+  quantidade: number;
+  preco: number; // Preço unitário da receita
+  observacao?: string;
+  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais
 }
 
 interface CartState {
   items: CartItem[];
   combos: CartCombo[]; // Lista de combos no carrinho
+  receitas: CartReceita[]; // Lista de receitas no carrinho
   observacao: string;
   editingPedidoId: number | null;
   setObservacao: (texto: string) => void;
   add: (item: CartItem) => void;
   addCombo: (combo: CartCombo) => void;
   removeCombo: (combo_id: number) => void;
-  updateAdicionaisItem: (cod_barras: string, adicionais_ids: number[]) => void;
+  incCombo: (combo_id: number, step?: number) => void;
+  decCombo: (combo_id: number, step?: number) => void;
+  addReceita: (receita: CartReceita) => void;
+  removeReceita: (receita_id: number) => void;
+  incReceita: (receita_id: number, step?: number) => void;
+  decReceita: (receita_id: number, step?: number) => void;
+  updateAdicionaisItem: (cod_barras: string, adicionais: CartItemAdicional[]) => void;
   inc: (cod_barras: string, step?: number) => void;
   dec: (cod_barras: string, step?: number) => void;
   updateObservacaoItem: (cod_barras: string, observacao: string) => void;
@@ -72,12 +89,30 @@ const withLogger =
     return wrapped;
   };
 
+/* ---------- Migração: Limpar estrutura antiga do localStorage ---------- */
+if (typeof window !== 'undefined') {
+  try {
+    const stored = localStorage.getItem('cardapio-cart');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Se houver estrutura aninhada com 'state', limpar e reescrever
+      if (parsed && typeof parsed === 'object' && 'state' in parsed && parsed.state) {
+        const cleanState = parsed.state;
+        localStorage.setItem('cardapio-cart', JSON.stringify(cleanState));
+      }
+    }
+  } catch (e) {
+    // Ignorar erros na migração
+  }
+}
+
 /* ---------- Store ---------- */
 export const useCart = create<CartState>()(
   persist(
     withLogger<CartState>((set, get) => ({
       items: [],
       combos: [],
+      receitas: [],
       observacao: "",
       editingPedidoId: null,
 
@@ -87,13 +122,34 @@ export const useCart = create<CartState>()(
 
       addCombo: (combo) => {
         const combos = get().combos;
-        const index = combos.findIndex((c: CartCombo) => c.combo_id === combo.combo_id);
+        // Função auxiliar para extrair IDs dos adicionais
+        const getAdicionaisIds = (adicionais?: CartItemAdicional[]) => 
+          (adicionais || []).map(a => a.id).sort();
+        
+        // Verificar se já existe um combo com o mesmo combo_id E mesmos adicionais
+        const adicionaisIdsCombo = getAdicionaisIds(combo.adicionais).join(',');
+        const index = combos.findIndex((c: CartCombo) => {
+          const adicionaisIdsC = getAdicionaisIds(c.adicionais).join(',');
+          return c.combo_id === combo.combo_id && adicionaisIdsC === adicionaisIdsCombo;
+        });
 
         if (index === -1) {
+          // Combo não existe, adicionar novo
           set({ combos: [...combos, combo] });
         } else {
+          // Combo existe, incrementar quantidade
           const updated = [...combos];
           updated[index].quantidade += combo.quantidade;
+
+          if (combo.observacao) {
+            updated[index].observacao = combo.observacao;
+          }
+
+          // Atualizar adicionais se necessário (manter os existentes)
+          if (combo.adicionais && combo.adicionais.length > 0) {
+            updated[index].adicionais = combo.adicionais;
+          }
+
           set({ combos: updated });
         }
       },
@@ -104,11 +160,95 @@ export const useCart = create<CartState>()(
         });
       },
 
-      updateAdicionaisItem: (cod_barras, adicionais_ids) => {
+      incCombo: (combo_id, step = 1) => {
+        set({
+          combos: get().combos.map((c: CartCombo) =>
+            c.combo_id === combo_id
+              ? { ...c, quantidade: c.quantidade + step }
+              : c
+          ),
+        });
+      },
+
+      decCombo: (combo_id, step = 1) => {
+        set({
+          combos: get().combos
+            .map((c: CartCombo) =>
+              c.combo_id === combo_id
+                ? { ...c, quantidade: c.quantidade - step }
+                : c
+            )
+            .filter((c: CartCombo) => c.quantidade > 0),
+        });
+      },
+
+      addReceita: (receita) => {
+        const receitas = get().receitas;
+        // Função auxiliar para extrair IDs dos adicionais
+        const getAdicionaisIds = (adicionais?: CartItemAdicional[]) => 
+          (adicionais || []).map(a => a.id).sort();
+        
+        // Verificar se já existe uma receita com o mesmo receita_id E mesmos adicionais
+        const adicionaisIdsReceita = getAdicionaisIds(receita.adicionais).join(',');
+        const index = receitas.findIndex((r: CartReceita) => {
+          const adicionaisIdsR = getAdicionaisIds(r.adicionais).join(',');
+          return r.receita_id === receita.receita_id && adicionaisIdsR === adicionaisIdsReceita;
+        });
+
+        if (index === -1) {
+          // Receita não existe, adicionar nova
+          set({ receitas: [...receitas, receita] });
+        } else {
+          // Receita existe, incrementar quantidade
+          const updated = [...receitas];
+          updated[index].quantidade += receita.quantidade;
+
+          if (receita.observacao) {
+            updated[index].observacao = receita.observacao;
+          }
+
+          // Atualizar adicionais se necessário (manter os existentes)
+          if (receita.adicionais && receita.adicionais.length > 0) {
+            updated[index].adicionais = receita.adicionais;
+          }
+
+          set({ receitas: updated });
+        }
+      },
+
+      removeReceita: (receita_id) => {
+        set({
+          receitas: get().receitas.filter((r: CartReceita) => r.receita_id !== receita_id),
+        });
+      },
+
+      incReceita: (receita_id, step = 1) => {
+        set({
+          receitas: get().receitas.map((r: CartReceita) =>
+            r.receita_id === receita_id
+              ? { ...r, quantidade: r.quantidade + step }
+              : r
+          ),
+        });
+      },
+
+      decReceita: (receita_id, step = 1) => {
+        set({
+          receitas: get().receitas
+            .map((r: CartReceita) =>
+              r.receita_id === receita_id
+                ? { ...r, quantidade: r.quantidade - step }
+                : r
+            )
+            .filter((r: CartReceita) => r.quantidade > 0),
+        });
+      },
+
+      updateAdicionaisItem: (cod_barras, adicionais) => {
         set({
           items: get().items.map((item: { cod_barras: string; }) =>
             item.cod_barras === cod_barras
-              ? { ...item, adicionais_ids }
+              ? { ...item, adicionais }
               : item
           ),
         });
@@ -116,11 +256,14 @@ export const useCart = create<CartState>()(
 
       add: (item) => {
         const items = get().items;
+        // Função auxiliar para extrair IDs dos adicionais
+        const getAdicionaisIds = (adicionais?: CartItemAdicional[]) => 
+          (adicionais || []).map(a => a.id).sort();
+        
         // Verificar se já existe um item com o mesmo cod_barras E mesmos adicionais
-        // Comparar arrays de adicionais por IDs (ordenados)
-        const adicionaisIdsItem = (item.adicionais_ids || []).sort().join(',');
+        const adicionaisIdsItem = getAdicionaisIds(item.adicionais).join(',');
         const index = items.findIndex((p: CartItem) => {
-          const adicionaisIdsP = (p.adicionais_ids || []).sort().join(',');
+          const adicionaisIdsP = getAdicionaisIds(p.adicionais).join(',');
           return p.cod_barras === item.cod_barras && adicionaisIdsP === adicionaisIdsItem;
         });
 
@@ -179,17 +322,38 @@ export const useCart = create<CartState>()(
           items: get().items.filter((p: { cod_barras: string; }) => p.cod_barras !== cod_barras),
         }),
 
-      clear: () => set({ items: [], combos: [], observacao: "", editingPedidoId: null }),
+      clear: () => set({ items: [], combos: [], receitas: [], observacao: "", editingPedidoId: null }),
 
-      totalItems: () =>
-        get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0),
+      totalItems: () => {
+        const itemsTotal = get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0);
+        const combosTotal = get().combos.reduce((total: any, combo: { quantidade: any; }) => total + combo.quantidade, 0);
+        const receitasTotal = get().receitas.reduce((total: any, receita: { quantidade: any; }) => total + receita.quantidade, 0);
+        return itemsTotal + combosTotal + receitasTotal;
+      },
 
       totalPrice: () => {
-        return get().items.reduce((total: number, item: CartItem) => {
+        // Soma dos produtos
+        const itemsTotal = get().items.reduce((total: number, item: CartItem) => {
           const precoItem = item.preco * item.quantity;
           const precoAdicionais = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
           return total + precoItem + precoAdicionais;
         }, 0);
+        
+        // Soma dos combos
+        const combosTotal = get().combos.reduce((total: number, combo: CartCombo) => {
+          const precoCombo = combo.preco * combo.quantidade;
+          const precoAdicionais = (combo.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * combo.quantidade;
+          return total + precoCombo + precoAdicionais;
+        }, 0);
+        
+        // Soma das receitas
+        const receitasTotal = get().receitas.reduce((total: number, receita: CartReceita) => {
+          const precoReceita = receita.preco * receita.quantidade;
+          const precoAdicionais = (receita.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * receita.quantidade;
+          return total + precoReceita + precoAdicionais;
+        }, 0);
+        
+        return itemsTotal + combosTotal + receitasTotal;
       },
 
       startEditingPedido: (pedidoId, items, observacao = "") => {
@@ -205,6 +369,7 @@ export const useCart = create<CartState>()(
           editingPedidoId: null,
           items: [],
           combos: [],
+          receitas: [],
           observacao: ""
         });
       },
@@ -212,12 +377,55 @@ export const useCart = create<CartState>()(
     {
       name: "cardapio-cart",
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({
-        items: s.items,
-        combos: s.combos,
-        observacao: s.observacao,
-        editingPedidoId: s.editingPedidoId,
+      partialize: (state) => ({
+        items: state.items,
+        combos: state.combos,
+        receitas: state.receitas,
+        observacao: state.observacao,
+        editingPedidoId: state.editingPedidoId,
       }),
+      // Garantir que não há duplicação no estado e limpar estrutura antiga
+      merge: (persistedState, currentState) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return currentState;
+        }
+
+        // Se houver um objeto 'state' aninhado (estrutura antiga), usar apenas o conteúdo
+        if ('state' in persistedState) {
+          const nestedState = (persistedState as any).state;
+          if (nestedState && typeof nestedState === 'object') {
+            // Limpar o localStorage antigo e retornar apenas o estado interno
+            try {
+              localStorage.removeItem('cardapio-cart');
+            } catch (e) {
+              // Ignorar erros ao limpar
+            }
+            return { ...currentState, ...nestedState };
+          }
+        }
+
+        // Se o persistedState já tem a estrutura correta, usar diretamente
+        return { ...currentState, ...persistedState };
+      },
+      // Migração: limpar dados antigos na primeira carga
+      onRehydrateStorage: () => (state) => {
+        if (state && typeof state === 'object' && 'state' in state) {
+          // Se ainda houver estrutura aninhada após merge, limpar
+          try {
+            const stored = localStorage.getItem('cardapio-cart');
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              if (parsed && typeof parsed === 'object' && 'state' in parsed) {
+                // Reescrever sem o objeto state aninhado
+                const cleanState = parsed.state || parsed;
+                localStorage.setItem('cardapio-cart', JSON.stringify(cleanState));
+              }
+            }
+          } catch (e) {
+            // Ignorar erros
+          }
+        }
+      },
     }
   )
 );

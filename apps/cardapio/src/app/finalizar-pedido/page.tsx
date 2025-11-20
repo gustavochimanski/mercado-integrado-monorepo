@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, getTokenCliente, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
-import { useQueryEnderecos, useMutateEndereco, Endereco } from "@cardapio/services/useQueryEndereco";
-import { useMeiosPagamento } from "@cardapio/services/useQueryMeioPagamento";
+import { useQueryEnderecos, useMutateEndereco, Endereco } from "@cardapio/services/enderecos/useQueryEndereco";
+import { useMeiosPagamento } from "@cardapio/services/meio-pagamento";
 import { useMutatePedido } from "@cardapio/services/pedidos/useQueryPedido";
 import { usePreviewCheckout } from "@cardapio/services/pedidos/usePreviewCheckout";
 import { finalizarCheckoutCliente } from "@cardapio/services/pedidos/checkout-finalizar-pedido";
@@ -29,8 +29,10 @@ import ObservacaoStep from "@cardapio/components/Shared/finalizar-pedido/Observa
 import PedidoConfirmOverlay from "@cardapio/components/Shared/finalizar-pedido/PedidoConfirmOverlay";
 import { getEmpresaId, setEmpresaId, getMesaInicial, clearMesaInicial } from "@cardapio/stores/empresa/empresaStore";
 import { toast } from "sonner";
-import { useQueryEmpresasDisponiveis, EmpresaDisponivel } from "@cardapio/services/useQueryEmpresasDisponiveis";
+import { useQueryEmpresasDisponiveis, EmpresaDisponivel } from "@cardapio/services/empresa";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
+import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems";
+import { useCartHydrated } from "@cardapio/components/Shared/cart/useHydrated";
 
 const STEP_ORDER = ["tipo", "mesa", "balcao", "endereco", "pagamento", "observacao", "revisao"] as const;
 type CheckoutTab = (typeof STEP_ORDER)[number];
@@ -38,9 +40,10 @@ type CheckoutTab = (typeof STEP_ORDER)[number];
 export default function FinalizarPedidoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { items, combos, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
+  const { items, combos, receitas, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
   const queryClient = useQueryClient();
   const { updatePedido, updateStatus } = useMutatePedido();
+  const cartHydrated = useCartHydrated();
 
   const isEditingMode = editingPedidoId !== null;
 
@@ -287,6 +290,24 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
     }
   }, []); // Executar apenas uma vez ao montar
 
+  // Limpar modo de edição se não houver itens e não estiver realmente editando um pedido
+  // Executar apenas após a hidratação do carrinho para evitar limpar antes dos dados serem restaurados
+  useEffect(() => {
+    // Aguardar a hidratação do carrinho antes de fazer verificações
+    if (!cartHydrated) return;
+
+    // Se editingPedidoId está definido mas não há itens, combos ou receitas, limpar o modo de edição
+    // Isso pode acontecer se o editingPedidoId ficou "preso" no localStorage
+    if (editingPedidoId !== null) {
+      const totalItems = items.length + (combos?.length || 0) + (receitas?.length || 0);
+      if (totalItems === 0) {
+        // Se não há itens, não deveria estar em modo de edição
+        stopEditingPedido();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartHydrated]); // Executar após a hidratação do carrinho
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const resolveClienteId = () => {
@@ -395,12 +416,22 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         validationError = "Cliente não identificado. Faça login novamente.";
       } else if (!enderecoId && tipoPedido === "DELIVERY") {
         validationError = "Endereço não selecionado. Selecione um endereço de entrega.";
-      } else if (!meioPagamentoId && tipoPedido === "DELIVERY") {
+      } else if (!meioPagamentoId) {
         validationError = "Forma de pagamento não selecionada. Escolha uma forma de pagamento.";
-      } else if (tipoPedido === "MESA" && !mesaCodigo) {
-        validationError = "Informe o código/número da mesa.";
-      } else if (tipoPedido === "BALCAO" && !balcaoEmpresaId) {
-        validationError = "Selecione a unidade para retirada no balcão.";
+      } else {
+        // Verificar se o meio de pagamento é dinheiro e se o troco está preenchido
+        const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
+        if (meioSelecionado?.tipo === "DINHEIRO" && (!trocoPara || trocoPara <= 0)) {
+          validationError = "Informe o valor do troco para pagamento em dinheiro.";
+        }
+      }
+      
+      if (!validationError) {
+        if (tipoPedido === "MESA" && !mesaCodigo) {
+          validationError = "Informe o código/número da mesa.";
+        } else if (tipoPedido === "BALCAO" && !balcaoEmpresaId) {
+          validationError = "Selecione a unidade para retirada no balcão.";
+        }
       }
 
       if (validationError) {
@@ -417,14 +448,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         const empresaIdLoja = ensurePositiveInteger(getEmpresaId());
         let empresaIdPayload: number | null = null;
 
-        const itensPedido = items.map((i) => ({
-          produto_cod_barras: i.cod_barras,
-          quantidade: i.quantity,
-          observacao: i.observacao || undefined,
-          adicionais_ids: i.adicionais_ids && i.adicionais_ids.length > 0 
-            ? i.adicionais_ids 
-            : undefined,
-        }));
+        // Converter itens do carrinho para formato aninhado em produtos
+        const { produtos } = 
+          mapCartToPedidoItems(items, combos || [], receitas || []);
 
         const tipoSelecionado = tipoPedido as TipoPedidoCheckout;
 
@@ -442,45 +468,64 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           empresaIdPayload = empresaIdLoja;
         }
 
+        // Obter valor total do preview ou usar totalPrice como fallback
+        const valorTotal = previewData?.valor_total ?? totalPrice();
+
         const payload: FinalizarPedidoRequest = {
           tipo_pedido: tipoSelecionado,
           origem: "WEB",
           observacao_geral: observacao || undefined,
-          itens: itensPedido,
+          produtos,
           cliente_id: resolveClienteId(),
-          // Incluir combos se houver
-          combos: combos && combos.length > 0
-            ? combos.map((c) => ({
-                combo_id: c.combo_id,
-                quantidade: c.quantidade || 1,
-              }))
-            : undefined,
         };
 
-        if (tipoSelecionado !== "DELIVERY" && empresaIdPayload) {
-          payload.empresa_id = empresaIdPayload;
-        }
-
+        // Para DELIVERY, empresa_id deve ser null (não undefined)
         if (tipoPedido === "DELIVERY") {
+          payload.empresa_id = null;
+          payload.tipo_entrega = "DELIVERY";
           payload.endereco_id = enderecoId as number;
-          payload.meio_pagamento_id = meioPagamentoId as number;
-          payload.troco_para = trocoPara ?? undefined;
-          payload.mesa_codigo = undefined;
-        } else if (tipoPedido === "MESA") {
-          const codigoMesa = mesaCodigo ?? (mesaId !== null ? String(mesaId) : undefined);
-          if (codigoMesa) {
-            payload.mesa_codigo = codigoMesa;
-          }
-          payload.num_pessoas = numPessoas ?? null;
-          payload.meio_pagamento_id = meioPagamentoId ?? null;
           payload.troco_para = trocoPara ?? null;
+          payload.mesa_codigo = null;
+          
+          // Usar meios_pagamento ao invés de meio_pagamento_id na raiz
+          if (meioPagamentoId) {
+            payload.meios_pagamento = [
+              {
+                meio_pagamento_id: meioPagamentoId,
+                valor: valorTotal,
+              },
+            ];
+          }
         } else {
-          const codigoRetirada = mesaCodigo ?? (mesaId !== null ? String(mesaId) : undefined);
-          if (codigoRetirada) {
-            payload.mesa_codigo = codigoRetirada;
+          // Para MESA e BALCAO, incluir empresa_id
+          if (empresaIdPayload) {
+            payload.empresa_id = empresaIdPayload;
           }
-          payload.meio_pagamento_id = meioPagamentoId ?? null;
+          
+          if (tipoPedido === "MESA") {
+            const codigoMesa = mesaCodigo ?? (mesaId !== null ? String(mesaId) : undefined);
+            if (codigoMesa) {
+              payload.mesa_codigo = codigoMesa;
+            }
+            payload.num_pessoas = numPessoas ?? null;
+          } else if (tipoPedido === "BALCAO") {
+            const codigoRetirada = mesaCodigo ?? (mesaId !== null ? String(mesaId) : undefined);
+            if (codigoRetirada) {
+              payload.mesa_codigo = codigoRetirada;
+            }
+          }
+          
           payload.troco_para = trocoPara ?? null;
+          
+          // Usar meios_pagamento se houver meio de pagamento selecionado
+          if (meioPagamentoId) {
+            payload.meios_pagamento = [
+              {
+                meio_pagamento_id: meioPagamentoId,
+                valor: valorTotal,
+              },
+            ];
+          }
         }
 
         await finalizarCheckoutCliente(payload);
@@ -566,11 +611,14 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           </Button>
         );
       case "pagamento":
+        const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
+        const isDinheiro = meioSelecionado?.tipo === "DINHEIRO";
+        const trocoObrigatorioPreenchido = !isDinheiro || (isDinheiro && trocoPara !== null && trocoPara !== undefined && trocoPara > 0);
         return (
           <Button 
             className="w-full text-lg p-6 bg-amber-600" 
             onClick={() => setCurrentTab("observacao")}
-            disabled={!meioPagamentoId}
+            disabled={!meioPagamentoId || !trocoObrigatorioPreenchido}
           >
             Continuar <CircleArrowRight strokeWidth={3} />
           </Button>
@@ -583,17 +631,14 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         );
       case "revisao":
         return (
-          <Button onClick={handleFinalizar} disabled={items.length === 0} className="w-full text-lg p-6 bg-green-600">
-            <div className="flex gap-3 items-center">
-              {isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"} <CircleCheck strokeWidth={3} />
-            </div>
-          </Button>
-        );
-      default:
-        return null;
+          <Button onClick={handleFinalizar} disabled={items.length === 0 && combos?.length === 0 && receitas?.length === 0} className="w-full text-lg p-6 bg-green-600">
+          <div className="flex gap-3 items-center">
+            {isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"} <CircleCheck strokeWidth={3} />
+          </div>
+        </Button>
+      );
     }
   };
-
   return (
     <div className="w-full flex flex-col gap-0 p-0 relative">
       {/* OVERLAY FULL SCREEN */}

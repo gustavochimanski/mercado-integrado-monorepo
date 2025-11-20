@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { useMutateCategoria } from "@cardapio/services/useQueryCategoria";
+import { useMutateCategoria } from "@cardapio/services/categoria";
 
 interface ModalCategoriaProps {
   open: boolean;

@@ -52,7 +52,6 @@ export function mapProdutoToCartItem(
     categoriaId: produto.produto.cod_categoria ?? undefined,
     subcategoriaId: produto.subcategoria_id ?? 0,
     observacao,
-    adicionais_ids, // Manter para compatibilidade
-    adicionais, // Dados completos para exibição
+    adicionais, // Apenas dados completos dos adicionais
   };
 }

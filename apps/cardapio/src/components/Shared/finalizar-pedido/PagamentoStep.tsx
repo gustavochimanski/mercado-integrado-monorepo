@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { MeioPagamento } from "@cardapio/services/useQueryMeioPagamento";
+import type { MeioPagamento } from "@cardapio/services/meio-pagamento";
 import { Banknote, CreditCard, QrCode, Smartphone, type LucideIcon } from "lucide-react";
 import { Label } from "@cardapio/components/Shared/ui/label";
 import { Input } from "@cardapio/components/Shared/ui/input";
@@ -96,7 +96,7 @@ export default function PagamentoStep({ meios, selecionado, onSelect, onTrocoCha
       {mostrarCampoTroco && (
         <div className="space-y-2 p-4 bg-muted/50 rounded-xl">
           <Label htmlFor="troco-para" className="text-sm font-medium">
-            Troco para quanto? (Opcional)
+            Troco para quanto? <span className="text-red-600">*</span>
           </Label>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">R$</span>
@@ -109,10 +109,11 @@ export default function PagamentoStep({ meios, selecionado, onSelect, onTrocoCha
               value={trocoPara}
               onChange={(e) => handleTrocoChange(e.target.value)}
               className="flex-1"
+              required
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Informe o valor da nota para facilitar o troco
+            Informe o valor da nota para facilitar o troco (obrigatório)
           </p>
         </div>
       )}

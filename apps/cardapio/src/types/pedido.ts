@@ -48,23 +48,56 @@ export interface Pedido {
 }
 
 // ================= Request de finalizar pedido =================
+export interface ItemAdicionalRequest {
+  adicional_id: number;
+  quantidade: number;
+}
+
 export interface ItemPedidoRequest {
   produto_cod_barras: string;
   quantidade: number;
   observacao?: string;
-  adicionais_ids?: number[]; // IDs dos adicionais selecionados para este item
+  adicionais?: ItemAdicionalRequest[]; // Adicionais com ID e quantidade separados
 }
 
 export interface ComboPedidoRequest {
   combo_id: number;
-  quantidade?: number; // Default: 1
+  quantidade?: number; // Default: 1 (legado)
+  adicionais?: ItemAdicionalRequest[]; // Adicionais com ID e quantidade separados
+}
+
+export interface ReceitaPedidoRequest {
+  receita_id: number;
+  quantidade: number;
+  observacao?: string;
+  adicionais?: ItemAdicionalRequest[]; // Adicionais com ID e quantidade separados
+}
+
+// ================= Formato unificado de itens do pedido =================
+export interface PedidoItemUnificado {
+  tipo: "PRODUTO" | "COMBO" | "RECEITA";
+  produto_cod_barras?: string; // se tipo = PRODUTO
+  combo_id?: number;           // se tipo = COMBO
+  receita_id?: number;         // se tipo = RECEITA
+  quantidade: number;
+  observacao?: string;
+  adicionais?: Array<{
+    adicional_id: number;
+    quantidade: number;
+  }>;
 }
 
 export type TipoPedidoGateway = "DELIVERY" | "MESA" | "BALCAO";
 export type TipoPedidoCheckout = TipoPedidoGateway;
 
+export interface ProdutosPedidoRequest {
+  itens: ItemPedidoRequest[]; // Produtos individuais (com produto_cod_barras)
+  combos?: ComboPedidoRequest[]; // Combos
+  receitas?: ReceitaPedidoRequest[]; // Receitas
+}
+
 export interface FinalizarPedidoRequest {
-  empresa_id?: number;
+  empresa_id?: number | null;
   tipo_pedido: TipoPedidoCheckout;
   telefone_cliente?: string; // será setado pelo token
   cliente_id?: number | null;
@@ -78,8 +111,7 @@ export interface FinalizarPedidoRequest {
   observacao_geral?: string;
   cupom_id?: number | null;
   troco_para?: number | null;
-  itens: ItemPedidoRequest[];
-  combos?: ComboPedidoRequest[]; // Lista de combos opcionais
+  produtos: ProdutosPedidoRequest; // Produtos englobando itens, combos e receitas
 }
 
 // ================= Request de confirmar pagamento =================
@@ -98,7 +130,7 @@ export interface MeioPagamentoParcialRequest {
 export interface CheckoutGatewayRequest {
   tipo_pedido: TipoPedidoGateway;
   empresa_id: number;
-  itens: ItemPedidoRequest[];
+  itens: ItemPedidoRequest[]; // Apenas produtos (com produto_cod_barras)
   
   // Campos comuns (todos os tipos)
   observacao_geral?: string | null;

@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogTitle } from "@cardapio/components/Shared/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@cardapio/components/Shared/ui/card";
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 
-import { useCategoriasSearch } from "@cardapio/services/useQueryCategoria";
-import { useVitrinesSearch, useMutateVitrine, VitrineSearchItem } from "@cardapio/services/useQueryVitrine";
+import { useCategoriasSearch } from "@cardapio/services/categoria";
+import { useVitrinesSearch, useMutateVitrine, VitrineSearchItem } from "@cardapio/services/vitrine";
 
 type Categoria = { id: number; descricao: string; imagem?: string | null };
 

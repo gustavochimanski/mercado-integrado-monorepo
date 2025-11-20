@@ -3,13 +3,13 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
-import { useHome } from "@cardapio/services/useQueryHome";
+import { useHome } from "@cardapio/services/home";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { CartFab } from "@cardapio/components/Shared/cart/CartSuspense";
 import { CartSheet } from "@cardapio/components/Shared/cart/CartSheet";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
 import { getEmpresaId, setEmpresaId, setMesaInicial } from "@cardapio/stores/empresa/empresaStore";
-import { useMutateCliente} from "@cardapio/services/useQueryCliente";
+import { useMutateCliente} from "@cardapio/services/cliente";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
@@ -19,9 +19,9 @@ import VitrineDestaques from "@cardapio/components/Shared/vitrine/VitrineDestaqu
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { CardHeader, CardTitle } from "../Shared/ui/card";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { useBanners } from "@cardapio/services/useQueryBanners";
+import { useBanners } from "@cardapio/services/banners";
 import { BannerVertical, BannersHorizontal } from "../Shared/parceiros/Banners";
-import { useQueryEmpresasDisponiveis } from "@cardapio/services/useQueryEmpresasDisponiveis";
+import { useQueryEmpresasDisponiveis } from "@cardapio/services/empresa";
 
 export default function HomePage() {
   // ✅ TODOS os hooks primeiro, sem returns no meio

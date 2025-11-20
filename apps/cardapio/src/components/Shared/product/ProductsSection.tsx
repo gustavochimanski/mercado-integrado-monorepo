@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import LoadingSpinner from "../ui/loader";
 import ProductsVitrineSection from "./ProductsVitrineSection";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import { useProdutosVitrinePorCategoria } from "@cardapio/services/useQueryHome";
+import { useProdutosVitrinePorCategoria } from "@cardapio/services/home";
 
 interface Props {
   codCategoria: number;

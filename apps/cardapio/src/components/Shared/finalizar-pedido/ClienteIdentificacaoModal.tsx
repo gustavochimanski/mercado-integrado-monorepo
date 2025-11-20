@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { useMutateCliente } from "@cardapio/services/useQueryCliente";
+import { useMutateCliente } from "@cardapio/services/cliente";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
 
 interface Props {

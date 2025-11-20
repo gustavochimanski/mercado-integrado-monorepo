@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { ComboMiniDTO } from "@cardapio/services/useQueryHome";
-import { useCart } from "@cardapio/stores/cart/useCart";
+import { ComboMiniDTO } from "@cardapio/services/home";
+import { SheetAdicionarCombo } from "./SheetAddCombo";
 
 type Props = {
   combo: ComboMiniDTO;
@@ -14,22 +15,23 @@ type Props = {
 };
 
 export function ComboCard({ combo, onSelectCombo, empresa_id, vitrineId }: Props) {
-  const { addCombo } = useCart();
+  const [sheetOpen, setSheetOpen] = useState(false);
   const price = Number(combo.preco_total) || 0;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addCombo({
-      combo_id: combo.id,
-      quantidade: 1,
-    });
+    setSheetOpen(true);
+  };
+
+  const handleCardClick = () => {
+    setSheetOpen(true);
   };
 
   return (
     <div className="relative">
       <Card
         className="w-[120px] h-[180px] flex flex-col overflow-hidden gap-0 p-0 cursor-pointer hover:shadow-lg transition-all duration-200 rounded-lg border-0 shadow-md bg-white"
-        onClick={() => onSelectCombo?.(combo)}
+        onClick={handleCardClick}
       >
         {/* Imagem principal */}
         <div className="relative w-full h-[100px] overflow-hidden flex-shrink-0 bg-gray-100">
@@ -61,6 +63,11 @@ export function ComboCard({ combo, onSelectCombo, empresa_id, vitrineId }: Props
           </div>
         </div>
       </Card>
+      <SheetAdicionarCombo
+        combo={combo}
+        isOpen={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+      />
     </div>
   );
 }

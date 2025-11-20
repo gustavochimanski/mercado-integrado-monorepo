@@ -16,7 +16,7 @@ import {
   useCategoriasSearch,
   useMutateCategoria,
   CategoriaSearchItem,
-} from "@cardapio/services/useQueryCategoria";
+} from "@cardapio/services/categoria";
 
 interface ModalEditCategoriaProps {
   open: boolean;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Clock, User, AlertCircle } from "lucide-react";
-import { useQueryHistoricoPedidoBalcao } from "@cardapio/services/useQueryBalcao";
+import { useQueryHistoricoPedidoBalcao } from "@cardapio/services/balcao";
 import { Card, CardContent, CardHeader, CardTitle } from "@cardapio/components/Shared/ui/card";
 import { Badge } from "@cardapio/components/Shared/ui/badge";
 import { getStatusDescricao, normalizeStatus } from "@cardapio/utils/statusHelpers";

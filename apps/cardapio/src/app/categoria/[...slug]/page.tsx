@@ -13,7 +13,7 @@ import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
-import { useCategoriaPorSlug } from "@cardapio/services/useQueryHome";
+import { useCategoriaPorSlug } from "@cardapio/services/home";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
 import HeaderComponent from "@cardapio/components/Shared/Header";
@@ -31,9 +31,12 @@ export default function RouteCategoryPage() {
   }, [params.slug]);
 
   // ⬇️ usa o endpoint novo
-  const { data, isLoading } = useCategoriaPorSlug(empresa_id, slugAtual);
+  const { data, isLoading, isPending } = useCategoriaPorSlug(empresa_id, slugAtual);
   const categoriaAtual = data?.categoria ?? null;
   const subcategorias = data?.subcategorias ?? [];
+
+  // Verificar se está carregando de forma consistente entre servidor e cliente
+  const isDataLoading = isLoading || isPending || (!data && !!empresa_id && !!slugAtual);
 
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
@@ -88,7 +91,7 @@ export default function RouteCategoryPage() {
     [add]
   );
 
-  if (isLoading) {
+  if (isDataLoading) {
     return (
       <div className="p-6 w-full h-screen flex items-center justify-center">
         <LoadingSpinner />
@@ -97,7 +100,11 @@ export default function RouteCategoryPage() {
   }
 
   if (!categoriaAtual) {
-    return <div className="p-6 w-full h-min-screen text-center text-muted-foreground">Categoria não encontrada</div>;
+    return (
+      <div className="p-6 w-full h-screen flex items-center justify-center text-center text-muted-foreground">
+        Categoria não encontrada
+      </div>
+    );
   }
 
   return (

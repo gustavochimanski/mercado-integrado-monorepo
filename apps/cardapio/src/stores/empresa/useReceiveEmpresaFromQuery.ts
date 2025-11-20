@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@cardapio/app/api/api";
-import type { EmpresaDisponivel } from "@cardapio/services/useQueryEmpresasDisponiveis";
+import type { EmpresaDisponivel } from "@cardapio/services/empresa";
 import { getEmpresaId, setEmpresaId } from "./empresaStore";
 
 export function useReceiveEmpresaFromQuery(onReceived?: () => void) {
@@ -53,7 +53,7 @@ export function useReceiveEmpresaFromQuery(onReceived?: () => void) {
 
     const selectDefaultEmpresa = async () => {
       try {
-        const { data } = await api.get<EmpresaDisponivel[]>("/api/cadastros/public/emp/lista");
+        const { data } = await api.get<EmpresaDisponivel[]>("/api/empresas/public/emp/lista");
         if (cancelled) return;
 
         if (Array.isArray(data) && data.length > 0) {

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
 import { Input } from "@cardapio/components/Shared/ui/input";
-import { useMutateVitrine } from "@cardapio/services/useQueryVitrine";
+import { useMutateVitrine } from "@cardapio/services/vitrine";
 import Image from "next/image";
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery } from "@tanstack/react-query";

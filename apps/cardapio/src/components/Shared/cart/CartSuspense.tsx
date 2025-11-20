@@ -9,9 +9,7 @@ interface Props {
 }
 
 export function CartFab({ onOpen }: Props) {
-  const total = useCart((s) =>
-    s.items.reduce((acc, i) => acc + i.quantity, 0)
-  );
+  const total = useCart((s) => s.totalItems());
   const totalPrice = useCart((s) => s.totalPrice());
 
   const pathname = usePathname();

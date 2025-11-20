@@ -4,6 +4,7 @@ import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import { getCliente, getTokenCliente } from "@cardapio/stores/client/ClientStore";
 import { previewCheckoutCliente } from "@cardapio/services/pedidos/checkout-finalizar-pedido";
 import type { FinalizarPedidoRequest, TipoPedidoCheckout } from "@cardapio/types/pedido";
+import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems";
 
 export interface PreviewCheckoutResult {
   subtotal: number;
@@ -11,6 +12,9 @@ export interface PreviewCheckoutResult {
   taxa_servico: number;
   valor_total: number;
   desconto: number;
+  distancia_km?: number;
+  empresa_id?: number;
+  tempo_entrega_minutos?: number;
 }
 
 /**
@@ -45,7 +49,7 @@ export function usePreviewCheckout({
   empresaSelecionadaId = null,
   enabled = true,
 }: UsePreviewCheckoutParams) {
-  const { items, combos, observacao } = useCart();
+  const { items, combos, receitas, observacao } = useCart();
   
   const empresaStoreId = getEmpresaId();
   const telefone_cliente = getTokenCliente();
@@ -60,8 +64,9 @@ export function usePreviewCheckout({
     queryKey: [
       "preview-checkout",
       tipoPedido,
-      items.map(i => `${i.cod_barras}-${i.quantity}-${i.adicionais_ids?.join(",") || ""}`).join(","),
-      combos?.map(c => `${c.combo_id}-${c.quantidade}`).join(",") || "",
+      items.map(i => `${i.cod_barras}-${i.quantity}-${(i.adicionais?.map(a => a.id).sort().join(",") || "")}`).join(","),
+      combos?.map(c => `${c.combo_id}-${c.quantidade}-${(c.adicionais?.map(a => a.id).sort().join(",") || "")}`).join(",") || "",
+      receitas?.map(r => `${r.receita_id}-${r.quantidade}-${(r.adicionais?.map(a => a.id).sort().join(",") || "")}`).join(",") || "",
       enderecoId,
       meioPagamentoId,
       mesaCodigo,
@@ -72,7 +77,7 @@ export function usePreviewCheckout({
       observacao,
     ],
     queryFn: async () => {
-      if (!tipoPedido || items.length === 0 || !telefone_cliente) {
+      if (!tipoPedido || (!items.length && (!combos || combos.length === 0) && (!receitas || receitas.length === 0)) || !telefone_cliente) {
         return null;
       }
 
@@ -91,37 +96,39 @@ export function usePreviewCheckout({
       }
 
       try {
+        // Converter itens do carrinho para formato aninhado em produtos
+        const { produtos } = 
+          mapCartToPedidoItems(items, combos || [], receitas || []);
+
         const payload: FinalizarPedidoRequest = {
           tipo_pedido: tipoPedido,
           origem: "WEB",
           observacao_geral: observacao || undefined,
-          itens: items.map((i) => ({
-            produto_cod_barras: i.cod_barras,
-            quantidade: i.quantity,
-            observacao: i.observacao || undefined,
-            adicionais_ids: i.adicionais_ids && i.adicionais_ids.length > 0 
-              ? i.adicionais_ids 
-              : undefined,
-          })),
+          produtos,
           cliente_id: cliente?.id ? Number(cliente.id) : null,
-          // Incluir combos se houver
-          combos: combos && combos.length > 0
-            ? combos.map((c) => ({
-                combo_id: c.combo_id,
-                quantidade: c.quantidade || 1,
-              }))
-            : undefined,
         };
 
-        if (tipoPedido !== "DELIVERY") {
-          payload.empresa_id = empresaIdParaUso ?? undefined;
-        }
-
+        // Para DELIVERY, empresa_id deve ser null (não undefined)
         if (tipoPedido === "DELIVERY") {
-          payload.endereco_id = enderecoId ?? undefined;
-          payload.meio_pagamento_id = meioPagamentoId ?? undefined;
-          payload.troco_para = trocoPara ?? undefined;
+          payload.empresa_id = null;
+          payload.tipo_entrega = "DELIVERY";
+          payload.endereco_id = enderecoId ?? null;
+          payload.troco_para = trocoPara ?? null;
+          
+          // Usar meios_pagamento ao invés de meio_pagamento_id na raiz
+          if (meioPagamentoId) {
+            // TODO: Calcular o valor total do pedido para meios_pagamento
+            // Por enquanto, vamos usar um valor placeholder que será ajustado pelo backend
+            payload.meios_pagamento = [
+              {
+                meio_pagamento_id: meioPagamentoId,
+                valor: 0, // O backend deve calcular o valor correto no preview
+              },
+            ];
+          }
         } else {
+          // Para MESA e BALCAO, incluir empresa_id
+          payload.empresa_id = empresaIdParaUso ?? undefined;
           payload.mesa_codigo = mesaCodigo ?? undefined;
           if (tipoPedido === "MESA" && numPessoas) {
             payload.num_pessoas = numPessoas;
@@ -145,7 +152,7 @@ export function usePreviewCheckout({
       enabled &&
       !!tipoPedido &&
       (tipoPedido === "DELIVERY" || !!empresaIdParaUso) &&
-      items.length > 0,
+      (items.length > 0 || (combos && combos.length > 0) || (receitas && receitas.length > 0)),
     staleTime: 10000, // Cache por 10 segundos
     refetchOnWindowFocus: false,
   });

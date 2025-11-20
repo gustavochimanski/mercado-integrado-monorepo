@@ -8,9 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@cardapio/components/Shared/ui/dialog";
-import { Package, ChefHat } from "lucide-react";
+import { Package, ChefHat, UtensilsCrossed } from "lucide-react";
 import { ModalNovoProduto } from "./ModalAddProduto";
 import { ModalNovoCombo } from "./ModalAddCombo";
+import { ModalAddReceita } from "./ModalAddReceita";
 
 interface Props {
   open: boolean;
@@ -19,7 +20,7 @@ interface Props {
   vitrineId: number;
 }
 
-type TipoItem = "produto" | "combo" | null;
+type TipoItem = "produto" | "combo" | "receita" | null;
 
 export const ModalSelecionarTipo = ({
   open,
@@ -62,6 +63,17 @@ export const ModalSelecionarTipo = ({
     );
   }
 
+  if (tipoSelecionado === "receita") {
+    return (
+      <ModalAddReceita
+        open={open}
+        onOpenChange={handleClose}
+        empresaId={empresaId}
+        vitrineId={vitrineId}
+      />
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -94,6 +106,20 @@ export const ModalSelecionarTipo = ({
               <span className="text-lg font-semibold">Combo</span>
               <span className="text-sm text-muted-foreground">
                 Adicionar um combo à vitrine
+              </span>
+            </div>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="h-auto p-6 flex flex-col items-center gap-3 hover:bg-primary/5 hover:border-primary transition-all"
+            onClick={() => setTipoSelecionado("receita")}
+          >
+            <UtensilsCrossed className="w-12 h-12 text-primary" />
+            <div className="flex flex-col items-center">
+              <span className="text-lg font-semibold">Receita</span>
+              <span className="text-sm text-muted-foreground">
+                Adicionar uma receita à vitrine
               </span>
             </div>
           </Button>

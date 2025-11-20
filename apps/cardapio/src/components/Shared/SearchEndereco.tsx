@@ -3,8 +3,8 @@
 import * as React from "react"
 import { MapPin, Search, X, Check } from "lucide-react"
 import { cn } from "@cardapio/lib/utils"
-import { useSearchEndereco } from "@cardapio/services/useQueryEndereco"
-import type { EnderecoSearchResult } from "@cardapio/services/useQueryEndereco"
+import { useSearchEndereco } from "@cardapio/services/enderecos/useQueryEndereco"
+import type { EnderecoSearchResult } from "@cardapio/services/enderecos/useQueryEndereco"
 
 interface SearchEnderecoProps {
   value: string
@@ -91,6 +91,11 @@ export function SearchEndereco({
   }
 
   const formatAddress = (address: EnderecoSearchResult) => {
+    // Usar endereco_formatado se disponível, senão construir manualmente
+    if (address.endereco_formatado) {
+      return address.endereco_formatado
+    }
+    
     const parts = [
       address.logradouro,
       address.numero,
