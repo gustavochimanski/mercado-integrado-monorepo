@@ -104,12 +104,14 @@ export default function VitrineDestaques({
       <div className="flex items-center justify-between mb-4 px-4">
         <h2 className="text-lg font-semibold text-gray-800">{titulo}</h2>
 
-        <AdminVitrineOptions
-          empresaId={empresaId}
-          codCategoria={codCategoria}
-          vitrineId={vitrineId}
-          isHome={is_home}
-        />
+        {codCategoria !== null && (
+          <AdminVitrineOptions
+            empresaId={empresaId}
+            codCategoria={codCategoria}
+            vitrineId={vitrineId}
+            isHome={is_home}
+          />
+        )}
 
         {hasHref ? (
           <Link

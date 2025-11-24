@@ -11,9 +11,8 @@ import {
 import { Input } from "@cardapio/components/Shared/ui/input";
 import { useMutateVitrine } from "@cardapio/services/vitrine";
 import Image from "next/image";
-import apiAdmin from "@cardapio/app/api/apiAdmin";
-import { useQuery } from "@tanstack/react-query";
-import type { ComboDTO, ListaCombosResponse } from "@cardapio/api";
+import { useListarCombosAdmin } from "@cardapio/services/combos";
+import type { ComboDTO } from "@cardapio/api";
 
 interface Props {
   open: boolean;
@@ -41,30 +40,12 @@ export const ModalNovoCombo = ({
   const [page, setPage] = React.useState(1);
   const buscaDeb = useDebounced(busca, 350);
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["combos_admin", empresaId, page, buscaDeb],
-    queryFn: async () => {
-      const params: Record<string, any> = { 
-        cod_empresa: empresaId,
-        page,
-        limit: 30,
-      };
-      const { data } = await apiAdmin.get<ListaCombosResponse>("/api/cadastros/admin/combos/", { params });
-      
-      // Filtrar por busca se necessário (client-side por enquanto)
-      let combos = data.data || [];
-      if (buscaDeb?.trim()) {
-        combos = combos.filter(c => 
-          c.titulo.toLowerCase().includes(buscaDeb.toLowerCase()) ||
-          c.descricao?.toLowerCase().includes(buscaDeb.toLowerCase())
-        );
-      }
-      
-      return { combos, hasMore: data.has_more };
-    },
-    enabled: open && !!empresaId,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data, isLoading, isFetching } = useListarCombosAdmin(
+    empresaId,
+    page,
+    buscaDeb,
+    open && !!empresaId
+  );
 
   const combos = data?.combos || [];
   const hasMore = data?.hasMore ?? false;

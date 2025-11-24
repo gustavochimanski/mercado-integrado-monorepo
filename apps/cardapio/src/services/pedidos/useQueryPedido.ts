@@ -1,7 +1,7 @@
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { AtualizarStatusGatewayRequest, Pedido } from "@cardapio/types/pedido";
+import type { Pedido } from "@cardapio/types/pedido";
 import type { EditarPedidoRequest } from "../../api/models/EditarPedidoRequest";
 import type { ItemPedidoEditar as ItemPedidoEditarPayload } from "../../api/models/ItemPedidoEditar";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
@@ -90,35 +90,6 @@ export function useMutatePedido() {
     qc.invalidateQueries({ queryKey: ["pedidos_search"] });
     qc.invalidateQueries({ queryKey: ["pedido"] });
   };
-
-  /**
-   * Atualiza status do pedido usando a API do cliente.
-   * 
-   * Endpoint: PUT /api/cardapio/client/pedidos/{pedido_id}/status
-   * 
-   * Suporta dois modos:
-   * 1. Atualização simples: apenas status via query parameter
-   * 2. Atualização com histórico: status + motivo + observacoes + ip_origem + user_agent via body
-   */
-  const updateStatus = useMutation({
-    mutationFn: async ({ 
-      id, 
-      status, 
-      dadosHistorico 
-    }: { 
-      id: number; 
-      status: string;
-      dadosHistorico?: Omit<AtualizarStatusGatewayRequest, "status">;
-    }) => {
-      const response = await atualizarStatusPedidoCliente(id, status, dadosHistorico);
-      return response;
-    },
-    onSuccess: () => {
-      toast.success("Status do pedido atualizado!");
-      invalidate();
-    },
-    onError: (err) => toast.error(extractErrorMessage(err)),
-  });
 
   /**
    * Ativa/desativa modo de edição e gerencia status do pedido.
@@ -268,5 +239,5 @@ export function useMutatePedido() {
     onError: (err) => toast.error(extractErrorMessage(err, "Erro ao atualizar itens do pedido")),
   });
 
-  return { updateStatus, toggleModoEdicao, updatePedido, confirmarPagamento, updateItens };
+  return { toggleModoEdicao, updatePedido, confirmarPagamento, updateItens };
 }

@@ -201,6 +201,7 @@ export function SheetAdicionarReceita({
       // Adicionar diretamente ao carrinho
       addReceita({
         receita_id: receita.id,
+        nome: receita.nome,
         quantidade: data.quantity,
         preco: receita.preco_venda,
         observacao,

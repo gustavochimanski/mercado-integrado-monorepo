@@ -25,6 +25,7 @@ export interface CartItem {
 
 export interface CartCombo {
   combo_id: number;
+  nome?: string; // Título/nome do combo (opcional para compatibilidade)
   quantidade: number;
   preco: number; // Preço unitário do combo
   observacao?: string;
@@ -33,6 +34,7 @@ export interface CartCombo {
 
 export interface CartReceita {
   receita_id: number;
+  nome?: string; // Nome da receita (opcional para compatibilidade)
   quantidade: number;
   preco: number; // Preço unitário da receita
   observacao?: string;

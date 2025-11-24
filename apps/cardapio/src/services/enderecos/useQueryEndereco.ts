@@ -11,6 +11,7 @@ export interface Endereco {
   numero: string; // obrigatório no front
   complemento?: string;
   bairro: string;
+  distrito?: string;
   cidade: string;
   estado: string;
   cep: string;

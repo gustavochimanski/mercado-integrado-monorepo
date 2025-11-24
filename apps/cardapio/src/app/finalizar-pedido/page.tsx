@@ -42,7 +42,7 @@ export default function FinalizarPedidoPage() {
   const searchParams = useSearchParams();
   const { items, combos, receitas, totalPrice, observacao, editingPedidoId, stopEditingPedido, clear: clearCart } = useCart();
   const queryClient = useQueryClient();
-  const { updatePedido, updateStatus } = useMutatePedido();
+  const { updatePedido } = useMutatePedido();
   const cartHydrated = useCartHydrated();
 
   const isEditingMode = editingPedidoId !== null;
@@ -258,6 +258,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   logradouro: e.logradouro || "",
   numero: e.numero || "", // <- corrige aqui
   bairro: e.bairro || "",
+  distrito: undefined, // EnderecoOut não tem distrito, mas EnderecoStep espera
   cidade: e.cidade || "",
   estado: e.estado || "",
   cep: e.cep || "",
@@ -372,29 +373,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           },
           onSuccess: () => {
             clearMesaInicial();
-            // Após atualizar pedido editado, muda status para D (EDITADO) e desativa modo edição
-            updateStatus.mutate(
-              { id: editingPedidoId, status: "D" },
-              {
-                onSuccess: () => {
-                  setTimeout(() => {
-                    setOverlayStatus("sucesso");
-                    stopEditingPedido(); // Limpa o modo edição
-                    queryClient.invalidateQueries({ queryKey: ["pedidos"] });
-                    setTimeout(() => router.push("/pedidos"), 3000);
-                  }, 1500);
-                },
-                onError: (error: any) => {
-                  // Mesmo se falhar mudar status, considera sucesso e limpa
-                  setTimeout(() => {
-                    setOverlayStatus("sucesso");
-                    stopEditingPedido();
-                    queryClient.invalidateQueries({ queryKey: ["pedidos"] });
-                    setTimeout(() => router.push("/pedidos"), 3000);
-                  }, 1500);
-                },
-              }
-            );
+            // Após atualizar pedido editado, desativa modo edição
+            setTimeout(() => {
+              setOverlayStatus("sucesso");
+              stopEditingPedido(); // Limpa o modo edição
+              queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+              setTimeout(() => router.push("/pedidos"), 3000);
+            }, 1500);
           },
           onError: (error: any) => {
             setTimeout(() => {
@@ -416,13 +401,15 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         validationError = "Cliente não identificado. Faça login novamente.";
       } else if (!enderecoId && tipoPedido === "DELIVERY") {
         validationError = "Endereço não selecionado. Selecione um endereço de entrega.";
-      } else if (!meioPagamentoId) {
+      } else if (!meioPagamentoId && tipoPedido === "DELIVERY") {
         validationError = "Forma de pagamento não selecionada. Escolha uma forma de pagamento.";
       } else {
-        // Verificar se o meio de pagamento é dinheiro e se o troco está preenchido
-        const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
-        if (meioSelecionado?.tipo === "DINHEIRO" && (!trocoPara || trocoPara <= 0)) {
-          validationError = "Informe o valor do troco para pagamento em dinheiro.";
+        // Verificar se o meio de pagamento é dinheiro e se o troco está preenchido (apenas para DELIVERY)
+        if (tipoPedido === "DELIVERY") {
+          const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
+          if (meioSelecionado?.tipo === "DINHEIRO" && (!trocoPara || trocoPara <= 0)) {
+            validationError = "Informe o valor do troco para pagamento em dinheiro.";
+          }
         }
       }
       
@@ -588,20 +575,20 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         return (
           <Button 
             className="w-full text-lg p-6 bg-blue-600" 
-            onClick={() => setCurrentTab("pagamento")}
+            onClick={() => setCurrentTab("observacao")}
             disabled={!mesaCodigo}
           >
-            Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
+            Continuar <CircleArrowRight strokeWidth={3} />
           </Button>
         );
       case "balcao":
         return (
           <Button 
             className="w-full text-lg p-6 bg-green-600" 
-            onClick={() => setCurrentTab("pagamento")}
+            onClick={() => setCurrentTab("observacao")}
             disabled={!balcaoEmpresaId}
           >
-            Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
+            Continuar <CircleArrowRight strokeWidth={3} />
           </Button>
         );
       case "endereco":
@@ -867,6 +854,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                       />
                     );
                   },
+                  hidden: tipoPedido === "MESA" || tipoPedido === "BALCAO",
                 },
                 {
                   value: "observacao",
@@ -884,6 +872,8 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   Component: () => (
                     <RevisaoStep
                       items={items}
+                      combos={combos}
+                      receitas={receitas}
                       observacao={observacao}
                       endereco={tipoPedido === "DELIVERY" ? enderecos.find((e) => e.id === enderecoId) ?? undefined : undefined}
                       pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
@@ -894,6 +884,12 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                       inc={useCart.getState().inc}
                       dec={useCart.getState().dec}
                       remove={useCart.getState().remove}
+                      incCombo={useCart.getState().incCombo}
+                      decCombo={useCart.getState().decCombo}
+                      removeCombo={useCart.getState().removeCombo}
+                      incReceita={useCart.getState().incReceita}
+                      decReceita={useCart.getState().decReceita}
+                      removeReceita={useCart.getState().removeReceita}
                       tipoPedido={tipoPedido}
                       mesaCodigo={mesaCodigo ?? undefined}
                       numPessoas={numPessoas ?? undefined}

@@ -201,6 +201,7 @@ export function SheetAdicionarCombo({
       // Adicionar diretamente ao carrinho
       addCombo({
         combo_id: combo.id,
+        nome: combo.titulo,
         quantidade: data.quantity,
         preco: combo.preco_total,
         observacao,

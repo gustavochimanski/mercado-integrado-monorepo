@@ -122,7 +122,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
       ...novo,
       logradouro: selectedAddress.logradouro || "",
       numero: selectedAddress.numero || novo.numero || "",
-      complemento: selectedAddress.complemento || novo.complemento || "",
+      complemento: novo.complemento || "", // EnderecoSearchResult não tem complemento
       bairro: selectedAddress.bairro || "",
       distrito: selectedAddress.distrito || "",
       cidade: selectedAddress.cidade || "",
@@ -132,7 +132,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
       pais: selectedAddress.pais || "",
       latitude: selectedAddress.latitude || 0,
       longitude: selectedAddress.longitude || 0,
-      ponto_referencia: selectedAddress.ponto_referencia || ""
+      ponto_referencia: "" // EnderecoSearchResult não tem ponto_referencia
     });
     // Manter o endereço formatado no campo de pesquisa
     setSearchAddress(selectedAddress.endereco_formatado || "");

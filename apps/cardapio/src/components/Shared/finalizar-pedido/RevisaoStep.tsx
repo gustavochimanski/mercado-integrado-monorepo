@@ -29,6 +29,26 @@ interface Item {
   nome: string;
   quantity: number;
   preco: number;
+  observacao?: string;
+  adicionais?: Array<{ id: number; nome: string; preco: number }>;
+}
+
+interface Combo {
+  combo_id: number;
+  nome?: string;
+  quantidade: number;
+  preco: number;
+  observacao?: string;
+  adicionais?: Array<{ id: number; nome: string; preco: number }>;
+}
+
+interface Receita {
+  receita_id: number;
+  nome?: string;
+  quantidade: number;
+  preco: number;
+  observacao?: string;
+  adicionais?: Array<{ id: number; nome: string; preco: number }>;
 }
 
 interface PreviewCheckoutData {
@@ -44,6 +64,8 @@ interface PreviewCheckoutData {
 
 interface RevisaoStepProps {
   items: Item[];
+  combos?: Combo[];
+  receitas?: Receita[];
   observacao?: string;
   endereco?: {
     logradouro?: string;
@@ -62,6 +84,12 @@ interface RevisaoStepProps {
   inc?: (cod_barras: string) => void;
   dec?: (cod_barras: string) => void;
   remove?: (cod_barras: string) => void;
+  incCombo?: (combo_id: number) => void;
+  decCombo?: (combo_id: number) => void;
+  removeCombo?: (combo_id: number) => void;
+  incReceita?: (receita_id: number) => void;
+  decReceita?: (receita_id: number) => void;
+  removeReceita?: (receita_id: number) => void;
   tipoPedido?: "DELIVERY" | "MESA" | "BALCAO" | null;
   mesaCodigo?: string | null;
   numPessoas?: number | null;
@@ -69,6 +97,8 @@ interface RevisaoStepProps {
 
 export default function RevisaoStep({
   items,
+  combos = [],
+  receitas = [],
   observacao,
   endereco,
   pagamento,
@@ -79,6 +109,12 @@ export default function RevisaoStep({
   inc,
   dec,
   remove,
+  incCombo,
+  decCombo,
+  removeCombo,
+  incReceita,
+  decReceita,
+  removeReceita,
   tipoPedido,
   mesaCodigo,
   numPessoas,
@@ -220,62 +256,239 @@ export default function RevisaoStep({
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-border">
-            {items.map((item) => (
-              <div
-                key={item.cod_barras}
-                className="px-6 py-4 hover:bg-muted/30 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                        {item.quantity}x
-                      </span>
-                      <h3 className="text-sm font-medium text-foreground truncate">
-                        {item.nome}
-                      </h3>
-                    </div>
-                    <p className="text-base font-semibold text-foreground mt-2">
-                      R$ {(item.preco * item.quantity).toFixed(2)}
-                    </p>
-                  </div>
-                  
-                  {inc && dec && remove && (
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="flex items-center gap-1 border rounded-lg">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 rounded-r-none"
-                          onClick={() => dec(item.cod_barras)}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="min-w-[2rem] text-center text-sm font-medium px-2">
-                          {item.quantity}
+            {/* Produtos */}
+            {items.map((item) => {
+              const precoAdicionais = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
+              const precoTotal = (item.preco * item.quantity) + precoAdicionais;
+              
+              return (
+                <div
+                  key={`produto-${item.cod_barras}`}
+                  className="px-6 py-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          {item.quantity}x
                         </span>
+                        <h3 className="text-sm font-medium text-foreground truncate">
+                          {item.nome}
+                        </h3>
+                      </div>
+                      {item.observacao && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          Obs: {item.observacao}
+                        </p>
+                      )}
+                      {item.adicionais && item.adicionais.length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          {item.adicionais.map((adicional, idx) => (
+                            <p key={idx} className="text-xs text-muted-foreground">
+                              + {adicional.nome} {adicional.preco > 0 && `(R$ ${adicional.preco.toFixed(2)})`}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-base font-semibold text-foreground mt-2">
+                        R$ {precoTotal.toFixed(2)}
+                      </p>
+                    </div>
+                    
+                    {inc && dec && remove && (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1 border rounded-lg">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-r-none"
+                            onClick={() => dec(item.cod_barras)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="min-w-[2rem] text-center text-sm font-medium px-2">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-l-none"
+                            onClick={() => inc(item.cod_barras)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 rounded-l-none"
-                          onClick={() => inc(item.cod_barras)}
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => remove(item.cod_barras)}
                         >
-                          <Plus className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => remove(item.cod_barras)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+            
+            {/* Combos */}
+            {combos.map((combo) => {
+              const precoAdicionais = (combo.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * combo.quantidade;
+              const precoTotal = (combo.preco * combo.quantidade) + precoAdicionais;
+              
+              return (
+                <div
+                  key={`combo-${combo.combo_id}`}
+                  className="px-6 py-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          {combo.quantidade}x
+                        </span>
+                        <h3 className="text-sm font-medium text-foreground truncate">
+                          {combo.nome || `Combo #${combo.combo_id}`}
+                        </h3>
+                        <span className="text-xs text-muted-foreground bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                          Combo
+                        </span>
+                      </div>
+                      {combo.observacao && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          Obs: {combo.observacao}
+                        </p>
+                      )}
+                      {combo.adicionais && combo.adicionais.length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          {combo.adicionais.map((adicional, idx) => (
+                            <p key={idx} className="text-xs text-muted-foreground">
+                              + {adicional.nome} {adicional.preco > 0 && `(R$ ${adicional.preco.toFixed(2)})`}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-base font-semibold text-foreground mt-2">
+                        R$ {precoTotal.toFixed(2)}
+                      </p>
+                    </div>
+                    
+                    {incCombo && decCombo && removeCombo && (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1 border rounded-lg">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-r-none"
+                            onClick={() => decCombo(combo.combo_id)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="min-w-[2rem] text-center text-sm font-medium px-2">
+                            {combo.quantidade}
+                          </span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-l-none"
+                            onClick={() => incCombo(combo.combo_id)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => removeCombo(combo.combo_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {/* Receitas */}
+            {receitas.map((receita) => {
+              const precoAdicionais = (receita.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * receita.quantidade;
+              const precoTotal = (receita.preco * receita.quantidade) + precoAdicionais;
+              
+              return (
+                <div
+                  key={`receita-${receita.receita_id}`}
+                  className="px-6 py-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          {receita.quantidade}x
+                        </span>
+                        <h3 className="text-sm font-medium text-foreground truncate">
+                          {receita.nome || `Receita #${receita.receita_id}`}
+                        </h3>
+                      </div>
+                      {receita.observacao && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          Obs: {receita.observacao}
+                        </p>
+                      )}
+                      {receita.adicionais && receita.adicionais.length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          {receita.adicionais.map((adicional, idx) => (
+                            <p key={idx} className="text-xs text-muted-foreground">
+                              + {adicional.nome} {adicional.preco > 0 && `(R$ ${adicional.preco.toFixed(2)})`}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-base font-semibold text-foreground mt-2">
+                        R$ {precoTotal.toFixed(2)}
+                      </p>
+                    </div>
+                    
+                    {incReceita && decReceita && removeReceita && (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1 border rounded-lg">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-r-none"
+                            onClick={() => decReceita(receita.receita_id)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="min-w-[2rem] text-center text-sm font-medium px-2">
+                            {receita.quantidade}
+                          </span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 rounded-l-none"
+                            onClick={() => incReceita(receita.receita_id)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => removeReceita(receita.receita_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

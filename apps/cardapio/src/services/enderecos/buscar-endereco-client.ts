@@ -3,21 +3,7 @@ import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
-
-export interface EnderecoSearchResult {
-  estado: string | null;
-  codigo_estado: string | null;
-  cidade: string | null;
-  bairro: string | null;
-  distrito: string | null;
-  logradouro: string | null;
-  numero: string | null;
-  cep: string | null;
-  pais: string | null;
-  latitude: number;
-  longitude: number;
-  endereco_formatado: string;
-}
+import type { EnderecoSearchResult } from "./useQueryEndereco";
 
 interface BuscarEnderecoClientParams {
   text: string;

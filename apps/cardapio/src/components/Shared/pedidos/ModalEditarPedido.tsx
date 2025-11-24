@@ -59,7 +59,7 @@ interface Props {
 export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
   const router = useRouter();
   const { startEditingPedido } = useCart();
-  const { toggleModoEdicao, updatePedido, updateStatus } = useMutatePedido();
+  const { toggleModoEdicao, updatePedido } = useMutatePedido();
   const { data: meiosPagamento = [] } = useMeiosPagamento();
   const { data: enderecos = [] } = useQueryEnderecos();
   const [showEnderecoModal, setShowEnderecoModal] = useState(false);
@@ -344,24 +344,16 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       {
         onSuccess: () => {
           setLoadingGeral(false);
-          // Após salvar alterações, muda status para D (EDITADO)
-          updateStatus.mutate(
-            { id: pedido.id, status: "D" },
+          // Desativa modo edição e fecha modal
+          toggleModoEdicao.mutate(
+            { id: pedido.id, modo: false },
             {
               onSuccess: () => {
-                // Desativa modo edição e fecha modal
-                toggleModoEdicao.mutate(
-                  { id: pedido.id, modo: false },
-                  {
-                    onSuccess: () => {
-                      setModoEdicaoAtivo(false);
-                      modoEdicaoJaAtivado.current = false;
-                      statusOriginalRef.current = null;
-                      houveAlteracoesRef.current = false;
-                      onClose();
-                    },
-                  }
-                );
+                setModoEdicaoAtivo(false);
+                modoEdicaoJaAtivado.current = false;
+                statusOriginalRef.current = null;
+                houveAlteracoesRef.current = false;
+                onClose();
               },
               onError: () => {
                 handleClose();
@@ -400,24 +392,16 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       {
         onSuccess: () => {
           setLoadingItens(false);
-          // Após salvar alterações nos itens, muda status para D (EDITADO)
-          updateStatus.mutate(
-            { id: pedido.id, status: "D" },
+          // Desativa modo edição
+          toggleModoEdicao.mutate(
+            { id: pedido.id, modo: false },
             {
               onSuccess: () => {
-                // Desativa modo edição
-                toggleModoEdicao.mutate(
-                  { id: pedido.id, modo: false },
-                  {
-                    onSuccess: () => {
-                      setModoEdicaoAtivo(false);
-                      modoEdicaoJaAtivado.current = false;
-                      statusOriginalRef.current = null;
-                      houveAlteracoesRef.current = false;
-                      toast.success("Itens atualizados! Pedido marcado como editado.");
-                    },
-                  }
-                );
+                setModoEdicaoAtivo(false);
+                modoEdicaoJaAtivado.current = false;
+                statusOriginalRef.current = null;
+                houveAlteracoesRef.current = false;
+                toast.success("Itens atualizados! Pedido marcado como editado.");
               },
             }
           );
