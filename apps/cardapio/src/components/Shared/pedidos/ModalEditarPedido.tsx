@@ -209,23 +209,11 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
     }));
     formItens.setValue("itens", itensEditaveis);
 
-    // Ativa modo edição e muda status para X (EM_EDICAO)
-    setIsLoading(true);
-    modoEdicaoJaAtivado.current = true; // Marca como ativado ANTES de chamar mutate para evitar loop
-    toggleModoEdicao.mutate(
-      { id: pedido.id, modo: true },
-      {
-        onSuccess: () => {
-          setModoEdicaoAtivo(true);
-          setIsLoading(false);
-        },
-        onError: () => {
-          setIsLoading(false);
-          modoEdicaoJaAtivado.current = false; // Reseta em caso de erro
-          toast.error("Erro ao ativar modo edição");
-        },
-      }
-    );
+    // ⚠️ Modo de edição do backend foi desativado
+    // Ativa modo edição apenas localmente (sem chamada ao backend)
+    setModoEdicaoAtivo(true);
+    modoEdicaoJaAtivado.current = true;
+    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pedido?.id, isOpen]); // Usar apenas pedido.id e isOpen como dependências
 
@@ -287,37 +275,14 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
 
   const handleClose = async () => {
     if (pedido && modoEdicaoAtivo) {
-      setIsLoading(true);
-      
-      // Verifica se houve alterações
-      const houveAlteracoes = verificarAlteracoes();
-      
-      // Se não houve alterações, volta status para o original (R)
-      // Se houve alterações, mantém X (será mudado para D ao finalizar checkout)
-      const statusParaVoltar = houveAlteracoes ? undefined : (statusOriginalRef.current || "R");
-      
-      toggleModoEdicao.mutate(
-        { id: pedido.id, modo: false, statusAnterior: statusParaVoltar },
-        {
-          onSuccess: () => {
-            setModoEdicaoAtivo(false);
-            setIsLoading(false);
-            modoEdicaoJaAtivado.current = false;
-            statusOriginalRef.current = null;
-            houveAlteracoesRef.current = false;
-            onClose();
-          },
-          onError: () => {
-            setModoEdicaoAtivo(false);
-            setIsLoading(false);
-            onClose();
-          },
-        }
-      );
-    } else {
+      // ⚠️ Modo de edição do backend foi desativado
+      // Apenas desativa localmente (sem chamada ao backend)
       setModoEdicaoAtivo(false);
-      onClose();
+      modoEdicaoJaAtivado.current = false;
+      statusOriginalRef.current = null;
+      houveAlteracoesRef.current = false;
     }
+    onClose();
   };
 
   // Submit para dados gerais do pedido
@@ -344,22 +309,13 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       {
         onSuccess: () => {
           setLoadingGeral(false);
-          // Desativa modo edição e fecha modal
-          toggleModoEdicao.mutate(
-            { id: pedido.id, modo: false },
-            {
-              onSuccess: () => {
-                setModoEdicaoAtivo(false);
-                modoEdicaoJaAtivado.current = false;
-                statusOriginalRef.current = null;
-                houveAlteracoesRef.current = false;
-                onClose();
-              },
-              onError: () => {
-                handleClose();
-              },
-            }
-          );
+          // ⚠️ Modo de edição do backend foi desativado
+          // Apenas desativa localmente e fecha modal (sem chamada ao backend)
+          setModoEdicaoAtivo(false);
+          modoEdicaoJaAtivado.current = false;
+          statusOriginalRef.current = null;
+          houveAlteracoesRef.current = false;
+          onClose();
         },
         onError: () => {
           setLoadingGeral(false);
@@ -392,19 +348,13 @@ export default function ModalEditarPedido({ pedido, isOpen, onClose }: Props) {
       {
         onSuccess: () => {
           setLoadingItens(false);
-          // Desativa modo edição
-          toggleModoEdicao.mutate(
-            { id: pedido.id, modo: false },
-            {
-              onSuccess: () => {
-                setModoEdicaoAtivo(false);
-                modoEdicaoJaAtivado.current = false;
-                statusOriginalRef.current = null;
-                houveAlteracoesRef.current = false;
-                toast.success("Itens atualizados! Pedido marcado como editado.");
-              },
-            }
-          );
+          // ⚠️ Modo de edição do backend foi desativado
+          // Apenas desativa localmente (sem chamada ao backend)
+          setModoEdicaoAtivo(false);
+          modoEdicaoJaAtivado.current = false;
+          statusOriginalRef.current = null;
+          houveAlteracoesRef.current = false;
+          toast.success("Itens atualizados! Pedido marcado como editado.");
         },
         onError: () => {
           setLoadingItens(false);

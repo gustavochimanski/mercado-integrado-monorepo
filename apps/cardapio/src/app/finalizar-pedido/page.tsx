@@ -13,9 +13,9 @@ import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { useQueryClient } from "@tanstack/react-query";
 import type { FinalizarPedidoRequest, TipoPedidoCheckout } from "@cardapio/types/pedido";
 import { Button } from "@cardapio/components/Shared/ui/button";
-import { CardContent, CardFooter } from "@cardapio/components/Shared/ui/card";
+import { CardContent } from "@cardapio/components/Shared/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
-import { CircleArrowRight, CircleCheck, Loader2 } from "lucide-react";
+import { CircleArrowRight, CircleCheck, Loader2, Home } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion"; // <--- IMPORT FRAMER MOTION
 import Tabs from "@cardapio/components/Shared/ui/tabs";
 import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-pedido/ClienteIdentificacaoModal";
@@ -542,9 +542,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   const renderFooterButton = () => {
     if (isFinalizando || overlayStatus === "loading") {
       return (
-        <Button disabled className="w-full text-lg p-6 bg-gray-200 text-gray-700">
+        <Button disabled className="w-full text-base sm:text-lg p-4 sm:p-6 bg-gray-200 text-gray-700">
           <Loader2 className="animate-spin mr-2" size={20} />
-          Enviando pedido...
+          <span className="text-sm sm:text-base">Enviando pedido...</span>
         </Button>
       );
     }
@@ -553,7 +553,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
       case "tipo":
         return (
           <Button 
-            className="w-full text-lg p-6 bg-primary" 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
             onClick={() => {
               if (!ensureClienteIdentificado()) {
                 return;
@@ -568,33 +568,33 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             }}
             disabled={!tipoPedido}
           >
-            Continuar <CircleArrowRight strokeWidth={3} />
+            <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "mesa":
         return (
           <Button 
-            className="w-full text-lg p-6 bg-blue-600" 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-blue-600" 
             onClick={() => setCurrentTab("observacao")}
             disabled={!mesaCodigo}
           >
-            Continuar <CircleArrowRight strokeWidth={3} />
+            <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "balcao":
         return (
           <Button 
-            className="w-full text-lg p-6 bg-green-600" 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-green-600" 
             onClick={() => setCurrentTab("observacao")}
             disabled={!balcaoEmpresaId}
           >
-            Continuar <CircleArrowRight strokeWidth={3} />
+            <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "endereco":
         return (
-          <Button className="w-full text-lg p-6 bg-yellow-500" onClick={() => setConfirmEnderecoOpen(true)} disabled={!enderecoId}>
-            Continuar para Pagamento <CircleArrowRight strokeWidth={3} />
+          <Button className="w-full text-base sm:text-lg p-4 sm:p-6 bg-yellow-500" onClick={() => setConfirmEnderecoOpen(true)} disabled={!enderecoId}>
+            <span className="text-sm sm:text-base">Continuar para Pagamento</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "pagamento":
@@ -603,29 +603,30 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         const trocoObrigatorioPreenchido = !isDinheiro || (isDinheiro && trocoPara !== null && trocoPara !== undefined && trocoPara > 0);
         return (
           <Button 
-            className="w-full text-lg p-6 bg-amber-600" 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-amber-600" 
             onClick={() => setCurrentTab("observacao")}
             disabled={!meioPagamentoId || !trocoObrigatorioPreenchido}
           >
-            Continuar <CircleArrowRight strokeWidth={3} />
+            <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "observacao":
         return (
-          <Button className="w-full text-lg p-6 bg-indigo-800" onClick={() => setCurrentTab("revisao")}>
-            Revisar Pedido <CircleArrowRight strokeWidth={3} />
+          <Button className="w-full text-base sm:text-lg p-4 sm:p-6 bg-indigo-800" onClick={() => setCurrentTab("revisao")}>
+            <span className="text-sm sm:text-base">Revisar Pedido</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "revisao":
         return (
-          <Button onClick={handleFinalizar} disabled={items.length === 0 && combos?.length === 0 && receitas?.length === 0} className="w-full text-lg p-6 bg-green-600">
-          <div className="flex gap-3 items-center">
-            {isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"} <CircleCheck strokeWidth={3} />
-          </div>
-        </Button>
-      );
+          <Button onClick={handleFinalizar} disabled={items.length === 0 && combos?.length === 0 && receitas?.length === 0} className="w-full text-base sm:text-lg p-4 sm:p-6 bg-green-600">
+            <div className="flex gap-2 sm:gap-3 items-center">
+              <span className="text-sm sm:text-base">{isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"}</span> <CircleCheck strokeWidth={3} size={20} />
+            </div>
+          </Button>
+        );
     }
   };
+
   return (
     <div className="w-full flex flex-col gap-0 p-0 relative">
       {/* OVERLAY FULL SCREEN */}
@@ -712,8 +713,8 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
 
       {/* CONTEÚDO PRINCIPAL */}
       {cliente && (
-        <div className="relative h-[calc(100vh-4rem)] flex flex-col">
-          <CardContent className="flex-1 overflow-auto p-0">
+        <div className="relative min-h-screen flex flex-col pb-32 sm:pb-36">
+          <CardContent className="flex-1 overflow-auto p-0 pb-4">
             <Tabs
               value={currentTab}
               onValueChange={(v) => {
@@ -900,13 +901,32 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             />
           </CardContent>
 
-          <div className="flex font-bold bg-muted text-end text-primary gap-2 m-2 p-2">
-            <span className="ml-auto">Total:</span>
-            <span>R$ {((previewData?.valor_total ?? totalPrice()) || 0).toFixed(2)}</span>
+          {/* Área fixa inferior com total e botão de ação */}
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-border shadow-lg z-40">
+            {/* Total */}
+            <div className="flex font-bold bg-muted text-end text-primary gap-2 px-4 py-2 sm:py-3">
+              <span className="ml-auto text-sm sm:text-base">Total:</span>
+              <span className="text-sm sm:text-base">R$ {((previewData?.valor_total ?? totalPrice()) || 0).toFixed(2)}</span>
+            </div>
+            
+            {/* Botão de ação */}
+            <div className="px-4 pb-3 sm:pb-4 pt-2">
+              {renderFooterButton()}
+            </div>
           </div>
-
-          <CardFooter className="w-full p-2 pb-2">{renderFooterButton()}</CardFooter>
         </div>
+      )}
+
+      {/* Botão HOME flutuante no canto inferior direito */}
+      {cliente && (
+        <Button
+          onClick={() => router.push("/")}
+          className="fixed bottom-28 sm:bottom-32 right-4 sm:right-6 z-50 rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg bg-primary hover:bg-primary/90 flex items-center justify-center transition-all active:scale-95"
+          size="icon"
+          aria-label="Voltar para home"
+        >
+          <Home size={18} className="sm:w-5 sm:h-5 text-white" />
+        </Button>
       )}
     </div>
   );

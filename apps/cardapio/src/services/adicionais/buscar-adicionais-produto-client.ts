@@ -12,7 +12,7 @@ if (!BASE_URL) {
 
 /**
  * Hook para buscar adicionais de um produto (client-side)
- * Endpoint: GET /api/cadastros/client/adicionais/produto/{cod_barras}
+ * Endpoint: GET /api/catalogo/client/adicionais/produto/{cod_barras}
  * 
  * Requer autenticação via header X-Super-Token (token do cliente).
  * Retorna apenas adicionais ativos por padrão (a menos que apenas_ativos=false).
@@ -41,7 +41,7 @@ export function useBuscarAdicionaisProdutoClient(
       }
 
       const response = await axios.get<AdicionalResponse[]>(
-        `${BASE_URL}/api/cadastros/client/adicionais/produto/${codBarras}`,
+        `${BASE_URL}/api/catalogo/client/adicionais/produto/${codBarras}`,
         {
           headers: {
             "X-Super-Token": tokenCliente,
@@ -80,7 +80,7 @@ export async function buscarAdicionaisProduto(
   }
 
   const response = await axios.get<AdicionalResponse[]>(
-    `${BASE_URL}/api/cadastros/client/adicionais/produto/${codBarras}`,
+    `${BASE_URL}/api/catalogo/client/adicionais/produto/${codBarras}`,
     {
       headers: {
         "X-Super-Token": tokenCliente,

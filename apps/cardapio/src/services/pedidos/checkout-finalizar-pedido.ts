@@ -10,7 +10,7 @@ import type { ItemPedidoEditar } from "../../api/models/ItemPedidoEditar";
 import type { ModoEdicaoRequest } from "../../api/models/ModoEdicaoRequest";
 import type { AtualizarStatusGatewayRequest } from "@cardapio/types/pedido";
 
-const CLIENT_PEDIDOS_BASE_PATH = "/api/cardapio/client/pedidos";
+const CLIENT_PEDIDOS_BASE_PATH = "/api/pedidos/client";
 
 export function ensureBaseUrl(): string {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -40,6 +40,16 @@ export function buildClientHeaders(includeJson: boolean = true): Record<string, 
   return headers;
 }
 
+/**
+ * Calcula o preview do checkout sem criar o pedido.
+ * 
+ * Endpoint: POST /api/pedidos/client/checkout/preview
+ * 
+ * Calcula valores do pedido (subtotal, taxas, desconto, total) sem criar
+ * o pedido no banco de dados.
+ * 
+ * Autenticação: Requer X-Super-Token no header (token do cliente)
+ */
 export async function previewCheckoutCliente(
   payload: FinalizarPedidoRequest
 ): Promise<PreviewCheckoutResponse> {
@@ -64,6 +74,17 @@ export async function previewCheckoutCliente(
   }
 }
 
+/**
+ * Finaliza o checkout e cria o pedido no banco de dados.
+ * 
+ * Endpoint: POST /api/pedidos/client/checkout
+ * 
+ * Cria o pedido completo no banco de dados com todos os dados fornecidos.
+ * 
+ * Autenticação: Requer X-Super-Token no header (token do cliente)
+ * 
+ * Retorna o pedido criado (DELIVERY, MESA ou BALCAO conforme tipo_pedido)
+ */
 export async function finalizarCheckoutCliente(
   payload: FinalizarPedidoRequest
 ): Promise<PedidoResponse | PedidoMesaOut | PedidoBalcaoOut> {
@@ -89,6 +110,16 @@ export async function finalizarCheckoutCliente(
 }
 
 
+/**
+ * Edita informações gerais do pedido.
+ * 
+ * Endpoint: PUT /api/pedidos/client/{pedido_id}/editar
+ * 
+ * Permite editar: meio_pagamento_id, endereco_id, cupom_id,
+ * observacao_geral, troco_para, etc.
+ * 
+ * Autenticação: Requer X-Super-Token no header (token do cliente)
+ */
 export async function editarPedidoCliente(
   pedidoId: number,
   dados: EditarPedidoRequest
@@ -114,6 +145,18 @@ export async function editarPedidoCliente(
   }
 }
 
+/**
+ * Adiciona, atualiza ou remove itens de um pedido.
+ * 
+ * Endpoint: PUT /api/pedidos/client/{pedido_id}/itens
+ * 
+ * Ações disponíveis:
+ * - adicionar: Adiciona novo item ao pedido
+ * - atualizar: Atualiza item existente (requer id)
+ * - remover: Remove item do pedido (requer id)
+ * 
+ * Autenticação: Requer X-Super-Token no header (token do cliente)
+ */
 export async function atualizarItemPedidoCliente(
   pedidoId: number,
   item: ItemPedidoEditar
@@ -139,68 +182,42 @@ export async function atualizarItemPedidoCliente(
   }
 }
 
+/**
+ * [DESATIVADO] Altera o modo de edição do pedido.
+ * 
+ * Endpoint: PUT /api/pedidos/client/{pedido_id}/modo-edicao
+ * 
+ * ⚠️ ATENÇÃO: Este endpoint foi desativado no backend e sempre retorna 403.
+ * A alteração de status de pedido é permitida apenas em endpoints de admin.
+ * 
+ * @deprecated Use endpoints admin para alterar status de pedidos.
+ */
 export async function alterarModoEdicaoCliente(
   pedidoId: number,
   modoEdicao: boolean
 ): Promise<PedidoResponse> {
-  try {
-    const body: ModoEdicaoRequest = {
-      modo_edicao: modoEdicao,
-    };
-
-    const response = await axios.put<PedidoResponse>(
-      `${ensureBaseUrl()}${CLIENT_PEDIDOS_BASE_PATH}/${pedidoId}/modo-edicao`,
-      body,
-      { headers: buildClientHeaders() }
-    );
-
-    if (response.status !== 200) {
-      throw new Error("Erro ao alterar modo de edição");
-    }
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error;
-    }
-
-    throw new Error(error.message || "Erro inesperado ao alterar modo de edição");
-  }
+  throw new Error(
+    "Endpoint desativado. Alteração de status de pedido é permitida apenas em endpoints de admin."
+  );
 }
 
+/**
+ * [DESATIVADO] Atualiza o status do pedido (cliente).
+ * 
+ * Endpoint: PUT /api/pedidos/client/{pedido_id}/status?novo_status={status}
+ * 
+ * ⚠️ ATENÇÃO: Clientes não podem alterar status diretamente; apenas admin pode.
+ * Use o endpoint de admin: PUT /api/pedidos/admin/{pedido_id}/status?novo_status={status}
+ * 
+ * @deprecated Use endpoints admin para alterar status de pedidos.
+ */
 export async function atualizarStatusPedidoCliente(
   pedidoId: number,
   status: string,
   dados?: Omit<AtualizarStatusGatewayRequest, "status">
 ): Promise<PedidoResponse> {
-  try {
-    const hasBody = dados && Object.keys(dados).length > 0;
-    const headers = buildClientHeaders(hasBody);
-    let url = `${ensureBaseUrl()}${CLIENT_PEDIDOS_BASE_PATH}/${pedidoId}/status`;
-    let body: Record<string, unknown> | undefined;
-
-    if (hasBody) {
-      body = {
-        status,
-        ...dados,
-      };
-    } else {
-      url += `?novo_status=${encodeURIComponent(status)}`;
-    }
-
-    const response = await axios.put<PedidoResponse>(url, body, { headers });
-
-    if (response.status !== 200) {
-      throw new Error("Erro ao atualizar status do pedido");
-    }
-
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.data) {
-      throw error;
-    }
-
-    throw new Error(error.message || "Erro inesperado ao atualizar status do pedido");
-  }
+  throw new Error(
+    "Clientes não podem alterar status de pedidos. Use endpoints admin para esta operação."
+  );
 }
 

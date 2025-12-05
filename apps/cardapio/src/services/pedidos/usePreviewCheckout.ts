@@ -20,7 +20,7 @@ export interface PreviewCheckoutResult {
 /**
  * Hook para calcular preview do checkout (taxa de entrega, subtotal, etc.)
  * 
- * Usa a API de pedidos do cliente: POST /api/cardapio/client/pedidos/checkout/preview
+ * Usa a API unificada de Pedidos: POST /api/pedidos/client/checkout/preview
  * 
  * Calcula valores do pedido sem criar o pedido no banco de dados.
  * Retorna subtotal, taxas, desconto e total calculados.

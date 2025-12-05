@@ -7,7 +7,7 @@ import type {
   PedidoBalcaoOut,
 } from "@cardapio/api";
 
-const CLIENT_PEDIDOS_BASE_PATH = "/api/cardapio/client/pedidos";
+const CLIENT_PEDIDOS_BASE_PATH = "/api/pedidos/client";
 
 type TipoPedidoUnificado = "DELIVERY" | "MESA" | "BALCAO";
 
@@ -172,6 +172,19 @@ function normalizePedido(entry: PedidoUnificadoResponse): Pedido | null {
   return null;
 }
 
+/**
+ * Lista todos os pedidos do cliente (DELIVERY, MESA e BALCAO) mesclados.
+ * 
+ * Endpoint: GET /api/pedidos/client/
+ * 
+ * Query Parameters:
+ * - skip: Número de registros para pular (padrão: 0)
+ * - limit: Limite de registros (padrão: 50, máx: 200)
+ * 
+ * Autenticação: Requer X-Super-Token no header (token do cliente)
+ * 
+ * Retorna lista unificada de pedidos com dados completos de cada tipo.
+ */
 export async function listarPedidosCliente(
   skip: number = 0,
   limit: number = 50

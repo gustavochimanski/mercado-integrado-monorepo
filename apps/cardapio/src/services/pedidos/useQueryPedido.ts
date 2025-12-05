@@ -8,8 +8,6 @@ import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import {
   editarPedidoCliente,
   atualizarItemPedidoCliente,
-  atualizarStatusPedidoCliente,
-  alterarModoEdicaoCliente,
 } from "@cardapio/services/pedidos/checkout-finalizar-pedido";
 import { listarPedidosCliente } from "@cardapio/services/pedidos/listar-pedidos-client";
 
@@ -40,12 +38,12 @@ export interface UpdateItensRequest {
 }
 
 /**
- * Lista pedidos do cliente usando a API do Cardápio.
+ * Lista pedidos do cliente usando a API unificada de Pedidos.
  *
- * Endpoint: GET /api/cardapio/client/pedidos
+ * Endpoint: GET /api/pedidos/client/
  *
- * Retorna lista de pedidos do cliente com dados simplificados, exigindo `X-Super-Token`.
- * O helper já prioriza esse endpoint e faz fallback para o fluxo legacy apenas se necessário.
+ * Retorna lista de pedidos do cliente (DELIVERY, MESA e BALCAO) mesclados.
+ * Requer autenticação via `X-Super-Token` (token do cliente).
  */
 export function usePedidos(skip: number = 0, limit: number = 50) {
   return useQuery<Pedido[]>({
@@ -61,7 +59,7 @@ export function usePedidos(skip: number = 0, limit: number = 50) {
 /**
  * Busca o pedido na lista em cache ao invés de fazer request individual.
  *
- * Endpoint base: GET /api/cardapio/client/pedidos (prioritário).
+ * Endpoint base: GET /api/pedidos/client/.
  * Busca até 200 pedidos e filtra o ID desejado, evitando round-trips extras.
  */
 export function usePedidoById(pedidoId: number | null, opts?: { enabled?: boolean }) {  
@@ -92,11 +90,14 @@ export function useMutatePedido() {
   };
 
   /**
-   * Ativa/desativa modo de edição e gerencia status do pedido.
+   * [DESATIVADO] Ativa/desativa modo de edição e gerencia status do pedido.
    * 
-   * Utiliza a API do cliente (`PUT /api/cardapio/client/pedidos/{pedido_id}/modo-edicao`).
-   * - Ao ativar (modo=true): muda status para "X" (EM_EDICAO)
-   * - Ao desativar (modo=false): pode voltar status para o anterior se fornecido
+   * ⚠️ ATENÇÃO: Os endpoints de modo-edicao e atualização de status foram desativados.
+   * A alteração de status de pedido é permitida apenas em endpoints de admin.
+   * 
+   * Esta função agora apenas simula o comportamento localmente sem fazer chamadas ao backend.
+   * 
+   * @deprecated Endpoints desativados. Use endpoints admin para alterar status.
    */
   const toggleModoEdicao = useMutation({
     mutationFn: async ({ 
@@ -108,20 +109,22 @@ export function useMutatePedido() {
       modo: boolean;
       statusAnterior?: string;
     }) => {
-      // Ao ativar modo edição, muda status para "X" (EM_EDICAO)
-      if (modo) {
-        await atualizarStatusPedidoCliente(id, "X");
-        return await alterarModoEdicaoCliente(id, true);
-      } else {
-        // Ao desativar modo edição, volta status para o anterior se fornecido
-        if (statusAnterior) {
-          await atualizarStatusPedidoCliente(id, statusAnterior);
-        }
-        return await alterarModoEdicaoCliente(id, false);
-      }
+      // Endpoints desativados - apenas simula comportamento local
+      // Não faz chamadas ao backend
+      console.warn(
+        `[DESATIVADO] Modo edição ${modo ? "ativado" : "desativado"} para pedido ${id}. ` +
+        `Endpoints de alteração de status foram desativados. Use endpoints admin.`
+      );
+      
+      // Retorna um objeto vazio para manter compatibilidade
+      return { id } as any;
     },
     onSuccess: (_, { modo }) => {
-      toast.success(modo ? "Modo edição ativado" : "Modo edição desativado");
+      toast.warning(
+        modo 
+          ? "Modo edição ativado localmente (backend desativado)" 
+          : "Modo edição desativado localmente (backend desativado)"
+      );
       invalidate();
     },
     onError: (err: unknown) => {
@@ -142,13 +145,13 @@ export function useMutatePedido() {
   };
 
   /**
-   * Atualiza pedido usando a API do Cardápio (cliente)
+   * Atualiza pedido usando a API unificada de Pedidos (cliente)
    *
    * Reaproveita a API exclusiva do cliente para alterações de pedidos.
    * 
    * Lógica:
-   * - Se `data.itens` for um array: cada item é processado individualmente via PUT /api/cardapio/client/pedidos/{id}/itens
-   * - Caso contrário: usa PUT /api/cardapio/client/pedidos/{id}/editar para dados gerais do pedido
+   * - Se `data.itens` for um array: cada item é processado individualmente via PUT /api/pedidos/client/{id}/itens
+   * - Caso contrário: usa PUT /api/pedidos/client/{id}/editar para dados gerais do pedido
    * 
    * Itens marcados como "MANTER" são ignorados.
    */
@@ -203,9 +206,9 @@ export function useMutatePedido() {
   });
 
   /**
-   * Atualiza itens do pedido usando a API do Cardápio (cliente)
+   * Atualiza itens do pedido usando a API unificada de Pedidos (cliente)
    * 
-   * Endpoint: PUT /api/cardapio/client/pedidos/{pedido_id}/itens
+   * Endpoint: PUT /api/pedidos/client/{pedido_id}/itens
    *
    * Usa apenas a API do cliente (headers `X-Super-Token`).
    * 

@@ -6,6 +6,12 @@ import { usePathname } from "next/navigation";
 
 const FooterComponent = () => {
   const pathname = usePathname();
+  
+  // Não renderizar o footer na rota /finalizar-pedido
+  if (pathname === "/finalizar-pedido") {
+    return null;
+  }
+  
   return (
     <footer className="sticky bottom-0 left-0 w-full bg-white/80 backdrop-blur-sm rounded-t-3xl flex justify-around items-center h-16 shadow-sm z-50 border-t border-border">
       {/* Início */}

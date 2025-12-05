@@ -10,7 +10,6 @@ import { useMarcarHome } from "./marcar-home";
 
 export * from "./types";
 export * from "./buscar-vitrines";
-export * from "./listar-vitrines";
 export * from "./criar-vitrine";
 export * from "./atualizar-vitrine";
 export * from "./remover-vitrine";
@@ -20,9 +19,8 @@ export * from "./vincular-combo";
 export * from "./desvincular-combo";
 export * from "./marcar-home";
 
-// Aliases para manter compatibilidade
+// Alias para manter compatibilidade
 export { useBuscarVitrines as useVitrinesSearch } from "./buscar-vitrines";
-export { useListarVitrines as useFetchVitrine } from "./listar-vitrines";
 
 // Exportar useMutateVitrine como objeto com todas as mutations
 export function useMutateVitrine() {
