@@ -10,27 +10,38 @@ if (!BASE_URL) {
 }
 
 /**
- * Interface para um Adicional dentro de um Complemento
+ * Interface para um Adicional (Item) dentro de um Complemento
+ * Corresponde ao AdicionalResponse da API
  */
 export interface AdicionalComplemento {
-  id: number;
+  id: number;                      // Este é o adicional_id usado nos pedidos
   nome: string;
+  descricao?: string | null;
   preco: number;
+  custo: number;
+  ativo: boolean;
   ordem: number;
+  created_at: string;              // ISO 8601
+  updated_at: string;              // ISO 8601
 }
 
 /**
  * Interface para um Complemento
+ * Corresponde ao ComplementoResponse da API
  */
 export interface ComplementoResponse {
   id: number;
+  empresa_id: number;
   nome: string;
-  descricao?: string;
+  descricao?: string | null;
   obrigatorio: boolean;
   quantitativo: boolean;
   permite_multipla_escolha: boolean;
   ordem: number;
+  ativo: boolean;
   adicionais: AdicionalComplemento[];
+  created_at: string;              // ISO 8601
+  updated_at: string;              // ISO 8601
 }
 
 /**
