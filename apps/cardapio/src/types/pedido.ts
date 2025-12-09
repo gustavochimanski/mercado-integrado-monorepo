@@ -48,6 +48,18 @@ export interface Pedido {
 }
 
 // ================= Request de finalizar pedido =================
+// NOVO: Estrutura de Complementos
+export interface ItemAdicionalComplementoRequest {
+  adicional_id: number;
+  quantidade: number; // Usado apenas se complemento.quantitativo = true
+}
+
+export interface ItemComplementoRequest {
+  complemento_id: number;
+  adicionais: ItemAdicionalComplementoRequest[];
+}
+
+// LEGADO: Mantido para compatibilidade (deprecated)
 export interface ItemAdicionalRequest {
   adicional_id: number;
   quantidade: number;
@@ -57,20 +69,25 @@ export interface ItemPedidoRequest {
   produto_cod_barras: string;
   quantidade: number;
   observacao?: string;
-  adicionais?: ItemAdicionalRequest[]; // Adicionais com ID e quantidade separados
+  complementos?: ItemComplementoRequest[]; // NOVO: Complementos agrupados
+  // REMOVIDO: adicionais (não use mais)
+  // REMOVIDO: adicionais_ids (não use mais)
 }
 
 export interface ComboPedidoRequest {
   combo_id: number;
   quantidade?: number; // Default: 1 (legado)
-  adicionais?: ItemAdicionalRequest[]; // Adicionais com ID e quantidade separados
+  complementos?: ItemComplementoRequest[]; // NOVO: Complementos agrupados
+  // REMOVIDO: adicionais (não use mais)
 }
 
 export interface ReceitaPedidoRequest {
   receita_id: number;
   quantidade: number;
   observacao?: string;
-  adicionais?: ItemAdicionalRequest[]; // Adicionais com ID e quantidade separados
+  complementos?: ItemComplementoRequest[]; // NOVO: Complementos agrupados
+  // REMOVIDO: adicionais (não use mais)
+  // REMOVIDO: adicionais_ids (não use mais)
 }
 
 // ================= Formato unificado de itens do pedido =================
@@ -81,10 +98,8 @@ export interface PedidoItemUnificado {
   receita_id?: number;         // se tipo = RECEITA
   quantidade: number;
   observacao?: string;
-  adicionais?: Array<{
-    adicional_id: number;
-    quantidade: number;
-  }>;
+  complementos?: ItemComplementoRequest[]; // NOVO: Complementos agrupados
+  // REMOVIDO: adicionais (não use mais)
 }
 
 export type TipoPedidoGateway = "DELIVERY" | "MESA" | "BALCAO";

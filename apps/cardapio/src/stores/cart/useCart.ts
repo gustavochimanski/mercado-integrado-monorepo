@@ -4,10 +4,27 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 /* ---------- Types ---------- */
+// LEGADO: Mantido para compatibilidade com dados antigos
 export interface CartItemAdicional {
   id: number;
   nome: string;
   preco: number;
+}
+
+// NOVO: Estrutura de Complementos
+export interface CartItemAdicionalComplemento {
+  adicional_id: number;
+  quantidade: number;
+  // Dados completos para exibição (não enviado na API)
+  adicional_nome?: string;
+  adicional_preco?: number;
+}
+
+export interface CartItemComplemento {
+  complemento_id: number;
+  adicionais: CartItemAdicionalComplemento[];
+  // Dados completos para exibição (não enviado na API)
+  complemento_nome?: string;
 }
 
 export interface CartItem {
@@ -20,7 +37,8 @@ export interface CartItem {
   categoriaId?: number;
   subcategoriaId?: number;
   observacao?: string;
-  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais
+  complementos?: CartItemComplemento[]; // NOVO: Complementos agrupados
+  adicionais?: CartItemAdicional[]; // LEGADO: Mantido para compatibilidade (deprecated)
 }
 
 export interface CartCombo {
@@ -29,7 +47,8 @@ export interface CartCombo {
   quantidade: number;
   preco: number; // Preço unitário do combo
   observacao?: string;
-  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais
+  complementos?: CartItemComplemento[]; // NOVO: Complementos agrupados
+  adicionais?: CartItemAdicional[]; // LEGADO: Mantido para compatibilidade (deprecated)
 }
 
 export interface CartReceita {
@@ -38,7 +57,8 @@ export interface CartReceita {
   quantidade: number;
   preco: number; // Preço unitário da receita
   observacao?: string;
-  adicionais?: CartItemAdicional[]; // Dados completos dos adicionais
+  complementos?: CartItemComplemento[]; // NOVO: Complementos agrupados
+  adicionais?: CartItemAdicional[]; // LEGADO: Mantido para compatibilidade (deprecated)
 }
 
 interface CartState {
@@ -124,15 +144,20 @@ export const useCart = create<CartState>()(
 
       addCombo: (combo) => {
         const combos = get().combos;
-        // Função auxiliar para extrair IDs dos adicionais
-        const getAdicionaisIds = (adicionais?: CartItemAdicional[]) => 
-          (adicionais || []).map(a => a.id).sort();
+        // Função auxiliar para comparar complementos
+        const getComplementosKey = (complementos?: CartItemComplemento[]) => {
+          if (!complementos || complementos.length === 0) return "";
+          return complementos
+            .map(c => `${c.complemento_id}:${c.adicionais.map(a => `${a.adicional_id}x${a.quantidade}`).sort().join(",")}`)
+            .sort()
+            .join("|");
+        };
         
-        // Verificar se já existe um combo com o mesmo combo_id E mesmos adicionais
-        const adicionaisIdsCombo = getAdicionaisIds(combo.adicionais).join(',');
+        // Verificar se já existe um combo com o mesmo combo_id E mesmos complementos
+        const complementosKeyCombo = getComplementosKey(combo.complementos);
         const index = combos.findIndex((c: CartCombo) => {
-          const adicionaisIdsC = getAdicionaisIds(c.adicionais).join(',');
-          return c.combo_id === combo.combo_id && adicionaisIdsC === adicionaisIdsCombo;
+          const complementosKeyC = getComplementosKey(c.complementos);
+          return c.combo_id === combo.combo_id && complementosKeyC === complementosKeyCombo;
         });
 
         if (index === -1) {
@@ -147,9 +172,9 @@ export const useCart = create<CartState>()(
             updated[index].observacao = combo.observacao;
           }
 
-          // Atualizar adicionais se necessário (manter os existentes)
-          if (combo.adicionais && combo.adicionais.length > 0) {
-            updated[index].adicionais = combo.adicionais;
+          // Atualizar complementos se necessário (manter os existentes)
+          if (combo.complementos && combo.complementos.length > 0) {
+            updated[index].complementos = combo.complementos;
           }
 
           set({ combos: updated });
@@ -186,15 +211,20 @@ export const useCart = create<CartState>()(
 
       addReceita: (receita) => {
         const receitas = get().receitas;
-        // Função auxiliar para extrair IDs dos adicionais
-        const getAdicionaisIds = (adicionais?: CartItemAdicional[]) => 
-          (adicionais || []).map(a => a.id).sort();
+        // Função auxiliar para comparar complementos
+        const getComplementosKey = (complementos?: CartItemComplemento[]) => {
+          if (!complementos || complementos.length === 0) return "";
+          return complementos
+            .map(c => `${c.complemento_id}:${c.adicionais.map(a => `${a.adicional_id}x${a.quantidade}`).sort().join(",")}`)
+            .sort()
+            .join("|");
+        };
         
-        // Verificar se já existe uma receita com o mesmo receita_id E mesmos adicionais
-        const adicionaisIdsReceita = getAdicionaisIds(receita.adicionais).join(',');
+        // Verificar se já existe uma receita com o mesmo receita_id E mesmos complementos
+        const complementosKeyReceita = getComplementosKey(receita.complementos);
         const index = receitas.findIndex((r: CartReceita) => {
-          const adicionaisIdsR = getAdicionaisIds(r.adicionais).join(',');
-          return r.receita_id === receita.receita_id && adicionaisIdsR === adicionaisIdsReceita;
+          const complementosKeyR = getComplementosKey(r.complementos);
+          return r.receita_id === receita.receita_id && complementosKeyR === complementosKeyReceita;
         });
 
         if (index === -1) {
@@ -209,9 +239,9 @@ export const useCart = create<CartState>()(
             updated[index].observacao = receita.observacao;
           }
 
-          // Atualizar adicionais se necessário (manter os existentes)
-          if (receita.adicionais && receita.adicionais.length > 0) {
-            updated[index].adicionais = receita.adicionais;
+          // Atualizar complementos se necessário (manter os existentes)
+          if (receita.complementos && receita.complementos.length > 0) {
+            updated[index].complementos = receita.complementos;
           }
 
           set({ receitas: updated });
@@ -258,15 +288,20 @@ export const useCart = create<CartState>()(
 
       add: (item) => {
         const items = get().items;
-        // Função auxiliar para extrair IDs dos adicionais
-        const getAdicionaisIds = (adicionais?: CartItemAdicional[]) => 
-          (adicionais || []).map(a => a.id).sort();
+        // Função auxiliar para comparar complementos
+        const getComplementosKey = (complementos?: CartItemComplemento[]) => {
+          if (!complementos || complementos.length === 0) return "";
+          return complementos
+            .map(c => `${c.complemento_id}:${c.adicionais.map(a => `${a.adicional_id}x${a.quantidade}`).sort().join(",")}`)
+            .sort()
+            .join("|");
+        };
         
-        // Verificar se já existe um item com o mesmo cod_barras E mesmos adicionais
-        const adicionaisIdsItem = getAdicionaisIds(item.adicionais).join(',');
+        // Verificar se já existe um item com o mesmo cod_barras E mesmos complementos
+        const complementosKeyItem = getComplementosKey(item.complementos);
         const index = items.findIndex((p: CartItem) => {
-          const adicionaisIdsP = getAdicionaisIds(p.adicionais).join(',');
-          return p.cod_barras === item.cod_barras && adicionaisIdsP === adicionaisIdsItem;
+          const complementosKeyP = getComplementosKey(p.complementos);
+          return p.cod_barras === item.cod_barras && complementosKeyP === complementosKeyItem;
         });
 
         if (index === -1) {
@@ -281,9 +316,9 @@ export const useCart = create<CartState>()(
             updated[index].observacao = item.observacao;
           }
 
-          // Atualizar adicionais se necessário (manter os existentes)
-          if (item.adicionais && item.adicionais.length > 0) {
-            updated[index].adicionais = item.adicionais;
+          // Atualizar complementos se necessário (manter os existentes)
+          if (item.complementos && item.complementos.length > 0) {
+            updated[index].complementos = item.complementos;
           }
 
           set({ items: updated });
@@ -337,22 +372,49 @@ export const useCart = create<CartState>()(
         // Soma dos produtos
         const itemsTotal = get().items.reduce((total: number, item: CartItem) => {
           const precoItem = item.preco * item.quantity;
-          const precoAdicionais = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
-          return total + precoItem + precoAdicionais;
+          // NOVO: Calcular preço dos complementos
+          const precoComplementos = (item.complementos || []).reduce((sum, comp) => {
+            const precoComp = comp.adicionais.reduce((s, a) => {
+              const precoAdicional = a.adicional_preco || 0;
+              return s + (precoAdicional * a.quantidade);
+            }, 0);
+            return sum + precoComp;
+          }, 0) * item.quantity;
+          // LEGADO: Suporte para adicionais antigos
+          const precoAdicionaisLegado = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
+          return total + precoItem + precoComplementos + precoAdicionaisLegado;
         }, 0);
         
         // Soma dos combos
         const combosTotal = get().combos.reduce((total: number, combo: CartCombo) => {
           const precoCombo = combo.preco * combo.quantidade;
-          const precoAdicionais = (combo.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * combo.quantidade;
-          return total + precoCombo + precoAdicionais;
+          // NOVO: Calcular preço dos complementos
+          const precoComplementos = (combo.complementos || []).reduce((sum, comp) => {
+            const precoComp = comp.adicionais.reduce((s, a) => {
+              const precoAdicional = a.adicional_preco || 0;
+              return s + (precoAdicional * a.quantidade);
+            }, 0);
+            return sum + precoComp;
+          }, 0) * combo.quantidade;
+          // LEGADO: Suporte para adicionais antigos
+          const precoAdicionaisLegado = (combo.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * combo.quantidade;
+          return total + precoCombo + precoComplementos + precoAdicionaisLegado;
         }, 0);
         
         // Soma das receitas
         const receitasTotal = get().receitas.reduce((total: number, receita: CartReceita) => {
           const precoReceita = receita.preco * receita.quantidade;
-          const precoAdicionais = (receita.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * receita.quantidade;
-          return total + precoReceita + precoAdicionais;
+          // NOVO: Calcular preço dos complementos
+          const precoComplementos = (receita.complementos || []).reduce((sum, comp) => {
+            const precoComp = comp.adicionais.reduce((s, a) => {
+              const precoAdicional = a.adicional_preco || 0;
+              return s + (precoAdicional * a.quantidade);
+            }, 0);
+            return sum + precoComp;
+          }, 0) * receita.quantidade;
+          // LEGADO: Suporte para adicionais antigos
+          const precoAdicionaisLegado = (receita.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * receita.quantidade;
+          return total + precoReceita + precoComplementos + precoAdicionaisLegado;
         }, 0);
         
         return itemsTotal + combosTotal + receitasTotal;

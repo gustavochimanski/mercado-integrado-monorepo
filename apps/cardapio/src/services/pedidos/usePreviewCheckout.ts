@@ -64,9 +64,25 @@ export function usePreviewCheckout({
     queryKey: [
       "preview-checkout",
       tipoPedido,
-      items.map(i => `${i.cod_barras}-${i.quantity}-${(i.adicionais?.map(a => a.id).sort().join(",") || "")}`).join(","),
-      combos?.map(c => `${c.combo_id}-${c.quantidade}-${(c.adicionais?.map(a => a.id).sort().join(",") || "")}`).join(",") || "",
-      receitas?.map(r => `${r.receita_id}-${r.quantidade}-${(r.adicionais?.map(a => a.id).sort().join(",") || "")}`).join(",") || "",
+      // NOVO: Usar complementos na queryKey
+      items.map(i => {
+        const complementosKey = i.complementos?.map(c => 
+          `${c.complemento_id}:${c.adicionais.map(a => `${a.adicional_id}x${a.quantidade}`).join(",")}`
+        ).join("|") || "";
+        return `${i.cod_barras}-${i.quantity}-${complementosKey}`;
+      }).join(","),
+      combos?.map(c => {
+        const complementosKey = c.complementos?.map(comp => 
+          `${comp.complemento_id}:${comp.adicionais.map(a => `${a.adicional_id}x${a.quantidade}`).join(",")}`
+        ).join("|") || "";
+        return `${c.combo_id}-${c.quantidade}-${complementosKey}`;
+      }).join(",") || "",
+      receitas?.map(r => {
+        const complementosKey = r.complementos?.map(comp => 
+          `${comp.complemento_id}:${comp.adicionais.map(a => `${a.adicional_id}x${a.quantidade}`).join(",")}`
+        ).join("|") || "";
+        return `${r.receita_id}-${r.quantidade}-${complementosKey}`;
+      }).join(",") || "",
       enderecoId,
       meioPagamentoId,
       mesaCodigo,

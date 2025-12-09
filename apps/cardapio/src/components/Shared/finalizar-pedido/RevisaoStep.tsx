@@ -258,8 +258,17 @@ export default function RevisaoStep({
           <div className="divide-y divide-border">
             {/* Produtos */}
             {items.map((item) => {
-              const precoAdicionais = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
-              const precoTotal = (item.preco * item.quantity) + precoAdicionais;
+              // NOVO: Calcular preço dos complementos
+              const precoComplementos = (item.complementos || []).reduce((sum, comp) => {
+                const precoComp = comp.adicionais.reduce((s, a) => {
+                  const precoAdicional = a.adicional_preco || 0;
+                  return s + (precoAdicional * a.quantidade);
+                }, 0);
+                return sum + precoComp;
+              }, 0) * item.quantity;
+              // LEGADO: Suporte para adicionais antigos
+              const precoAdicionaisLegado = (item.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * item.quantity;
+              const precoTotal = (item.preco * item.quantity) + precoComplementos + precoAdicionaisLegado;
               
               return (
                 <div
@@ -281,7 +290,29 @@ export default function RevisaoStep({
                           Obs: {item.observacao}
                         </p>
                       )}
-                      {item.adicionais && item.adicionais.length > 0 && (
+                      {/* NOVO: Exibir complementos */}
+                      {item.complementos && item.complementos.length > 0 && (
+                        <div className="mt-1 space-y-1">
+                          {item.complementos.map((complemento, compIdx) => (
+                            <div key={compIdx} className="pl-2 border-l-2 border-muted">
+                              <p className="text-xs font-medium text-muted-foreground mb-0.5">
+                                {complemento.complemento_nome || `Complemento #${complemento.complemento_id}`}:
+                              </p>
+                              {complemento.adicionais.map((adicional, adicIdx) => (
+                                <p key={adicIdx} className="text-xs text-muted-foreground pl-2">
+                                  + {adicional.adicional_nome || `Adicional #${adicional.adicional_id}`}
+                                  {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                  {adicional.adicional_preco && adicional.adicional_preco > 0 && (
+                                    <span> - R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2)}</span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* LEGADO: Suporte para adicionais antigos */}
+                      {!item.complementos && item.adicionais && item.adicionais.length > 0 && (
                         <div className="mt-1 space-y-0.5">
                           {item.adicionais.map((adicional, idx) => (
                             <p key={idx} className="text-xs text-muted-foreground">
@@ -335,8 +366,17 @@ export default function RevisaoStep({
             
             {/* Combos */}
             {combos.map((combo) => {
-              const precoAdicionais = (combo.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * combo.quantidade;
-              const precoTotal = (combo.preco * combo.quantidade) + precoAdicionais;
+              // NOVO: Calcular preço dos complementos
+              const precoComplementos = (combo.complementos || []).reduce((sum, comp) => {
+                const precoComp = comp.adicionais.reduce((s, a) => {
+                  const precoAdicional = a.adicional_preco || 0;
+                  return s + (precoAdicional * a.quantidade);
+                }, 0);
+                return sum + precoComp;
+              }, 0) * combo.quantidade;
+              // LEGADO: Suporte para adicionais antigos
+              const precoAdicionaisLegado = (combo.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * combo.quantidade;
+              const precoTotal = (combo.preco * combo.quantidade) + precoComplementos + precoAdicionaisLegado;
               
               return (
                 <div
@@ -361,7 +401,29 @@ export default function RevisaoStep({
                           Obs: {combo.observacao}
                         </p>
                       )}
-                      {combo.adicionais && combo.adicionais.length > 0 && (
+                      {/* NOVO: Exibir complementos */}
+                      {combo.complementos && combo.complementos.length > 0 && (
+                        <div className="mt-1 space-y-1">
+                          {combo.complementos.map((complemento, compIdx) => (
+                            <div key={compIdx} className="pl-2 border-l-2 border-muted">
+                              <p className="text-xs font-medium text-muted-foreground mb-0.5">
+                                {complemento.complemento_nome || `Complemento #${complemento.complemento_id}`}:
+                              </p>
+                              {complemento.adicionais.map((adicional, adicIdx) => (
+                                <p key={adicIdx} className="text-xs text-muted-foreground pl-2">
+                                  + {adicional.adicional_nome || `Adicional #${adicional.adicional_id}`}
+                                  {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                  {adicional.adicional_preco && adicional.adicional_preco > 0 && (
+                                    <span> - R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2)}</span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* LEGADO: Suporte para adicionais antigos */}
+                      {!combo.complementos && combo.adicionais && combo.adicionais.length > 0 && (
                         <div className="mt-1 space-y-0.5">
                           {combo.adicionais.map((adicional, idx) => (
                             <p key={idx} className="text-xs text-muted-foreground">
@@ -415,8 +477,17 @@ export default function RevisaoStep({
             
             {/* Receitas */}
             {receitas.map((receita) => {
-              const precoAdicionais = (receita.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * receita.quantidade;
-              const precoTotal = (receita.preco * receita.quantidade) + precoAdicionais;
+              // NOVO: Calcular preço dos complementos
+              const precoComplementos = (receita.complementos || []).reduce((sum, comp) => {
+                const precoComp = comp.adicionais.reduce((s, a) => {
+                  const precoAdicional = a.adicional_preco || 0;
+                  return s + (precoAdicional * a.quantidade);
+                }, 0);
+                return sum + precoComp;
+              }, 0) * receita.quantidade;
+              // LEGADO: Suporte para adicionais antigos
+              const precoAdicionaisLegado = (receita.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * receita.quantidade;
+              const precoTotal = (receita.preco * receita.quantidade) + precoComplementos + precoAdicionaisLegado;
               
               return (
                 <div
@@ -438,7 +509,29 @@ export default function RevisaoStep({
                           Obs: {receita.observacao}
                         </p>
                       )}
-                      {receita.adicionais && receita.adicionais.length > 0 && (
+                      {/* NOVO: Exibir complementos */}
+                      {receita.complementos && receita.complementos.length > 0 && (
+                        <div className="mt-1 space-y-1">
+                          {receita.complementos.map((complemento, compIdx) => (
+                            <div key={compIdx} className="pl-2 border-l-2 border-muted">
+                              <p className="text-xs font-medium text-muted-foreground mb-0.5">
+                                {complemento.complemento_nome || `Complemento #${complemento.complemento_id}`}:
+                              </p>
+                              {complemento.adicionais.map((adicional, adicIdx) => (
+                                <p key={adicIdx} className="text-xs text-muted-foreground pl-2">
+                                  + {adicional.adicional_nome || `Adicional #${adicional.adicional_id}`}
+                                  {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                  {adicional.adicional_preco && adicional.adicional_preco > 0 && (
+                                    <span> - R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2)}</span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* LEGADO: Suporte para adicionais antigos */}
+                      {!receita.complementos && receita.adicionais && receita.adicionais.length > 0 && (
                         <div className="mt-1 space-y-0.5">
                           {receita.adicionais.map((adicional, idx) => (
                             <p key={idx} className="text-xs text-muted-foreground">

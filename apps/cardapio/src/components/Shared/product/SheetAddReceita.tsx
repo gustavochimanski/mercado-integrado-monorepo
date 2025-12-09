@@ -19,11 +19,11 @@ import { ReceitaMiniDTO } from "@cardapio/services/home";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart, X, Check } from "lucide-react";
-import { useAdicionaisReceita } from "@cardapio/services/adicionais";
+import { useComplementosReceita } from "@cardapio/services/complementos";
 import { useState, useMemo } from "react";
-import type { AdicionalResponse } from "@cardapio/api";
+import type { ComplementoResponse, AdicionalComplemento } from "@cardapio/services/complementos/buscar-complementos-produto-client";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import type { CartItemAdicional } from "@cardapio/stores/cart/useCart";
+import type { CartItemComplemento } from "@cardapio/stores/cart/useCart";
 
 const schema = z.object({
   quantity: z
@@ -39,7 +39,7 @@ type FormData = z.infer<typeof schema>;
 
 interface SheetAdicionarReceitaProps {
   receita: ReceitaMiniDTO;
-  onAdd?: (receita: ReceitaMiniDTO, quantity: number, observacao?: string, adicionais_ids?: number[]) => void;
+  onAdd?: (receita: ReceitaMiniDTO, quantity: number, observacao?: string, complementos?: CartItemComplemento[]) => void;
   isOpen: boolean;
   onClose: () => void;
   quickAddQuantity?: number;
@@ -70,91 +70,139 @@ export function SheetAdicionarReceita({
 
   const quantity = watch("quantity");
   
-  // Buscar adicionais da receita usando o novo endpoint do catalogo
-  const { data: adicionaisDaAPI = [], isLoading: isLoadingAdicionais } = useAdicionaisReceita(
+  // Buscar complementos da receita usando o novo endpoint
+  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos } = useComplementosReceita(
     receita.id, // ID da receita
     true, // apenas ativos
     isOpen // só busca quando o sheet está aberto
   );
 
-  const adicionais: AdicionalResponse[] = adicionaisDaAPI;
+  const complementos: ComplementoResponse[] = complementosDaAPI;
 
-  // Estado para adicionais selecionados: mapeia ID do adicional para quantidade
-  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<Record<number, number>>({});
+  // Estado para complementos selecionados: mapeia complemento_id -> adicional_id -> quantidade
+  const [selecoesComplementos, setSelecoesComplementos] = useState<Record<number, Record<number, number>>>({});
 
   // Resetar seleção quando o sheet fecha
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setAdicionaisSelecionados({});
+      setSelecoesComplementos({});
       reset();
       onClose();
     }
   };
 
-  // Agrupar adicionais por tipo (obrigatório vs opcional)
-  const adicionaisAgrupados = useMemo(() => {
-    const obrigatorios = adicionais.filter(a => a.obrigatorio);
-    const opcionais = adicionais.filter(a => !a.obrigatorio);
-    return { obrigatorios, opcionais };
-  }, [adicionais]);
-
-  // Obter quantidade de um adicional
-  const getQuantidadeAdicional = (adicionalId: number) => {
-    return adicionaisSelecionados[adicionalId] || 0;
+  // Obter quantidade de um adicional em um complemento
+  const getQuantidadeAdicional = (complementoId: number, adicionalId: number) => {
+    return selecoesComplementos[complementoId]?.[adicionalId] || 0;
   };
 
-  // Incrementar quantidade de um adicional
-  const incrementarAdicional = (adicionalId: number) => {
-    setAdicionaisSelecionados(prev => ({
-      ...prev,
-      [adicionalId]: (prev[adicionalId] || 0) + 1,
-    }));
-  };
-
-  // Decrementar quantidade de um adicional
-  const decrementarAdicional = (adicionalId: number) => {
-    setAdicionaisSelecionados(prev => {
-      const quantidadeAtual = prev[adicionalId] || 0;
-      if (quantidadeAtual <= 1) {
-        const novo = { ...prev };
-        delete novo[adicionalId];
-        return novo;
-      }
+  // Incrementar quantidade de um adicional em um complemento
+  const incrementarAdicional = (complementoId: number, adicionalId: number, quantitativo: boolean) => {
+    setSelecoesComplementos(prev => {
+      const complementoSelecoes = prev[complementoId] || {};
+      const quantidadeAtual = complementoSelecoes[adicionalId] || 0;
+      
+      // Se não é quantitativo, sempre será 1
+      const novaQuantidade = quantitativo ? quantidadeAtual + 1 : 1;
+      
       return {
         ...prev,
-        [adicionalId]: quantidadeAtual - 1,
+        [complementoId]: {
+          ...complementoSelecoes,
+          [adicionalId]: novaQuantidade,
+        },
       };
     });
   };
 
-  // Toggle adicional (para adicionais que não permitem múltipla escolha)
-  const toggleAdicional = (adicionalId: number, permiteMultipla: boolean) => {
-    if (permiteMultipla) {
-      incrementarAdicional(adicionalId);
-    } else {
-      setAdicionaisSelecionados(prev => {
-        if (prev[adicionalId]) {
-          const novo = { ...prev };
-          delete novo[adicionalId];
-          return novo;
+  // Decrementar quantidade de um adicional em um complemento
+  const decrementarAdicional = (complementoId: number, adicionalId: number) => {
+    setSelecoesComplementos(prev => {
+      const complementoSelecoes = prev[complementoId] || {};
+      const quantidadeAtual = complementoSelecoes[adicionalId] || 0;
+      
+      if (quantidadeAtual <= 1) {
+        const novo = { ...complementoSelecoes };
+        delete novo[adicionalId];
+        
+        // Se não há mais adicionais neste complemento, remover o complemento
+        if (Object.keys(novo).length === 0) {
+          const novoEstado = { ...prev };
+          delete novoEstado[complementoId];
+          return novoEstado;
         }
+        
         return {
           ...prev,
-          [adicionalId]: 1,
+          [complementoId]: novo,
         };
+      }
+      
+      return {
+        ...prev,
+        [complementoId]: {
+          ...complementoSelecoes,
+          [adicionalId]: quantidadeAtual - 1,
+        },
+      };
+    });
+  };
+
+  // Toggle adicional (para complementos que não permitem múltipla escolha)
+  const toggleAdicional = (complementoId: number, adicionalId: number, permiteMultipla: boolean, quantitativo: boolean) => {
+    const complemento = complementos.find(c => c.id === complementoId);
+    if (!complemento) return;
+
+    if (!permiteMultipla) {
+      // Se não permite múltipla escolha, apenas um adicional pode ser selecionado
+      setSelecoesComplementos(prev => {
+        const novo = { ...prev };
+        const complementoSelecoes = novo[complementoId] || {};
+        const estaSelecionado = complementoSelecoes[adicionalId] > 0;
+        
+        if (estaSelecionado) {
+          // Desmarcar
+          const novoComplemento = { ...complementoSelecoes };
+          delete novoComplemento[adicionalId];
+          
+          if (Object.keys(novoComplemento).length === 0) {
+            delete novo[complementoId];
+          } else {
+            novo[complementoId] = novoComplemento;
+          }
+        } else {
+          // Marcar apenas este (remover todos os outros)
+          novo[complementoId] = {
+            [adicionalId]: quantitativo ? 1 : 1,
+          };
+        }
+        
+        return novo;
       });
+    } else {
+      // Se permite múltipla escolha, pode incrementar
+      incrementarAdicional(complementoId, adicionalId, quantitativo);
     }
   };
 
-  // Calcular preço total incluindo adicionais (considerando quantidades)
-  const precoAdicionais = useMemo(() => {
-    return Object.entries(adicionaisSelecionados).reduce((total, [adicionalId, quantidade]) => {
-      const adicional = adicionais.find(a => a.id === Number(adicionalId));
-      return total + (adicional?.preco || 0) * quantidade;
-    }, 0);
-  }, [adicionaisSelecionados, adicionais]);
+  // Calcular preço total incluindo complementos (considerando quantidades)
+  const precoComplementos = useMemo(() => {
+    let total = 0;
+    Object.entries(selecoesComplementos).forEach(([complementoId, adicionaisSelecionados]) => {
+      const complemento = complementos.find(c => c.id === Number(complementoId));
+      if (!complemento) return;
+      
+      Object.entries(adicionaisSelecionados).forEach(([adicionalId, quantidade]) => {
+        const adicional = complemento.adicionais.find(a => a.id === Number(adicionalId));
+        if (adicional) {
+          total += adicional.preco * quantidade;
+        }
+      });
+    });
+    return total;
+  }, [selecoesComplementos, complementos]);
 
-  const precoTotal = (receita.preco_venda + precoAdicionais) * quantity;
+  const precoTotal = (receita.preco_venda + precoComplementos) * quantity;
 
   function increment() {
     if (quantity < 99) setValue("quantity", quantity + 1);
@@ -169,34 +217,58 @@ export function SheetAdicionarReceita({
     setValue("quantity", novaQuantidade);
   }
 
+  // Validar se complementos obrigatórios foram selecionados
+  const validarComplementos = (): boolean => {
+    for (const complemento of complementos) {
+      if (complemento.obrigatorio) {
+        const selecoes = selecoesComplementos[complemento.id];
+        if (!selecoes || Object.keys(selecoes).length === 0) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   function onSubmit(data: FormData) {
     const observacao = data.observacao?.trim() || undefined;
     
-    // Converter o objeto de quantidades em array de IDs (com repetição baseada na quantidade)
-    const adicionaisIds: number[] = [];
-    Object.entries(adicionaisSelecionados).forEach(([adicionalId, quantidade]) => {
-      for (let i = 0; i < quantidade; i++) {
-        adicionaisIds.push(Number(adicionalId));
-      }
-    });
-
-    // Buscar dados completos dos adicionais para exibição
-    const adicionaisCompletos: CartItemAdicional[] = [];
-    Object.entries(adicionaisSelecionados).forEach(([adicionalId, quantidade]) => {
-      const adicional = adicionais.find(a => a.id === Number(adicionalId));
-      if (adicional) {
-        for (let i = 0; i < quantidade; i++) {
-          adicionaisCompletos.push({
-            id: adicional.id,
-            nome: adicional.nome,
-            preco: adicional.preco,
+    // Validar complementos obrigatórios
+    if (!validarComplementos()) {
+      // TODO: Mostrar erro ao usuário
+      return;
+    }
+    
+    // Converter seleções para formato de complementos do carrinho
+    const complementosSelecionados: CartItemComplemento[] = [];
+    Object.entries(selecoesComplementos).forEach(([complementoId, adicionaisSelecionados]) => {
+      const complemento = complementos.find(c => c.id === Number(complementoId));
+      if (!complemento || Object.keys(adicionaisSelecionados).length === 0) return;
+      
+      const adicionais: Array<{ adicional_id: number; quantidade: number; adicional_nome?: string; adicional_preco?: number }> = [];
+      Object.entries(adicionaisSelecionados).forEach(([adicionalId, quantidade]) => {
+        const adicional = complemento.adicionais.find(a => a.id === Number(adicionalId));
+        if (adicional) {
+          adicionais.push({
+            adicional_id: adicional.id,
+            quantidade: quantidade,
+            adicional_nome: adicional.nome,
+            adicional_preco: adicional.preco,
           });
         }
+      });
+      
+      if (adicionais.length > 0) {
+        complementosSelecionados.push({
+          complemento_id: complemento.id,
+          adicionais,
+          complemento_nome: complemento.nome,
+        });
       }
     });
 
     if (onAdd) {
-      onAdd(receita, data.quantity, observacao, adicionaisIds.length > 0 ? adicionaisIds : undefined);
+      onAdd(receita, data.quantity, observacao, complementosSelecionados.length > 0 ? complementosSelecionados : undefined);
     } else {
       // Adicionar diretamente ao carrinho
       addReceita({
@@ -205,13 +277,13 @@ export function SheetAdicionarReceita({
         quantidade: data.quantity,
         preco: receita.preco_venda,
         observacao,
-        adicionais: adicionaisCompletos.length > 0 ? adicionaisCompletos : undefined,
+        complementos: complementosSelecionados.length > 0 ? complementosSelecionados : undefined,
       });
     }
 
     setValue("quantity", 1);
     setValue("observacao", "");
-    setAdicionaisSelecionados({});
+    setSelecoesComplementos({});
     onClose();
   }
 
@@ -263,13 +335,13 @@ export function SheetAdicionarReceita({
                   <span className="text-2xl font-bold text-primary">
                     R$ {receita.preco_venda.toFixed(2).replace(".", ",")}
                   </span>
-                  {precoAdicionais > 0 && (
+                  {precoComplementos > 0 && (
                     <span className="text-xs text-muted-foreground mt-1">
-                      + R$ {precoAdicionais.toFixed(2).replace(".", ",")} em adicionais
+                      + R$ {precoComplementos.toFixed(2).replace(".", ",")} em complementos
                     </span>
                   )}
                 </div>
-                {(quantity > 1 || precoAdicionais > 0) && (
+                {(quantity > 1 || precoComplementos > 0) && (
                   <div className="flex flex-col items-end">
                     <span className="text-sm text-muted-foreground">Total</span>
                     <span className="text-xl font-semibold text-foreground">
@@ -342,61 +414,37 @@ export function SheetAdicionarReceita({
             {/* Divisor */}
             <div className="border-t border-border my-6" />
 
-            {/* Seção de Adicionais */}
-            {isLoadingAdicionais ? (
+            {/* Seção de Complementos */}
+            {isLoadingComplementos ? (
               <div className="space-y-3 mb-6">
-                <Label className="text-base font-semibold">Adicionais</Label>
-                <p className="text-sm text-muted-foreground">Carregando adicionais...</p>
+                <Label className="text-base font-semibold">Complementos</Label>
+                <p className="text-sm text-muted-foreground">Carregando complementos...</p>
               </div>
-            ) : adicionais.length > 0 ? (
-              <div className="space-y-4 mb-6">
+            ) : complementos.length > 0 ? (
+              <div className="space-y-6 mb-6">
                 <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">Adicionais</Label>
+                  <Label className="text-base font-semibold">Complementos</Label>
                   <span className="text-xs text-muted-foreground">
-                    {Object.keys(adicionaisSelecionados).length > 0 && `+ R$ ${precoAdicionais.toFixed(2).replace(".", ",")}`}
+                    {Object.keys(selecoesComplementos).length > 0 && `+ R$ ${precoComplementos.toFixed(2).replace(".", ",")}`}
                   </span>
                 </div>
 
-                {/* Adicionais Obrigatórios */}
-                {adicionaisAgrupados.obrigatorios.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">Obrigatórios</Label>
-                    {adicionaisAgrupados.obrigatorios.map((adicional) => (
-                      <AdicionalItem
-                        key={adicional.id}
-                        adicional={adicional}
-                        quantidade={getQuantidadeAdicional(adicional.id)}
-                        onToggle={() => toggleAdicional(adicional.id, adicional.permite_multipla_escolha)}
-                        onIncrement={() => incrementarAdicional(adicional.id)}
-                        onDecrement={() => decrementarAdicional(adicional.id)}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Adicionais Opcionais */}
-                {adicionaisAgrupados.opcionais.length > 0 && (
-                  <div className="space-y-2">
-                    {adicionaisAgrupados.obrigatorios.length > 0 && (
-                      <Label className="text-sm font-medium text-muted-foreground">Opcionais</Label>
-                    )}
-                    {adicionaisAgrupados.opcionais.map((adicional) => (
-                      <AdicionalItem
-                        key={adicional.id}
-                        adicional={adicional}
-                        quantidade={getQuantidadeAdicional(adicional.id)}
-                        onToggle={() => toggleAdicional(adicional.id, adicional.permite_multipla_escolha)}
-                        onIncrement={() => incrementarAdicional(adicional.id)}
-                        onDecrement={() => decrementarAdicional(adicional.id)}
-                      />
-                    ))}
-                  </div>
-                )}
+                {complementos.map((complemento) => (
+                  <ComplementoSection
+                    key={complemento.id}
+                    complemento={complemento}
+                    selecoes={selecoesComplementos[complemento.id] || {}}
+                    getQuantidade={(adicionalId) => getQuantidadeAdicional(complemento.id, adicionalId)}
+                    onToggle={(adicionalId) => toggleAdicional(complemento.id, adicionalId, complemento.permite_multipla_escolha, complemento.quantitativo)}
+                    onIncrement={(adicionalId) => incrementarAdicional(complemento.id, adicionalId, complemento.quantitativo)}
+                    onDecrement={(adicionalId) => decrementarAdicional(complemento.id, adicionalId)}
+                  />
+                ))}
               </div>
             ) : null}
 
             {/* Divisor */}
-            {adicionais.length > 0 && <div className="border-t border-border my-6" />}
+            {complementos.length > 0 && <div className="border-t border-border my-6" />}
 
             {/* Campo de Observação */}
             <div className="space-y-3 mb-4">
@@ -431,7 +479,7 @@ export function SheetAdicionarReceita({
           <SheetFooter className="border-t border-border bg-background px-4 pt-4 pb-6 sticky bottom-0">
             <Button 
               type="submit" 
-              disabled={isLoadingAdicionais}
+              disabled={isLoadingComplementos}
               className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
             >
@@ -445,22 +493,82 @@ export function SheetAdicionarReceita({
   );
 }
 
-// Componente para exibir um adicional
-function AdicionalItem({ 
-  adicional, 
-  quantidade,
+// Componente para exibir uma seção de complemento
+function ComplementoSection({
+  complemento,
+  selecoes,
+  getQuantidade,
   onToggle,
   onIncrement,
   onDecrement,
-}: { 
-  adicional: AdicionalResponse; 
+}: {
+  complemento: ComplementoResponse;
+  selecoes: Record<number, number>;
+  getQuantidade: (adicionalId: number) => number;
+  onToggle: (adicionalId: number) => void;
+  onIncrement: (adicionalId: number) => void;
+  onDecrement: (adicionalId: number) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Label className="text-base font-semibold">{complemento.nome}</Label>
+        {complemento.obrigatorio && (
+          <Badge variant="destructive" className="text-xs px-1.5 py-0">
+            Obrigatório
+          </Badge>
+        )}
+        {complemento.quantitativo && (
+          <Badge variant="outline" className="text-xs px-1.5 py-0">
+            Quantitativo
+          </Badge>
+        )}
+        {!complemento.permite_multipla_escolha && (
+          <Badge variant="outline" className="text-xs px-1.5 py-0">
+            Escolha única
+          </Badge>
+        )}
+      </div>
+      {complemento.descricao && (
+        <p className="text-sm text-muted-foreground">{complemento.descricao}</p>
+      )}
+      <div className="space-y-2 pl-2 border-l-2 border-border">
+        {complemento.adicionais.map((adicional) => (
+          <AdicionalItem
+            key={adicional.id}
+            adicional={adicional}
+            quantidade={getQuantidade(adicional.id)}
+            permiteMultipla={complemento.permite_multipla_escolha}
+            quantitativo={complemento.quantitativo}
+            onToggle={() => onToggle(adicional.id)}
+            onIncrement={() => onIncrement(adicional.id)}
+            onDecrement={() => onDecrement(adicional.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Componente para exibir um adicional dentro de um complemento
+function AdicionalItem({
+  adicional,
+  quantidade,
+  permiteMultipla,
+  quantitativo,
+  onToggle,
+  onIncrement,
+  onDecrement,
+}: {
+  adicional: AdicionalComplemento;
   quantidade: number;
+  permiteMultipla: boolean;
+  quantitativo: boolean;
   onToggle: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
 }) {
   const isSelected = quantidade > 0;
-  const permiteMultipla = adicional.permite_multipla_escolha;
 
   return (
     <div
@@ -511,27 +619,15 @@ function AdicionalItem({
           </div>
         )}
         <div className="flex-1" onClick={!permiteMultipla ? onToggle : undefined}>
-          <div className="flex items-center gap-2">
-            <Label className={`text-sm font-medium ${!permiteMultipla ? "cursor-pointer" : ""}`}>
-              {adicional.nome}
-            </Label>
-            {adicional.obrigatorio && (
-              <Badge variant="destructive" className="text-xs px-1.5 py-0">
-                Obrigatório
-              </Badge>
-            )}
-          </div>
-          {adicional.descricao && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {adicional.descricao}
-            </p>
-          )}
+          <Label className={`text-sm font-medium ${!permiteMultipla ? "cursor-pointer" : ""}`}>
+            {adicional.nome}
+          </Label>
         </div>
       </div>
       <div className="flex items-center gap-2">
         {adicional.preco > 0 && (
           <span className="text-sm font-semibold text-primary">
-            {quantidade > 0 && permiteMultipla ? (
+            {quantidade > 0 && quantitativo ? (
               <>
                 R$ {(adicional.preco * quantidade).toFixed(2).replace(".", ",")}
                 <span className="text-xs text-muted-foreground ml-1">
