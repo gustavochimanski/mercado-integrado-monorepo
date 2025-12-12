@@ -30,7 +30,17 @@ interface Item {
   quantity: number;
   preco: number;
   observacao?: string;
-  adicionais?: Array<{ id: number; nome: string; preco: number }>;
+  complementos?: Array<{
+    complemento_id: number;
+    complemento_nome?: string;
+    adicionais: Array<{
+      adicional_id: number;
+      quantidade: number;
+      adicional_nome?: string;
+      adicional_preco?: number;
+    }>;
+  }>;
+  adicionais?: Array<{ id: number; nome: string; preco: number }>; // LEGADO
 }
 
 interface Combo {
@@ -39,7 +49,17 @@ interface Combo {
   quantidade: number;
   preco: number;
   observacao?: string;
-  adicionais?: Array<{ id: number; nome: string; preco: number }>;
+  complementos?: Array<{
+    complemento_id: number;
+    complemento_nome?: string;
+    adicionais: Array<{
+      adicional_id: number;
+      quantidade: number;
+      adicional_nome?: string;
+      adicional_preco?: number;
+    }>;
+  }>;
+  adicionais?: Array<{ id: number; nome: string; preco: number }>; // LEGADO
 }
 
 interface Receita {
@@ -48,7 +68,17 @@ interface Receita {
   quantidade: number;
   preco: number;
   observacao?: string;
-  adicionais?: Array<{ id: number; nome: string; preco: number }>;
+  complementos?: Array<{
+    complemento_id: number;
+    complemento_nome?: string;
+    adicionais: Array<{
+      adicional_id: number;
+      quantidade: number;
+      adicional_nome?: string;
+      adicional_preco?: number;
+    }>;
+  }>;
+  adicionais?: Array<{ id: number; nome: string; preco: number }>; // LEGADO
 }
 
 interface PreviewCheckoutData {

@@ -99,8 +99,24 @@ export default function HomePage() {
   const bannerVerticalPrincipal = bannersVerticais.length > 0 ? bannersVerticais[0] : null;
 
   const handleAdd = useCallback(
-    (produto: ProdutoEmpMini, quantity: number, observacao?: string, adicionais_ids?: number[]) => {
-      add(mapProdutoToCartItem(produto, quantity, observacao, adicionais_ids));
+    (produto: ProdutoEmpMini, quantity: number, observacao?: string, complementos?: import("@cardapio/stores/cart/useCart").CartItemComplemento[]) => {
+      // Se houver complementos, usar diretamente; caso contrário, criar item sem complementos
+      if (complementos && complementos.length > 0) {
+        add({
+          cod_barras: produto.cod_barras,
+          nome: produto.produto.descricao,
+          preco: produto.preco_venda,
+          quantity,
+          empresaId: produto.empresa_id ?? produto.empresa ?? 0,
+          imagem: produto.produto.imagem ?? null,
+          categoriaId: produto.produto.cod_categoria ?? undefined,
+          subcategoriaId: produto.subcategoria_id ?? 0,
+          observacao,
+          complementos,
+        });
+      } else {
+        add(mapProdutoToCartItem(produto, quantity, observacao));
+      }
       setSheetOpen(false);
     },
     [add]

@@ -270,17 +270,8 @@ export function SheetAdicionarProduto({
     });
     
     if (onAdd) {
-      // Se houver callback, usar ele (compatibilidade com código antigo)
-      // Por enquanto, converter complementos para adicionais_ids para compatibilidade
-      const adicionaisIds: number[] = [];
-      complementosSelecionados.forEach(complemento => {
-        complemento.adicionais.forEach(adicional => {
-          for (let i = 0; i < adicional.quantidade; i++) {
-            adicionaisIds.push(adicional.adicional_id);
-          }
-        });
-      });
-      onAdd(produto, data.quantity, observacao, adicionaisIds.length > 0 ? adicionaisIds : undefined);
+      // Passar complementos diretamente para o callback
+      onAdd(produto, data.quantity, observacao, complementosSelecionados.length > 0 ? complementosSelecionados : undefined);
     } else {
       // Adicionar diretamente ao carrinho com complementos
       add({
