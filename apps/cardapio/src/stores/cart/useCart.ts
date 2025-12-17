@@ -112,19 +112,28 @@ const withLogger =
   };
 
 /* ---------- Migração: Limpar estrutura antiga do localStorage ---------- */
+// Executar apenas uma vez quando o módulo é carregado
 if (typeof window !== 'undefined') {
   try {
-    const stored = localStorage.getItem('cardapio-cart');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Se houver estrutura aninhada com 'state', limpar e reescrever
-      if (parsed && typeof parsed === 'object' && 'state' in parsed && parsed.state) {
-        const cleanState = parsed.state;
-        localStorage.setItem('cardapio-cart', JSON.stringify(cleanState));
+    const migrationKey = 'cardapio-cart-migrated';
+    const alreadyMigrated = localStorage.getItem(migrationKey);
+    
+    if (!alreadyMigrated) {
+      const stored = localStorage.getItem('cardapio-cart');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Se houver estrutura aninhada com 'state', limpar e reescrever
+        if (parsed && typeof parsed === 'object' && 'state' in parsed && parsed.state) {
+          const cleanState = parsed.state;
+          localStorage.setItem('cardapio-cart', JSON.stringify(cleanState));
+        }
       }
+      // Marcar como migrado para não executar novamente
+      localStorage.setItem(migrationKey, 'true');
     }
   } catch (e) {
     // Ignorar erros na migração
+    console.warn('Erro na migração do carrinho:', e);
   }
 }
 
@@ -440,7 +449,17 @@ export const useCart = create<CartState>()(
     })),
     {
       name: "cardapio-cart",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => {
+        // No servidor (SSR), localStorage não existe, então retornamos um objeto vazio
+        if (typeof window === 'undefined') {
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          } as any;
+        }
+        return localStorage;
+      }),
       partialize: (state) => ({
         items: state.items,
         combos: state.combos,
@@ -450,6 +469,7 @@ export const useCart = create<CartState>()(
       }),
       // Garantir que não há duplicação no estado e limpar estrutura antiga
       merge: (persistedState, currentState) => {
+        // Se não há estado persistido, retornar o estado atual (vazio inicial)
         if (!persistedState || typeof persistedState !== 'object') {
           return currentState;
         }
@@ -460,33 +480,34 @@ export const useCart = create<CartState>()(
           if (nestedState && typeof nestedState === 'object') {
             // Limpar o localStorage antigo e retornar apenas o estado interno
             try {
-              localStorage.removeItem('cardapio-cart');
+              if (typeof window !== 'undefined') {
+                // Não remover o item, apenas reescrever com a estrutura correta
+                localStorage.setItem('cardapio-cart', JSON.stringify(nestedState));
+              }
             } catch (e) {
               // Ignorar erros ao limpar
             }
+            // Retornar o estado aninhado mesclado com o estado atual (para garantir que todas as funções estejam presentes)
             return { ...currentState, ...nestedState };
           }
         }
 
-        // Se o persistedState já tem a estrutura correta, usar diretamente
+        // Se o persistedState já tem a estrutura correta, mesclar com o estado atual
+        // Isso garante que todas as funções do estado estejam presentes
         return { ...currentState, ...persistedState };
       },
-      // Migração: limpar dados antigos na primeira carga
-      onRehydrateStorage: () => (state) => {
-        if (state && typeof state === 'object' && 'state' in state) {
-          // Se ainda houver estrutura aninhada após merge, limpar
-          try {
-            const stored = localStorage.getItem('cardapio-cart');
-            if (stored) {
-              const parsed = JSON.parse(stored);
-              if (parsed && typeof parsed === 'object' && 'state' in parsed) {
-                // Reescrever sem o objeto state aninhado
-                const cleanState = parsed.state || parsed;
-                localStorage.setItem('cardapio-cart', JSON.stringify(cleanState));
-              }
-            }
-          } catch (e) {
-            // Ignorar erros
+      // Callback após reidratação do storage
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Erro ao reidratar carrinho do localStorage:', error);
+          return;
+        }
+        
+        // Log para debug (pode ser removido em produção)
+        if (process.env.NODE_ENV === 'development' && state) {
+          const totalItems = (state.items?.length || 0) + (state.combos?.length || 0) + (state.receitas?.length || 0);
+          if (totalItems > 0) {
+            console.log(`✅ Carrinho reidratado com ${totalItems} item(ns)`);
           }
         }
       },

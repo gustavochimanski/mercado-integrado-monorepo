@@ -44,18 +44,17 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
           {/* Produtos */}
           {items.map((i) => {
             const precoItem = i.preco * i.quantity;
-            const precoAdicionais = (i.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * i.quantity;
-            const precoTotalItem = precoItem + precoAdicionais;
-            
-            // Agrupar adicionais por ID para mostrar quantidade
-            const adicionaisAgrupados = (i.adicionais || []).reduce((acc, adic) => {
-              const key = adic.id;
-              if (!acc[key]) {
-                acc[key] = { ...adic, quantidade: 0 };
-              }
-              acc[key].quantidade += 1;
-              return acc;
-            }, {} as Record<number, { id: number; nome: string; preco: number; quantidade: number }>);
+            // NOVO: Calcular preço dos complementos
+            const precoComplementos = (i.complementos || []).reduce((sum, comp) => {
+              const precoComp = comp.adicionais.reduce((s, a) => {
+                const precoAdicional = a.adicional_preco || 0;
+                return s + (precoAdicional * a.quantidade);
+              }, 0);
+              return sum + precoComp;
+            }, 0) * i.quantity;
+            // LEGADO: Suporte para adicionais antigos
+            const precoAdicionaisLegado = (i.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * i.quantity;
+            const precoTotalItem = precoItem + precoComplementos + precoAdicionaisLegado;
 
             return (
               <div key={i.cod_barras} className="space-y-2">
@@ -63,16 +62,39 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                   <div className="flex-1">
                     <p className="font-medium text-sm">{i.nome}</p>
                     
-                    {/* Adicionais */}
-                    {Object.values(adicionaisAgrupados).length > 0 && (
+                    {/* NOVO: Complementos agrupados */}
+                    {i.complementos && i.complementos.length > 0 && (
+                      <div className="mt-1 space-y-1">
+                        {i.complementos.map((complemento) => (
+                          <div key={complemento.complemento_id} className="pl-2 border-l-2 border-muted">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {complemento.complemento_nome || `Complemento ${complemento.complemento_id}`}:
+                            </p>
+                            {complemento.adicionais.map((adicional, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground pl-2">
+                                • {adicional.adicional_nome || `Adicional ${adicional.adicional_id}`}
+                                {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                {adicional.adicional_preco && adicional.adicional_preco > 0 && (
+                                  <span className="ml-1">
+                                    R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2).replace(".", ",")}
+                                  </span>
+                                )}
+                              </p>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* LEGADO: Adicionais antigos (deprecated) */}
+                    {i.adicionais && i.adicionais.length > 0 && !i.complementos && (
                       <div className="mt-1 space-y-0.5">
-                        {Object.values(adicionaisAgrupados).map((adic) => (
+                        {i.adicionais.map((adic) => (
                           <p key={adic.id} className="text-xs text-muted-foreground pl-2">
                             + {adic.nome}
-                            {adic.quantidade > 1 && ` (${adic.quantidade}x)`}
                             {adic.preco > 0 && (
                               <span className="ml-1">
-                                R$ {(adic.preco * adic.quantidade).toFixed(2).replace(".", ",")}
+                                R$ {adic.preco.toFixed(2).replace(".", ",")}
                               </span>
                             )}
                           </p>
@@ -87,12 +109,14 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                     )}
                     
                     <p className="text-xs text-muted-foreground mt-1">
-                      {precoAdicionais > 0 ? (
+                      {precoComplementos > 0 || precoAdicionaisLegado > 0 ? (
                         <>
                           R$ {precoItem.toFixed(2).replace(".", ",")} 
-                          <span className="text-muted-foreground/70">
-                            {" + "}R$ {precoAdicionais.toFixed(2).replace(".", ",")} adicionais
-                          </span>
+                          {(precoComplementos > 0 || precoAdicionaisLegado > 0) && (
+                            <span className="text-muted-foreground/70">
+                              {" + "}R$ {(precoComplementos + precoAdicionaisLegado).toFixed(2).replace(".", ",")} extras
+                            </span>
+                          )}
                           {" = "}R$ {precoTotalItem.toFixed(2).replace(".", ",")}
                         </>
                       ) : (
@@ -123,35 +147,57 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
           {/* Combos */}
           {combos?.map((c) => {
             const precoCombo = c.preco * c.quantidade;
-            const precoAdicionais = (c.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * c.quantidade;
-            const precoTotalCombo = precoCombo + precoAdicionais;
-            
-            // Agrupar adicionais por ID para mostrar quantidade
-            const adicionaisAgrupados = (c.adicionais || []).reduce((acc, adic) => {
-              const key = adic.id;
-              if (!acc[key]) {
-                acc[key] = { ...adic, quantidade: 0 };
-              }
-              acc[key].quantidade += 1;
-              return acc;
-            }, {} as Record<number, { id: number; nome: string; preco: number; quantidade: number }>);
+            // NOVO: Calcular preço dos complementos
+            const precoComplementos = (c.complementos || []).reduce((sum, comp) => {
+              const precoComp = comp.adicionais.reduce((s, a) => {
+                const precoAdicional = a.adicional_preco || 0;
+                return s + (precoAdicional * a.quantidade);
+              }, 0);
+              return sum + precoComp;
+            }, 0) * c.quantidade;
+            // LEGADO: Suporte para adicionais antigos
+            const precoAdicionaisLegado = (c.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * c.quantidade;
+            const precoTotalCombo = precoCombo + precoComplementos + precoAdicionaisLegado;
 
             return (
               <div key={`combo-${c.combo_id}`} className="space-y-2">
                 <div className="flex justify-between items-center gap-2">
                   <div className="flex-1">
-                    <p className="font-medium text-sm">Combo #{c.combo_id}</p>
+                    <p className="font-medium text-sm">{c.nome || `Combo #${c.combo_id}`}</p>
                     
-                    {/* Adicionais */}
-                    {Object.values(adicionaisAgrupados).length > 0 && (
+                    {/* NOVO: Complementos agrupados */}
+                    {c.complementos && c.complementos.length > 0 && (
+                      <div className="mt-1 space-y-1">
+                        {c.complementos.map((complemento) => (
+                          <div key={complemento.complemento_id} className="pl-2 border-l-2 border-muted">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {complemento.complemento_nome || `Complemento ${complemento.complemento_id}`}:
+                            </p>
+                            {complemento.adicionais.map((adicional, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground pl-2">
+                                • {adicional.adicional_nome || `Adicional ${adicional.adicional_id}`}
+                                {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                {adicional.adicional_preco && adicional.adicional_preco > 0 && (
+                                  <span className="ml-1">
+                                    R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2).replace(".", ",")}
+                                  </span>
+                                )}
+                              </p>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* LEGADO: Adicionais antigos (deprecated) */}
+                    {c.adicionais && c.adicionais.length > 0 && !c.complementos && (
                       <div className="mt-1 space-y-0.5">
-                        {Object.values(adicionaisAgrupados).map((adic) => (
+                        {c.adicionais.map((adic) => (
                           <p key={adic.id} className="text-xs text-muted-foreground pl-2">
                             + {adic.nome}
-                            {adic.quantidade > 1 && ` (${adic.quantidade}x)`}
                             {adic.preco > 0 && (
                               <span className="ml-1">
-                                R$ {(adic.preco * adic.quantidade).toFixed(2).replace(".", ",")}
+                                R$ {adic.preco.toFixed(2).replace(".", ",")}
                               </span>
                             )}
                           </p>
@@ -166,12 +212,14 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                     )}
                     
                     <p className="text-xs text-muted-foreground mt-1">
-                      {precoAdicionais > 0 ? (
+                      {precoComplementos > 0 || precoAdicionaisLegado > 0 ? (
                         <>
                           R$ {precoCombo.toFixed(2).replace(".", ",")} 
-                          <span className="text-muted-foreground/70">
-                            {" + "}R$ {precoAdicionais.toFixed(2).replace(".", ",")} adicionais
-                          </span>
+                          {(precoComplementos > 0 || precoAdicionaisLegado > 0) && (
+                            <span className="text-muted-foreground/70">
+                              {" + "}R$ {(precoComplementos + precoAdicionaisLegado).toFixed(2).replace(".", ",")} extras
+                            </span>
+                          )}
                           {" = "}R$ {precoTotalCombo.toFixed(2).replace(".", ",")}
                         </>
                       ) : (
@@ -202,35 +250,57 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
           {/* Receitas */}
           {receitas?.map((r) => {
             const precoReceita = r.preco * r.quantidade;
-            const precoAdicionais = (r.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * r.quantidade;
-            const precoTotalReceita = precoReceita + precoAdicionais;
-            
-            // Agrupar adicionais por ID para mostrar quantidade
-            const adicionaisAgrupados = (r.adicionais || []).reduce((acc, adic) => {
-              const key = adic.id;
-              if (!acc[key]) {
-                acc[key] = { ...adic, quantidade: 0 };
-              }
-              acc[key].quantidade += 1;
-              return acc;
-            }, {} as Record<number, { id: number; nome: string; preco: number; quantidade: number }>);
+            // NOVO: Calcular preço dos complementos
+            const precoComplementos = (r.complementos || []).reduce((sum, comp) => {
+              const precoComp = comp.adicionais.reduce((s, a) => {
+                const precoAdicional = a.adicional_preco || 0;
+                return s + (precoAdicional * a.quantidade);
+              }, 0);
+              return sum + precoComp;
+            }, 0) * r.quantidade;
+            // LEGADO: Suporte para adicionais antigos
+            const precoAdicionaisLegado = (r.adicionais || []).reduce((sum, adic) => sum + adic.preco, 0) * r.quantidade;
+            const precoTotalReceita = precoReceita + precoComplementos + precoAdicionaisLegado;
 
             return (
               <div key={`receita-${r.receita_id}`} className="space-y-2">
                 <div className="flex justify-between items-center gap-2">
                   <div className="flex-1">
-                    <p className="font-medium text-sm">Receita #{r.receita_id}</p>
+                    <p className="font-medium text-sm">{r.nome || `Receita #${r.receita_id}`}</p>
                     
-                    {/* Adicionais */}
-                    {Object.values(adicionaisAgrupados).length > 0 && (
+                    {/* NOVO: Complementos agrupados */}
+                    {r.complementos && r.complementos.length > 0 && (
+                      <div className="mt-1 space-y-1">
+                        {r.complementos.map((complemento) => (
+                          <div key={complemento.complemento_id} className="pl-2 border-l-2 border-muted">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {complemento.complemento_nome || `Complemento ${complemento.complemento_id}`}:
+                            </p>
+                            {complemento.adicionais.map((adicional, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground pl-2">
+                                • {adicional.adicional_nome || `Adicional ${adicional.adicional_id}`}
+                                {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                {adicional.adicional_preco && adicional.adicional_preco > 0 && (
+                                  <span className="ml-1">
+                                    R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2).replace(".", ",")}
+                                  </span>
+                                )}
+                              </p>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* LEGADO: Adicionais antigos (deprecated) */}
+                    {r.adicionais && r.adicionais.length > 0 && !r.complementos && (
                       <div className="mt-1 space-y-0.5">
-                        {Object.values(adicionaisAgrupados).map((adic) => (
+                        {r.adicionais.map((adic) => (
                           <p key={adic.id} className="text-xs text-muted-foreground pl-2">
                             + {adic.nome}
-                            {adic.quantidade > 1 && ` (${adic.quantidade}x)`}
                             {adic.preco > 0 && (
                               <span className="ml-1">
-                                R$ {(adic.preco * adic.quantidade).toFixed(2).replace(".", ",")}
+                                R$ {adic.preco.toFixed(2).replace(".", ",")}
                               </span>
                             )}
                           </p>
@@ -245,12 +315,14 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                     )}
                     
                     <p className="text-xs text-muted-foreground mt-1">
-                      {precoAdicionais > 0 ? (
+                      {precoComplementos > 0 || precoAdicionaisLegado > 0 ? (
                         <>
                           R$ {precoReceita.toFixed(2).replace(".", ",")} 
-                          <span className="text-muted-foreground/70">
-                            {" + "}R$ {precoAdicionais.toFixed(2).replace(".", ",")} adicionais
-                          </span>
+                          {(precoComplementos > 0 || precoAdicionaisLegado > 0) && (
+                            <span className="text-muted-foreground/70">
+                              {" + "}R$ {(precoComplementos + precoAdicionaisLegado).toFixed(2).replace(".", ",")} extras
+                            </span>
+                          )}
                           {" = "}R$ {precoTotalReceita.toFixed(2).replace(".", ",")}
                         </>
                       ) : (

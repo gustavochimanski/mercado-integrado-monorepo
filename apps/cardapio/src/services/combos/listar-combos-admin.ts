@@ -4,11 +4,11 @@ import type { ComboDTO, ListaCombosResponse } from "@cardapio/api";
 
 /**
  * Hook para listar combos admin com paginação e busca
- * Endpoint: GET /api/cadastros/admin/combos/
+ * Endpoint: GET /api/catalogo/admin/combos/
  * 
  * @param empresaId - ID da empresa
  * @param page - Página atual (padrão: 1)
- * @param busca - Texto de busca (opcional)
+ * @param busca - Texto de busca (opcional) - busca em título e descrição
  * @param enabled - Se deve buscar ou não (padrão: true)
  * 
  * @example
@@ -30,18 +30,15 @@ export function useListarCombosAdmin(
         page,
         limit: 30,
       };
-      const { data } = await apiAdmin.get<ListaCombosResponse>("/api/cadastros/admin/combos/", { params });
       
-      // Filtrar por busca se necessário (client-side por enquanto)
-      let combos = data.data || [];
+      // Adicionar parâmetro search se houver busca
       if (busca?.trim()) {
-        combos = combos.filter(c => 
-          c.titulo.toLowerCase().includes(busca.toLowerCase()) ||
-          c.descricao?.toLowerCase().includes(busca.toLowerCase())
-        );
+        params.search = busca.trim();
       }
       
-      return { combos, hasMore: data.has_more };
+      const { data } = await apiAdmin.get<ListaCombosResponse>("/api/catalogo/admin/combos/", { params });
+      
+      return { combos: data.data || [], hasMore: data.has_more };
     },
     enabled: enabled && !!empresaId,
     staleTime: 5 * 60 * 1000,

@@ -17,10 +17,10 @@ function useDebounced<T>(value: T, delay = 350) {
 
 /**
  * Hook para buscar produtos com filtros
- * Endpoint: GET /api/cadastros/admin/produtos/search
+ * Endpoint: GET /api/catalogo/admin/produtos/
  * 
  * @param cod_empresa - ID da empresa
- * @param q - Termo de busca
+ * @param search - Termo de busca (código de barras, descrição ou SKU)
  * @param opts - Opções de paginação e filtros
  * 
  * @example
@@ -30,7 +30,7 @@ function useDebounced<T>(value: T, delay = 350) {
  */
 export function useBuscarProdutos(
   cod_empresa: number,
-  q: string,
+  search: string,
   opts?: { page?: number; limit?: number; apenas_disponiveis?: boolean; enabled?: boolean }
 ) {
   const {
@@ -39,10 +39,10 @@ export function useBuscarProdutos(
     apenas_disponiveis = false,
     enabled,
   } = opts ?? {};
-  const qDeb = useDebounced(q, 350);
+  const searchDeb = useDebounced(search, 350);
 
   return useQuery<ProdutosPaginadosResponse>({
-    queryKey: ["produtos_search", cod_empresa, qDeb, page, limit, apenas_disponiveis],
+    queryKey: ["produtos_search", cod_empresa, searchDeb, page, limit, apenas_disponiveis],
     queryFn: async () => {
       const params: Record<string, any> = {
         cod_empresa,
@@ -50,9 +50,9 @@ export function useBuscarProdutos(
         limit,
         apenas_disponiveis,
       };
-      if (qDeb?.trim()) params.q = qDeb.trim();
+      if (searchDeb?.trim()) params.search = searchDeb.trim();
 
-      const { data } = await apiAdmin.get(`${BASE}/search`, { params });
+      const { data } = await apiAdmin.get(`${BASE}/`, { params });
       return data as ProdutosPaginadosResponse;
     },
     enabled: enabled ?? !!cod_empresa,

@@ -27,17 +27,13 @@ export const ModalAddReceita = ({
   vitrineId,
 }: Props) => {
   const [busca, setBusca] = React.useState("");
-  const [page, setPage] = React.useState(1);
 
-  const { data, isLoading, isFetching } = useListarReceitas(empresaId, {
-    page,
-    limit: 30,
-    q: busca,
+  const { data, isLoading } = useListarReceitas(empresaId, {
+    search: busca,
     enabled: open && !!empresaId,
   });
 
   const receitas = data?.receitas || [];
-  const hasMore = data?.hasMore ?? false;
 
   const vincularReceita = useVincularReceitaVitrine();
 
@@ -51,7 +47,6 @@ export const ModalAddReceita = ({
   React.useEffect(() => {
     if (!open) {
       setBusca("");
-      setPage(1);
     }
   }, [open]);
 
@@ -64,7 +59,7 @@ export const ModalAddReceita = ({
 
         <div className="flex flex-col gap-3">
           <Input
-            placeholder="Buscar por nome ou código de barras..."
+            placeholder="Buscar por nome ou descrição..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             autoFocus
@@ -119,27 +114,6 @@ export const ModalAddReceita = ({
               ))}
           </div>
 
-          {receitas.length > 0 && (
-            <div className="flex items-center justify-between pt-1">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setPage((n) => Math.max(1, n - 1))}
-                disabled={isFetching || page === 1}
-              >
-                Anterior
-              </Button>
-              <div className="text-xs text-muted-foreground">Página {page}</div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setPage((n) => n + 1)}
-                disabled={isFetching || !hasMore}
-              >
-                Próxima
-              </Button>
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>

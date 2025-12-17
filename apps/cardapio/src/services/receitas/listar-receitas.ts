@@ -14,56 +14,61 @@ function useDebounced<T>(value: T, delay = 350) {
 }
 
 interface UseListarReceitasOptions {
-  page?: number;
-  limit?: number;
-  q?: string; // Termo de busca opcional
+  search?: string; // Termo de busca opcional (busca em nome e descrição)
+  ativo?: boolean; // Filtrar por status ativo
   debounceMs?: number;
   enabled?: boolean;
 }
 
 /**
- * Hook para listar receitas com paginação e busca opcional
+ * Hook para listar receitas com busca opcional
  * Endpoint: GET /api/catalogo/admin/receitas/
  * 
- * @param empresaId - ID da empresa (obrigatório)
- * @param opts - Opções adicionais (page, limit, q, debounceMs, enabled)
+ * Nota: As receitas não têm paginação, retornam todas de uma vez
+ * 
+ * @param empresaId - ID da empresa (opcional, se não informado retorna todas)
+ * @param opts - Opções adicionais (search, ativo, debounceMs, enabled)
  * 
  * @example
  * ```tsx
- * const { data, isLoading } = useListarReceitas(empresaId, { page: 1, limit: 30, q: "pizza" });
+ * const { data, isLoading } = useListarReceitas(empresaId, { search: "pizza", ativo: true });
  * ```
  */
 export function useListarReceitas(
-  empresaId: number,
+  empresaId?: number,
   opts: UseListarReceitasOptions = {}
 ) {
   const {
-    page = 1,
-    limit = 30,
-    q = "",
+    search = "",
+    ativo,
     debounceMs = 350,
     enabled = true,
   } = opts;
 
-  const buscaDeb = useDebounced(q, debounceMs);
+  const searchDeb = useDebounced(search, debounceMs);
 
-  return useQuery<{ receitas: ReceitaListItem[]; hasMore: boolean }>({
-    queryKey: ["receitas_listar", empresaId, page, limit, buscaDeb],
+  return useQuery<{ receitas: ReceitaListItem[] }>({
+    queryKey: ["receitas_listar", empresaId, searchDeb, ativo],
     queryFn: async () => {
-      const params: Record<string, any> = {
-        cod_empresa: empresaId,
-        page,
-        limit,
-      };
-      if (buscaDeb?.trim()) {
-        params.q = buscaDeb.trim();
+      const params: Record<string, any> = {};
+      
+      if (empresaId) {
+        params.empresa_id = empresaId;
+      }
+      
+      if (ativo !== undefined) {
+        params.ativo = ativo;
+      }
+      
+      if (searchDeb?.trim()) {
+        params.search = searchDeb.trim();
       }
 
       try {
         const { data } = await apiAdmin.get<ReceitaApiResponse[]>("/api/catalogo/admin/receitas/", { params });
 
         // Mapear a resposta da API para o formato esperado
-        let receitas: ReceitaListItem[] = (data || []).map((item) => ({
+        const receitas: ReceitaListItem[] = (data || []).map((item) => ({
           id: item.id,
           receita_id: item.id,
           descricao: item.descricao || item.nome,
@@ -75,24 +80,13 @@ export function useListarReceitas(
           disponivel: item.disponivel,
         }));
 
-        // Filtrar por busca se necessário (client-side por enquanto)
-        if (buscaDeb?.trim()) {
-          receitas = receitas.filter((r) =>
-            r.descricao.toLowerCase().includes(buscaDeb.toLowerCase()) ||
-            r.nome.toLowerCase().includes(buscaDeb.toLowerCase())
-          );
-        }
-
-        // Como o endpoint retorna array direto, assumimos que há mais se retornou o limite completo
-        const hasMore = receitas.length === limit;
-
-        return { receitas, hasMore };
+        return { receitas };
       } catch (error: any) {
         console.warn("Endpoint de receitas não encontrado", error);
-        return { receitas: [], hasMore: false };
+        return { receitas: [] };
       }
     },
-    enabled: enabled && !!empresaId,
+    enabled: enabled,
     staleTime: 5 * 60 * 1000,
   });
 }

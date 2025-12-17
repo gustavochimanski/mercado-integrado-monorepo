@@ -1,7 +1,6 @@
 // @cardapio/services/complementos/buscar-complementos-produto-client.ts
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,46 +8,14 @@ if (!BASE_URL) {
   throw new Error("NEXT_PUBLIC_API_URL não configurado");
 }
 
-/**
- * Interface para um Adicional (Item) dentro de um Complemento
- * Corresponde ao AdicionalResponse da API
- */
-export interface AdicionalComplemento {
-  id: number;                      // Este é o adicional_id usado nos pedidos
-  nome: string;
-  descricao?: string | null;
-  preco: number;
-  custo: number;
-  ativo: boolean;
-  ordem: number;
-  created_at: string;              // ISO 8601
-  updated_at: string;              // ISO 8601
-}
-
-/**
- * Interface para um Complemento
- * Corresponde ao ComplementoResponse da API
- */
-export interface ComplementoResponse {
-  id: number;
-  empresa_id: number;
-  nome: string;
-  descricao?: string | null;
-  obrigatorio: boolean;
-  quantitativo: boolean;
-  permite_multipla_escolha: boolean;
-  ordem: number;
-  ativo: boolean;
-  adicionais: AdicionalComplemento[];
-  created_at: string;              // ISO 8601
-  updated_at: string;              // ISO 8601
-}
+// Re-exportar tipos centralizados para manter compatibilidade
+export type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
 
 /**
  * Hook para buscar complementos de um produto (client-side)
- * Endpoint: GET /api/catalogo/client/complementos/produto/{cod_barras}
+ * Endpoint: GET /api/catalogo/public/complementos/produto/{cod_barras}
  * 
- * Requer autenticação via header X-Super-Token (token do cliente).
+ * Endpoint público - não requer autenticação.
  * Retorna apenas complementos ativos por padrão (a menos que apenas_ativos=false).
  * 
  * @param codBarras - Código de barras do produto
@@ -65,21 +32,16 @@ export function useBuscarComplementosProdutoClient(
   apenasAtivos: boolean = true,
   enabled: boolean = true
 ) {
-  const tokenCliente = getTokenCliente();
-
   return useQuery<ComplementoResponse[]>({
     queryKey: ["complementos-produto", codBarras, apenasAtivos],
     queryFn: async () => {
-      if (!codBarras || !tokenCliente) {
-        throw new Error("Código de barras ou token do cliente não fornecido");
+      if (!codBarras) {
+        throw new Error("Código de barras não fornecido");
       }
 
       const response = await axios.get<ComplementoResponse[]>(
-        `${BASE_URL}/api/catalogo/client/complementos/produto/${codBarras}`,
+        `${BASE_URL}/api/catalogo/public/complementos/produto/${codBarras}`,
         {
-          headers: {
-            "X-Super-Token": tokenCliente,
-          },
           params: {
             apenas_ativos: apenasAtivos,
           },
@@ -88,7 +50,8 @@ export function useBuscarComplementosProdutoClient(
 
       return response.data;
     },
-    enabled: enabled && !!codBarras && !!tokenCliente,
+    // Habilitar apenas quando enabled=true, codBarras existe, e estamos no cliente
+    enabled: enabled && !!codBarras && typeof window !== 'undefined',
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
     refetchOnWindowFocus: false,
   });
@@ -107,18 +70,9 @@ export async function buscarComplementosProduto(
   codBarras: string,
   apenasAtivos: boolean = true
 ): Promise<ComplementoResponse[]> {
-  const tokenCliente = getTokenCliente();
-
-  if (!tokenCliente) {
-    throw new Error("Token do cliente não encontrado. Cliente não autenticado.");
-  }
-
   const response = await axios.get<ComplementoResponse[]>(
-    `${BASE_URL}/api/catalogo/client/complementos/produto/${codBarras}`,
+    `${BASE_URL}/api/catalogo/public/complementos/produto/${codBarras}`,
     {
-      headers: {
-        "X-Super-Token": tokenCliente,
-      },
       params: {
         apenas_ativos: apenasAtivos,
       },

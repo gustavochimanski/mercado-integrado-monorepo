@@ -1,8 +1,7 @@
 // @cardapio/services/complementos/buscar-complementos-receita-client.ts
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
-import type { ComplementoResponse } from "./buscar-complementos-produto-client";
+import type { ComplementoResponse } from "@cardapio/types/complementos";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,9 +11,9 @@ if (!BASE_URL) {
 
 /**
  * Hook para buscar complementos de uma receita (client-side)
- * Endpoint: GET /api/catalogo/client/complementos/receita/{receita_id}
+ * Endpoint: GET /api/catalogo/public/complementos/receita/{receita_id}
  * 
- * Requer autenticação via header X-Super-Token (token do cliente).
+ * Endpoint público - não requer autenticação.
  * Retorna apenas complementos ativos por padrão (a menos que apenas_ativos=false).
  * 
  * @param receitaId - ID da receita
@@ -31,21 +30,16 @@ export function useBuscarComplementosReceitaClient(
   apenasAtivos: boolean = true,
   enabled: boolean = true
 ) {
-  const tokenCliente = getTokenCliente();
-
   return useQuery<ComplementoResponse[]>({
     queryKey: ["complementos-receita", receitaId, apenasAtivos],
     queryFn: async () => {
-      if (!receitaId || !tokenCliente) {
-        throw new Error("ID da receita ou token do cliente não fornecido");
+      if (!receitaId) {
+        throw new Error("ID da receita não fornecido");
       }
 
       const response = await axios.get<ComplementoResponse[]>(
-        `${BASE_URL}/api/catalogo/client/complementos/receita/${receitaId}`,
+        `${BASE_URL}/api/catalogo/public/complementos/receita/${receitaId}`,
         {
-          headers: {
-            "X-Super-Token": tokenCliente,
-          },
           params: {
             apenas_ativos: apenasAtivos,
           },
@@ -54,7 +48,7 @@ export function useBuscarComplementosReceitaClient(
 
       return response.data;
     },
-    enabled: enabled && !!receitaId && !!tokenCliente,
+    enabled: enabled && !!receitaId && typeof window !== 'undefined',
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
     refetchOnWindowFocus: false,
   });
@@ -73,18 +67,9 @@ export async function buscarComplementosReceita(
   receitaId: number,
   apenasAtivos: boolean = true
 ): Promise<ComplementoResponse[]> {
-  const tokenCliente = getTokenCliente();
-
-  if (!tokenCliente) {
-    throw new Error("Token do cliente não encontrado. Cliente não autenticado.");
-  }
-
   const response = await axios.get<ComplementoResponse[]>(
-    `${BASE_URL}/api/catalogo/client/complementos/receita/${receitaId}`,
+    `${BASE_URL}/api/catalogo/public/complementos/receita/${receitaId}`,
     {
-      headers: {
-        "X-Super-Token": tokenCliente,
-      },
       params: {
         apenas_ativos: apenasAtivos,
       },

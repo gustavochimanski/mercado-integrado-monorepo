@@ -1,8 +1,7 @@
 // @cardapio/services/complementos/buscar-complementos-combo-client.ts
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
-import type { ComplementoResponse } from "./buscar-complementos-produto-client";
+import type { ComplementoResponse } from "@cardapio/types/complementos";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,9 +11,9 @@ if (!BASE_URL) {
 
 /**
  * Hook para buscar complementos de um combo (client-side)
- * Endpoint: GET /api/catalogo/client/complementos/combo/{combo_id}
+ * Endpoint: GET /api/catalogo/public/complementos/combo/{combo_id}
  * 
- * Requer autenticação via header X-Super-Token (token do cliente).
+ * Endpoint público - não requer autenticação.
  * Retorna apenas complementos ativos por padrão (a menos que apenas_ativos=false).
  * 
  * @param comboId - ID do combo
@@ -31,21 +30,16 @@ export function useBuscarComplementosComboClient(
   apenasAtivos: boolean = true,
   enabled: boolean = true
 ) {
-  const tokenCliente = getTokenCliente();
-
   return useQuery<ComplementoResponse[]>({
     queryKey: ["complementos-combo", comboId, apenasAtivos],
     queryFn: async () => {
-      if (!comboId || !tokenCliente) {
-        throw new Error("ID do combo ou token do cliente não fornecido");
+      if (!comboId) {
+        throw new Error("ID do combo não fornecido");
       }
 
       const response = await axios.get<ComplementoResponse[]>(
-        `${BASE_URL}/api/catalogo/client/complementos/combo/${comboId}`,
+        `${BASE_URL}/api/catalogo/public/complementos/combo/${comboId}`,
         {
-          headers: {
-            "X-Super-Token": tokenCliente,
-          },
           params: {
             apenas_ativos: apenasAtivos,
           },
@@ -54,7 +48,7 @@ export function useBuscarComplementosComboClient(
 
       return response.data;
     },
-    enabled: enabled && !!comboId && !!tokenCliente,
+    enabled: enabled && !!comboId && typeof window !== 'undefined',
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
     refetchOnWindowFocus: false,
   });
@@ -73,18 +67,9 @@ export async function buscarComplementosCombo(
   comboId: number,
   apenasAtivos: boolean = true
 ): Promise<ComplementoResponse[]> {
-  const tokenCliente = getTokenCliente();
-
-  if (!tokenCliente) {
-    throw new Error("Token do cliente não encontrado. Cliente não autenticado.");
-  }
-
   const response = await axios.get<ComplementoResponse[]>(
-    `${BASE_URL}/api/catalogo/client/complementos/combo/${comboId}`,
+    `${BASE_URL}/api/catalogo/public/complementos/combo/${comboId}`,
     {
-      headers: {
-        "X-Super-Token": tokenCliente,
-      },
       params: {
         apenas_ativos: apenasAtivos,
       },

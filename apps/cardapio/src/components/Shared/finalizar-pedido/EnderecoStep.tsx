@@ -5,7 +5,7 @@ import { Button } from "@cardapio/components/Shared/ui/button";
 import { Label } from "@cardapio/components/Shared/ui/label";
 import { Input } from "@cardapio/components/Shared/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@cardapio/components/Shared/ui/dialog";
-import { Pen, Trash2, Plus, MapPin } from "lucide-react";
+import { Pen, Trash2, Plus, MapPin, Check } from "lucide-react";
 import { SearchEndereco } from "@cardapio/components/Shared/SearchEndereco";
 import type { EnderecoSearchResult } from "@cardapio/services/enderecos/useQueryEndereco";
 
@@ -118,21 +118,21 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleSelectAddress = (selectedAddress: EnderecoSearchResult) => {
+    // Preencher automaticamente TODOS os campos possíveis do endereço selecionado
     setNovo({
-      ...novo,
       logradouro: selectedAddress.logradouro || "",
-      numero: selectedAddress.numero || novo.numero || "",
-      complemento: novo.complemento || "", // EnderecoSearchResult não tem complemento
+      numero: selectedAddress.numero || novo.numero || "", // Manter número se já estava preenchido
+      complemento: novo.complemento || "", // Manter complemento se já estava preenchido
       bairro: selectedAddress.bairro || "",
       distrito: selectedAddress.distrito || "",
       cidade: selectedAddress.cidade || "",
-      estado: selectedAddress.codigo_estado || selectedAddress.estado || "",
-      codigo_estado: selectedAddress.codigo_estado || "",
+      estado: selectedAddress.estado || selectedAddress.codigo_estado || "",
+      codigo_estado: selectedAddress.codigo_estado || selectedAddress.estado || "",
       cep: selectedAddress.cep || "",
-      pais: selectedAddress.pais || "",
+      pais: selectedAddress.pais || "Brasil", // Default para Brasil
       latitude: selectedAddress.latitude || 0,
       longitude: selectedAddress.longitude || 0,
-      ponto_referencia: "" // EnderecoSearchResult não tem ponto_referencia
+      ponto_referencia: novo.ponto_referencia || "" // Manter ponto de referência se já estava preenchido
     });
     // Manter o endereço formatado no campo de pesquisa
     setSearchAddress(selectedAddress.endereco_formatado || "");
@@ -145,20 +145,28 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
   const validateForm = () => {
     const errors: Record<string, string> = {};
     
-    if (!novo.logradouro.trim()) {
-      errors.logradouro = "Rua é obrigatória";
+    if (!novo.logradouro?.trim()) {
+      errors.logradouro = "Rua/Logradouro é obrigatório";
     }
     
-    if (!novo.cidade.trim()) {
+    if (!novo.numero?.trim()) {
+      errors.numero = "Número é obrigatório";
+    }
+    
+    if (!novo.bairro?.trim()) {
+      errors.bairro = "Bairro é obrigatório";
+    }
+    
+    if (!novo.cidade?.trim()) {
       errors.cidade = "Cidade é obrigatória";
     }
     
-    if (!novo.estado.trim()) {
-      errors.estado = "Estado é obrigatório";
+    if (!novo.estado?.trim() && !novo.codigo_estado?.trim()) {
+      errors.estado = "Estado/UF é obrigatório";
     }
     
     if (novo.cep && !/^\d{5}-?\d{3}$/.test(novo.cep.replace(/\D/g, ""))) {
-      errors.cep = "CEP deve ter 8 dígitos";
+      errors.cep = "CEP deve ter 8 dígitos (formato: 00000-000)";
     }
     
     setValidationErrors(errors);
@@ -258,156 +266,306 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
           );
         })}
 
-        {/* Card para adicionar novo */}
-        <div
-          role="button"
-          tabIndex={0}
+        {/* Botão para adicionar novo */}
+        <Button
           onClick={startAddNew}
-          className="w-full rounded-xl border-2 border-dashed border-muted-foreground/60 flex items-center justify-center gap-2 py-4"
+          variant="default"
+          className="w-full rounded-xl flex items-center justify-center gap-2 py-6 h-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
         >
-          <Plus className="h-5 w-5 text-muted-foreground/60" />
-          <span className="text-muted-foreground/60">Adicionar Novo Endereço</span>
-        </div>
+          <Plus className="h-5 w-5" />
+          <span>Adicionar Novo Endereço</span>
+        </Button>
       </div>
 
       {/* Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="!max-w-md">
+        <DialogContent className="!max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-base">{editingId !== null ? "Editar Endereço" : "Novo Endereço"}</DialogTitle>
+            <DialogTitle className="text-lg">{editingId !== null ? "Editar Endereço" : "Adicionar Novo Endereço"}</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {editingId !== null 
+                ? "Pesquise e selecione um endereço ou edite manualmente os campos abaixo"
+                : "Pesquise seu endereço digitando a rua ou CEP. Os campos serão preenchidos automaticamente!"}
+            </p>
           </DialogHeader>
 
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-600" />
-                Pesquisar Endereço (Rua ou CEP) *
+          <div className="space-y-4">
+            {/* Busca de Endereço - Destaque Principal */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                Pesquisar Endereço
+                <span className="text-xs font-normal text-muted-foreground">(Rua ou CEP)</span>
               </Label>
               <SearchEndereco
                 value={searchAddress}
                 onValueChange={handleSearchChange}
                 onAddressSelect={handleSelectAddress}
-                placeholder="Digite a rua ou CEP"
+                placeholder="Ex: Rua das Flores ou 01310-100"
               />
-              {validationErrors.logradouro && (
-                <p className="text-red-500 text-xs">{validationErrors.logradouro}</p>
+              {(validationErrors.logradouro || validationErrors.numero || validationErrors.bairro || validationErrors.cidade || validationErrors.estado) && (
+                <div className="space-y-1">
+                  {validationErrors.logradouro && (
+                    <p className="text-red-500 text-xs flex items-center gap-1">
+                      <span>⚠️</span> {validationErrors.logradouro}
+                    </p>
+                  )}
+                  {validationErrors.numero && (
+                    <p className="text-red-500 text-xs flex items-center gap-1">
+                      <span>⚠️</span> {validationErrors.numero}
+                    </p>
+                  )}
+                  {validationErrors.bairro && (
+                    <p className="text-red-500 text-xs flex items-center gap-1">
+                      <span>⚠️</span> {validationErrors.bairro}
+                    </p>
+                  )}
+                  {validationErrors.cidade && (
+                    <p className="text-red-500 text-xs flex items-center gap-1">
+                      <span>⚠️</span> {validationErrors.cidade}
+                    </p>
+                  )}
+                  {validationErrors.estado && (
+                    <p className="text-red-500 text-xs flex items-center gap-1">
+                      <span>⚠️</span> {validationErrors.estado}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Detalhes do Endereço</Label>
-              <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_logradouro" className="text-sm font-medium">Logradouro</Label>
-                        <Input
-                          id="endereco_logradouro"
-                          value={novo.logradouro || ""}
-                          onChange={(e) => setNovo({ ...novo, logradouro: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_numero" className="text-sm font-medium text-yellow-600">Número *</Label>
-                        <Input
-                          id="endereco_numero"
-                          value={novo.numero || ""}
-                          onChange={(e) => setNovo({ ...novo, numero: e.target.value })}
-                          className="bg-white h-8 text-sm border-2 border-yellow-200 focus:border-yellow-400"
-                          autoComplete="off"
-                          placeholder="Ex.: 123"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_complemento" className="text-sm font-medium text-gray-500">Complemento (opcional)</Label>
-                        <Input
-                          id="endereco_complemento"
-                          value={novo.complemento || ""}
-                          onChange={(e) => setNovo({ ...novo, complemento: e.target.value })}
-                          className="bg-white h-8 text-sm border-2 border-gray-200 focus:border-gray-400"
-                          autoComplete="off"
-                          placeholder="Ex.: Apto 101"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_bairro" className="text-sm font-medium">Bairro</Label>
-                        <Input
-                          id="endereco_bairro"
-                          value={novo.bairro || ""}
-                          onChange={(e) => setNovo({ ...novo, bairro: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_distrito" className="text-sm font-medium text-gray-500">Distrito</Label>
-                        <Input
-                          id="endereco_distrito"
-                          value={novo.distrito || ""}
-                          onChange={(e) => setNovo({ ...novo, distrito: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_cidade" className="text-sm font-medium">Cidade</Label>
-                        <Input
-                          id="endereco_cidade"
-                          value={novo.cidade || ""}
-                          onChange={(e) => setNovo({ ...novo, cidade: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_estado" className="text-sm font-medium">Estado</Label>
-                        <Input
-                          id="endereco_estado"
-                          value={novo.estado || ""}
-                          onChange={(e) => setNovo({ ...novo, estado: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_codigo_estado" className="text-sm font-medium text-gray-500">UF</Label>
-                        <Input
-                          id="endereco_codigo_estado"
-                          value={novo.codigo_estado || ""}
-                          onChange={(e) => setNovo({ ...novo, codigo_estado: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_cep" className="text-sm font-medium">CEP</Label>
-                        <Input
-                          id="endereco_cep"
-                          value={novo.cep || ""}
-                          onChange={(e) => setNovo({ ...novo, cep: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="endereco_pais" className="text-sm font-medium text-gray-500">País</Label>
-                        <Input
-                          id="endereco_pais"
-                          value={novo.pais || ""}
-                          onChange={(e) => setNovo({ ...novo, pais: e.target.value })}
-                          className="bg-white h-8 text-sm"
-                          autoComplete="off"
-                        />
-                      </div>
-                    </div>
+            {/* Campos Essenciais - Visíveis e Destacados */}
+            <div className="space-y-3 border-t pt-4">
+              <Label className="text-sm font-semibold">Informações do Endereço</Label>
+              
+              {/* Linha 1: Logradouro e Número */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="endereco_logradouro" className="text-sm">
+                      Rua/Logradouro <span className="text-red-500">*</span>
+                    </Label>
+                    {!!searchAddress && !!novo.logradouro && (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Preenchido automaticamente
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="endereco_logradouro"
+                    value={novo.logradouro || ""}
+                    onChange={(e) => setNovo({ ...novo, logradouro: e.target.value })}
+                    className={`h-10 text-sm ${
+                      !!searchAddress && !!novo.logradouro ? "bg-green-50 border-green-200" : ""
+                    }`}
+                    autoComplete="address-line1"
+                    placeholder="Ex: Rua das Flores"
+                    readOnly={!!searchAddress && !!novo.logradouro} // Readonly se foi preenchido pela busca
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="endereco_numero" className="text-sm font-semibold text-amber-600">
+                    Número <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="endereco_numero"
+                    value={novo.numero || ""}
+                    onChange={(e) => setNovo({ ...novo, numero: e.target.value })}
+                    className={`h-10 text-sm border-2 font-medium ${
+                      validationErrors.numero 
+                        ? "border-red-300 focus:border-red-500" 
+                        : "border-amber-200 focus:border-amber-400"
+                    }`}
+                    autoComplete="off"
+                    placeholder="Ex: 123"
+                    required
+                  />
+                  {validationErrors.numero && (
+                    <p className="text-red-500 text-xs">{validationErrors.numero}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Linha 2: Complemento */}
+              <div className="space-y-1">
+                <Label htmlFor="endereco_complemento" className="text-sm text-muted-foreground">
+                  Complemento <span className="text-xs">(opcional)</span>
+                </Label>
+                <Input
+                  id="endereco_complemento"
+                  value={novo.complemento || ""}
+                  onChange={(e) => setNovo({ ...novo, complemento: e.target.value })}
+                  className="h-10 text-sm"
+                  autoComplete="address-line2"
+                  placeholder="Ex: Apto 101, Bloco B, etc."
+                />
+              </div>
+
+              {/* Linha 3: Bairro e CEP */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="endereco_bairro" className="text-sm">
+                      Bairro <span className="text-red-500">*</span>
+                    </Label>
+                    {!!searchAddress && !!novo.bairro && (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Preenchido
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="endereco_bairro"
+                    value={novo.bairro || ""}
+                    onChange={(e) => setNovo({ ...novo, bairro: e.target.value })}
+                    className={`h-10 text-sm ${
+                      validationErrors.bairro 
+                        ? "border-red-300 focus:border-red-500" 
+                        : (!!searchAddress && !!novo.bairro ? "bg-green-50 border-green-200" : "")
+                    }`}
+                    autoComplete="address-level2"
+                    placeholder="Ex: Centro"
+                    readOnly={!!searchAddress && !!novo.bairro}
+                  />
+                  {validationErrors.bairro && (
+                    <p className="text-red-500 text-xs">{validationErrors.bairro}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="endereco_cep" className="text-sm">
+                      CEP
+                    </Label>
+                    {!!searchAddress && !!novo.cep && (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Preenchido
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="endereco_cep"
+                    value={novo.cep || ""}
+                    onChange={(e) => setNovo({ ...novo, cep: e.target.value })}
+                    className={`h-10 text-sm ${
+                      !!searchAddress && !!novo.cep ? "bg-green-50 border-green-200" : ""
+                    }`}
+                    autoComplete="postal-code"
+                    placeholder="00000-000"
+                    readOnly={!!searchAddress && !!novo.cep}
+                  />
+                </div>
+              </div>
+
+              {/* Linha 4: Cidade e Estado */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="endereco_cidade" className="text-sm">
+                      Cidade <span className="text-red-500">*</span>
+                    </Label>
+                    {!!searchAddress && !!novo.cidade && (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Preenchido
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="endereco_cidade"
+                    value={novo.cidade || ""}
+                    onChange={(e) => setNovo({ ...novo, cidade: e.target.value })}
+                    className={`h-10 text-sm ${
+                      validationErrors.cidade 
+                        ? "border-red-300 focus:border-red-500" 
+                        : (!!searchAddress && !!novo.cidade ? "bg-green-50 border-green-200" : "")
+                    }`}
+                    autoComplete="address-level1"
+                    placeholder="Ex: São Paulo"
+                    readOnly={!!searchAddress && !!novo.cidade}
+                  />
+                  {validationErrors.cidade && (
+                    <p className="text-red-500 text-xs">{validationErrors.cidade}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="endereco_estado" className="text-sm">
+                      Estado/UF <span className="text-red-500">*</span>
+                    </Label>
+                    {!!searchAddress && (!!novo.codigo_estado || !!novo.estado) && (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Preenchido
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="endereco_estado"
+                    value={novo.codigo_estado || novo.estado || ""}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase().slice(0, 2);
+                      setNovo({ ...novo, codigo_estado: value, estado: value });
+                    }}
+                    className={`h-10 text-sm font-medium ${
+                      validationErrors.estado 
+                        ? "border-red-300 focus:border-red-500" 
+                        : (!!searchAddress && (!!novo.codigo_estado || !!novo.estado) ? "bg-green-50 border-green-200" : "")
+                    }`}
+                    autoComplete="off"
+                    placeholder="SP"
+                    maxLength={2}
+                    readOnly={!!searchAddress && (!!novo.codigo_estado || !!novo.estado)}
+                  />
+                  {validationErrors.estado && (
+                    <p className="text-red-500 text-xs">{validationErrors.estado}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Campos Ocultos por padrão - Expandir se necessário */}
+              <details className="border rounded-md p-2">
+                <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                  Campos adicionais (opcional)
+                </summary>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t">
+                  <div className="space-y-1">
+                    <Label htmlFor="endereco_distrito" className="text-xs text-muted-foreground">Distrito</Label>
+                    <Input
+                      id="endereco_distrito"
+                      value={novo.distrito || ""}
+                      onChange={(e) => setNovo({ ...novo, distrito: e.target.value })}
+                      className="h-9 text-sm"
+                      autoComplete="off"
+                      disabled={!!searchAddress && !!novo.distrito}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="endereco_pais" className="text-xs text-muted-foreground">País</Label>
+                    <Input
+                      id="endereco_pais"
+                      value={novo.pais || "Brasil"}
+                      onChange={(e) => setNovo({ ...novo, pais: e.target.value })}
+                      className="h-9 text-sm"
+                      autoComplete="country"
+                      disabled={!!searchAddress && !!novo.pais}
+                    />
+                  </div>
+                </div>
+              </details>
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
-            <Button onClick={handleSave} className="w-full sm:w-auto">
-              {editingId !== null ? "Salvar" : "Adicionar"}
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t">
+            <Button 
+              onClick={handleSave} 
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+              disabled={!novo.logradouro || !novo.numero || !novo.cidade || !novo.estado}
+            >
+              {editingId !== null ? "Salvar Alterações" : "Adicionar Endereço"}
             </Button>
-            <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              onClick={() => setOpen(false)} 
+              className="w-full sm:w-auto"
+            >
               Cancelar
             </Button>
           </DialogFooter>
