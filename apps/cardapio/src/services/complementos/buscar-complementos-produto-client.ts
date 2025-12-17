@@ -1,6 +1,7 @@
 // @cardapio/services/complementos/buscar-complementos-produto-client.ts
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import type { ComplementoResponse } from "@cardapio/types/complementos";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
