@@ -266,7 +266,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
           );
         })}
 
-        {/* Botão para adicionar novo */}
+        {/* Botão para adiciona novo */}
         <Button
           onClick={startAddNew}
           variant="default"
