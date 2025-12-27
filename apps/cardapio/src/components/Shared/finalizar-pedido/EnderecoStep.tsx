@@ -334,7 +334,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
               )}
             </div>
 
-            {/* Campos Essenciais - Visíveis e Destaados */}
+            {/* Campos Essenciais - Visíveis e Destaado */}
             <div className="space-y-3 border-t pt-4">
               <Label className="text-sm font-semibold">Informações do Endereço</Label>
               
