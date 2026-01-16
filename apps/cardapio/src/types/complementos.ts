@@ -56,3 +56,15 @@ export interface ValidacaoComplementosResult {
   erro?: string;
 }
 
+/**
+ * Tipo do produto para buscar complementos
+ * Corresponde ao TipoProdutoEnum do backend
+ */
+export type TipoProdutoEnum = "produto" | "combo" | "receita";
+
+/**
+ * Tipo de pedido para buscar complementos
+ * Corresponde ao TipoPedidoEnum do backend (em minúsculas)
+ */
+export type TipoPedidoEnum = "balcao" | "mesa" | "delivery";
+
