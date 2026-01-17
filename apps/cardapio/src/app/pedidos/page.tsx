@@ -308,26 +308,137 @@ export default function RoutePedidos() {
                               <div className="space-y-1">
                                 <h4 className="text-sm font-medium text-primary mb-2">Itens</h4>
                                 <ul className="space-y-2.5">
-                                  {order.itens.map((item) => (
-                                    <li key={item.id} className="flex gap-3 text-sm">
-                                      <span className="text-muted-foreground font-medium shrink-0 min-w-[2rem]">
-                                        {item.quantidade}×
-                                      </span>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-foreground font-medium">
-                                          {item.produto_descricao_snapshot}
-                                        </p>
-                                        {item.observacao && (
-                                          <p className="text-xs text-muted-foreground italic mt-0.5">
-                                            {item.observacao}
+                                  {order.itens.map((item) => {
+                                    // Buscar item (produto com código de barras) correspondente se houver produtos
+                                    const itemProdutoCorrespondente = item.produto_cod_barras 
+                                      ? order.produtos?.itens?.find(
+                                          (i) => i.item_id === item.id && i.produto_cod_barras === item.produto_cod_barras
+                                        )
+                                      : null;
+
+                                    // Buscar receita correspondente se houver produtos
+                                    const receitaCorrespondente = order.produtos?.receitas?.find(
+                                      (r) => r.item_id === item.id
+                                    );
+
+                                    // Buscar combo correspondente se houver produtos
+                                    // Tenta encontrar combo pela observação, descrição e preço
+                                    const combosDisponiveis = order.produtos?.combos || [];
+                                    let comboCorrespondente = combosDisponiveis.find((c) => {
+                                      // Se a observação do item menciona o combo (ex: "Combo #1")
+                                      const observacaoMatch = item.observacao && c.combo_id && 
+                                        item.observacao.match(/Combo\s*#(\d+)/i) &&
+                                        Number(item.observacao.match(/Combo\s*#(\d+)/i)?.[1]) === c.combo_id;
+                                      
+                                      // Se a descrição corresponde ao nome do combo
+                                      const nomeMatch = item.produto_descricao_snapshot && c.nome &&
+                                        item.produto_descricao_snapshot.trim() === c.nome.trim();
+                                      
+                                      // Se o preço corresponde (para distinguir múltiplos combos do mesmo tipo)
+                                      const precoMatch = Math.abs((item.preco_unitario || 0) - (c.preco_unitario || 0)) < 0.01;
+                                      
+                                      return (observacaoMatch || nomeMatch) && precoMatch;
+                                    });
+
+                                    return (
+                                      <li key={item.id} className="flex gap-3 text-sm">
+                                        <span className="text-muted-foreground font-medium shrink-0 min-w-[2rem]">
+                                          {item.quantidade}×
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-foreground font-medium">
+                                            {item.produto_descricao_snapshot}
                                           </p>
-                                        )}
-                                      </div>
-                                      <span className="text-muted-foreground font-medium shrink-0">
-                                        R$ {(item.preco_unitario * item.quantidade).toFixed(2).replace('.', ',')}
-                                      </span>
-                                    </li>
-                                  ))}
+                                          {item.observacao && (
+                                            <p className="text-xs text-muted-foreground italic mt-0.5">
+                                              {item.observacao}
+                                            </p>
+                                          )}
+                                          
+                                          {/* Exibir adicionais/complementos de itens (produtos com código de barras) */}
+                                          {itemProdutoCorrespondente && itemProdutoCorrespondente.complementos && itemProdutoCorrespondente.complementos.length > 0 && (
+                                            <div className="mt-2 space-y-1.5">
+                                              {itemProdutoCorrespondente.complementos.map((complemento) => (
+                                                <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
+                                                  {complemento.adicionais && complemento.adicionais.length > 0 && (
+                                                    <div className="space-y-0.5">
+                                                      {complemento.adicionais.map((adicional) => (
+                                                        <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
+                                                          <span className="text-primary font-medium">+</span>
+                                                          <span>{adicional.nome}</span>
+                                                          {adicional.quantidade > 1 && (
+                                                            <span className="text-primary/70">×{adicional.quantidade}</span>
+                                                          )}
+                                                          {adicional.preco_unitario > 0 && (
+                                                            <span className="ml-auto text-primary/80">R$ {adicional.total.toFixed(2).replace('.', ',')}</span>
+                                                          )}
+                                                        </p>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+
+                                          {/* Exibir adicionais/complementos de receitas */}
+                                          {receitaCorrespondente && receitaCorrespondente.complementos && receitaCorrespondente.complementos.length > 0 && (
+                                            <div className="mt-2 space-y-1.5">
+                                              {receitaCorrespondente.complementos.map((complemento) => (
+                                                <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
+                                                  {complemento.adicionais && complemento.adicionais.length > 0 && (
+                                                    <div className="space-y-0.5">
+                                                      {complemento.adicionais.map((adicional) => (
+                                                        <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
+                                                          <span className="text-primary font-medium">+</span>
+                                                          <span>{adicional.nome}</span>
+                                                          {adicional.quantidade > 1 && (
+                                                            <span className="text-primary/70">×{adicional.quantidade}</span>
+                                                          )}
+                                                          {adicional.preco_unitario > 0 && (
+                                                            <span className="ml-auto text-primary/80">R$ {adicional.total.toFixed(2).replace('.', ',')}</span>
+                                                          )}
+                                                        </p>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+
+                                          {/* Exibir adicionais/complementos de combos */}
+                                          {comboCorrespondente && comboCorrespondente.complementos && comboCorrespondente.complementos.length > 0 && (
+                                            <div className="mt-2 space-y-1.5">
+                                              {comboCorrespondente.complementos.map((complemento) => (
+                                                <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
+                                                  {complemento.adicionais && complemento.adicionais.length > 0 && (
+                                                    <div className="space-y-0.5">
+                                                      {complemento.adicionais.map((adicional) => (
+                                                        <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
+                                                          <span className="text-primary font-medium">+</span>
+                                                          <span>{adicional.nome}</span>
+                                                          {adicional.quantidade > 1 && (
+                                                            <span className="text-primary/70">×{adicional.quantidade}</span>
+                                                          )}
+                                                          {adicional.preco_unitario > 0 && (
+                                                            <span className="ml-auto text-primary/80">R$ {adicional.total.toFixed(2).replace('.', ',')}</span>
+                                                          )}
+                                                        </p>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <span className="text-muted-foreground font-medium shrink-0">
+                                          R$ {(item.preco_unitario * item.quantidade).toFixed(2).replace('.', ',')}
+                                        </span>
+                                      </li>
+                                    );
+                                  })}
                                 </ul>
                               </div>
 

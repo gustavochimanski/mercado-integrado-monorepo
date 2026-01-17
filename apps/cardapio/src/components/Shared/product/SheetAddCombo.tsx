@@ -19,7 +19,7 @@ import { ComboMiniDTO } from "@cardapio/services/home";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { useComplementosCombo } from "@cardapio/services/complementos";
+import { useComplementosUnificado } from "@cardapio/services/complementos";
 import { useState, useMemo } from "react";
 import type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
 import { useCart } from "@cardapio/stores/cart/useCart";
@@ -71,9 +71,11 @@ export function SheetAdicionarCombo({
 
   const quantity = watch("quantity");
   
-  // Buscar complementos do combo usando o novo endpoint
-  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosCombo(
+  // Buscar complementos do combo usando o endpoint unificado
+  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosUnificado(
+    "combo",
     combo?.id, // ID do combo
+    "delivery", // TODO: obter tipoPedido do contexto/store quando disponível
     true, // apenas ativos
     isOpen // só busca quando o sheet está aberto
   );

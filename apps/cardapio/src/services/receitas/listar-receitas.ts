@@ -16,6 +16,7 @@ function useDebounced<T>(value: T, delay = 350) {
 interface UseListarReceitasOptions {
   search?: string; // Termo de busca opcional (busca em nome e descrição)
   ativo?: boolean; // Filtrar por status ativo
+  apenas_ativos?: boolean; // Se true, retorna apenas receitas ativas (via API)
   debounceMs?: number;
   enabled?: boolean;
 }
@@ -41,6 +42,7 @@ export function useListarReceitas(
   const {
     search = "",
     ativo,
+    apenas_ativos = false,
     debounceMs = 350,
     enabled = true,
   } = opts;
@@ -48,7 +50,7 @@ export function useListarReceitas(
   const searchDeb = useDebounced(search, debounceMs);
 
   return useQuery<{ receitas: ReceitaListItem[] }>({
-    queryKey: ["receitas_listar", empresaId, searchDeb, ativo],
+    queryKey: ["receitas_listar", empresaId, searchDeb, ativo, apenas_ativos],
     queryFn: async () => {
       const params: Record<string, any> = {};
       
@@ -58,6 +60,10 @@ export function useListarReceitas(
       
       if (ativo !== undefined) {
         params.ativo = ativo;
+      }
+      
+      if (apenas_ativos) {
+        params.apenas_ativos = true;
       }
       
       if (searchDeb?.trim()) {

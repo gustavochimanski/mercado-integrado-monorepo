@@ -68,3 +68,33 @@ export type TipoProdutoEnum = "produto" | "combo" | "receita";
  */
 export type TipoPedidoEnum = "balcao" | "mesa" | "delivery";
 
+/**
+ * Tipo de pedido usado no frontend (em maiúsculas)
+ */
+export type TipoPedidoFrontend = "DELIVERY" | "MESA" | "BALCAO";
+
+/**
+ * Converte o tipo de pedido do frontend (maiúsculas) para o formato do backend (minúsculas)
+ * 
+ * @param tipoPedido - Tipo de pedido do frontend: "DELIVERY", "MESA" ou "BALCAO"
+ * @returns Tipo de pedido do backend: "delivery", "mesa" ou "balcao"
+ * 
+ * @example
+ * ```ts
+ * const tipoBackend = converterTipoPedidoParaBackend("DELIVERY"); // "delivery"
+ * ```
+ */
+export function converterTipoPedidoParaBackend(tipoPedido: TipoPedidoFrontend | null | undefined): TipoPedidoEnum {
+  if (!tipoPedido) {
+    return "delivery"; // Default
+  }
+  
+  const mapping: Record<TipoPedidoFrontend, TipoPedidoEnum> = {
+    DELIVERY: "delivery",
+    MESA: "mesa",
+    BALCAO: "balcao",
+  };
+  
+  return mapping[tipoPedido] || "delivery";
+}
+

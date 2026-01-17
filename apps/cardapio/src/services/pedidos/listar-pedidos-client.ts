@@ -38,9 +38,20 @@ function calcularSubtotal(
 
 function mapPedidoDelivery(
   entry: PedidoUnificadoResponse,
-  delivery: PedidoResponseSimplificado
+  delivery: PedidoResponseSimplificado,
+  entryAny?: any
 ): Pedido {
   const empresaId = (delivery as any)?.empresa_id ?? 0;
+  // A estrutura produtos está em entry.delivery (que é o objeto completo retornado pela API)
+  // entryAny.delivery contém o objeto completo retornado pela API (não apenas o tipo simplificado)
+  // O tipo PedidoResponseSimplificado não inclui produtos, mas a API retorna
+  const entryDelivery = entryAny?.delivery as any;
+  const deliveryAny = delivery as any;
+  
+  // Pegar produtos diretamente de entry.delivery (que tem a estrutura completa)
+  // ou de delivery (caso esteja lá também)
+  const produtos = entryDelivery?.produtos ?? deliveryAny?.produtos ?? undefined;
+  
   return {
     id: delivery.id,
     status: delivery.status as any,
@@ -70,6 +81,7 @@ function mapPedidoDelivery(
     tipo_pedido: entry.tipo_pedido,
     numero_pedido: entry.numero_pedido || String(delivery.id),
     status_descricao: entry.status_descricao,
+    produtos,
   };
 }
 
@@ -153,8 +165,12 @@ function mapPedidoBalcao(
 }
 
 function normalizePedido(entry: PedidoUnificadoResponse): Pedido | null {
+  // Fazer cast para any para acessar propriedades não tipadas (como produtos)
+  const entryAny = entry as any;
+  
   if (entry.tipo_pedido === "DELIVERY" && entry.delivery) {
-    return mapPedidoDelivery(entry, entry.delivery);
+    // entry.delivery pode ter produtos mesmo que o tipo não inclua
+    return mapPedidoDelivery(entry, entry.delivery, entryAny);
   }
 
   if (entry.tipo_pedido === "MESA" && entry.mesa) {
@@ -165,7 +181,7 @@ function normalizePedido(entry: PedidoUnificadoResponse): Pedido | null {
     return mapPedidoBalcao(entry, entry.balcao);
   }
 
-  if (entry.delivery) return mapPedidoDelivery(entry, entry.delivery);
+  if (entry.delivery) return mapPedidoDelivery(entry, entry.delivery, entryAny);
   if (entry.mesa) return mapPedidoMesa(entry, entry.mesa);
   if (entry.balcao) return mapPedidoBalcao(entry, entry.balcao);
 

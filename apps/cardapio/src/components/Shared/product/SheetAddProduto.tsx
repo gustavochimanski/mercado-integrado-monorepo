@@ -19,7 +19,7 @@ import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { useComplementosProduto } from "@cardapio/services/complementos";
+import { useComplementosUnificado } from "@cardapio/services/complementos";
 import { useState, useMemo } from "react";
 import type { ComplementoResponse, AdicionalComplementoResponse } from "@cardapio/types/complementos";
 import { useCart } from "@cardapio/stores/cart/useCart";
@@ -71,9 +71,11 @@ export function SheetAdicionarProduto({
   const { add } = useCart();
   const quantity = watch("quantity");
   
-  // Buscar complementos do produto usando o novo endpoint
-  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosProduto(
+  // Buscar complementos do produto usando o endpoint unificado
+  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosUnificado(
+    "produto",
     produto?.cod_barras,
+    "delivery", // TODO: obter tipoPedido do contexto/store quando disponível
     true, // apenas ativos
     isOpen // só busca quando o sheet está aberto
   );

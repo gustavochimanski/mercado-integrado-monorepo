@@ -618,9 +618,26 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         );
       case "revisao":
         return (
-          <Button onClick={handleFinalizar} disabled={items.length === 0 && combos?.length === 0 && receitas?.length === 0} className="w-full text-base sm:text-lg p-4 sm:p-6 bg-green-600">
+          <Button 
+            onClick={handleFinalizar} 
+            disabled={
+              items.length === 0 && combos?.length === 0 && receitas?.length === 0 || 
+              isLoadingPreview || 
+              (currentTab === "revisao" && tipoPedido === "DELIVERY" && !previewData)
+            } 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-green-600"
+          >
             <div className="flex gap-2 sm:gap-3 items-center">
-              <span className="text-sm sm:text-base">{isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"}</span> <CircleCheck strokeWidth={3} size={20} />
+              {isLoadingPreview ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  <span className="text-sm sm:text-base">Carregando dados...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm sm:text-base">{isEditingMode ? "Atualizar Pedido" : "Confirmar Pedido"}</span> <CircleCheck strokeWidth={3} size={20} />
+                </>
+              )}
             </div>
           </Button>
         );

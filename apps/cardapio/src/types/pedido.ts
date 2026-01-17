@@ -16,6 +16,51 @@ export interface ItemPedido {
   produto_imagem_snapshot?: string | null;
 }
 
+// ================= Estrutura de produtos do pedido (com complementos) =================
+export interface AdicionalPedido {
+  adicional_id: number;
+  nome: string;
+  quantidade: number;
+  preco_unitario: number;
+  total: number;
+}
+
+export interface ComplementoPedido {
+  complemento_id: number;
+  complemento_nome: string;
+  obrigatorio: boolean;
+  quantitativo: boolean;
+  total: number;
+  adicionais: AdicionalPedido[];
+}
+
+export interface ItemProdutoPedido {
+  item_id: number;
+  produto_cod_barras: string;
+  descricao: string;
+  imagem?: string | null;
+  quantidade: number;
+  preco_unitario: number;
+  observacao?: string | null;
+  complementos: ComplementoPedido[];
+}
+
+export interface ReceitaPedido {
+  item_id: number;
+  receita_id: number;
+  nome: string;
+  quantidade: number;
+  preco_unitario: number;
+  observacao?: string | null;
+  complementos: ComplementoPedido[];
+}
+
+export interface ProdutosPedido {
+  itens: ItemProdutoPedido[];
+  receitas: ReceitaPedido[];
+  combos: any[];
+}
+
 // ================= Pedido completo =================
 export interface Pedido {
   endereco_snapshot: any;
@@ -45,6 +90,7 @@ export interface Pedido {
   tipo_pedido?: TipoPedidoGateway;
   numero_pedido?: string;
   status_descricao?: string;
+  produtos?: ProdutosPedido; // Estrutura completa com receitas, combos e complementos
 }
 
 // ================= Request de finalizar pedido =================

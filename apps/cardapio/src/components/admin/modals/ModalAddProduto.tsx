@@ -34,6 +34,7 @@ export const ModalNovoProduto = ({
     page,
     limit: 30,
     apenas_disponiveis: false,
+    apenas_ativos: true,
     enabled: open,
   });
 

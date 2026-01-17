@@ -45,9 +45,9 @@ export const categoriaImageSchema = baseImageSchema
 // Schema para produto (formato + tamanho, sem dimensões)
 export const produtoImageSchema = baseImageSchema
   .refine(
-    (file) => file.size <= 10 * 1024 * 1024, // 10MB
+    (file) => file.size <= 5 * 1024 * 1024, // 5MB
     {
-      message: "Tamanho do arquivo muito grande. Máximo permitido: 10MB.",
+      message: "Tamanho do arquivo muito grande. Máximo permitido: 5MB.",
     }
   );
 
@@ -69,12 +69,11 @@ export const validateImageWithFeedback = async (
   }
 
   // 2. Validar tamanho
-  const maxSize = type === "categoria" ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB ou 10MB
+  const maxSize = 5 * 1024 * 1024; // 5MB para categoria e produto
   if (file.size > maxSize) {
-    const maxSizeMB = type === "categoria" ? "5MB" : "10MB";
     return { 
       isValid: false, 
-      error: `Tamanho do arquivo muito grande. Máximo permitido: ${maxSizeMB}.` 
+      error: "Tamanho do arquivo muito grande. Máximo permitido: 5MB." 
     };
   }
 

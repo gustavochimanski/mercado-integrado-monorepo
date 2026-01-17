@@ -44,7 +44,8 @@ export const ModalNovoCombo = ({
     empresaId,
     page,
     buscaDeb,
-    open && !!empresaId
+    open && !!empresaId,
+    true // apenas_ativos
   );
 
   const combos = data?.combos || [];

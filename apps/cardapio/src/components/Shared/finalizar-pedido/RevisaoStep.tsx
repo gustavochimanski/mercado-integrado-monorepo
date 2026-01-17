@@ -626,10 +626,11 @@ export default function RevisaoStep({
         </CardHeader>
         <CardContent className="space-y-3">
           {isLoadingPreview ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>Calculando valores...</span>
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-medium text-muted-foreground">Calculando valores...</span>
+                <span className="text-xs text-muted-foreground">Aguarde enquanto calculamos os totais do pedido</span>
               </div>
             </div>
           ) : previewData ? (

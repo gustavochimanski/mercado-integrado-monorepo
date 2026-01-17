@@ -11,9 +11,11 @@ export function ThemeProvider() {
   useEffect(() => {
     const tema = empresa?.cardapio_tema?.trim();
 
-    const primary = tema || "oklch(0.80 0.16 86)"; // fallback para o padrão atual
+    // Se o tema existir e não estiver vazio, usa o tema; caso contrário, usa o fallback
+    const primary = (tema && tema.length > 0) ? tema : "oklch(0.80 0.16 86)";
 
     // Aplica a cor na variável CSS --primary do :root
+    // Isso garante que o layout respeite a cor --primary que vem de get empresa
     document.documentElement.style.setProperty("--primary", primary);
   }, [empresa?.cardapio_tema]);
 

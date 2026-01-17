@@ -30,6 +30,7 @@ export const ModalAddReceita = ({
 
   const { data, isLoading } = useListarReceitas(empresaId, {
     search: busca,
+    apenas_ativos: true,
     enabled: open && !!empresaId,
   });
 

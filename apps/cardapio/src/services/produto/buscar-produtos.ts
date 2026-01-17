@@ -31,18 +31,19 @@ function useDebounced<T>(value: T, delay = 350) {
 export function useBuscarProdutos(
   cod_empresa: number,
   search: string,
-  opts?: { page?: number; limit?: number; apenas_disponiveis?: boolean; enabled?: boolean }
+  opts?: { page?: number; limit?: number; apenas_disponiveis?: boolean; apenas_ativos?: boolean; enabled?: boolean }
 ) {
   const {
     page = 1,
     limit = 30,
     apenas_disponiveis = false,
+    apenas_ativos = false,
     enabled,
   } = opts ?? {};
   const searchDeb = useDebounced(search, 350);
 
   return useQuery<ProdutosPaginadosResponse>({
-    queryKey: ["produtos_search", cod_empresa, searchDeb, page, limit, apenas_disponiveis],
+    queryKey: ["produtos_search", cod_empresa, searchDeb, page, limit, apenas_disponiveis, apenas_ativos],
     queryFn: async () => {
       const params: Record<string, any> = {
         cod_empresa,
@@ -50,6 +51,7 @@ export function useBuscarProdutos(
         limit,
         apenas_disponiveis,
       };
+      if (apenas_ativos) params.apenas_ativos = true;
       if (searchDeb?.trim()) params.search = searchDeb.trim();
 
       const { data } = await apiAdmin.get(`${BASE}/`, { params });

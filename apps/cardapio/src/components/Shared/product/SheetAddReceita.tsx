@@ -18,7 +18,7 @@ import { Badge } from "../ui/badge";
 import { ReceitaMiniDTO } from "@cardapio/services/home";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { useComplementosReceita } from "@cardapio/services/complementos";
+import { useComplementosUnificado } from "@cardapio/services/complementos";
 import { useState, useMemo } from "react";
 import type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
 import { useCart } from "@cardapio/stores/cart/useCart";
@@ -70,9 +70,11 @@ export function SheetAdicionarReceita({
 
   const quantity = watch("quantity");
   
-  // Buscar complementos da receita usando o novo endpoint
-  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosReceita(
+  // Buscar complementos da receita usando o endpoint unificado
+  const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosUnificado(
+    "receita",
     receita?.id, // ID da receita
+    "delivery", // TODO: obter tipoPedido do contexto/store quando disponível
     true, // apenas ativos
     isOpen // só busca quando o sheet está aberto
   );
