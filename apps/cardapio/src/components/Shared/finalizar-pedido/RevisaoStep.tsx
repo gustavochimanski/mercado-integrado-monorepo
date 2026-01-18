@@ -111,6 +111,7 @@ interface RevisaoStepProps {
   total: number;
   previewData?: PreviewCheckoutData | null;
   isLoadingPreview?: boolean;
+  previewError?: Error | null;
   inc?: (cod_barras: string) => void;
   dec?: (cod_barras: string) => void;
   remove?: (cod_barras: string) => void;
@@ -136,6 +137,7 @@ export default function RevisaoStep({
   total,
   previewData,
   isLoadingPreview = false,
+  previewError,
   inc,
   dec,
   remove,
@@ -631,6 +633,22 @@ export default function RevisaoStep({
                 <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 <span className="text-sm font-medium text-muted-foreground">Calculando valores...</span>
                 <span className="text-xs text-muted-foreground">Aguarde enquanto calculamos os totais do pedido</span>
+              </div>
+            </div>
+          ) : previewError ? (
+            <div className="flex flex-col items-center justify-center py-8 px-4">
+              <div className="rounded-lg bg-destructive/10 border-2 border-destructive p-4 w-full">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 space-y-1">
+                    <h4 className="text-sm font-semibold text-destructive">
+                      Não é possível fazer a entrega
+                    </h4>
+                    <p className="text-sm text-destructive/90">
+                      {previewError.message || "O endereço informado está fora da área de entrega."}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           ) : previewData ? (

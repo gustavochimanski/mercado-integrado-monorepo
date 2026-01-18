@@ -87,10 +87,22 @@ function mapPedidoDelivery(
 
 function mapPedidoMesa(
   entry: PedidoUnificadoResponse,
-  mesa: PedidoMesaOut
+  mesa: PedidoMesaOut,
+  entryAny?: any
 ): Pedido {
   const itens = mesa.itens ?? [];
   const subtotal = calcularSubtotal(itens);
+  
+  // A estrutura produtos está em entry.mesa (que é o objeto completo retornado pela API)
+  // entryAny.mesa contém o objeto completo retornado pela API (não apenas o tipo simplificado)
+  // O tipo PedidoMesaOut pode não incluir produtos, mas a API retorna
+  const entryMesa = entryAny?.mesa as any;
+  const mesaAny = mesa as any;
+  
+  // Pegar produtos diretamente de entry.mesa (que tem a estrutura completa)
+  // ou de mesa (caso esteja lá também)
+  const produtos = entryMesa?.produtos ?? mesaAny?.produtos ?? undefined;
+  
   return {
     id: mesa.id,
     status: entry.status_codigo as any,
@@ -120,15 +132,28 @@ function mapPedidoMesa(
     tipo_pedido: entry.tipo_pedido,
     numero_pedido: entry.numero_pedido,
     status_descricao: entry.status_descricao,
+    produtos,
   };
 }
 
 function mapPedidoBalcao(
   entry: PedidoUnificadoResponse,
-  balcao: PedidoBalcaoOut
+  balcao: PedidoBalcaoOut,
+  entryAny?: any
 ): Pedido {
   const itens = balcao.itens ?? [];
   const subtotal = calcularSubtotal(itens);
+  
+  // A estrutura produtos está em entry.balcao (que é o objeto completo retornado pela API)
+  // entryAny.balcao contém o objeto completo retornado pela API (não apenas o tipo simplificado)
+  // O tipo PedidoBalcaoOut pode não incluir produtos, mas a API retorna
+  const entryBalcao = entryAny?.balcao as any;
+  const balcaoAny = balcao as any;
+  
+  // Pegar produtos diretamente de entry.balcao (que tem a estrutura completa)
+  // ou de balcao (caso esteja lá também)
+  const produtos = entryBalcao?.produtos ?? balcaoAny?.produtos ?? undefined;
+  
   return {
     id: balcao.id,
     status: entry.status_codigo as any,
@@ -161,6 +186,7 @@ function mapPedidoBalcao(
     tipo_pedido: entry.tipo_pedido,
     numero_pedido: entry.numero_pedido,
     status_descricao: entry.status_descricao,
+    produtos,
   };
 }
 
@@ -174,16 +200,18 @@ function normalizePedido(entry: PedidoUnificadoResponse): Pedido | null {
   }
 
   if (entry.tipo_pedido === "MESA" && entry.mesa) {
-    return mapPedidoMesa(entry, entry.mesa);
+    // entry.mesa pode ter produtos mesmo que o tipo não inclua
+    return mapPedidoMesa(entry, entry.mesa, entryAny);
   }
 
   if (entry.tipo_pedido === "BALCAO" && entry.balcao) {
-    return mapPedidoBalcao(entry, entry.balcao);
+    // entry.balcao pode ter produtos mesmo que o tipo não inclua
+    return mapPedidoBalcao(entry, entry.balcao, entryAny);
   }
 
   if (entry.delivery) return mapPedidoDelivery(entry, entry.delivery, entryAny);
-  if (entry.mesa) return mapPedidoMesa(entry, entry.mesa);
-  if (entry.balcao) return mapPedidoBalcao(entry, entry.balcao);
+  if (entry.mesa) return mapPedidoMesa(entry, entry.mesa, entryAny);
+  if (entry.balcao) return mapPedidoBalcao(entry, entry.balcao, entryAny);
 
   return null;
 }

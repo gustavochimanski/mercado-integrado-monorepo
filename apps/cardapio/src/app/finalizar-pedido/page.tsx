@@ -242,7 +242,7 @@ useEffect(() => {
 }, [mesaPresetAplicada, tipoPedido]);
 
   // Busca preview do checkout quando estiver na aba de revisão
-  const { data: previewData, isLoading: isLoadingPreview } = usePreviewCheckout({
+  const { data: previewData, isLoading: isLoadingPreview, error: previewError } = usePreviewCheckout({
     tipoPedido,
     enderecoId,
     meioPagamentoId,
@@ -899,6 +899,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                       total={(previewData?.valor_total ?? totalPrice()) || 0}
                       previewData={previewData ?? undefined}
                       isLoadingPreview={isLoadingPreview}
+                      previewError={previewError}
                       inc={useCart.getState().inc}
                       dec={useCart.getState().dec}
                       remove={useCart.getState().remove}

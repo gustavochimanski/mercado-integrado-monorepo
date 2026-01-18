@@ -12,6 +12,7 @@ export type AdicionalResponse = {
     obrigatorio: boolean;
     permite_multipla_escolha: boolean;
     ordem: number;
+    imagem?: (string | null);
     created_at: string;
     updated_at: string;
 };

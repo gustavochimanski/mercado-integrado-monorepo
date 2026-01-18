@@ -11,5 +11,6 @@ export type CriarAdicionalRequest = {
     obrigatorio?: boolean;
     permite_multipla_escolha?: boolean;
     ordem?: number;
+    imagem?: (string | null);
 };
 

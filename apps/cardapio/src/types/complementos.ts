@@ -17,6 +17,7 @@ export interface AdicionalComplementoResponse {
   custo: number;                     // Custo (geralmente não usado no frontend)
   ativo: boolean;                   // Se está ativo
   ordem: number;                     // Ordem de exibição
+  imagem?: string | null;            // URL da imagem (MinIO)
   created_at: string;                // ISO 8601
   updated_at: string;                // ISO 8601
 }

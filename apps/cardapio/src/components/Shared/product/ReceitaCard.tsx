@@ -6,15 +6,17 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { ReceitaMiniDTO } from "@cardapio/services/home";
 import { SheetAdicionarReceita } from "./SheetAddReceita";
+import { ReceitaOptions } from "@cardapio/components/admin/options/ReceitaOptions";
 
 type Props = {
   receita: ReceitaMiniDTO;
   onSelectReceita?: (receita: ReceitaMiniDTO) => void;
+  onEdit?: (receitaId: number) => void;
   empresa_id?: number;
   vitrineId?: number;
 };
 
-export function ReceitaCard({ receita, onSelectReceita, empresa_id, vitrineId }: Props) {
+export function ReceitaCard({ receita, onSelectReceita, onEdit, empresa_id, vitrineId }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const price = Number(receita.preco_venda) || 0;
 
@@ -29,6 +31,11 @@ export function ReceitaCard({ receita, onSelectReceita, empresa_id, vitrineId }:
 
   return (
     <div className="relative">
+      <ReceitaOptions
+        receitaId={receita.id}
+        onEdit={() => onEdit?.(receita.id)}
+        vitrineId={vitrineId}
+      />
       <Card
         className="w-[120px] h-[180px] flex flex-col overflow-hidden gap-0 p-0 cursor-pointer hover:shadow-lg transition-all duration-200 rounded-lg border-0 shadow-md bg-white"
         onClick={handleCardClick}

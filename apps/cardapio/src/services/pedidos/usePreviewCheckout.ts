@@ -155,13 +155,18 @@ export function usePreviewCheckout({
 
         return result;
       } catch (error: any) {
-        // Se der erro 400 (área de atendimento), retorna null
+        // Re-lançar o erro para que o React Query possa capturá-lo
+        // Isso permite que o componente exiba a mensagem de erro
         if (error.response?.status === 400) {
-          console.warn("Endereço fora da área de atendimento");
-          return null;
+          // Extrair a mensagem de detalhe do erro
+          const errorMessage = error.response?.data?.detail || "Erro ao calcular preview do checkout";
+          const errorWithDetail = new Error(errorMessage);
+          (errorWithDetail as any).response = error.response;
+          (errorWithDetail as any).status = 400;
+          throw errorWithDetail;
         }
         console.error("Erro ao calcular preview do checkout:", error);
-        return null;
+        throw error;
       }
     },
     enabled:

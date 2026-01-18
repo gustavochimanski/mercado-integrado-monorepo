@@ -6,15 +6,17 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { ComboMiniDTO } from "@cardapio/services/home";
 import { SheetAdicionarCombo } from "./SheetAddCombo";
+import { ComboOptions } from "@cardapio/components/admin/options/ComboOptions";
 
 type Props = {
   combo: ComboMiniDTO;
   onSelectCombo?: (combo: ComboMiniDTO) => void;
+  onEdit?: (comboId: number) => void;
   empresa_id?: number;
   vitrineId?: number;
 };
 
-export function ComboCard({ combo, onSelectCombo, empresa_id, vitrineId }: Props) {
+export function ComboCard({ combo, onSelectCombo, onEdit, empresa_id, vitrineId }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const price = Number(combo.preco_total) || 0;
 
@@ -29,6 +31,11 @@ export function ComboCard({ combo, onSelectCombo, empresa_id, vitrineId }: Props
 
   return (
     <div className="relative">
+      <ComboOptions
+        comboId={combo.id}
+        onEdit={() => onEdit?.(combo.id)}
+        vitrineId={vitrineId}
+      />
       <Card
         className="w-[120px] h-[180px] flex flex-col overflow-hidden gap-0 p-0 cursor-pointer hover:shadow-lg transition-all duration-200 rounded-lg border-0 shadow-md bg-white"
         onClick={handleCardClick}

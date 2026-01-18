@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -230,6 +231,18 @@ function AdicionalItem({
             >
               <Plus className="h-4 w-4" />
             </Button>
+          </div>
+        )}
+        {/* Imagem do adicional (se disponível) */}
+        {adicional.imagem && (
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+            <Image
+              src={adicional.imagem}
+              alt={adicional.nome}
+              fill
+              className="object-cover"
+              sizes="48px"
+            />
           </div>
         )}
         <div className="flex-1 min-w-0">

@@ -10,5 +10,6 @@ export type AtualizarAdicionalRequest = {
     obrigatorio?: (boolean | null);
     permite_multipla_escolha?: (boolean | null);
     ordem?: (number | null);
+    imagem?: (string | null);
 };
 
