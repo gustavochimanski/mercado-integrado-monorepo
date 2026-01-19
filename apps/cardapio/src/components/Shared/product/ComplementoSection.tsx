@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Minus, Plus, Check } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
 
 interface ComplementoSectionProps {
@@ -87,21 +87,23 @@ export function ComplementoSection({
         </div>
       </div>
 
-      {/* Lista de Adicionais */}
-      <div className="space-y-2">
-        {complemento.adicionais.map((adicional) => (
-          <AdicionalItem
-            key={adicional.id}
-            adicional={adicional}
-            quantidade={getQuantidade(adicional.id)}
-            permiteMultipla={complemento.permite_multipla_escolha}
-            quantitativo={complemento.quantitativo}
-            atingiuMaximo={atingiuMaximo}
-            onToggle={() => onToggle(adicional.id)}
-            onIncrement={() => onIncrement(adicional.id)}
-            onDecrement={() => onDecrement(adicional.id)}
-          />
-        ))}
+      {/* Lista de Adicionais - Scroll Horizontal */}
+      <div className="relative">
+        <div className="relative flex overflow-x-auto gap-4 px-2 py-2 hide-scrollbar">
+          {complemento.adicionais.map((adicional) => (
+            <AdicionalItem
+              key={adicional.id}
+              adicional={adicional}
+              quantidade={getQuantidade(adicional.id)}
+              permiteMultipla={complemento.permite_multipla_escolha}
+              quantitativo={complemento.quantitativo}
+              atingiuMaximo={atingiuMaximo}
+              onToggle={() => onToggle(adicional.id)}
+              onIncrement={() => onIncrement(adicional.id)}
+              onDecrement={() => onDecrement(adicional.id)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -133,7 +135,7 @@ function AdicionalItem({
 
   return (
     <div
-      className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+      className={`flex flex-col items-center w-32 min-w-[128px] p-3 rounded-lg border-2 transition-all ${
         quantitativo ? "" : "cursor-pointer"
       } ${
         isSelected
@@ -142,7 +144,37 @@ function AdicionalItem({
       }`}
       onClick={!quantitativo && !permiteMultipla ? onToggle : undefined}
     >
-      <div className="flex items-center gap-3 flex-1">
+      {/* Imagem do adicional (se disponível) */}
+      {adicional.imagem ? (
+        <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-muted mb-2">
+          <Image
+            src={adicional.imagem}
+            alt={adicional.nome}
+            fill
+            className="object-cover"
+            sizes="64px"
+          />
+        </div>
+      ) : (
+        <div className="w-16 h-16 rounded-lg bg-muted mb-2 flex items-center justify-center">
+          <span className="text-2xl">🍽️</span>
+        </div>
+      )}
+
+      {/* Nome do adicional */}
+      <div className="w-full text-center mb-2">
+        <Label className={`text-xs font-medium block ${!permiteMultipla ? "cursor-pointer" : ""} line-clamp-2`}>
+          {adicional.nome}
+        </Label>
+        {adicional.descricao && (
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+            {adicional.descricao}
+          </p>
+        )}
+      </div>
+
+      {/* Controles de seleção/quantidade */}
+      <div className="w-full flex flex-col items-center gap-2">
         {quantitativo ? (
           // Controles de quantidade para complementos quantitativos (sempre usar soma)
           <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1">
@@ -150,23 +182,23 @@ function AdicionalItem({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full hover:bg-background disabled:opacity-30"
+              className="h-7 w-7 rounded-full hover:bg-background disabled:opacity-30"
               onClick={(e) => {
                 e.stopPropagation();
                 onDecrement();
               }}
               disabled={quantidade === 0}
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3 w-3" />
             </Button>
-            <span className="text-base font-bold w-8 text-center text-foreground">
+            <span className="text-sm font-bold w-6 text-center text-foreground">
               {quantidade}
             </span>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full hover:bg-background disabled:opacity-30"
+              className="h-7 w-7 rounded-full hover:bg-background disabled:opacity-30"
               onClick={(e) => {
                 e.stopPropagation();
                 if (podeIncrementar) {
@@ -176,7 +208,7 @@ function AdicionalItem({
               disabled={!podeIncrementar}
               title={atingiuMaximo && quantidade > 0 ? "Limite máximo atingido" : ""}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3 w-3" />
             </Button>
           </div>
         ) : !permiteMultipla ? (
@@ -203,23 +235,23 @@ function AdicionalItem({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full hover:bg-background disabled:opacity-30"
+              className="h-7 w-7 rounded-full hover:bg-background disabled:opacity-30"
               onClick={(e) => {
                 e.stopPropagation();
                 onDecrement();
               }}
               disabled={quantidade === 0}
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3 w-3" />
             </Button>
-            <span className="text-base font-bold w-8 text-center text-foreground">
+            <span className="text-sm font-bold w-6 text-center text-foreground">
               {quantidade}
             </span>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full hover:bg-background disabled:opacity-30"
+              className="h-7 w-7 rounded-full hover:bg-background disabled:opacity-30"
               onClick={(e) => {
                 e.stopPropagation();
                 if (podeIncrementar) {
@@ -229,55 +261,34 @@ function AdicionalItem({
               disabled={!podeIncrementar}
               title={atingiuMaximo && quantidade > 0 ? "Limite máximo atingido" : ""}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3 w-3" />
             </Button>
           </div>
         )}
-        {/* Imagem do adicional (se disponível) */}
-        {adicional.imagem && (
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-            <Image
-              src={adicional.imagem}
-              alt={adicional.nome}
-              fill
-              className="object-cover"
-              sizes="48px"
-            />
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <Label className={`text-sm font-medium block ${!permiteMultipla ? "cursor-pointer" : ""}`}>
-            {adicional.nome}
-          </Label>
-          {adicional.descricao && (
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-              {adicional.descricao}
-            </p>
+
+        {/* Preço */}
+        <div className="w-full text-center">
+          {adicional.preco > 0 ? (
+            <div>
+              {quantidade > 0 && quantitativo ? (
+                <div className="flex flex-col items-center">
+                  <span className="text-xs font-bold text-primary">
+                    R$ {(adicional.preco * quantidade).toFixed(2).replace(".", ",")}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {quantidade}x R$ {adicional.preco.toFixed(2).replace(".", ",")}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs font-semibold text-primary">
+                  + R$ {adicional.preco.toFixed(2).replace(".", ",")}
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground italic">Grátis</span>
           )}
         </div>
-      </div>
-      <div className="flex items-center gap-2 ml-2">
-        {adicional.preco > 0 && (
-          <div className="text-right">
-            {quantidade > 0 && quantitativo ? (
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-bold text-primary">
-                  R$ {(adicional.preco * quantidade).toFixed(2).replace(".", ",")}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {quantidade}x R$ {adicional.preco.toFixed(2).replace(".", ",")}
-                </span>
-              </div>
-            ) : (
-              <span className="text-sm font-semibold text-primary">
-                + R$ {adicional.preco.toFixed(2).replace(".", ",")}
-              </span>
-            )}
-          </div>
-        )}
-        {adicional.preco === 0 && (
-          <span className="text-xs text-muted-foreground italic">Grátis</span>
-        )}
       </div>
     </div>
   );
