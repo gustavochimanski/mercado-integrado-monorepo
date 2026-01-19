@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
@@ -132,6 +133,7 @@ function AdicionalItem({
 }: AdicionalItemProps) {
   const isSelected = quantidade > 0;
   const podeIncrementar = !atingiuMaximo || quantidade === 0;
+  const [imageError, setImageError] = useState(false);
 
   return (
     <div
@@ -145,7 +147,7 @@ function AdicionalItem({
       onClick={!quantitativo && !permiteMultipla ? onToggle : undefined}
     >
       {/* Imagem do adicional (se disponível) */}
-      {adicional.imagem ? (
+      {adicional.imagem && !imageError ? (
         <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted mb-1.5">
           <Image
             src={adicional.imagem}
@@ -153,6 +155,7 @@ function AdicionalItem({
             fill
             className="object-cover"
             sizes="48px"
+            onError={() => setImageError(true)}
           />
         </div>
       ) : (
