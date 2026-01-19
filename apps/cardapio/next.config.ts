@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const cliente = "teste2"
+const cliente = "teste2";
 
 const nextConfig: NextConfig = {
   eslint: {

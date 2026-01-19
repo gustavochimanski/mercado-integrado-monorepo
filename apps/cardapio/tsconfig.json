@@ -22,8 +22,8 @@
     "baseUrl": "./src",
     "paths": {
       "@cardapio/*": ["./*"]
-    },
+    }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../supervisor/src/components/modals/cadastros/ModalAddProduto.tsx", "src/services/useQueryVitrine.ts", "src/components/Shared/finalizar-pedido/ClienteIdentificacaoModaltsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
