@@ -12,7 +12,7 @@ import { Button } from "@cardapio/components/Shared/ui/button";
 import { Badge } from "@cardapio/components/Shared/ui/badge";
 import { format, isToday, isYesterday, subDays, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Pedido } from "@cardapio/types/pedido";
+import { Pedido, AdicionalPedido, ComplementoPedido } from "@cardapio/types/pedido";
 import { usePedidos } from "@cardapio/services/pedidos/useQueryPedido";
 import { 
   Pencil, 
@@ -393,11 +393,11 @@ export default function RoutePedidos() {
                                             {/* Exibir adicionais/complementos */}
                                             {item.complementos && item.complementos.length > 0 && (
                                               <div className="mt-2 space-y-1.5">
-                                                {item.complementos.map((complemento) => (
+                                                {item.complementos.map((complemento: ComplementoPedido) => (
                                                   <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
                                                     {complemento.adicionais && complemento.adicionais.length > 0 && (
                                                       <div className="space-y-0.5">
-                                                        {complemento.adicionais.map((adicional) => (
+                                                        {complemento.adicionais.map((adicional: AdicionalPedido) => (
                                                           <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
                                                             <span className="text-primary font-medium">+</span>
                                                             <span>{adicional.nome}</span>
@@ -474,11 +474,11 @@ export default function RoutePedidos() {
                                             {/* Exibir adicionais/complementos de itens (produtos com código de barras) */}
                                             {itemProdutoCorrespondente && itemProdutoCorrespondente.complementos && itemProdutoCorrespondente.complementos.length > 0 && (
                                               <div className="mt-2 space-y-1.5">
-                                                {itemProdutoCorrespondente.complementos.map((complemento) => (
+                                                {itemProdutoCorrespondente.complementos.map((complemento: ComplementoPedido) => (
                                                   <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
                                                     {complemento.adicionais && complemento.adicionais.length > 0 && (
                                                       <div className="space-y-0.5">
-                                                        {complemento.adicionais.map((adicional) => (
+                                                        {complemento.adicionais.map((adicional: AdicionalPedido) => (
                                                           <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
                                                             <span className="text-primary font-medium">+</span>
                                                             <span>{adicional.nome}</span>
@@ -500,11 +500,11 @@ export default function RoutePedidos() {
                                             {/* Exibir adicionais/complementos de receitas */}
                                             {receitaCorrespondente && receitaCorrespondente.complementos && receitaCorrespondente.complementos.length > 0 && (
                                               <div className="mt-2 space-y-1.5">
-                                                {receitaCorrespondente.complementos.map((complemento) => (
+                                                {receitaCorrespondente.complementos.map((complemento: ComplementoPedido) => (
                                                   <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
                                                     {complemento.adicionais && complemento.adicionais.length > 0 && (
                                                       <div className="space-y-0.5">
-                                                        {complemento.adicionais.map((adicional) => (
+                                                        {complemento.adicionais.map((adicional: AdicionalPedido) => (
                                                           <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
                                                             <span className="text-primary font-medium">+</span>
                                                             <span>{adicional.nome}</span>
@@ -526,11 +526,11 @@ export default function RoutePedidos() {
                                             {/* Exibir adicionais/complementos de combos */}
                                             {comboCorrespondente && comboCorrespondente.complementos && comboCorrespondente.complementos.length > 0 && (
                                               <div className="mt-2 space-y-1.5">
-                                                {comboCorrespondente.complementos.map((complemento) => (
+                                                {comboCorrespondente.complementos.map((complemento: ComplementoPedido) => (
                                                   <div key={complemento.complemento_id} className="pl-2 border-l-2 border-primary/20">
                                                     {complemento.adicionais && complemento.adicionais.length > 0 && (
                                                       <div className="space-y-0.5">
-                                                        {complemento.adicionais.map((adicional) => (
+                                                        {complemento.adicionais.map((adicional: AdicionalPedido) => (
                                                           <p key={adicional.adicional_id} className="text-xs text-muted-foreground flex items-center gap-1">
                                                             <span className="text-primary font-medium">+</span>
                                                             <span>{adicional.nome}</span>
