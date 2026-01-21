@@ -25,10 +25,14 @@ export function useBuscarEmpresa(options?: UseBuscarEmpresaOptions) {
   return useQuery<EmpresaPublic>({
     queryKey: ["empresa-public", empresaId],
     queryFn: async () => {
-      const { data } = await api.get<EmpresaPublic>("/api/empresas/public/emp/lista", {
+      const { data } = await api.get<EmpresaPublic[]>("/api/empresas/public/emp/lista", {
         params: { empresa_id: empresaId },
       });
-      return data;
+      // A API retorna um array, pegamos o primeiro item
+      if (Array.isArray(data) && data.length > 0) {
+        return data[0];
+      }
+      throw new Error("Empresa não encontrada");
     },
     enabled: enabled && !!empresaId,
     staleTime: 60 * 60 * 1000, // 1 hora - empresa não muda frequentemente

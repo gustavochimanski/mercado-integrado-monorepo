@@ -53,7 +53,8 @@ export function ThemeProvider() {
   const { data: empresa } = useQueryEmpresaPublic(true, empresaId);
 
   useEffect(() => {
-    const tema = empresa?.cardapio_tema?.trim();
+    // Prioriza o campo 'tema' (novo formato da API), mas mantém compatibilidade com 'cardapio_tema'
+    const tema = empresa?.tema?.trim() || empresa?.cardapio_tema?.trim();
 
     // Se o tema existir e não estiver vazio, usa o tema; caso contrário, usa o fallback
     const primary = (tema && tema.length > 0) ? tema : "oklch(0.80 0.16 86)";
@@ -67,7 +68,7 @@ export function ThemeProvider() {
     document.documentElement.style.setProperty("--primary", primary);
     document.documentElement.style.setProperty("--primary-foreground", primaryForeground);
     document.documentElement.style.setProperty("--ring", ring);
-  }, [empresa?.cardapio_tema]);
+  }, [empresa?.tema, empresa?.cardapio_tema]);
 
   return null;
 }
