@@ -279,7 +279,7 @@ export function SheetAdicionarCombo({
 
   // IMPORTANTE: obrigatorio vem da vinculação, não do complemento em si
   const isComplementoObrigatorio = (complemento: ComplementoResponse) => {
-    return (complemento as any).obrigatorio === true || (complemento as any).obrigatorio === 1 || (complemento as any).obrigatorio === "true";
+    return complemento.obrigatorio === true;
   };
 
   // Validar se complementos obrigatórios foram selecionados
