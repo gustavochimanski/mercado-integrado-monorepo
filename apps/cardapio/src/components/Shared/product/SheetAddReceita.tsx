@@ -496,33 +496,34 @@ export function SheetAdicionarReceita({
         side="bottom" 
         className="h-[85vh] w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background overflow-hidden"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full min-h-0">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full min-h-0 relative">
           {/* Botão de fechar customizado */}
           <button
             type="button"
             onClick={() => handleOpenChange(false)}
-            className="absolute top-4 right-4 z-50 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm p-2 text-white transition-colors"
+            className="absolute top-4 right-4 z-[60] rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm p-2 text-white transition-colors"
             aria-label="Fechar"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Imagem Hero no Topo */}
-          <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
-            <ImageZoomDialog
-              src={imagem}
-              alt={nome}
-              priority
-              className="w-full h-full relative"
-            />
-            <div className="absolute inset-0 pointer-events-none z-10" />
-          </div>
-
           {/* Conteúdo Scrollável */}
           <div
             ref={scrollContainerRef}
-            className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-6"
+            className="flex-1 min-h-0 overflow-y-auto pb-6"
           >
+            {/* Imagem Hero no Topo */}
+            <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
+              <ImageZoomDialog
+                src={imagem}
+                alt={nome}
+                priority
+                className="w-full h-full relative"
+              />
+              <div className="absolute inset-0 pointer-events-none z-10" />
+            </div>
+
+            <div className="px-4 pt-4">
             <SheetHeader className="mb-6">
               <SheetTitle className="text-2xl font-bold leading-tight text-left mb-2">
                 {nome}
@@ -694,6 +695,7 @@ export function SheetAdicionarReceita({
               {errors.observacao && (
                 <p className="text-destructive text-sm font-medium">{errors.observacao.message}</p>
               )}
+            </div>
             </div>
           </div>
 
