@@ -65,7 +65,6 @@ import { PublicDeliveryMercadoPagoWebhooksService } from './services/PublicDeliv
 import { PublicRotasPBlicasService } from './services/PublicRotasPBlicasService';
 import { RabbitmqService } from './services/RabbitmqService';
 import { SubscriptionsService } from './services/SubscriptionsService';
-import { WebsocketService } from './services/WebsocketService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class MensuraApiClient {
     public readonly adminBalcOPedidos: AdminBalcOPedidosService;
@@ -128,7 +127,6 @@ export class MensuraApiClient {
     public readonly publicRotasPBlicas: PublicRotasPBlicasService;
     public readonly rabbitmq: RabbitmqService;
     public readonly subscriptions: SubscriptionsService;
-    public readonly websocket: WebsocketService;
     public readonly request: BaseHttpRequest;
     constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
         this.request = new HttpRequest({
@@ -202,7 +200,6 @@ export class MensuraApiClient {
         this.publicRotasPBlicas = new PublicRotasPBlicasService(this.request);
         this.rabbitmq = new RabbitmqService(this.request);
         this.subscriptions = new SubscriptionsService(this.request);
-        this.websocket = new WebsocketService(this.request);
     }
 }
 

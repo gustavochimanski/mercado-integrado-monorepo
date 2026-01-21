@@ -57,9 +57,9 @@ export default function RootLayout({
                       "--success-border": "#16a34a",
 
                       /* erro (toast.error → variante 'destructive') */
-                      "--destructive-bg": "#ef4444",
-                      "--destructive-text": "#ffffff",
-                      "--destructive-border": "#dc2626",
+                      "--destructive-bg": "#ffffff",
+                      "--destructive-text": "#ef4444",
+                      "--destructive-border": "#ef4444",
                     } as React.CSSProperties}
                   />
                   <div className="flex-1">

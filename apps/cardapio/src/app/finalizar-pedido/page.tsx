@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getCliente, getEnderecoPadraoId, getMeioPagamentoId, getTokenCliente, setEnderecoPadraoId, setMeioPagamentoId } from "@cardapio/stores/client/ClientStore";
@@ -134,6 +134,10 @@ export default function FinalizarPedidoPage() {
     if (tipoPedido !== "BALCAO") {
       setBalcaoEmpresaId(null);
     }
+
+    // Resetar progresso quando o tipo de pedido mudar
+    setCompletedSteps(new Set());
+    setIsTransitioning(false);
   }, [tipoPedido]);
 
   const [confirmEnderecoOpen, setConfirmEnderecoOpen] = useState(false);
@@ -310,6 +314,53 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   }, [cartHydrated]); // Executar após a hidratação do carrinho
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [completedSteps, setCompletedSteps] = useState<Set<CheckoutTab>>(new Set());
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Calcula os steps disponíveis baseado no tipo de pedido
+  const getAvailableSteps = useCallback((): CheckoutTab[] => {
+    const steps: CheckoutTab[] = ["tipo"];
+    
+    if (tipoPedido === "MESA") {
+      steps.push("mesa");
+    } else if (tipoPedido === "BALCAO") {
+      steps.push("balcao");
+    } else if (tipoPedido === "DELIVERY") {
+      steps.push("endereco", "pagamento");
+    }
+    
+    steps.push("observacao", "revisao");
+    return steps;
+  }, [tipoPedido]);
+
+  // Calcula o progresso atual
+  const getProgress = useCallback(() => {
+    const availableSteps = getAvailableSteps();
+    const currentIndex = availableSteps.indexOf(currentTab);
+    // O número de steps concluídos é o índice atual (0 = nenhum concluído, 1 = 1 concluído, etc)
+    // Durante a transição, mostra como se o step atual já estivesse concluído
+    const completedCount = isTransitioning ? currentIndex + 1 : currentIndex;
+    return {
+      current: completedCount,
+      total: availableSteps.length,
+      percentage: (completedCount / availableSteps.length) * 100,
+    };
+  }, [currentTab, getAvailableSteps, isTransitioning]);
+
+  // Função para avançar para o próximo step com animação de progresso
+  const handleStepComplete = useCallback((nextTab: CheckoutTab) => {
+    setIsTransitioning(true);
+    setCompletedSteps(prev => new Set([...prev, currentTab]));
+    
+    // Aguardar um pouco mais para garantir que a animação seja visível
+    setTimeout(() => {
+      setCurrentTab(nextTab);
+      // Aguardar um pouco mais antes de esconder o loader para garantir transição suave
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 200);
+    }, 1000); // Tempo da animação do loader
+  }, [currentTab]);
 
   const resolveClienteId = () => {
     const candidate = cliente?.id ?? getCliente()?.id;
@@ -559,14 +610,14 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                 return;
               }
               if (tipoPedido === "MESA") {
-                setCurrentTab("mesa");
+                handleStepComplete("mesa");
               } else if (tipoPedido === "BALCAO") {
-                setCurrentTab("balcao");
+                handleStepComplete("balcao");
               } else if (tipoPedido === "DELIVERY") {
-                setCurrentTab("endereco");
+                handleStepComplete("endereco");
               }
             }}
-            disabled={!tipoPedido}
+            disabled={!tipoPedido || isTransitioning}
           >
             <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
@@ -574,9 +625,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
       case "mesa":
         return (
           <Button 
-            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-blue-600" 
-            onClick={() => setCurrentTab("observacao")}
-            disabled={!mesaCodigo}
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
+            onClick={() => handleStepComplete("observacao")}
+            disabled={!mesaCodigo || isTransitioning}
           >
             <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
@@ -584,16 +635,20 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
       case "balcao":
         return (
           <Button 
-            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-green-600" 
-            onClick={() => setCurrentTab("observacao")}
-            disabled={!balcaoEmpresaId}
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
+            onClick={() => handleStepComplete("observacao")}
+            disabled={!balcaoEmpresaId || isTransitioning}
           >
             <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "endereco":
         return (
-          <Button className="w-full text-base sm:text-lg p-4 sm:p-6 bg-yellow-500" onClick={() => setConfirmEnderecoOpen(true)} disabled={!enderecoId}>
+          <Button 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
+            onClick={() => setConfirmEnderecoOpen(true)} 
+            disabled={!enderecoId || isTransitioning}
+          >
             <span className="text-sm sm:text-base">Continuar para Pagamento</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
@@ -603,16 +658,20 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         const trocoObrigatorioPreenchido = !isDinheiro || (isDinheiro && trocoPara !== null && trocoPara !== undefined && trocoPara > 0);
         return (
           <Button 
-            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-amber-600" 
-            onClick={() => setCurrentTab("observacao")}
-            disabled={!meioPagamentoId || !trocoObrigatorioPreenchido}
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
+            onClick={() => handleStepComplete("observacao")}
+            disabled={!meioPagamentoId || !trocoObrigatorioPreenchido || isTransitioning}
           >
             <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
       case "observacao":
         return (
-          <Button className="w-full text-base sm:text-lg p-4 sm:p-6 bg-indigo-800" onClick={() => setCurrentTab("revisao")}>
+          <Button 
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
+            onClick={() => handleStepComplete("revisao")}
+            disabled={isTransitioning}
+          >
             <span className="text-sm sm:text-base">Revisar Pedido</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
         );
@@ -625,7 +684,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
               isLoadingPreview || 
               (currentTab === "revisao" && tipoPedido === "DELIVERY" && !previewData)
             } 
-            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-green-600"
+            className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary"
           >
             <div className="flex gap-2 sm:gap-3 items-center">
               {isLoadingPreview ? (
@@ -714,14 +773,14 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             <Button
               onClick={() => {
                 setConfirmEnderecoOpen(false);
-                setCurrentTab("pagamento");
+                handleStepComplete("pagamento");
               }}
               className="w-full sm:w-auto"
               disabled={!enderecoId}
             >
               Sim, estou nesse endereço
             </Button>
-            <Button variant="destructive" onClick={() => setConfirmEnderecoOpen(false)} className="w-full sm:w-auto">
+            <Button variant="outline" onClick={() => setConfirmEnderecoOpen(false)} className="w-full sm:w-auto">
               Não, trocar
             </Button>
           </DialogFooter>
@@ -916,6 +975,30 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   ),
                 },
               ].filter(item => !item.hidden)}
+              middleContent={
+                (() => {
+                  const progress = getProgress();
+                  return (
+                    <div className="px-4 py-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-muted-foreground">Progresso</span>
+                        <span className="text-sm font-semibold" style={{ color: 'var(--primary)' }}>
+                          {progress.current}/{progress.total}
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500 ease-out"
+                          style={{
+                            width: `${progress.percentage}%`,
+                            backgroundColor: 'var(--primary)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()
+              }
             />
           </CardContent>
 
@@ -938,8 +1021,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
       {/* Botão HOME flutuante no canto inferior direito */}
       {cliente && (
         <Button
-          onClick={() => router.push("/")}
-          className="fixed bottom-28 sm:bottom-32 right-4 sm:right-6 z-50 rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg bg-primary hover:bg-primary/90 flex items-center justify-center transition-all active:scale-95"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.push("/");
+          }}
+          className="fixed bottom-28 sm:bottom-32 right-4 sm:right-6 z-[60] rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg bg-primary hover:bg-primary/90 flex items-center justify-center transition-all active:scale-95"
           size="icon"
           aria-label="Voltar para home"
         >

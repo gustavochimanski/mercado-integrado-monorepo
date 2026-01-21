@@ -9,14 +9,22 @@ import { Minus, Plus } from "lucide-react";
 import type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
 
 interface ComplementoSectionProps {
-  complemento: ComplementoResponse;
+  complemento: ComplementoResponse; // Complemento com valores da vinculação (obrigatorio, quantitativo, minimo_itens, maximo_itens, ordem)
   selecoes: Record<number, number>;
   getQuantidade: (adicionalId: number) => number;
   onToggle: (adicionalId: number) => void;
   onIncrement: (adicionalId: number) => void;
   onDecrement: (adicionalId: number) => void;
+  highlight?: boolean;
 }
 
+/**
+ * Componente para exibir e gerenciar a seleção de um complemento
+ * 
+ * IMPORTANTE: **TODOS** os valores de configuração (`obrigatorio`, `quantitativo`, `minimo_itens`, `maximo_itens` e `ordem`)
+ * vêm da vinculação entre complemento e produto/receita/combo, não do complemento em si.
+ * A API retorna esses valores quando buscamos complementos de um item específico.
+ */
 export function ComplementoSection({
   complemento,
   selecoes,
@@ -24,14 +32,25 @@ export function ComplementoSection({
   onToggle,
   onIncrement,
   onDecrement,
+  highlight = false,
 }: ComplementoSectionProps) {
   const totalSelecionado = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
+  // minimo_itens e maximo_itens vêm da vinculação
   const atingiuMinimo = complemento.minimo_itens ? totalSelecionado >= complemento.minimo_itens : true;
   const atingiuMaximo = complemento.maximo_itens ? totalSelecionado >= complemento.maximo_itens : false;
   const faltaItens = complemento.minimo_itens ? complemento.minimo_itens - totalSelecionado : 0;
 
   return (
-    <div className="space-y-3 p-4 rounded-lg border-2 bg-card">
+    <div 
+      className={`space-y-3 p-4 rounded-lg border-2 bg-card transition-all duration-300 ${
+        highlight 
+          ? "border-primary/60 shadow-md shadow-primary/20" 
+          : ""
+      }`}
+      style={highlight ? {
+        animation: 'flash 0.4s ease-in-out 5'
+      } : undefined}
+    >
       {/* Cabeçalho do Complemento */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">

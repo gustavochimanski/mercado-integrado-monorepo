@@ -31,18 +31,25 @@ export type AdicionalComplemento = AdicionalComplementoResponse;
 /**
  * Interface para um Complemento
  * Corresponde ao ComplementoResponse da API
+ * 
+ * IMPORTANTE: A partir da atualização da API, **TODAS** as configurações (`obrigatorio`, 
+ * `quantitativo`, `minimo_itens`, `maximo_itens` e `ordem`) vêm da **vinculação** entre 
+ * o complemento e o produto/receita/combo, não mais do complemento em si. Isso permite 
+ * que o mesmo complemento tenha comportamentos diferentes dependendo de onde está sendo usado.
+ * 
+ * @see Documentação: Configurações de Complemento na Vinculação
  */
 export interface ComplementoResponse {
   id: number;                        // ID do complemento
   empresa_id: number;                // ID da empresa
   nome: string;                      // Nome do complemento (ex: "Tamanho", "Bebida")
   descricao?: string | null;         // Descrição do complemento
-  obrigatorio: boolean;              // Se é obrigatório selecionar
-  quantitativo: boolean;             // Se permite quantidade > 1
-  permite_multipla_escolha: boolean; // Se permite selecionar múltiplos adicionais
-  minimo_itens?: number | null;      // Quantidade mínima de itens (se aplicável)
-  maximo_itens?: number | null;      // Quantidade máxima de itens (se aplicável)
-  ordem: number;                     // Ordem de exibição
+  obrigatorio: boolean;              // Se é obrigatório selecionar (vem da VINCULAÇÃO)
+  quantitativo: boolean;             // Se permite quantidade > 1 e múltipla escolha (vem da VINCULAÇÃO)
+  permite_multipla_escolha: boolean; // Se permite selecionar múltiplos adicionais (legado, pode ser derivado de quantitativo)
+  minimo_itens?: number | null;      // Quantidade mínima de itens (vem da VINCULAÇÃO)
+  maximo_itens?: number | null;      // Quantidade máxima de itens (vem da VINCULAÇÃO)
+  ordem: number;                     // Ordem de exibição (vem da VINCULAÇÃO)
   ativo: boolean;                   // Se está ativo
   adicionais: AdicionalComplementoResponse[]; // Lista de adicionais
   created_at: string;                // ISO 8601
@@ -97,5 +104,37 @@ export function converterTipoPedidoParaBackend(tipoPedido: TipoPedidoFrontend | 
   };
   
   return mapping[tipoPedido] || "delivery";
+}
+
+/**
+ * Configuração de vinculação de um complemento a um produto/receita/combo
+ * 
+ * Usado no formato completo de vinculação de complementos.
+ * Todas as configurações são obrigatórias na vinculação.
+ */
+export interface ConfiguracaoVinculacaoComplemento {
+  complemento_id: number;           // ID do complemento a vincular (obrigatório)
+  ordem?: number;                    // Ordem de exibição (opcional, usa índice se não informado)
+  obrigatorio: boolean;              // Se o complemento é obrigatório nesta vinculação (obrigatório)
+  quantitativo: boolean;             // Se permite quantidade e múltipla escolha nesta vinculação (obrigatório)
+  minimo_itens?: number | null;     // Quantidade mínima de itens (opcional, null = sem mínimo)
+  maximo_itens?: number | null;     // Quantidade máxima de itens (opcional, null = sem limite)
+}
+
+/**
+ * Request body para vincular complementos (formato completo - recomendado)
+ */
+export interface VincularComplementosRequest {
+  configuracoes: ConfiguracaoVinculacaoComplemento[];
+}
+
+/**
+ * Request body para vincular complementos (formato simples - compatibilidade)
+ * 
+ * @deprecated Use o formato completo com `configuracoes` em vez disso
+ */
+export interface VincularComplementosRequestSimples {
+  complemento_ids: number[];
+  ordens?: number[];
 }
 

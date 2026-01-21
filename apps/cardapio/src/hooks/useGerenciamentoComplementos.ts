@@ -11,7 +11,11 @@ import { validarComplementosObrigatorios } from "@cardapio/utils/complementos/va
  * Este hook centraliza a lógica de seleção, incremento, decremento e validação
  * de complementos, facilitando a reutilização em diferentes componentes.
  * 
- * @param complementos - Array de complementos disponíveis
+ * IMPORTANTE: **TODOS** os valores de configuração (`obrigatorio`, `quantitativo`, `minimo_itens` e `maximo_itens`) 
+ * nos complementos vêm da vinculação entre complemento e produto/receita/combo, não do complemento em si.
+ * A API já retorna esses valores corretos quando buscamos complementos de um item específico.
+ * 
+ * @param complementos - Array de complementos disponíveis (com valores da vinculação)
  * @returns Objeto com estado e funções para gerenciar complementos
  * 
  * @example
@@ -68,7 +72,7 @@ export function useGerenciamentoComplementos(
           // Adicionar ou atualizar adicional
           const compSelecoes = novo.get(complementoId) || new Map<number, number>();
 
-          // Validar máximo de itens do complemento
+          // Validar máximo de itens do complemento (vem da vinculação)
           if (complemento.maximo_itens && complemento.maximo_itens > 0) {
             const totalItens = Array.from(compSelecoes.values()).reduce(
               (sum, qtd) => sum + qtd,
@@ -222,6 +226,10 @@ export function useGerenciamentoComplementos(
 
   /**
    * Valida se todos os complementos obrigatórios foram selecionados
+   * 
+   * IMPORTANTE: Os valores de `obrigatorio`, `minimo_itens` e `maximo_itens` usados aqui
+   * vêm da vinculação (retornados pela API ao buscar complementos de um produto/receita/combo),
+   * não do complemento em si.
    */
   const validar = useCallback((): { valido: boolean; erro?: string } => {
     // Converter seleções para formato CartItemComplemento para validação

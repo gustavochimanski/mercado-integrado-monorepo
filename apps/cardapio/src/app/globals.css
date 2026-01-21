@@ -149,3 +149,17 @@
   max-width: 100% !important;
 }
 
+/* Animação de piscar para complementos obrigatórios */
+/* Usa variáveis CSS dinâmicas criadas pelo ThemeProvider baseadas no tema da empresa */
+@keyframes flash {
+  0%, 100% {
+    background-color: var(--primary-flash-bg, oklch(0.80 0.16 86 / 0.0));
+    border-color: var(--primary-flash-border, oklch(0.80 0.16 86 / 0.6));
+  }
+  50% {
+    background-color: var(--primary-flash-peak, oklch(0.80 0.16 86 / 0.1)); /* primary/40 */
+    border-color: var(--primary-flash-border, oklch(0.80 0.16 86 / 0.6));
+    box-shadow: 0 0 16px var(--primary-flash-shadow, oklch(0.80 0.16 86 / 0.28));
+  }
+}
+

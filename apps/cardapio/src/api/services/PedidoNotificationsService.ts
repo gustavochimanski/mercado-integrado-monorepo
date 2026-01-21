@@ -14,8 +14,7 @@ export class PedidoNotificationsService {
      * Este endpoint deve ser chamado sempre que um novo pedido for criado no sistema.
      * Ele irá:
      * 1. Publicar um evento no sistema de eventos
-     * 2. Enviar notificação em tempo real via WebSocket para todos os usuários da empresa
-     * 3. Processar assinaturas de notificação configuradas
+     * 2. Processar assinaturas de notificação configuradas
      * @param empresaId
      * @param pedidoId
      * @param valorTotal

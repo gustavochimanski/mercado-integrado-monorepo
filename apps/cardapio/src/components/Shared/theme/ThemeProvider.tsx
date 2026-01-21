@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQueryEmpresaPublic } from "@cardapio/services/empresa";
-import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { getEmpresaId, getEmpresaData } from "@cardapio/stores/empresa/empresaStore";
+import { usePathname } from "next/navigation";
+import type { EmpresaPublic } from "@cardapio/services/empresa/types";
 
 /**
  * Extrai os valores de uma cor oklch
@@ -50,7 +52,25 @@ function calculateRing(primary: string): string {
 
 export function ThemeProvider() {
   const empresaId = getEmpresaId();
-  const { data: empresa } = useQueryEmpresaPublic(true, empresaId);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  
+  // Só faz GET na home, nas outras páginas lê do localStorage
+  const { data: empresaFromAPI } = useQueryEmpresaPublic(isHome, empresaId);
+  const [empresaFromStorage, setEmpresaFromStorage] = useState<EmpresaPublic | null>(null);
+
+  // Ler do localStorage quando não for home
+  useEffect(() => {
+    if (!isHome) {
+      const stored = getEmpresaData();
+      if (stored) {
+        setEmpresaFromStorage(stored as EmpresaPublic);
+      }
+    }
+  }, [isHome]);
+
+  // Usar empresa da API (home) ou do localStorage (outras páginas)
+  const empresa = isHome ? empresaFromAPI : empresaFromStorage;
 
   useEffect(() => {
     // Prioriza o campo 'tema' (novo formato da API), mas mantém compatibilidade com 'cardapio_tema'
@@ -68,6 +88,15 @@ export function ThemeProvider() {
     document.documentElement.style.setProperty("--primary", primary);
     document.documentElement.style.setProperty("--primary-foreground", primaryForeground);
     document.documentElement.style.setProperty("--ring", ring);
+    
+    // Extrai valores oklch para criar versões com opacidade para a animação
+    const parsed = parseOklch(primary);
+    if (parsed) {
+      document.documentElement.style.setProperty("--primary-flash-bg", `oklch(${parsed.L} ${parsed.C} ${parsed.H} / 0.0)`);
+      document.documentElement.style.setProperty("--primary-flash-border", `oklch(${parsed.L} ${parsed.C} ${parsed.H} / 0.6)`);
+      document.documentElement.style.setProperty("--primary-flash-peak", `oklch(${parsed.L} ${parsed.C} ${parsed.H} / 0.1)`);
+      document.documentElement.style.setProperty("--primary-flash-shadow", `oklch(${parsed.L} ${parsed.C} ${parsed.H} / 0.28)`);
+    }
   }, [empresa?.tema, empresa?.cardapio_tema]);
 
   return null;

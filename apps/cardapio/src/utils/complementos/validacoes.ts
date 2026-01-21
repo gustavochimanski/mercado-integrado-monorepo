@@ -3,6 +3,10 @@
  * 
  * Centraliza todas as validações relacionadas a complementos
  * para garantir consistência em todo o projeto.
+ * 
+ * IMPORTANTE: **TODOS** os valores de configuração (`obrigatorio`, `quantitativo`, `minimo_itens` e `maximo_itens`)
+ * vêm da vinculação entre complemento e produto/receita/combo, não do complemento em si.
+ * A API já retorna esses valores corretos quando buscamos complementos de um item específico.
  */
 
 import type { ComplementoResponse } from "@cardapio/types/complementos";
@@ -13,7 +17,12 @@ import type { ValidacaoComplementosResult } from "@cardapio/types/complementos";
  * Valida se todos os complementos obrigatórios foram selecionados
  * e se as quantidades mínimas/máximas foram respeitadas
  * 
- * @param complementos - Array de complementos disponíveis
+ * IMPORTANTE: Os valores de `obrigatorio`, `minimo_itens` e `maximo_itens` usados aqui
+ * vêm da vinculação (retornados pela API ao buscar complementos de um produto/receita/combo),
+ * não do complemento em si. Isso permite que o mesmo complemento tenha regras diferentes
+ * em cada produto/receita/combo.
+ * 
+ * @param complementos - Array de complementos disponíveis (com valores da vinculação)
  * @param complementosSelecionados - Map de complementos selecionados (complemento_id -> CartItemComplemento)
  * @returns Resultado da validação com mensagem de erro se houver
  * 
@@ -30,6 +39,7 @@ export function validarComplementosObrigatorios(
   complementosSelecionados: Map<number, CartItemComplemento>
 ): ValidacaoComplementosResult {
   for (const complemento of complementos) {
+    // obrigatorio vem da vinculação, não do complemento em si
     if (complemento.obrigatorio) {
       const selecionado = complementosSelecionados.get(complemento.id);
 
@@ -55,7 +65,7 @@ export function validarComplementosObrigatorios(
         }
       }
 
-      // Validar quantidade máxima
+      // Validar quantidade máxima (vem da vinculação)
       if (complemento.maximo_itens && complemento.maximo_itens > 0) {
         const totalItens = selecionado.adicionais.reduce(
           (sum, ad) => sum + ad.quantidade,
@@ -90,7 +100,10 @@ export function permiteMultiplaEscolha(
 /**
  * Verifica se um complemento é quantitativo (permite quantidade > 1)
  * 
- * @param complemento - Complemento a verificar
+ * IMPORTANTE: O valor de `quantitativo` vem da vinculação entre complemento e produto/receita/combo,
+ * não do complemento em si. A API retorna esse valor quando buscamos complementos de um item específico.
+ * 
+ * @param complemento - Complemento a verificar (com valor de quantitativo da vinculação)
  * @returns true se é quantitativo, false caso contrário
  */
 export function permiteQuantidade(
@@ -102,7 +115,10 @@ export function permiteQuantidade(
 /**
  * Verifica se um complemento é obrigatório
  * 
- * @param complemento - Complemento a verificar
+ * IMPORTANTE: O valor de `obrigatorio` vem da vinculação entre complemento e produto/receita/combo,
+ * não do complemento em si. A API retorna esse valor quando buscamos complementos de um item específico.
+ * 
+ * @param complemento - Complemento a verificar (com valor de obrigatorio da vinculação)
  * @returns true se é obrigatório, false caso contrário
  */
 export function isObrigatorio(

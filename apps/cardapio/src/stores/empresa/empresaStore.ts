@@ -103,3 +103,40 @@ export function clearMesaInicial() {
     }
   }
 }
+
+// Funções para gerenciar empresa completa no localStorage
+const EMPRESA_STORAGE_KEY = "empresaData";
+
+export function setEmpresaData(empresa: any) {
+  try {
+    localStorage.setItem(EMPRESA_STORAGE_KEY, JSON.stringify(empresa));
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Não foi possível salvar empresa no localStorage:", error);
+    }
+  }
+}
+
+export function getEmpresaData(): any | null {
+  try {
+    const stored = localStorage.getItem(EMPRESA_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Não foi possível ler empresa do localStorage:", error);
+    }
+  }
+  return null;
+}
+
+export function clearEmpresaData() {
+  try {
+    localStorage.removeItem(EMPRESA_STORAGE_KEY);
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Não foi possível limpar empresa do localStorage:", error);
+    }
+  }
+}

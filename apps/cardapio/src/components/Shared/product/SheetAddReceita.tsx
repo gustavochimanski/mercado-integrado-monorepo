@@ -19,11 +19,15 @@ import { ReceitaMiniDTO } from "@cardapio/services/home";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import { useComplementosUnificado } from "@cardapio/services/complementos";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import type { CartItemComplemento } from "@cardapio/stores/cart/useCart";
 import { ComplementoSection } from "./ComplementoSection";
+import { toast } from "sonner";
+
+const isTruthyFlag = (v: unknown) =>
+  v === true || v === 1 || v === "1" || v === "true" || v === "TRUE" || v === "S" || v === "s";
 
 const schema = z.object({
   quantity: z
@@ -88,9 +92,9 @@ export function SheetAdicionarReceita({
     return complementosDaAPI
       .map(comp => ({
         ...comp,
-        adicionais: (comp.adicionais || []).filter((ad: AdicionalComplemento) => ad.ativo)
+        adicionais: (comp.adicionais || []).filter((ad: AdicionalComplemento) => isTruthyFlag((ad as any).ativo))
       }))
-      .filter(comp => comp.ativo && comp.adicionais.length > 0);
+      .filter(comp => isTruthyFlag((comp as any).ativo) && comp.adicionais.length > 0);
   }, [complementosDaAPI]);
 
   // Debug: Log para verificar se os dados estão chegando
@@ -124,7 +128,6 @@ export function SheetAdicionarReceita({
 
   // Incrementar quantidade de um adicional em um complemento
   const incrementarAdicional = (complementoId: number, adicionalId: number, quantitativo: boolean) => {
-    setErroValidacao(null); // Limpar erro ao interagir
     setSelecoesComplementos(prev => {
       const complemento = complementos.find(c => c.id === complementoId);
       if (!complemento) return prev;
@@ -264,10 +267,16 @@ export function SheetAdicionarReceita({
     setValue("quantity", novaQuantidade);
   }
 
+  // IMPORTANTE: obrigatorio vem da vinculação, não do complemento em si
+  const isComplementoObrigatorio = (complemento: ComplementoResponse) => {
+    return complemento.obrigatorio === true;
+  };
+
   // Validar se complementos obrigatórios foram selecionados
+  // IMPORTANTE: TODOS os valores de configuração (obrigatorio, quantitativo, minimo_itens, maximo_itens) vêm da vinculação
   const validarComplementos = (): { valido: boolean; erro?: string } => {
     for (const complemento of complementos) {
-      if (complemento.obrigatorio) {
+      if (isComplementoObrigatorio(complemento)) {
         const selecoes = selecoesComplementos[complemento.id];
         if (!selecoes || Object.keys(selecoes).length === 0) {
           return {
@@ -276,7 +285,7 @@ export function SheetAdicionarReceita({
           };
         }
 
-        // Validar quantidade mínima
+        // Validar quantidade mínima (vem da vinculação)
         if (complemento.minimo_itens && complemento.minimo_itens > 0) {
           const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
           if (totalItens < complemento.minimo_itens) {
@@ -287,7 +296,7 @@ export function SheetAdicionarReceita({
           }
         }
 
-        // Validar quantidade máxima
+        // Validar quantidade máxima (vem da vinculação)
         if (complemento.maximo_itens && complemento.maximo_itens > 0) {
           const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
           if (totalItens > complemento.maximo_itens) {
@@ -302,7 +311,122 @@ export function SheetAdicionarReceita({
     return { valido: true };
   };
 
-  const [erroValidacao, setErroValidacao] = useState<string | null>(null);
+  const [complementoHighlightId, setComplementoHighlightId] = useState<number | null>(null);
+  const complementoRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Sempre voltar pro topo ao abrir (evita reabrir já no meio da lista)
+  useEffect(() => {
+    if (!isOpen) return;
+    requestAnimationFrame(() => {
+      scrollContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+  }, [isOpen, receita?.id]);
+
+  const encontrarScrollParent = (el: HTMLElement | null): HTMLElement | null => {
+    if (!el) return null;
+    let current: HTMLElement | null = el.parentElement;
+    while (current) {
+      const style = window.getComputedStyle(current);
+      const overflowY = style.overflowY;
+      if (overflowY === "auto" || overflowY === "scroll") {
+        return current;
+      }
+      current = current.parentElement;
+    }
+    return null;
+  };
+
+  // Verificar se todos os complementos obrigatórios estão selecionados
+  const todosComplementosObrigatoriosSelecionados = useMemo(() => {
+    if (isLoadingComplementos) {
+      return true;
+    }
+    if (!complementos || complementos.length === 0) {
+      return true;
+    }
+
+    for (const complemento of complementos) {
+      if (isComplementoObrigatorio(complemento)) {
+        const selecoes = selecoesComplementos[complemento.id];
+        if (!selecoes || Object.keys(selecoes).length === 0) {
+          return false;
+        }
+
+        if (complemento.minimo_itens && complemento.minimo_itens > 0) {
+          const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
+          if (totalItens < complemento.minimo_itens) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }, [complementos, selecoesComplementos, isLoadingComplementos]);
+
+  // Encontrar o primeiro complemento obrigatório não selecionado
+  const encontrarComplementoObrigatorioNaoSelecionado = (): ComplementoResponse | null => {
+    for (const complemento of complementos) {
+      if (isComplementoObrigatorio(complemento)) {
+        const selecoes = selecoesComplementos[complemento.id];
+        if (!selecoes || Object.keys(selecoes).length === 0) {
+          return complemento;
+        }
+
+        if (complemento.minimo_itens && complemento.minimo_itens > 0) {
+          const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
+          if (totalItens < complemento.minimo_itens) {
+            return complemento;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const scrollParaComplementoObrigatorio = () => {
+    const complementoNaoSelecionado = encontrarComplementoObrigatorioNaoSelecionado();
+    if (!complementoNaoSelecionado) return;
+
+    setComplementoHighlightId(complementoNaoSelecionado.id);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const element = complementoRefs.current[complementoNaoSelecionado.id];
+
+        if (!element) return;
+
+        const container = scrollContainerRef.current || encontrarScrollParent(element);
+
+        if (container) {
+          const containerRect = container.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const scrollTop = container.scrollTop;
+          const elementTop = elementRect.top - containerRect.top + scrollTop;
+          const centerOffset = container.clientHeight / 2 - elementRect.height / 2;
+          const targetTop = elementTop - centerOffset;
+
+          container.scrollTo({
+            top: targetTop,
+            behavior: "smooth",
+          });
+          return;
+        }
+
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (complementoHighlightId !== null) {
+      const timer = setTimeout(() => {
+        setComplementoHighlightId(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [complementoHighlightId]);
 
   function onSubmit(data: FormData) {
     const observacao = data.observacao?.trim() || undefined;
@@ -310,13 +434,10 @@ export function SheetAdicionarReceita({
     // Validar complementos obrigatórios
     const validacao = validarComplementos();
     if (!validacao.valido) {
-      setErroValidacao(validacao.erro || "Erro de validação");
-      // Scroll para o topo para mostrar o erro
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast.error(validacao.erro || "Erro de validação");
+      scrollParaComplementoObrigatorio();
       return;
     }
-    
-    setErroValidacao(null);
     
     // Converter seleções para formato de complementos do carrinho
     const complementosSelecionados: CartItemComplemento[] = [];
@@ -373,13 +494,13 @@ export function SheetAdicionarReceita({
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent 
         side="bottom" 
-        className="min-h-[55vh] max-h-[85vh] overflow-y-auto w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background"
+        className="h-[85vh] w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background overflow-hidden"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full min-h-0">
           {/* Botão de fechar customizado */}
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => handleOpenChange(false)}
             className="absolute top-4 right-4 z-50 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm p-2 text-white transition-colors"
             aria-label="Fechar"
           >
@@ -398,7 +519,10 @@ export function SheetAdicionarReceita({
           </div>
 
           {/* Conteúdo Scrollável */}
-          <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-6"
+          >
             <SheetHeader className="mb-6">
               <SheetTitle className="text-2xl font-bold leading-tight text-left mb-2">
                 {nome}
@@ -493,13 +617,6 @@ export function SheetAdicionarReceita({
             {/* Divisor */}
             <div className="border-t border-border my-6" />
 
-            {/* Mensagem de erro de validação */}
-            {erroValidacao && (
-              <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive text-destructive text-sm">
-                {erroValidacao}
-              </div>
-            )}
-
             {/* Seção de Complementos */}
             {isLoadingComplementos ? (
               <div className="space-y-3 mb-6">
@@ -523,18 +640,30 @@ export function SheetAdicionarReceita({
                 </div>
 
                 {complementos.map((complemento) => (
-                  <ComplementoSection
+                  <div
                     key={complemento.id}
-                    complemento={complemento}
-                    selecoes={selecoesComplementos[complemento.id] || {}}
-                    getQuantidade={(adicionalId) => getQuantidadeAdicional(complemento.id, adicionalId)}
-                    onToggle={(adicionalId) => toggleAdicional(complemento.id, adicionalId, complemento.permite_multipla_escolha, complemento.quantitativo)}
-                    onIncrement={(adicionalId) => incrementarAdicional(complemento.id, adicionalId, complemento.quantitativo)}
-                    onDecrement={(adicionalId) => decrementarAdicional(complemento.id, adicionalId)}
-                  />
+                    ref={(el) => {
+                      complementoRefs.current[complemento.id] = el;
+                    }}
+                  >
+                    <ComplementoSection
+                      complemento={complemento}
+                      selecoes={selecoesComplementos[complemento.id] || {}}
+                      getQuantidade={(adicionalId) => getQuantidadeAdicional(complemento.id, adicionalId)}
+                      onToggle={(adicionalId) => toggleAdicional(complemento.id, adicionalId, complemento.permite_multipla_escolha, complemento.quantitativo)}
+                      onIncrement={(adicionalId) => incrementarAdicional(complemento.id, adicionalId, complemento.quantitativo)}
+                      onDecrement={(adicionalId) => decrementarAdicional(complemento.id, adicionalId)}
+                      highlight={complementoHighlightId === complemento.id}
+                    />
+                  </div>
                 ))}
               </div>
-            ) : null}
+            ) : (
+              <div className="space-y-3 mb-6">
+                <Label className="text-base font-semibold">Complementos</Label>
+                <p className="text-sm text-muted-foreground">Esta receita não possui complementos disponíveis.</p>
+              </div>
+            )}
 
             {/* Divisor */}
             {complementos.length > 0 && <div className="border-t border-border my-6" />}
@@ -571,10 +700,27 @@ export function SheetAdicionarReceita({
           {/* Footer Fixo */}
           <SheetFooter className="border-t border-border bg-background px-4 pt-4 pb-6 sticky bottom-0">
             <Button 
-              type="submit" 
-              disabled={isLoadingComplementos}
-              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed"
+              type="button"
+              aria-disabled={!todosComplementosObrigatoriosSelecionados}
+              className={`w-full h-14 text-base font-semibold shadow-lg transition-all bg-primary text-background ${
+                todosComplementosObrigatoriosSelecionados
+                  ? "hover:shadow-xl hover:bg-primary/90"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
               size="lg"
+              onClick={(e) => {
+                if (!todosComplementosObrigatoriosSelecionados) {
+                  e.preventDefault();
+                  const validacao = validarComplementos();
+                  if (!validacao.valido) {
+                    toast.error(validacao.erro || "Erro de validação");
+                  }
+                  scrollParaComplementoObrigatorio();
+                  return;
+                }
+
+                handleSubmit(onSubmit)();
+              }}
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
               {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}

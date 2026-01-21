@@ -717,86 +717,13 @@ export class ApiNotificationsService {
         });
     }
     /**
-     * Get Connection Stats
-     * Retorna estatísticas das conexões WebSocket
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public getConnectionStatsApiNotificationsWsConnectionsStatsGet(): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/notifications/ws/connections/stats',
-        });
-    }
-    /**
-     * Send Notification To User
-     * Envia notificação para um usuário específico via WebSocket
-     * @param userId
-     * @param title
-     * @param message
-     * @param notificationType
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public sendNotificationToUserApiNotificationsWsNotificationsSendPost(
-        userId: string,
-        title: string,
-        message: string,
-        notificationType: string = 'info',
-    ): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/notifications/ws/notifications/send',
-            query: {
-                'user_id': userId,
-                'title': title,
-                'message': message,
-                'notification_type': notificationType,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Broadcast Notification
-     * Envia notificação para todos os usuários de uma empresa
-     * @param empresaId
-     * @param title
-     * @param message
-     * @param notificationType
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public broadcastNotificationApiNotificationsWsNotificationsBroadcastPost(
-        empresaId: string,
-        title: string,
-        message: string,
-        notificationType: string = 'info',
-    ): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/api/notifications/ws/notifications/broadcast',
-            query: {
-                'empresa_id': empresaId,
-                'title': title,
-                'message': message,
-                'notification_type': notificationType,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Notificar Novo Pedido
      * Notifica sobre um novo pedido criado
      *
      * Este endpoint deve ser chamado sempre que um novo pedido for criado no sistema.
      * Ele irá:
      * 1. Publicar um evento no sistema de eventos
-     * 2. Enviar notificação em tempo real via WebSocket para todos os usuários da empresa
-     * 3. Processar assinaturas de notificação configuradas
+     * 2. Processar assinaturas de notificação configuradas
      * @param empresaId
      * @param pedidoId
      * @param valorTotal

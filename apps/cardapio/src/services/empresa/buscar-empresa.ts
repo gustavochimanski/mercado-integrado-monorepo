@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@cardapio/app/api/api";
 import type { EmpresaPublic } from "./types";
+import { setEmpresaData } from "@cardapio/stores/empresa/empresaStore";
 
 interface UseBuscarEmpresaOptions {
   enabled?: boolean;
@@ -30,7 +31,10 @@ export function useBuscarEmpresa(options?: UseBuscarEmpresaOptions) {
       });
       // A API retorna um array, pegamos o primeiro item
       if (Array.isArray(data) && data.length > 0) {
-        return data[0];
+        const empresa = data[0];
+        // Salvar empresa completa no localStorage
+        setEmpresaData(empresa);
+        return empresa;
       }
       throw new Error("Empresa não encontrada");
     },

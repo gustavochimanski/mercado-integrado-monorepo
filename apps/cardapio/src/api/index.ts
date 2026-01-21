@@ -259,4 +259,3 @@ export { PublicDeliveryMercadoPagoWebhooksService } from './services/PublicDeliv
 export { PublicRotasPBlicasService } from './services/PublicRotasPBlicasService';
 export { RabbitmqService } from './services/RabbitmqService';
 export { SubscriptionsService } from './services/SubscriptionsService';
-export { WebsocketService } from './services/WebsocketService';

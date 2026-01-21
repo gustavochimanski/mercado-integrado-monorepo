@@ -71,6 +71,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
   });
   const [open, setOpen] = useState(false);
   const [searchAddress, setSearchAddress] = useState("");
+  const [showSearchOnly, setShowSearchOnly] = useState(false); // Controla se mostra apenas pesquisa ou formulário
   useEffect(() => setSelected(enderecoId ?? null), [enderecoId]);
 
   const startEdit = (e: Endereco) => {
@@ -91,6 +92,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
       ponto_referencia: e.ponto_referencia || ""
     });
     setSearchAddress("");
+    setShowSearchOnly(false); // Ao editar, mostra formulário direto
     setOpen(true);
   };
 
@@ -112,6 +114,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
       ponto_referencia: ""
     });
     setSearchAddress("");
+    setShowSearchOnly(true); // Ao adicionar novo, mostra apenas pesquisa
     setOpen(true);
   };
 
@@ -136,6 +139,8 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     });
     // Manter o endereço formatado no campo de pesquisa
     setSearchAddress(selectedAddress.endereco_formatado || "");
+    // Ocultar pesquisa e mostrar formulário
+    setShowSearchOnly(false);
   };
 
   const handleSearchChange = (value: string) => {
@@ -197,6 +202,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     });
     setSearchAddress("");
     setValidationErrors({});
+    setShowSearchOnly(false);
     setOpen(false);
   };
 
@@ -270,7 +276,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
         <Button
           onClick={startAddNew}
           variant="default"
-          className="w-full rounded-xl flex items-center justify-center gap-2 py-6 h-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+          className="h-10"
         >
           <Plus className="h-5 w-5" />
           <span>Adicionar Novo Endereço</span>
@@ -278,64 +284,82 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
       </div>
 
       {/* Modal */}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          // Resetar estado quando fechar
+          setShowSearchOnly(editingId === null);
+          setSearchAddress("");
+        }
+      }}>
         <DialogContent className="!max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg">{editingId !== null ? "Editar Endereço" : "Adicionar Novo Endereço"}</DialogTitle>
+            <DialogTitle className="text-lg">
+              {editingId !== null 
+                ? "Editar Endereço" 
+                : showSearchOnly 
+                  ? "Pesquisar Endereço" 
+                  : "Confirmar Endereço"}
+            </DialogTitle>
             <p className="text-sm text-muted-foreground mt-1">
               {editingId !== null 
                 ? "Pesquise e selecione um endereço ou edite manualmente os campos abaixo"
-                : "Pesquise seu endereço digitando a rua ou CEP. Os campos serão preenchidos automaticamente!"}
+                : showSearchOnly
+                  ? "Pesquise seu endereço digitando a rua ou CEP"
+                  : "Confira os dados do endereço selecionado e complete as informações necessárias"}
             </p>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Busca de Endereço - Destaque Principal */}
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-primary" />
-                Pesquisar Endereço
-                <span className="text-xs font-normal text-muted-foreground">(Rua ou CEP)</span>
-              </Label>
-              <SearchEndereco
-                value={searchAddress}
-                onValueChange={handleSearchChange}
-                onAddressSelect={handleSelectAddress}
-                placeholder="Ex: Rua das Flores ou 01310-100"
-              />
-              {(validationErrors.logradouro || validationErrors.numero || validationErrors.bairro || validationErrors.cidade || validationErrors.estado) && (
-                <div className="space-y-1">
-                  {validationErrors.logradouro && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {validationErrors.logradouro}
-                    </p>
-                  )}
-                  {validationErrors.numero && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {validationErrors.numero}
-                    </p>
-                  )}
-                  {validationErrors.bairro && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {validationErrors.bairro}
-                    </p>
-                  )}
-                  {validationErrors.cidade && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {validationErrors.cidade}
-                    </p>
-                  )}
-                  {validationErrors.estado && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {validationErrors.estado}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Busca de Endereço - Mostrar apenas quando showSearchOnly for true OU quando estiver editando */}
+            {(showSearchOnly || editingId !== null) && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  Pesquisar Endereço
+                  <span className="text-xs font-normal text-muted-foreground">(Rua ou CEP)</span>
+                </Label>
+                <SearchEndereco
+                  value={searchAddress}
+                  onValueChange={handleSearchChange}
+                  onAddressSelect={handleSelectAddress}
+                  placeholder="Ex: Rua das Flores ou 01310-100"
+                />
+                {(validationErrors.logradouro || validationErrors.numero || validationErrors.bairro || validationErrors.cidade || validationErrors.estado) && (
+                  <div className="space-y-1">
+                    {validationErrors.logradouro && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <span>⚠️</span> {validationErrors.logradouro}
+                      </p>
+                    )}
+                    {validationErrors.numero && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <span>⚠️</span> {validationErrors.numero}
+                      </p>
+                    )}
+                    {validationErrors.bairro && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <span>⚠️</span> {validationErrors.bairro}
+                      </p>
+                    )}
+                    {validationErrors.cidade && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <span>⚠️</span> {validationErrors.cidade}
+                      </p>
+                    )}
+                    {validationErrors.estado && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <span>⚠️</span> {validationErrors.estado}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
-            {/* Campos Essenciais - Visíveis e Destado */}
-            <div className="space-y-3 border-t pt-4">
+            {/* Campos Essenciais - Mostrar quando não estiver apenas pesquisando OU quando estiver editando */}
+            {(!showSearchOnly || editingId !== null) && (
+              <div className="space-y-3 border-t pt-4">
               <Label className="text-sm font-semibold">Informações do Endereço</Label>
               
               {/* Linha 1: Logradouro e Número */}
@@ -550,23 +574,65 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
                   </div>
                 </div>
               </details>
-            </div>
+              </div>
+            )}
+
+            {/* Botão para voltar à pesquisa (quando não está apenas pesquisando e não está editando) */}
+            {!showSearchOnly && editingId === null && (
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowSearchOnly(true);
+                    setNovo({ 
+                      logradouro: "", 
+                      numero: "", 
+                      bairro: "", 
+                      cidade: "", 
+                      estado: "", 
+                      cep: "",
+                      complemento: "",
+                      distrito: "",
+                      codigo_estado: "",
+                      pais: "",
+                      latitude: 0,
+                      longitude: 0,
+                      ponto_referencia: ""
+                    });
+                    setSearchAddress("");
+                    setValidationErrors({});
+                  }}
+                  className="w-full text-xs"
+                >
+                  ← Pesquisar outro endereço
+                </Button>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t">
+            {/* Mostrar botão de salvar apenas quando não estiver apenas pesquisando OU quando estiver editando */}
+            {(!showSearchOnly || editingId !== null) && (
+              <Button 
+                onClick={handleSave} 
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+                disabled={!novo.logradouro || !novo.numero || !novo.cidade || !novo.estado}
+              >
+                {editingId !== null ? "Salvar Alterações" : "Confirmar e Cadastrar"}
+              </Button>
+            )}
             <Button 
-              onClick={handleSave} 
-              className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-              disabled={!novo.logradouro || !novo.numero || !novo.cidade || !novo.estado}
-            >
-              {editingId !== null ? "Salvar Alterações" : "Adicionar Endereço"}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setOpen(false)} 
+              variant="secondary" 
+              onClick={() => {
+                setOpen(false);
+                setShowSearchOnly(editingId === null);
+                setSearchAddress("");
+              }} 
               className="w-full sm:w-auto"
             >
-              Cancelar
+              {showSearchOnly ? "Cancelar" : "Fechar"}
             </Button>
           </DialogFooter>
         </DialogContent>

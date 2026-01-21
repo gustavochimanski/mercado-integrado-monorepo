@@ -3,16 +3,26 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Props {
   onOpen: () => void;
 }
 
 export function CartFab({ onOpen }: Props) {
+  // Evita hydration mismatch: no SSR o Zustand (persist) pode vir vazio,
+  // e no client hidratar com itens, mudando o HTML inicial.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const total = useCart((s) => s.totalItems());
   const totalPrice = useCart((s) => s.totalPrice());
 
   const pathname = usePathname();
+
+  // Importante: hooks precisam rodar sempre (Rules of Hooks).
+  // Só depois decidimos não renderizar nada.
+  if (!mounted) return null;
 
   // Oculta se não houver itens ou se estiver na rota /finalizar-pedido
   if (total === 0 || pathname === "/finalizar-pedido") return null;

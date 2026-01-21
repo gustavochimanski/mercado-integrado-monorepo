@@ -30,6 +30,7 @@ interface TabsProps {
   containerClassName?: string;
   triggerClassName?: string;
   contentClassName?: string;
+  middleContent?: React.ReactNode; // Conteúdo entre as tabs e o conteúdo principal
 }
 
 const Tabs: React.FC<TabsProps> = ({
@@ -40,6 +41,7 @@ const Tabs: React.FC<TabsProps> = ({
   containerClassName,
   triggerClassName,
   contentClassName,
+  middleContent,
 }) => {
   const {
     scrollRef,
@@ -106,6 +108,12 @@ const Tabs: React.FC<TabsProps> = ({
           </TabsPrimitive.Trigger>
         ))}
       </TabsPrimitive.List>
+
+      {middleContent && (
+        <div className="border-t border-border">
+          {middleContent}
+        </div>
+      )}
 
       <div className="flex-1 overflow-hidden">
         {activeItem && (
