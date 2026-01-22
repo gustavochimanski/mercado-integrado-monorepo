@@ -547,7 +547,7 @@ export function SheetAdicionarProduto({
               <div className="absolute inset-0 pointer-events-none z-10" />
               
               {/* Badge de desconto flutuante */}
-              <div className="absolute top-4 left-4 z-30 pointer-events-auto">
+              <div className="absolute top-4 left-4 z-20 pointer-events-auto">
                 <Badge className="bg-red-500 text-white font-bold text-sm px-3 py-1 shadow-lg">
                   -20% OFF
                 </Badge>
