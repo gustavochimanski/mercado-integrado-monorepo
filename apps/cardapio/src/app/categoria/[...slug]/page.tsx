@@ -173,7 +173,7 @@ export default function RouteCategoryPage() {
 
         {/* Usar vitrines já carregadas ao invés de ProductsSection */}
         {/* Mostrar todas as vitrines da categoria atual */}
-        {vitrinesFiltradas.map((vitrine) => (
+        {vitrinesFiltradas.map((vitrine, index) => (
           <ProductsVitrineSection
             key={vitrine.id}
             vitrineId={vitrine.id}
@@ -189,12 +189,13 @@ export default function RouteCategoryPage() {
             isHome={false}
             vitrineIsHome={vitrine.is_home}
             isHighlighted={highlightedVitrineId === vitrine.id}
+            isLast={vitrinesFilhoFiltradas.length === 0 && index === vitrinesFiltradas.length - 1}
           />
         ))}
 
         {/* Vitrines das subcategorias (apenas as primeiras de cada subcategoria) */}
         {/* Evitar duplicatas já exibidas em vitrines acima */}
-        {vitrinesFilhoFiltradas.map((vit) => (
+        {vitrinesFilhoFiltradas.map((vit, index) => (
           <ProductsVitrineSection
             key={vit.id}
             vitrineId={vit.id}
@@ -210,6 +211,7 @@ export default function RouteCategoryPage() {
             isHome={false}
             vitrineIsHome={vit.is_home}
             isHighlighted={highlightedVitrineId === vit.id}
+            isLast={index === vitrinesFilhoFiltradas.length - 1}
           />
         ))}
 
