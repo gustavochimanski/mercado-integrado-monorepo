@@ -10,6 +10,9 @@ export interface EmpresaDisponivel {
   bairro?: string | null;
   cidade?: string | null;
   estado?: string | null;
+  tema?: string | null;
+  redireciona_home?: boolean;
+  redireciona_home_para?: string | null;
 }
 
 // Tipo para dados públicos de uma empresa específica
@@ -22,6 +25,8 @@ export interface EmpresaPublic {
   estado?: string | null;
   distancia_km?: number | null;
   tema: string; // Cor oklch do tema, ex: "oklch(0.55 0.22 25)"
+  redireciona_home?: boolean;
+  redireciona_home_para?: string | null;
   // Campos legados para compatibilidade
   cardapio_tema?: string;
   aceita_pedido_automatico?: boolean;

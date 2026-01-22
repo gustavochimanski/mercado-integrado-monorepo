@@ -40,8 +40,23 @@ export default function RouteCategoryPage() {
 
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
+  const [scrollingToId, setScrollingToId] = useState<number | null>(null);
+  const scrollLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const scrollToSection = useCallback((id: number) => {
+    if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current);
+    setScrollingToId(id);
     document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollLockTimerRef.current = setTimeout(() => {
+      scrollLockTimerRef.current = null;
+      setScrollingToId(null);
+    }, 700);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current);
+    };
   }, []);
 
   // Mostrar todas as vitrines da categoria atual, independente de is_home
@@ -124,15 +139,15 @@ export default function RouteCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col gap-4">
+    <div className="min-h-screen flex flex-col">
       <HeaderComponent/>
 
-      <main className="flex-1 px-2 pt-2 pb-2">
+      <main className="flex-1 px-2 pb-2">
         {vitrinesMeta.length > 0 && (
           <HorizontalSpy
             key={`spy-${categoriaAtual.id}-${vitrinesMeta.length}`}
             items={vitrinesMeta}
-            activeId={activeId}
+            activeId={scrollingToId ?? activeId}
             onClickItem={scrollToSection}
           />
         )}

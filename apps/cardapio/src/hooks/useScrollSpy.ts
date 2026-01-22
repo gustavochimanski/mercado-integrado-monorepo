@@ -1,57 +1,88 @@
 // hooks/useScrollSpy.ts
-// Pequeno hook para observar várias <section> e devolver o ID atualmente visível
+// Observa várias <section> e devolve o ID atualmente “ativo” com base na posição de scroll.
+// Usa scroll + getBoundingClientRect para evitar instabilidade ao rolar (ex.: badges bugando).
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface SpyOptions {
-  root?: Element | null;
-  rootMargin?: string;
-  threshold?: number | number[];
+  /** Linha (px from top) considerada “limite” para a seção ativa. Acima dela = já passou. */
+  triggerOffset?: number;
+  /** Throttle do listener de scroll (ms). */
+  throttleMs?: number;
 }
 
-export function useScrollSpy<T extends string | number>(opts: SpyOptions = {
-  root: null,
-  rootMargin: "-30% 0px -30% 0px",
-  threshold: 0.1,
-}) {
-  const [activeId, setActiveId] = useState<T | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const elementsMap = useRef<Map<T, Element>>(new Map());
+const defaultTrigger = 250; // header + badges (~40 + ~60) + pequena margem
+const defaultThrottle = 80;
 
-  // Registra / cancela elementos
+export function useScrollSpy<T extends string | number>(opts: SpyOptions = {}) {
+  const trigger = opts.triggerOffset ?? defaultTrigger;
+  const throttle = opts.throttleMs ?? defaultThrottle;
+
+  const [activeId, setActiveId] = useState<T | null>(null);
+  const elementsMap = useRef<Map<T, Element>>(new Map());
+  const rafRef = useRef<number | null>(null);
+  const lastRun = useRef(0);
+
+  const compute = useCallback(() => {
+    const map = elementsMap.current;
+    if (!map.size) {
+      setActiveId(null);
+      return;
+    }
+
+    const entries = [...map.entries()].map(([id, el]) => {
+      const rect = el.getBoundingClientRect();
+      return { id, top: rect.top, bottom: rect.bottom };
+    });
+
+    // Ordenar por top (posição na tela).
+    entries.sort((a, b) => a.top - b.top);
+
+    // Seção ativa: a última cujo top já “passou” da linha de trigger (ou a primeira, se todas abaixo).
+    let best: T | null = null;
+    for (const { id, top } of entries) {
+      if (top <= trigger) best = id;
+      else break;
+    }
+    if (best === null && entries.length) best = entries[0].id;
+
+    setActiveId(best);
+  }, [trigger]);
+
+  const onScroll = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRun.current < throttle) {
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        lastRun.current = Date.now();
+        compute();
+      });
+      return;
+    }
+    lastRun.current = now;
+    compute();
+  }, [throttle, compute]);
+
   const register = useCallback(
     (id: T) => (el: Element | null) => {
       if (!el) {
-        // unmount
-        const current = elementsMap.current.get(id);
-        if (current && observerRef.current) {
-          observerRef.current.unobserve(current);
-        }
         elementsMap.current.delete(id);
         return;
       }
-
       elementsMap.current.set(id, el);
-      if (!observerRef.current) {
-        observerRef.current = new IntersectionObserver((entries) => {
-          const visible = entries
-            .filter((e) => e.isIntersecting)
-            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-          if (visible.length) {
-            const target = visible[0].target as HTMLElement;
-            const found = [...elementsMap.current.entries()].find(([, node]) => node === target);
-            if (found) setActiveId(found[0]);
-          }
-        }, opts);
-      }
-      observerRef.current.observe(el);
+      setTimeout(compute, 0);
     },
-    [opts]
+    [compute]
   );
 
-  // Cleanup geral ao desmontar a página
   useEffect(() => {
-    return () => observerRef.current?.disconnect();
-  }, []);
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, [compute, onScroll]);
 
   return { activeId, register } as const;
 }

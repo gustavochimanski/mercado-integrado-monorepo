@@ -94,7 +94,7 @@ export default function ProductsVitrineSection({
     <section
       id={`secao-${vitrineId}`}
       ref={sectionRef}
-      className="relative pt-2 px-2 pb-2 bg-muted rounded-xl scroll-mt-20 overflow-hidden"
+      className="relative pt-2 px-2 pb-2 bg-muted rounded-xl scroll-mt-32 overflow-hidden"
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>

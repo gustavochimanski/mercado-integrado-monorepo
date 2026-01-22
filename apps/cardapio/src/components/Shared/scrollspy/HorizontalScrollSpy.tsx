@@ -43,7 +43,7 @@ export function HorizontalSpy({ items, activeId, onClickItem }: HorizontalSpyPro
   }, [activeId]);
 
   return (
-    <nav className="sticky top-0  bg-background/80 backdrop-blur p-4 z-33 border-b">
+    <nav className="sticky top-[40px] bg-background/80 backdrop-blur p-4 z-[60] border-b -mx-2">
       <ul
         ref={listRef}
         className="flex flex-nowrap gap-2 whitespace-nowrap overflow-x-auto hide-scrollbar scroll-smooth "
