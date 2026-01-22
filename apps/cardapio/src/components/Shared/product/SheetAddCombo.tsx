@@ -5,7 +5,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -18,7 +17,7 @@ import { Badge } from "../ui/badge";
 import { ComboMiniDTO } from "@cardapio/services/home";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X, ChevronDown } from "lucide-react";
 import { useComplementosUnificado } from "@cardapio/services/complementos";
 import { useState, useMemo, useEffect, useRef } from "react";
 import type { ComplementoResponse, AdicionalComplementoResponse as AdicionalComplemento } from "@cardapio/types/complementos";
@@ -402,9 +401,13 @@ export function SheetAdicionarCombo({
           </button>
 
           {/* Conteúdo Scrollável */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto pb-6">
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto relative">
             {/* Imagem Hero no Topo */}
             <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
+              {/* Seta indicando para rolar para baixo */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                <ChevronDown className="h-6 w-6 text-white/90 drop-shadow-lg animate-bounce-down" />
+              </div>
               <ImageZoomDialog
                 src={imagem}
                 alt={titulo}
@@ -580,21 +583,21 @@ export function SheetAdicionarCombo({
                 <p className="text-destructive text-sm font-medium">{errors.observacao.message}</p>
               )}
             </div>
+
+            {/* Botão de Adicionar ao Carrinho - Dentro do scroll */}
+            <div className="border-t border-border pt-4 pb-6 px-4">
+              <Button 
+                type="submit" 
+                disabled={isLoadingComplementos}
+                className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed"
+                size="lg"
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}
+              </Button>
+            </div>
             </div>
           </div>
-
-          {/* Footer Fixo */}
-          <SheetFooter className="border-t border-border bg-background px-4 pt-4 pb-6 sticky bottom-0">
-            <Button 
-              type="submit" 
-              disabled={isLoadingComplementos}
-              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed"
-              size="lg"
-            >
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}
-            </Button>
-          </SheetFooter>
         </form>
       </SheetContent>
     </Sheet>

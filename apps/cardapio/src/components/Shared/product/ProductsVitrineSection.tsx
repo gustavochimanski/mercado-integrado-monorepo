@@ -100,7 +100,7 @@ export default function ProductsVitrineSection({
       ref={sectionRef}
       className={`relative pt-2 px-2 pb-2 bg-muted rounded-xl scroll-mt-32 overflow-hidden transition-all duration-500 ${
         isHighlighted ? 'bg-primary/10 ring-2 ring-primary/20 shadow-lg' : ''
-      } ${isLast ? 'mb-32' : ''}`}
+      } ${isLast ? 'mb-24' : ''}`}
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>

@@ -8,7 +8,7 @@ import { useCart } from "@cardapio/stores/cart/useCart";
 import { CartFab } from "@cardapio/components/Shared/cart/CartSuspense";
 import { CartSheet } from "@cardapio/components/Shared/cart/CartSheet";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
-import { getEmpresaId, setEmpresaId, setMesaInicial, getEmpresaData } from "@cardapio/stores/empresa/empresaStore";
+import { getEmpresaId, setEmpresaId, setMesaInicial, getEmpresaData, setEmpresaData } from "@cardapio/stores/empresa/empresaStore";
 import { useMutateCliente} from "@cardapio/services/cliente";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import HeaderComponent from "@cardapio/components/Shared/Header";
@@ -75,14 +75,23 @@ export default function HomePage() {
   }, [empresa_id]);
 
   // Função auxiliar para fazer o redirecionamento
-  const fazerRedirecionamento = useCallback((url: string) => {
+  const fazerRedirecionamento = useCallback((url: string, empresa?: EmpresaPublic | null, empresaId?: number | null) => {
     if (redirecionadoRef.current) return; // Já foi redirecionado
+    
+    // IMPORTANTE: Salvar empresa no localStorage ANTES de redirecionar
+    const idParaSalvar = empresaId || empresa?.id;
+    if (idParaSalvar) {
+      setEmpresaId(idParaSalvar);
+      if (empresa) {
+        setEmpresaData(empresa);
+      }
+    }
     
     redirecionadoRef.current = true;
     setRedirecionado(true);
     
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Redirecionando para:', url);
+      console.log('Redirecionando para:', url, 'com empresa:', idParaSalvar);
     }
     
     // Usar window.location.replace para redirecionamento imediato sem adicionar ao histórico
@@ -106,7 +115,9 @@ export default function HomePage() {
         if (process.env.NODE_ENV !== 'production') {
           console.log('Redirecionamento encontrado em empresaData (fallback):', url);
         }
-        fazerRedirecionamento(url);
+        // Garantir que empresa está salva antes de redirecionar
+        setEmpresaData(empresaData);
+        fazerRedirecionamento(url, empresaData, empresaData.id);
       }
     }
   }, [empresaData, podeFazerRequisicoes, fazerRedirecionamento]);
@@ -118,17 +129,37 @@ export default function HomePage() {
     
     const verificarRedirecionamento = async () => {
       try {
-        // Primeiro, verificar localStorage (mais rápido)
-        const currentEmpresaId = empresa_id || getEmpresaId();
-        if (currentEmpresaId) {
+        // Primeiro, verificar parâmetro da URL diretamente (para primeira visita)
+        const empresaParam = searchParams.get("empresa");
+        let empresaIdParaVerificar: number | null = null;
+        
+        if (empresaParam) {
+          const raw = empresaParam.trim();
+          if (/^\d+$/.test(raw)) {
+            const parsed = parseInt(raw, 10);
+            if (Number.isFinite(parsed) && parsed > 0) {
+              empresaIdParaVerificar = parsed;
+            }
+          }
+        }
+        
+        // Se não tem na URL, verificar do estado ou localStorage
+        if (!empresaIdParaVerificar) {
+          empresaIdParaVerificar = empresa_id || getEmpresaId();
+        }
+        
+        if (empresaIdParaVerificar) {
+          // Primeiro, verificar localStorage (mais rápido)
           const empresaSalva = getEmpresaData();
-          if (empresaSalva?.redireciona_home && empresaSalva?.redireciona_home_para && empresaSalva?.id === currentEmpresaId) {
+          if (empresaSalva?.redireciona_home && empresaSalva?.redireciona_home_para && empresaSalva?.id === empresaIdParaVerificar) {
             const url = empresaSalva.redireciona_home_para.trim();
             if (url) {
               if (process.env.NODE_ENV !== 'production') {
                 console.log('Redirecionamento encontrado no localStorage:', url);
               }
-              fazerRedirecionamento(url);
+              // Garantir que empresaId está salvo antes de redirecionar
+              setEmpresaId(empresaIdParaVerificar);
+              fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
               return;
             }
           }
@@ -139,7 +170,7 @@ export default function HomePage() {
           }
           
           const { data } = await api.get<EmpresaPublic[]>("/api/empresas/public/emp/lista", {
-            params: { empresa_id: currentEmpresaId },
+            params: { empresa_id: empresaIdParaVerificar },
           });
           
           if (Array.isArray(data) && data.length > 0) {
@@ -150,7 +181,9 @@ export default function HomePage() {
                 if (process.env.NODE_ENV !== 'production') {
                   console.log('Redirecionamento encontrado na API:', url);
                 }
-                fazerRedirecionamento(url);
+                // Salvar empresa completa antes de redirecionar
+                setEmpresaData(empresa);
+                fazerRedirecionamento(url, empresa, empresaIdParaVerificar);
                 return;
               }
             }
@@ -172,7 +205,9 @@ export default function HomePage() {
                   if (process.env.NODE_ENV !== 'production') {
                     console.log('Redirecionamento encontrado na lista:', url);
                   }
-                  fazerRedirecionamento(url);
+                  // Salvar empresa completa antes de redirecionar
+                  setEmpresaData(emp);
+                  fazerRedirecionamento(url, emp, emp.id);
                   return;
                 }
               }
@@ -197,7 +232,7 @@ export default function HomePage() {
     };
     
     verificarRedirecionamento();
-  }, [empresa_id, fazerRedirecionamento]);
+  }, [empresa_id, searchParams, fazerRedirecionamento]);
 
   useEffect(() => {
     if (!mesaIdParam) return;

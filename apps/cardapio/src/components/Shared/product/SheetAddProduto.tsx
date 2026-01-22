@@ -18,7 +18,7 @@ import { Badge } from "../ui/badge";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ImageZoomDialog } from "../ui/image-zoom-dialog";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X, ChevronDown } from "lucide-react";
 import { useComplementosUnificado } from "@cardapio/services/complementos";
 import { useState, useMemo, useRef, useEffect } from "react";
 import type { ComplementoResponse, AdicionalComplementoResponse } from "@cardapio/types/complementos";
@@ -534,10 +534,14 @@ export function SheetAdicionarProduto({
           {/* Conteúdo Scrollável */}
           <div 
             ref={scrollContainerRef}
-            className="flex-1 min-h-0 overflow-y-auto pb-6"
+            className="flex-1 min-h-0 overflow-y-auto relative"
           >
             {/* Imagem Hero no Topo */}
             <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
+              {/* Seta indicando para rolar para baixo */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                <ChevronDown className="h-6 w-6 text-white/90 drop-shadow-lg animate-bounce-down" />
+              </div>
               <ImageZoomDialog
                 src={imagem}
                 alt={descricao}
@@ -742,39 +746,39 @@ export function SheetAdicionarProduto({
                 <p className="text-destructive text-sm font-medium">{errors.observacao.message}</p>
               )}
             </div>
+
+            {/* Botão de Adicionar ao Carrinho - Dentro do scroll */}
+            <div className="border-t border-border pt-4 pb-6 px-4">
+              <Button 
+                type="button"
+                aria-disabled={!todosComplementosObrigatoriosSelecionados}
+                className={`w-full h-14 text-base font-semibold shadow-lg transition-all bg-primary text-background ${
+                  todosComplementosObrigatoriosSelecionados
+                    ? "hover:shadow-xl hover:bg-primary/90"
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+                size="lg"
+                onClick={(e) => {
+                  if (!todosComplementosObrigatoriosSelecionados) {
+                    e.preventDefault();
+                    const validacao = validarComplementos();
+                    if (!validacao.valido) {
+                      toast.error(validacao.erro || "Erro de validação");
+                    }
+                    scrollParaComplementoObrigatorio();
+                    return;
+                  }
+
+                  // dispara o submit com validações do react-hook-form
+                  handleSubmit(onSubmit)();
+                }}
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                Adicionar ao Carrinho • R$ {precoTotal.toFixed(2).replace(".", ",")}
+              </Button>
+            </div>
             </div>
           </div>
-
-          {/* Footer Fixo */}
-          <SheetFooter className="border-t border-border bg-background px-4 pt-4 pb-6 sticky bottom-0">
-            <Button 
-              type="button"
-              aria-disabled={!todosComplementosObrigatoriosSelecionados}
-              className={`w-full h-14 text-base font-semibold shadow-lg transition-all bg-primary text-background ${
-                todosComplementosObrigatoriosSelecionados
-                  ? "hover:shadow-xl hover:bg-primary/90"
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-              size="lg"
-              onClick={(e) => {
-                if (!todosComplementosObrigatoriosSelecionados) {
-                  e.preventDefault();
-                  const validacao = validarComplementos();
-                  if (!validacao.valido) {
-                    toast.error(validacao.erro || "Erro de validação");
-                  }
-                  scrollParaComplementoObrigatorio();
-                  return;
-                }
-
-                // dispara o submit com validações do react-hook-form
-                handleSubmit(onSubmit)();
-              }}
-            >
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              Adicionar ao Carrinho • R$ {precoTotal.toFixed(2).replace(".", ",")}
-            </Button>
-          </SheetFooter>
         </form>
       </SheetContent>
     </Sheet>
