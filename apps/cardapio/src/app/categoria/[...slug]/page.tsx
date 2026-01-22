@@ -41,21 +41,34 @@ export default function RouteCategoryPage() {
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
   const [scrollingToId, setScrollingToId] = useState<number | null>(null);
+  const [highlightedVitrineId, setHighlightedVitrineId] = useState<number | null>(null);
   const scrollLockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const highlightTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToSection = useCallback((id: number) => {
     if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current);
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+
     setScrollingToId(id);
+    setHighlightedVitrineId(id);
+
     document.getElementById(`secao-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
     scrollLockTimerRef.current = setTimeout(() => {
       scrollLockTimerRef.current = null;
       setScrollingToId(null);
     }, 700);
+
+    // Manter destaque por 2 segundos após o scroll terminar
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedVitrineId(null);
+    }, 2000);
   }, []);
 
   useEffect(() => {
     return () => {
       if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current);
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
     };
   }, []);
 
@@ -175,6 +188,7 @@ export default function RouteCategoryPage() {
             hrefCategoria={vitrine.href_categoria ?? undefined}
             isHome={false}
             vitrineIsHome={vitrine.is_home}
+            isHighlighted={highlightedVitrineId === vitrine.id}
           />
         ))}
 
@@ -195,6 +209,7 @@ export default function RouteCategoryPage() {
             hrefCategoria={vit.href_categoria ?? undefined}
             isHome={false}
             vitrineIsHome={vit.is_home}
+            isHighlighted={highlightedVitrineId === vit.id}
           />
         ))}
 

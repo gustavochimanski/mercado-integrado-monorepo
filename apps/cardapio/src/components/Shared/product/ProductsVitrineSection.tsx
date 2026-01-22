@@ -26,6 +26,7 @@ interface Props {
   hrefCategoria?: string;
   isHome?: boolean;         // se está renderizando em contexto de home
   vitrineIsHome?: boolean;  // estado real vindo do backend/categoria
+  isHighlighted?: boolean;  // se a vitrine deve ter destaque visual (background)
 }
 
 export default function ProductsVitrineSection({
@@ -42,7 +43,8 @@ export default function ProductsVitrineSection({
   sectionRef,
   hrefCategoria,
   isHome,
-  vitrineIsHome
+  vitrineIsHome,
+  isHighlighted = false
 }: Props) {
   // A filtragem por is_home é feita nos componentes pai (ProductsSection ou página de categoria)
   // Este componente apenas renderiza a vitrine quando é chamado
@@ -94,7 +96,9 @@ export default function ProductsVitrineSection({
     <section
       id={`secao-${vitrineId}`}
       ref={sectionRef}
-      className="relative pt-2 px-2 pb-2 bg-muted rounded-xl scroll-mt-32 overflow-hidden"
+      className={`relative pt-2 px-2 pb-2 bg-muted rounded-xl scroll-mt-32 overflow-hidden transition-all duration-500 ${
+        isHighlighted ? 'bg-primary/10 ring-2 ring-primary/20 shadow-lg' : ''
+      }`}
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
