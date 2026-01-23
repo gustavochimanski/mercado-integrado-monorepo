@@ -13,6 +13,7 @@ import axios from "axios";
 import { getToken, setToken, clearToken } from "../../stores/token/tokenStore";
 import { loginService, logoutService } from "./authenticate";
 import { useReceiveTokenFromParent } from "../../stores/token/UseReceiveTokenFromParent";
+import { useModoSupervisor } from "../../lib/params/useModoSupervisor";
 
 // Instância axios com baseURL configurada
 const api = axios.create({
@@ -41,6 +42,7 @@ const UserContext = createContext<UserContextValue | null>(null);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isSupervisor = useModoSupervisor();
 
   // ✅ Memoiza a função pra não recriar em cada render
   const fetchUser = useCallback(async () => {
@@ -89,13 +91,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
     fetchUser().finally(() => setIsLoading(false));
   }, [fetchUser]);
 
+  // ✅ Se via=supervisor estiver presente, considerar como admin
+  const isAdmin = isSupervisor || user?.type_user === "admin";
+
   return (
     <UserContext.Provider
       value={{
         user,
         isLoading,
         isAuthenticated: !!user,
-        isAdmin: user?.type_user === "admin",
+        isAdmin,
         isUser: user?.type_user === "user",
         login,
         logout,

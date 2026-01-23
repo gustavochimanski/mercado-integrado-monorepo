@@ -102,18 +102,43 @@ export default function HomePage() {
     redirecionadoRef.current = true;
     setRedirecionado(true);
     
+    // ✅ PRESERVAR via=supervisor se existir na URL atual
+    const viaSupervisor = searchParams.get("via");
+    let urlFinal = url;
+    
+    if (viaSupervisor === "supervisor") {
+      // Verificar se a URL já tem parâmetros de query
+      const isExternalUrl = url.startsWith('http://') || url.startsWith('https://');
+      const urlObj = isExternalUrl 
+        ? new URL(url)
+        : new URL(url, window.location.origin);
+      
+      // Se já tiver via na URL de redirecionamento, não sobrescrever
+      if (!urlObj.searchParams.has("via")) {
+        urlObj.searchParams.set("via", "supervisor");
+      }
+      
+      // Reconstruir a URL final
+      if (isExternalUrl) {
+        urlFinal = urlObj.toString();
+      } else {
+        // Para rotas internas, usar apenas pathname + search
+        urlFinal = urlObj.pathname + (urlObj.search ? urlObj.search : '');
+      }
+    }
+    
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Redirecionando para:', url, 'com empresa:', idParaSalvar);
+      console.log('Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '');
     }
     
     // Usar window.location.replace para redirecionamento imediato sem adicionar ao histórico
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      window.location.replace(url);
+    if (urlFinal.startsWith('http://') || urlFinal.startsWith('https://')) {
+      window.location.replace(urlFinal);
     } else {
       // Para rotas internas, usar window.location para forçar reload completo
-      window.location.href = url;
+      window.location.href = urlFinal;
     }
-  }, []);
+  }, [searchParams]);
 
   // Fallback: Verificar redirecionamento caso a verificação inicial tenha falhado
   // (apenas como segurança extra, mas a verificação inicial já deve ter coberto)
