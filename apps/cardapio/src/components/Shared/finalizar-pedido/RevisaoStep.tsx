@@ -1,6 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
+import { ProdutoEmpMini } from "@cardapio/types/Produtos";
+import { useCart } from "@cardapio/stores/cart/useCart";
+import type { CartItemComplemento } from "@cardapio/stores/cart/useCart";
 import {
   Card,
   CardHeader,
@@ -22,6 +26,7 @@ import {
   Store,
   Minus,
   Plus,
+  Pencil,
 } from "lucide-react";
 
 interface Item {
@@ -29,6 +34,10 @@ interface Item {
   nome: string;
   quantity: number;
   preco: number;
+  empresaId?: number;
+  imagem?: string | null;
+  categoriaId?: number;
+  subcategoriaId?: number;
   observacao?: string;
   complementos?: Array<{
     complemento_id: number;
@@ -153,12 +162,78 @@ export default function RevisaoStep({
 }: RevisaoStepProps) {
   // Estado para controlar a seta
   const [showArrow, setShowArrow] = useState(true);
+  
+  // Estado para edição de item
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [sheetEditOpen, setSheetEditOpen] = useState(false);
+  const { add } = useCart();
 
   useEffect(() => {
     // Desaparece após 6 segundos
     const timer = setTimeout(() => setShowArrow(false), 6000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Função para reconstruir ProdutoEmpMini a partir do CartItem
+  const cartItemToProdutoEmpMini = useCallback((item: Item): ProdutoEmpMini | null => {
+    if (!item.cod_barras) return null;
+    
+    return {
+      cod_barras: item.cod_barras,
+      preco_venda: item.preco,
+      empresa_id: item.empresaId ?? 0,
+      produto: {
+        descricao: item.nome,
+        imagem: item.imagem ?? null,
+        cod_categoria: item.categoriaId ?? null,
+      },
+      subcategoria_id: item.subcategoriaId ?? 0,
+    };
+  }, []);
+
+  // Função para converter complementos do CartItem para formato do Sheet
+  const convertComplementosToSheet = useCallback((item: Item): CartItemComplemento[] | undefined => {
+    if (!item.complementos || item.complementos.length === 0) {
+      return undefined;
+    }
+    return item.complementos;
+  }, []);
+
+  // Handler para editar item
+  const handleEditItem = useCallback((item: Item) => {
+    setEditingItem(item);
+    setSheetEditOpen(true);
+  }, []);
+
+  // Handler para salvar edição
+  const handleSaveEdit = useCallback((
+    produto: ProdutoEmpMini,
+    quantity: number,
+    observacao?: string,
+    complementos?: CartItemComplemento[]
+  ) => {
+    if (!editingItem || !remove) return;
+    
+    // Remover item antigo
+    remove(editingItem.cod_barras);
+    
+    // Adicionar item editado
+    add({
+      cod_barras: produto.cod_barras,
+      nome: produto.produto.descricao,
+      preco: produto.preco_venda,
+      quantity,
+      empresaId: produto.empresa_id ?? produto.empresa ?? 0,
+      imagem: produto.produto.imagem ?? null,
+      categoriaId: produto.produto.cod_categoria ?? undefined,
+      subcategoriaId: produto.subcategoria_id ?? 0,
+      observacao,
+      complementos,
+    });
+    
+    setSheetEditOpen(false);
+    setEditingItem(null);
+  }, [editingItem, remove, add]);
 
   return (
     <div className="space-y-3 relative pb-4">
@@ -360,34 +435,43 @@ export default function RevisaoStep({
                     
                     {inc && dec && remove && (
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="flex items-center gap-1 border rounded-lg">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-7 w-7 text-primary border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+                          onClick={() => handleEditItem(item)}
+                          title="Editar item"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <div className="flex items-center gap-0.5 border rounded-md">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 rounded-r-none"
+                            className="h-6 w-6 rounded-r-none"
                             onClick={() => dec(item.cod_barras)}
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="min-w-[2rem] text-center text-sm font-medium px-2">
+                          <span className="min-w-[1.5rem] text-center text-xs font-medium px-1">
                             {item.quantity}
                           </span>
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 rounded-l-none"
+                            className="h-6 w-6 rounded-l-none"
                             onClick={() => inc(item.cod_barras)}
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-3 w-3" />
                           </Button>
                         </div>
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => remove(item.cod_barras)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     )}
@@ -470,35 +554,35 @@ export default function RevisaoStep({
                     </div>
                     
                     {incCombo && decCombo && removeCombo && (
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="flex items-center gap-1 border rounded-lg">
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <div className="flex items-center gap-0.5 border rounded-md">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 rounded-r-none"
+                            className="h-6 w-6 rounded-r-none"
                             onClick={() => decCombo(combo.combo_id)}
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="min-w-[2rem] text-center text-sm font-medium px-2">
+                          <span className="min-w-[1.5rem] text-center text-xs font-medium px-1">
                             {combo.quantidade}
                           </span>
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 rounded-l-none"
+                            className="h-6 w-6 rounded-l-none"
                             onClick={() => incCombo(combo.combo_id)}
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-3 w-3" />
                           </Button>
                         </div>
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => removeCombo(combo.combo_id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     )}
@@ -578,35 +662,35 @@ export default function RevisaoStep({
                     </div>
                     
                     {incReceita && decReceita && removeReceita && (
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="flex items-center gap-1 border rounded-lg">
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <div className="flex items-center gap-0.5 border rounded-md">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 rounded-r-none"
+                            className="h-6 w-6 rounded-r-none"
                             onClick={() => decReceita(receita.receita_id)}
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="min-w-[2rem] text-center text-sm font-medium px-2">
+                          <span className="min-w-[1.5rem] text-center text-xs font-medium px-1">
                             {receita.quantidade}
                           </span>
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 rounded-l-none"
+                            className="h-6 w-6 rounded-l-none"
                             onClick={() => incReceita(receita.receita_id)}
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-3 w-3" />
                           </Button>
                         </div>
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => removeReceita(receita.receita_id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     )}
@@ -751,6 +835,22 @@ export default function RevisaoStep({
             <ChevronDown className="h-5 w-5 text-primary" />
           </div>
         </div>
+      )}
+
+      {/* Sheet de Edição */}
+      {editingItem && (
+        <SheetAdicionarProduto
+          produto={cartItemToProdutoEmpMini(editingItem)!}
+          isOpen={sheetEditOpen}
+          onClose={() => {
+            setSheetEditOpen(false);
+            setEditingItem(null);
+          }}
+          onAdd={handleSaveEdit}
+          initialQuantity={editingItem.quantity}
+          initialObservacao={editingItem.observacao}
+          initialComplementos={convertComplementosToSheet(editingItem)}
+        />
       )}
     </div>
   );

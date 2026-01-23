@@ -1002,16 +1002,10 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             />
           </CardContent>
 
-          {/* Área fixa inferior com total e botão de ação */}
+          {/* Área fixa inferior com botão de ação */}
           <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-border shadow-lg z-40">
-            {/* Total */}
-            <div className="flex font-bold bg-muted text-end text-primary gap-2 px-4 py-2 sm:py-3">
-              <span className="ml-auto text-sm sm:text-base">Total:</span>
-              <span className="text-sm sm:text-base">R$ {((previewData?.valor_total ?? totalPrice()) || 0).toFixed(2)}</span>
-            </div>
-            
             {/* Botão de ação */}
-            <div className="px-4 pb-3 sm:pb-4 pt-2">
+            <div className="px-4 pb-3 sm:pb-4 pt-3">
               {renderFooterButton()}
             </div>
           </div>

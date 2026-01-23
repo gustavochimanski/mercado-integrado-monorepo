@@ -48,6 +48,9 @@ interface SheetAdicionarProdutoProps {
   isOpen: boolean;
   onClose: () => void;
   quickAddQuantity?: number;
+  initialQuantity?: number;
+  initialObservacao?: string;
+  initialComplementos?: CartItemComplemento[];
 }
 
 export function SheetAdicionarProduto({
@@ -56,6 +59,9 @@ export function SheetAdicionarProduto({
   isOpen,
   onClose,
   quickAddQuantity = 6,
+  initialQuantity,
+  initialObservacao,
+  initialComplementos,
 }: SheetAdicionarProdutoProps) {
   const {
     register,
@@ -67,8 +73,8 @@ export function SheetAdicionarProduto({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      quantity: 1,
-      observacao: "",
+      quantity: initialQuantity ?? 1,
+      observacao: initialObservacao ?? "",
     },
   });
 
@@ -120,11 +126,41 @@ export function SheetAdicionarProduto({
   // Estado para complementos selecionados: mapeia complemento_id -> adicional_id -> quantidade
   const [selecoesComplementos, setSelecoesComplementos] = useState<Record<number, Record<number, number>>>({});
 
+  // Inicializar valores quando o sheet abrir com valores iniciais
+  useEffect(() => {
+    if (isOpen) {
+      if (initialQuantity !== undefined) {
+        setValue("quantity", initialQuantity);
+      }
+      if (initialObservacao !== undefined) {
+        setValue("observacao", initialObservacao);
+      }
+      
+      // Inicializar complementos se fornecidos
+      if (initialComplementos && initialComplementos.length > 0) {
+        const novasSelecoes: Record<number, Record<number, number>> = {};
+        initialComplementos.forEach(comp => {
+          const adicionaisMap: Record<number, number> = {};
+          comp.adicionais.forEach(adicional => {
+            adicionaisMap[adicional.adicional_id] = adicional.quantidade;
+          });
+          novasSelecoes[comp.complemento_id] = adicionaisMap;
+        });
+        setSelecoesComplementos(novasSelecoes);
+      } else {
+        setSelecoesComplementos({});
+      }
+    }
+  }, [isOpen, initialQuantity, initialObservacao, initialComplementos, setValue]);
+
   // Resetar seleção quando o sheet fecha
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setSelecoesComplementos({});
-      reset();
+      reset({
+        quantity: 1,
+        observacao: "",
+      });
       onClose();
     }
   };
