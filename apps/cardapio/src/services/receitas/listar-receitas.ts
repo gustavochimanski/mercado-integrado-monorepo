@@ -2,9 +2,6 @@
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getToken } from "@cardapio/stores/token/tokenStore";
-import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
-import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import type { ReceitaApiResponse, ReceitaListItem } from "./types";
 
 function useDebounced<T>(value: T, delay = 350) {
@@ -51,30 +48,11 @@ export function useListarReceitas(
   } = opts;
 
   const searchDeb = useDebounced(search, debounceMs);
-  const isSupervisor = useModoSupervisor();
-  const { isAuthenticated } = useUserContext();
-  
-  // ✅ Usar estado reativo para verificar token
-  const [hasToken, setHasToken] = useState(() => !!getToken());
-  
-  useEffect(() => {
-    // Verificar token periodicamente quando estiver no modo supervisor
-    if (isSupervisor) {
-      const checkToken = () => {
-        const token = getToken();
-        setHasToken(!!token);
-      };
-      
-      checkToken();
-      const interval = setInterval(checkToken, 500); // Verificar a cada 500ms
-      
-      return () => clearInterval(interval);
-    }
-  }, [isSupervisor]);
 
-  // ✅ No modo supervisor, só fazer requisição se tiver token OU se estiver autenticado
-  // isAuthenticated garante que o token foi validado e está disponível
-  const shouldEnable = enabled && (!isSupervisor || hasToken || isAuthenticated);
+  // ✅ Remover verificação de token - deixar o interceptor do apiAdmin lidar com isso
+  // Se não tiver token, vai dar erro 401, mas pelo menos vai tentar fazer a requisição
+  // Isso permite que a requisição seja feita assim que o token estiver disponível
+  const shouldEnable = enabled;
 
   return useQuery<{ receitas: ReceitaListItem[] }>({
     queryKey: ["receitas_listar", empresaId, searchDeb, ativo, apenas_ativos],
@@ -115,8 +93,14 @@ export function useListarReceitas(
 
         return { receitas };
       } catch (error: any) {
-        console.warn("Endpoint de receitas não encontrado", error);
-        return { receitas: [] };
+        // ✅ Logar erro completo para debug
+        if (error?.response?.status === 401) {
+          console.warn("❌ Erro 401 ao buscar receitas - token não encontrado ou inválido", error);
+        } else {
+          console.warn("❌ Erro ao buscar receitas", error);
+        }
+        // Re-throw para que o React Query trate o erro corretamente
+        throw error;
       }
     },
     enabled: shouldEnable,
