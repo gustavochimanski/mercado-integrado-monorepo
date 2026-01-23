@@ -17,6 +17,7 @@ import { useCategoriaPorSlug } from "@cardapio/services/home";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
 import HeaderComponent from "@cardapio/components/Shared/Header";
+import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -153,6 +154,7 @@ export default function RouteCategoryPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <LoginWrapper />
       <HeaderComponent/>
 
       <main className="flex-1 px-2 pb-2">
