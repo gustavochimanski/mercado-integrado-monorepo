@@ -127,9 +127,8 @@ export default function HomePage() {
       }
     }
     
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '');
-    }
+    // ✅ Log sempre (mesmo em produção) para debug
+    console.log('🔄 Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '');
     
     // Usar window.location.replace para redirecionamento imediato sem adicionar ao histórico
     if (urlFinal.startsWith('http://') || urlFinal.startsWith('https://')) {
@@ -191,38 +190,38 @@ export default function HomePage() {
           const empresaSalva = getEmpresaData();
           // Se temos empresa salva e ela não redireciona, podemos habilitar requisições imediatamente
           if (empresaSalva && empresaSalva.id === empresaIdParaVerificar) {
+            console.log('🔍 Verificando redirecionamento - empresaSalva.redireciona_home:', empresaSalva.redireciona_home, 'url:', empresaSalva.redireciona_home_para);
             if (!empresaSalva.redireciona_home || !empresaSalva.redireciona_home_para) {
               // Não precisa redirecionar - habilitar requisições imediatamente
-              if (process.env.NODE_ENV !== 'production') {
-                console.log('Empresa encontrada no localStorage sem redirecionamento - habilitando requisições');
-              }
+              console.log('✅ Empresa encontrada no localStorage sem redirecionamento - habilitando requisições');
               setPodeFazerRequisicoes(true);
               setVerificandoRedirect(false);
               return;
             } else {
               // Tem redirecionamento - executar
-              const url = empresaSalva.redireciona_home_para.trim();
+              const url = empresaSalva.redireciona_home_para?.trim();
               if (url) {
-                if (process.env.NODE_ENV !== 'production') {
-                  console.log('Redirecionamento encontrado no localStorage:', url);
-                }
+                console.log('🔄 Redirecionamento encontrado no localStorage:', url);
                 setEmpresaId(empresaIdParaVerificar);
                 fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
                 return;
+              } else {
+                console.warn('⚠️ URL de redirecionamento vazia ou inválida');
               }
             }
+          } else {
+            console.log('⚠️ Empresa salva não encontrada ou ID não confere');
           }
         }
         
         if (empresaIdParaVerificar) {
           // Primeiro, verificar localStorage (mais rápido)
           const empresaSalva = getEmpresaData();
+          console.log('🔍 Verificando localStorage - empresaSalva:', empresaSalva ? `ID ${empresaSalva.id}, redireciona: ${empresaSalva.redireciona_home}, url: ${empresaSalva.redireciona_home_para}` : 'não encontrada');
           if (empresaSalva?.redireciona_home && empresaSalva?.redireciona_home_para && empresaSalva?.id === empresaIdParaVerificar) {
             const url = empresaSalva.redireciona_home_para.trim();
             if (url) {
-              if (process.env.NODE_ENV !== 'production') {
-                console.log('Redirecionamento encontrado no localStorage:', url);
-              }
+              console.log('🔄 Redirecionamento encontrado no localStorage:', url);
               // Garantir que empresaId está salvo antes de redirecionar
               setEmpresaId(empresaIdParaVerificar);
               fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
@@ -231,9 +230,7 @@ export default function HomePage() {
           }
           
           // Se não encontrou no localStorage, buscar na API
-          if (process.env.NODE_ENV !== 'production') {
-            console.log('Buscando empresa na API para verificar redirecionamento...');
-          }
+          console.log('🔍 Buscando empresa na API para verificar redirecionamento...');
           
           const { data } = await api.get<EmpresaPublic[]>("/api/empresas/public/emp/lista", {
             params: { empresa_id: empresaIdParaVerificar },
@@ -241,17 +238,18 @@ export default function HomePage() {
           
           if (Array.isArray(data) && data.length > 0) {
             const empresa = data[0];
+            console.log('🔍 Empresa encontrada na API - redireciona:', empresa.redireciona_home, 'url:', empresa.redireciona_home_para);
             if (empresa.redireciona_home && empresa.redireciona_home_para) {
               const url = empresa.redireciona_home_para.trim();
               if (url) {
-                if (process.env.NODE_ENV !== 'production') {
-                  console.log('Redirecionamento encontrado na API:', url);
-                }
+                console.log('🔄 Redirecionamento encontrado na API:', url);
                 // Salvar empresa completa antes de redirecionar
                 setEmpresaData(empresa);
                 fazerRedirecionamento(url, empresa, empresaIdParaVerificar);
                 return;
               }
+            } else {
+              console.log('ℹ️ Empresa não tem redirecionamento ativado');
             }
           }
         } else {
