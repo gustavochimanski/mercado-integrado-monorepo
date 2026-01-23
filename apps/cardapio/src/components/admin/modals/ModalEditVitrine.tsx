@@ -73,7 +73,7 @@ export function ModalEditVitrine({
       titulo?: string;
       ordem?: number;
       is_home?: boolean;
-      cod_categoria?: number | null;
+      cod_categoria?: number;
     } = {
       id: vitrineId,
       titulo: titulo.trim(),
@@ -81,8 +81,8 @@ export function ModalEditVitrine({
       is_home: isHome,
     };
 
-    // Incluir cod_categoria apenas se for diferente do inicial ou se for null
-    if (codCategoriaInicial !== null) {
+    // Incluir cod_categoria apenas se for um número válido
+    if (typeof codCategoriaInicial === "number") {
       payload.cod_categoria = codCategoriaInicial;
     }
 
