@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import apiAdmin from "@cardapio/app/api/apiAdmin";
+import { getToken } from "@cardapio/stores/token/tokenStore";
+import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
 import type { ComboDTO, ListaCombosResponse } from "@cardapio/api";
 
 /**
@@ -24,6 +26,12 @@ export function useListarCombosAdmin(
   enabled: boolean = true,
   apenas_ativos: boolean = false
 ) {
+  const isSupervisor = useModoSupervisor();
+  const hasToken = !!getToken();
+  
+  // ✅ No modo supervisor, só fazer requisição se tiver token
+  const shouldEnable = enabled && !!empresaId && (!isSupervisor || hasToken);
+  
   return useQuery<{ combos: ComboDTO[]; hasMore: boolean }>({
     queryKey: ["combos_admin", empresaId, page, busca, apenas_ativos],
     queryFn: async () => {
@@ -47,7 +55,7 @@ export function useListarCombosAdmin(
       
       return { combos: data.data || [], hasMore: data.has_more };
     },
-    enabled: enabled && !!empresaId,
+    enabled: shouldEnable,
     staleTime: 5 * 60 * 1000,
   });
 }

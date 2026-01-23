@@ -2,6 +2,8 @@
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { getToken } from "@cardapio/stores/token/tokenStore";
+import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
 import type { ReceitaApiResponse, ReceitaListItem } from "./types";
 
 function useDebounced<T>(value: T, delay = 350) {
@@ -48,6 +50,11 @@ export function useListarReceitas(
   } = opts;
 
   const searchDeb = useDebounced(search, debounceMs);
+  const isSupervisor = useModoSupervisor();
+  const hasToken = !!getToken();
+
+  // ✅ No modo supervisor, só fazer requisição se tiver token
+  const shouldEnable = enabled && (!isSupervisor || hasToken);
 
   return useQuery<{ receitas: ReceitaListItem[] }>({
     queryKey: ["receitas_listar", empresaId, searchDeb, ativo, apenas_ativos],
@@ -92,7 +99,7 @@ export function useListarReceitas(
         return { receitas: [] };
       }
     },
-    enabled: enabled,
+    enabled: shouldEnable,
     staleTime: 5 * 60 * 1000,
   });
 }

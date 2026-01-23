@@ -1,6 +1,8 @@
 // @cardapio/services/categoria/buscar-categorias.ts
 import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useQuery } from "@tanstack/react-query";
+import { getToken } from "@cardapio/stores/token/tokenStore";
+import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
 import type { CategoriaSearchItem } from "./types";
 import { useDebounced } from "./utils";
 
@@ -38,7 +40,11 @@ export function useBuscarCategorias(
 
   const qDeb = useDebounced(q ?? "", debounceMs);
   const hasTerm = qDeb.trim().length >= minLength;
-  const canRun = enabled && (allowEmpty || hasTerm);
+  const isSupervisor = useModoSupervisor();
+  const hasToken = !!getToken();
+  
+  // ✅ No modo supervisor, só fazer requisição se tiver token
+  const canRun = enabled && (allowEmpty || hasTerm) && (!isSupervisor || hasToken);
 
   return useQuery<CategoriaSearchItem[]>({
     queryKey: ["categorias_search", allowEmpty ? qDeb : hasTerm ? qDeb : "", limit, offset],
