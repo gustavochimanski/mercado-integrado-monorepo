@@ -357,18 +357,24 @@ export default function HomePage() {
 
   if (!ready)
     return (
-      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
-        Carregando empresa...
-      </div>
+      <>
+        <LoginWrapper />
+        <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
+          Carregando empresa...
+        </div>
+      </>
     );
 
   if (!empresa_id)
     return (
-      <div className="min-h-screen flex items-center justify-center text-center p-4">
-        <p className="text-muted-foreground text-sm">
-          Nenhuma empresa selecionada. Verifique a URL ou volte para o início.
-        </p>
-      </div>
+      <>
+        <LoginWrapper />
+        <div className="min-h-screen flex items-center justify-center text-center p-4">
+          <p className="text-muted-foreground text-sm">
+            Nenhuma empresa selecionada. Verifique a URL ou volte para o início.
+          </p>
+        </div>
+      </>
     );
 
   if (isError) return null;
