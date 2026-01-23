@@ -33,7 +33,6 @@ export function useCriarVitrine() {
       const payload: CreateVitrinePayload = {
         cod_categoria: body.cod_categoria,
         titulo: body.titulo,
-        ...(typeof body.ordem === "number" ? { ordem: body.ordem } : {}),
         ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
       };
       const { data } = await apiAdmin.post("/api/cardapio/admin/vitrines/", payload);
