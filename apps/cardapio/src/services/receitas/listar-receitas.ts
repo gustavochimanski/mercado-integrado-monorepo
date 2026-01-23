@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getToken } from "@cardapio/stores/token/tokenStore";
 import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
 import type { ReceitaApiResponse, ReceitaListItem } from "./types";
 
 function useDebounced<T>(value: T, delay = 350) {
@@ -51,10 +52,29 @@ export function useListarReceitas(
 
   const searchDeb = useDebounced(search, debounceMs);
   const isSupervisor = useModoSupervisor();
-  const hasToken = !!getToken();
+  const { isAuthenticated } = useUserContext();
+  
+  // ✅ Usar estado reativo para verificar token
+  const [hasToken, setHasToken] = useState(() => !!getToken());
+  
+  useEffect(() => {
+    // Verificar token periodicamente quando estiver no modo supervisor
+    if (isSupervisor) {
+      const checkToken = () => {
+        const token = getToken();
+        setHasToken(!!token);
+      };
+      
+      checkToken();
+      const interval = setInterval(checkToken, 500); // Verificar a cada 500ms
+      
+      return () => clearInterval(interval);
+    }
+  }, [isSupervisor]);
 
-  // ✅ No modo supervisor, só fazer requisição se tiver token
-  const shouldEnable = enabled && (!isSupervisor || hasToken);
+  // ✅ No modo supervisor, só fazer requisição se tiver token OU se estiver autenticado
+  // isAuthenticated garante que o token foi validado e está disponível
+  const shouldEnable = enabled && (!isSupervisor || hasToken || isAuthenticated);
 
   return useQuery<{ receitas: ReceitaListItem[] }>({
     queryKey: ["receitas_listar", empresaId, searchDeb, ativo, apenas_ativos],
