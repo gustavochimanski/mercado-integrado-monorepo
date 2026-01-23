@@ -64,15 +64,27 @@ export default function HomePage() {
     }
   });
 
+  // ✅ CORREÇÃO: Garantir que ready seja setado quando empresa_id já existe na inicialização
   useEffect(() => {
     const currentId = getEmpresaId();
     if (currentId && currentId !== empresa_id) {
       setEmpresaIdState(currentId);
       setReady(true);
-    } else if (currentId) {
+    } else if (currentId && currentId > 0) {
+      // Se já temos uma empresa válida, setar ready imediatamente
       setReady(true);
     }
   }, [empresa_id]);
+
+  // ✅ NOVO: Verificar na montagem inicial se já temos empresa do localStorage
+  useEffect(() => {
+    const initialId = getEmpresaId();
+    if (initialId && initialId > 0 && !ready) {
+      // Se temos empresa no localStorage mas ready ainda não foi setado, setar agora
+      setEmpresaIdState(initialId);
+      setReady(true);
+    }
+  }, []); // Executa apenas na montagem inicial
 
   // Função auxiliar para fazer o redirecionamento
   const fazerRedirecionamento = useCallback((url: string, empresa?: EmpresaPublic | null, empresaId?: number | null) => {
@@ -146,6 +158,35 @@ export default function HomePage() {
         // Se não tem na URL, verificar do estado ou localStorage
         if (!empresaIdParaVerificar) {
           empresaIdParaVerificar = empresa_id || getEmpresaId();
+        }
+        
+        // ✅ CORREÇÃO: Se já temos empresa válida no localStorage e não há parâmetro na URL,
+        // verificar redirecionamento de forma mais rápida e permitir requisições
+        if (empresaIdParaVerificar && !empresaParam) {
+          const empresaSalva = getEmpresaData();
+          // Se temos empresa salva e ela não redireciona, podemos habilitar requisições imediatamente
+          if (empresaSalva && empresaSalva.id === empresaIdParaVerificar) {
+            if (!empresaSalva.redireciona_home || !empresaSalva.redireciona_home_para) {
+              // Não precisa redirecionar - habilitar requisições imediatamente
+              if (process.env.NODE_ENV !== 'production') {
+                console.log('Empresa encontrada no localStorage sem redirecionamento - habilitando requisições');
+              }
+              setPodeFazerRequisicoes(true);
+              setVerificandoRedirect(false);
+              return;
+            } else {
+              // Tem redirecionamento - executar
+              const url = empresaSalva.redireciona_home_para.trim();
+              if (url) {
+                if (process.env.NODE_ENV !== 'production') {
+                  console.log('Redirecionamento encontrado no localStorage:', url);
+                }
+                setEmpresaId(empresaIdParaVerificar);
+                fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
+                return;
+              }
+            }
+          }
         }
         
         if (empresaIdParaVerificar) {
