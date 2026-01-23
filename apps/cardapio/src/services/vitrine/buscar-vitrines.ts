@@ -15,7 +15,7 @@ interface UseBuscarVitrinesOptions {
 
 /**
  * Hook para buscar vitrines com filtros
- * Endpoint: GET /api/cadastros/admin/vitrines/search
+ * Endpoint: GET /api/cardapio/admin/vitrines/search
  * 
  * @param q - Termo de busca
  * @param opts - Opções de filtro e paginação
@@ -50,7 +50,7 @@ export function useBuscarVitrines(
       if (hasQuery) params.q = qDeb.trim();
       if (codCategoria != null) params.cod_categoria = codCategoria;
       if (isHome != null) params.is_home = isHome;
-      const { data } = await apiAdmin.get<VitrineSearchItem[]>("/api/cadastros/admin/vitrines/search", { params });
+      const { data } = await apiAdmin.get<VitrineSearchItem[]>("/api/cardapio/admin/vitrines/search", { params });
       return data;
     },
     enabled: enabled ?? (hasCat || hasQuery),

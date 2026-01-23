@@ -109,6 +109,8 @@ export default function ProductsVitrineSection({
             vitrineId={vitrineId}
             empresaId={empresaId}
             codCategoria={codCategoria}
+            titulo={titulo}
+            isHome={vitrineIsHome}
           />
         )}
       </div>

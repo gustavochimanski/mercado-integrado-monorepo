@@ -110,6 +110,7 @@ export default function VitrineDestaques({
             codCategoria={codCategoria}
             vitrineId={vitrineId}
             isHome={is_home}
+            titulo={titulo}
           />
         )}
 

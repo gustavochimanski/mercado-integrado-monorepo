@@ -8,7 +8,7 @@ import {
 } from "../../Shared/ui/dropdown-menu";
 import { useState } from "react";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
-import { toast } from "sonner";
+import { ModalEditVitrine } from "../modals/ModalEditVitrine";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
 import { useMutateVitrine } from "@cardapio/services/vitrine";
 
@@ -16,18 +16,23 @@ interface AdminVitrineOptionsProps {
   empresaId: number;
   codCategoria: number;
   vitrineId: number;
-  isHome?: boolean; // <---- NOVO
+  isHome?: boolean;
+  titulo?: string;
+  ordem?: number;
 }
 
 const AdminVitrineOptions = ({
   empresaId,
   codCategoria,
   vitrineId,
-  isHome = false, // default seguro
+  isHome = false,
+  titulo = "",
+  ordem,
 }: AdminVitrineOptionsProps) => {
   const { isAdmin } = useUserContext();
 
   const [openModalAddProduto, setOpenModalAddProduto] = useState(false);
+  const [openModalEditVitrine, setOpenModalEditVitrine] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
   const { remove, markHome } = useMutateVitrine();
@@ -71,7 +76,7 @@ const AdminVitrineOptions = ({
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={() => toast.info("Edição ainda não implementada")}
+            onSelect={() => setOpenModalEditVitrine(true)}
           >
             <Pencil className="mr-2 h-4 w-4" />
             Editar Seção
@@ -92,6 +97,16 @@ const AdminVitrineOptions = ({
         onOpenChange={setOpenModalAddProduto}
         empresaId={empresaId}
         vitrineId={vitrineId}
+      />
+
+      <ModalEditVitrine
+        open={openModalEditVitrine}
+        onOpenChange={setOpenModalEditVitrine}
+        vitrineId={vitrineId}
+        tituloInicial={titulo}
+        codCategoriaInicial={codCategoria}
+        ordemInicial={ordem}
+        isHomeInicial={isHome}
       />
 
       <ConfirmDialog
