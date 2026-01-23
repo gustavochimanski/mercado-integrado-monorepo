@@ -10,6 +10,7 @@ import {
   useCallback,
 } from "react";
 import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { getToken, setToken, clearToken } from "../../stores/token/tokenStore";
 import { loginService, logoutService } from "./authenticate";
 import { useReceiveTokenFromParent } from "../../stores/token/UseReceiveTokenFromParent";
@@ -43,6 +44,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isSupervisor = useModoSupervisor();
+  const queryClient = useQueryClient();
 
   // ✅ Memoiza a função pra não recriar em cada render
   const fetchUser = useCallback(async () => {
@@ -73,12 +75,43 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ✅ Hook escutando token via postMessage
-  useReceiveTokenFromParent(fetchUser);
+  useReceiveTokenFromParent(() => {
+    fetchUser();
+    // ✅ Invalidar queries admin quando token for recebido via postMessage
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey?.[0];
+        return typeof key === "string" && (
+          key.includes("receitas") ||
+          key.includes("combos") ||
+          key.includes("categorias") ||
+          key.includes("vitrines") ||
+          key.includes("produtos") ||
+          key.includes("admin")
+        );
+      }
+    });
+  });
 
   async function login(username: string, password: string) {
     const res = await loginService(username, password);
     setToken(res.access_token);
     await fetchUser();
+    
+    // ✅ Invalidar queries admin após login bem-sucedido para que sejam refeitas com o token
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey?.[0];
+        return typeof key === "string" && (
+          key.includes("receitas") ||
+          key.includes("combos") ||
+          key.includes("categorias") ||
+          key.includes("vitrines") ||
+          key.includes("produtos") ||
+          key.includes("admin")
+        );
+      }
+    });
   }
 
   function logout() {
