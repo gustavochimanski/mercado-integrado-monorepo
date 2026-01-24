@@ -9,9 +9,12 @@ import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems
 export interface PreviewCheckoutResult {
   subtotal: number;
   taxa_entrega: number;
-  desconto: number;
+  taxa_servico: number;
   valor_total: number;
+  desconto: number;
   distancia_km?: number | null;
+  empresa_id?: number | null;
+  tempo_entrega_minutos?: number | null;
 }
 
 /**

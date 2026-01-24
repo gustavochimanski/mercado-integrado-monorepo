@@ -25,6 +25,12 @@ import {
   Minus,
   Plus,
   Pencil,
+  Clock,
+  Truck,
+  Receipt,
+  Percent,
+  Tag,
+  CircleDollarSign,
 } from "lucide-react";
 
 interface Item {
@@ -91,9 +97,12 @@ interface Receita {
 interface PreviewCheckoutData {
   subtotal: number;
   taxa_entrega: number;
-  desconto: number;
+  taxa_servico: number;
   valor_total: number;
+  desconto: number;
   distancia_km?: number | null;
+  empresa_id?: number | null;
+  tempo_entrega_minutos?: number | null;
 }
 
 interface RevisaoStepProps {
@@ -732,41 +741,91 @@ export default function RevisaoStep({
             </div>
           ) : previewData ? (
             <>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <span>Subtotal</span>
-                <span>R$ {previewData.subtotal.toFixed(2)}</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-muted-foreground">Subtotal</p>
+                    <p className="text-sm font-semibold truncate">R$ {previewData.subtotal.toFixed(2)}</p>
+                  </div>
+                </div>
+                {tipoPedido === "DELIVERY" && (
+                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                      <Truck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground">Taxa de entrega</p>
+                      <p className="text-sm font-semibold truncate">R$ {previewData.taxa_entrega.toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+                {tipoPedido === "DELIVERY" && (typeof previewData.distancia_km === "number" || (previewData.distancia_km != null && previewData.distancia_km >= 0)) && (
+                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                      <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground">Distância</p>
+                      <p className="text-sm font-semibold truncate">{Number(previewData.distancia_km).toFixed(1)} km</p>
+                    </div>
+                  </div>
+                )}
+                {(previewData.taxa_servico ?? 0) > 0 && (
+                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                      <Percent className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground">Taxa de serviço</p>
+                      <p className="text-sm font-semibold truncate">R$ {(previewData.taxa_servico ?? 0).toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+                {tipoPedido === "DELIVERY" && typeof previewData.tempo_entrega_minutos === "number" && previewData.tempo_entrega_minutos > 0 && (
+                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-900/30">
+                      <Clock className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground">Previsão de entrega</p>
+                      <p className="text-sm font-semibold truncate">~{Math.round(previewData.tempo_entrega_minutos)} min</p>
+                    </div>
+                  </div>
+                )}
+                {(previewData.desconto ?? 0) > 0 && (
+                  <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
+                      <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400">Desconto</p>
+                      <p className="text-sm font-semibold text-green-700 dark:text-green-400 truncate">- R$ {(previewData.desconto ?? 0).toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+                {pagamento?.tipo === "DINHEIRO" && trocoPara != null && trocoPara > 0 && (
+                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                      <Receipt className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground">Troco para</p>
+                      <p className="text-sm font-semibold truncate">R$ {trocoPara.toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              {tipoPedido === "DELIVERY" && (
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>Taxa de entrega</span>
-                  <span>R$ {previewData.taxa_entrega.toFixed(2)}</span>
-                </div>
-              )}
-              {tipoPedido === "DELIVERY" && typeof previewData.distancia_km === "number" && (
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>Distância</span>
-                  <span>{previewData.distancia_km.toFixed(1)} km</span>
-                </div>
-              )}
-              {previewData.desconto > 0 && (
-                <div className="flex justify-between items-center text-sm text-green-600">
-                  <span>Desconto</span>
-                  <span>- R$ {previewData.desconto.toFixed(2)}</span>
-                </div>
-              )}
-              {pagamento?.tipo === "DINHEIRO" && trocoPara && trocoPara > 0 && (
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>Troco para</span>
-                  <span>R$ {trocoPara.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="pt-4 mt-4 border-t-2 border-primary/20">
-                <div className="flex justify-between items-center">
+              <div className="mt-4 flex items-center justify-between rounded-xl border-2 border-primary/30 bg-primary/5 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/20">
+                    <CircleDollarSign className="h-5 w-5 text-primary" />
+                  </div>
                   <span className="text-lg font-semibold">Total</span>
-                  <span className="text-2xl font-bold text-primary">
-                    R$ {previewData.valor_total.toFixed(2)}
-                  </span>
                 </div>
+                <span className="text-2xl font-bold text-primary">R$ {previewData.valor_total.toFixed(2)}</span>
               </div>
             </>
           ) : (
