@@ -232,12 +232,14 @@ export default function HomePage() {
           // Se não encontrou no localStorage, buscar na API
           console.log('🔍 Buscando empresa na API para verificar redirecionamento...');
           
-          const { data } = await api.get<EmpresaPublic[]>("/api/empresas/public/emp/lista", {
+          const { data } = await api.get<EmpresaPublic | EmpresaPublic[]>("/api/empresas/public/emp/lista", {
             params: { empresa_id: empresaIdParaVerificar },
           });
           
-          if (Array.isArray(data) && data.length > 0) {
-            const empresa = data[0];
+          // Quando empresa_id é fornecido, a API retorna um objeto único
+          const empresa = Array.isArray(data) ? data[0] : data;
+          
+          if (empresa) {
             console.log('🔍 Empresa encontrada na API - redireciona:', empresa.redireciona_home, 'url:', empresa.redireciona_home_para);
             if (empresa.redireciona_home && empresa.redireciona_home_para) {
               const url = empresa.redireciona_home_para.trim();

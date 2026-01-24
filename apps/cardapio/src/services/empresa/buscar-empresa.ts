@@ -13,6 +13,9 @@ interface UseBuscarEmpresaOptions {
  * Hook para buscar dados públicos de uma empresa específica
  * Endpoint: GET /api/empresas/public/emp/lista?empresa_id={empresaId}
  * 
+ * Quando empresa_id é fornecido, a API retorna um objeto único.
+ * Quando não é fornecido, retorna uma lista.
+ * 
  * @param options - Opções incluindo empresaId
  * 
  * @example
@@ -26,17 +29,21 @@ export function useBuscarEmpresa(options?: UseBuscarEmpresaOptions) {
   return useQuery<EmpresaPublic>({
     queryKey: ["empresa-public", empresaId],
     queryFn: async () => {
-      const { data } = await api.get<EmpresaPublic[]>("/api/empresas/public/emp/lista", {
+      const { data } = await api.get<EmpresaPublic | EmpresaPublic[]>("/api/empresas/public/emp/lista", {
         params: { empresa_id: empresaId },
       });
-      // A API retorna um array, pegamos o primeiro item
-      if (Array.isArray(data) && data.length > 0) {
-        const empresa = data[0];
-        // Salvar empresa completa no localStorage
-        setEmpresaData(empresa);
-        return empresa;
+      
+      // Quando empresa_id é fornecido, a API retorna um objeto único
+      // Quando não é fornecido, retorna uma lista (mas não deveria acontecer aqui)
+      const empresa = Array.isArray(data) ? data[0] : data;
+      
+      if (!empresa) {
+        throw new Error("Empresa não encontrada");
       }
-      throw new Error("Empresa não encontrada");
+      
+      // Salvar empresa completa no localStorage
+      setEmpresaData(empresa);
+      return empresa;
     },
     enabled: enabled && !!empresaId,
     staleTime: 60 * 60 * 1000, // 1 hora - empresa não muda frequentemente
