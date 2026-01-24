@@ -351,15 +351,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   const handleStepComplete = useCallback((nextTab: CheckoutTab) => {
     setIsTransitioning(true);
     setCompletedSteps(prev => new Set([...prev, currentTab]));
-    
-    // Aguardar um pouco mais para garantir que a animação seja visível
+
     setTimeout(() => {
       setCurrentTab(nextTab);
-      // Aguardar um pouco mais antes de esconder o loader para garantir transição suave
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 200);
-    }, 1000); // Tempo da animação do loader
+      // Desligar transição no mesmo tick para não recalcular progresso com tab novo + transitioning
+      // (evita barra ir pra frente e voltar)
+      setIsTransitioning(false);
+    }, 400);
   }, [currentTab]);
 
   const resolveClienteId = () => {
