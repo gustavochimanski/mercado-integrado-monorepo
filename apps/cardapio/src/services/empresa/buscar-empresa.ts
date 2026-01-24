@@ -46,8 +46,8 @@ export function useBuscarEmpresa(options?: UseBuscarEmpresaOptions) {
       return empresa;
     },
     enabled: enabled && !!empresaId,
-    staleTime: 60 * 60 * 1000, // 1 hora - empresa não muda frequentemente
-    gcTime: 2 * 60 * 60 * 1000, // 2 horas
+    staleTime: 0, // Sempre considerar stale para garantir busca quando empresa muda
+    gcTime: 5 * 60 * 1000, // 5 minutos - manter cache por pouco tempo
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: 3, // Tentar 3 vezes em caso de erro

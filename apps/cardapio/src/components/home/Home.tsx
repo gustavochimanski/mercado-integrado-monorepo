@@ -24,6 +24,7 @@ import { BannerVertical, BannersHorizontal } from "../Shared/parceiros/Banners";
 import { useQueryEmpresasDisponiveis, useBuscarEmpresa } from "@cardapio/services/empresa";
 import { api } from "@cardapio/app/api/api";
 import type { EmpresaPublic } from "@cardapio/services/empresa/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function HomePage() {
   // ✅ TODOS os hooks primeiro, sem returns no meio
@@ -43,6 +44,7 @@ export default function HomePage() {
   const { isAdmin, refreshUser } = useUserContext();
   const { clear: clearCart, add } = useCart();
   const { loginDireto } = useMutateCliente();
+  const queryClient = useQueryClient();
 
   // empresa_id precisa ser reativo
   const [empresa_id, setEmpresaIdState] = useState<number | null>(() => getEmpresaId());
@@ -59,6 +61,13 @@ export default function HomePage() {
   useReceiveEmpresaFromQuery(() => {
     const newId = getEmpresaId();
     if (newId) {
+      // Invalidar cache do React Query quando a empresa muda
+      queryClient.invalidateQueries({ queryKey: ["empresa-public"] });
+      queryClient.invalidateQueries({ queryKey: ["home"] });
+      queryClient.invalidateQueries({ queryKey: ["categorias"] });
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
+      queryClient.invalidateQueries({ queryKey: ["banners"] });
+      
       setEmpresaIdState(newId);
       setReady(true);
     }
@@ -216,9 +225,11 @@ export default function HomePage() {
         
         if (empresaIdParaVerificar) {
           // Primeiro, verificar localStorage (mais rápido)
+          // IMPORTANTE: Verificar se os dados do localStorage são da empresa correta
           const empresaSalva = getEmpresaData();
           console.log('🔍 Verificando localStorage - empresaSalva:', empresaSalva ? `ID ${empresaSalva.id}, redireciona: ${empresaSalva.redireciona_home}, url: ${empresaSalva.redireciona_home_para}` : 'não encontrada');
-          if (empresaSalva?.redireciona_home && empresaSalva?.redireciona_home_para && empresaSalva?.id === empresaIdParaVerificar) {
+          // Só usar dados do localStorage se forem da empresa correta
+          if (empresaSalva?.id === empresaIdParaVerificar && empresaSalva?.redireciona_home && empresaSalva?.redireciona_home_para) {
             const url = empresaSalva.redireciona_home_para.trim();
             if (url) {
               console.log('🔄 Redirecionamento encontrado no localStorage:', url);

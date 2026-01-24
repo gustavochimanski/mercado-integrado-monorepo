@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@cardapio/app/api/api";
 import type { EmpresaDisponivel } from "@cardapio/services/empresa";
-import { getEmpresaId, setEmpresaId } from "./empresaStore";
+import { getEmpresaId, setEmpresaId, clearEmpresaData } from "./empresaStore";
 
 export function useReceiveEmpresaFromQuery(onReceived?: () => void) {
   const searchParams = useSearchParams();
@@ -33,6 +33,11 @@ export function useReceiveEmpresaFromQuery(onReceived?: () => void) {
 
     // idempotência total
     if (nextId === current || nextId === lastAppliedRef.current) return;
+
+    // Limpar dados da empresa antiga quando a empresa muda
+    if (current && current !== nextId) {
+      clearEmpresaData();
+    }
 
     setEmpresaId(nextId);
     lastAppliedRef.current = nextId;
