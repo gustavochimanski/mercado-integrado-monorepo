@@ -4,9 +4,13 @@
 /* eslint-disable */
 /**
  * Schema de resposta para preview do checkout (sem criar pedido)
- * Retorna apenas o valor_total calculado
+ * Calcula subtotal, taxas, desconto, total e distância sem criar o pedido.
  */
 export type PreviewCheckoutResponse = {
+    subtotal: number;
+    taxa_entrega: number;
+    desconto: number;
     valor_total: number;
+    distancia_km?: (number | null);
 };
 

@@ -7,7 +7,11 @@ import type { FinalizarPedidoRequest, TipoPedidoCheckout } from "@cardapio/types
 import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems";
 
 export interface PreviewCheckoutResult {
+  subtotal: number;
+  taxa_entrega: number;
+  desconto: number;
   valor_total: number;
+  distancia_km?: number | null;
 }
 
 /**

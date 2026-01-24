@@ -89,7 +89,11 @@ interface Receita {
 }
 
 interface PreviewCheckoutData {
+  subtotal: number;
+  taxa_entrega: number;
+  desconto: number;
   valor_total: number;
+  distancia_km?: number | null;
 }
 
 interface RevisaoStepProps {
@@ -728,13 +732,34 @@ export default function RevisaoStep({
             </div>
           ) : previewData ? (
             <>
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span>Subtotal</span>
+                <span>R$ {previewData.subtotal.toFixed(2)}</span>
+              </div>
+              {tipoPedido === "DELIVERY" && (
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>Taxa de entrega</span>
+                  <span>R$ {previewData.taxa_entrega.toFixed(2)}</span>
+                </div>
+              )}
+              {tipoPedido === "DELIVERY" && typeof previewData.distancia_km === "number" && (
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>Distância</span>
+                  <span>{previewData.distancia_km.toFixed(1)} km</span>
+                </div>
+              )}
+              {previewData.desconto > 0 && (
+                <div className="flex justify-between items-center text-sm text-green-600">
+                  <span>Desconto</span>
+                  <span>- R$ {previewData.desconto.toFixed(2)}</span>
+                </div>
+              )}
               {pagamento?.tipo === "DINHEIRO" && trocoPara && trocoPara > 0 && (
-                <div className="flex justify-between items-center text-sm text-muted-foreground mb-3">
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
                   <span>Troco para</span>
                   <span>R$ {trocoPara.toFixed(2)}</span>
                 </div>
               )}
-              
               <div className="pt-4 mt-4 border-t-2 border-primary/20">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
