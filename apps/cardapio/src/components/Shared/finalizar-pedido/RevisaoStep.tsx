@@ -247,55 +247,6 @@ export default function RevisaoStep({
         <p className="text-sm text-muted-foreground mt-1">Confira os detalhes antes de finalizar</p>
       </div>
 
-      {/* Tipo de Pedido - Design Minimalista */}
-      {tipoPedido === "MESA" && mesaCodigo && (
-        <Card className="border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-base">Mesa {mesaCodigo}</span>
-                </div>
-                {numPessoas && (
-                  <p className="text-sm text-muted-foreground">
-                    {numPessoas} {numPessoas === 1 ? "pessoa" : "pessoas"}
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  Atendimento na mesa
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {tipoPedido === "BALCAO" && (
-        <Card className="border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                <Store className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="flex-1 space-y-1">
-                <span className="font-semibold text-base block">Retirada no Balcão</span>
-                <p className="text-xs text-muted-foreground">
-                  Você receberá uma notificação quando estiver pronto
-                </p>
-                {mesaCodigo && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Código: <span className="font-medium">{mesaCodigo}</span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Endereço - Design Minimalista */}
       {tipoPedido === "DELIVERY" && (
         <Card className="border-l-4 border-l-primary">
@@ -320,42 +271,6 @@ export default function RevisaoStep({
           </CardContent>
         </Card>
       )}
-
-      {/* Pagamento - Design Minimalista */}
-      <Card className="border-l-4 border-l-purple-500">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-              <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="flex-1 space-y-1">
-              <p className="text-sm font-medium">{pagamento?.nome || "Não informado"}</p>
-              {pagamento?.tipo === "DINHEIRO" && trocoPara && (
-                <p className="text-xs text-muted-foreground">
-                  Troco para <span className="font-medium text-foreground">R$ {trocoPara.toFixed(2)}</span>
-                </p>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Observação - Design Minimalista */}
-      <Card className="border-l-4 border-l-amber-500">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-              <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium mb-1">Observação</p>
-              <p className="text-sm text-muted-foreground">
-                {observacao?.trim() || "Nenhuma observação"}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Itens do pedido - Design Melhorado */}
       <Card>
@@ -706,8 +621,8 @@ export default function RevisaoStep({
         </CardContent>
       </Card>
 
-      {/* Resumo Financeiro - Design Premium */}
-      <Card className="bg-gradient-to-br from-background to-muted/20 border-2">
+      {/* Resumo do Pedido */}
+      <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5 text-muted-foreground" />
@@ -741,106 +656,146 @@ export default function RevisaoStep({
             </div>
           ) : previewData ? (
             <>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                    <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="flex flex-col gap-0.5 divide-y divide-border/60">
+                {tipoPedido === "DELIVERY" && (
+                  <div className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <Truck className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Tipo</span>
+                    <span className="text-sm font-medium">Entrega</span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-muted-foreground">Subtotal</p>
-                    <p className="text-sm font-semibold truncate">R$ {previewData.subtotal.toFixed(2)}</p>
+                )}
+                {tipoPedido === "MESA" && mesaCodigo && (
+                  <div className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <Users className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Tipo</span>
+                    <span className="text-sm font-medium">Mesa {mesaCodigo}{numPessoas ? ` · ${numPessoas} ${numPessoas === 1 ? "pessoa" : "pessoas"}` : ""}</span>
                   </div>
+                )}
+                {tipoPedido === "BALCAO" && (
+                  <div className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <Store className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Tipo</span>
+                    <span className="text-sm font-medium">Retirada no balcão</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 py-2.5">
+                  <CreditCard className="h-4 w-4 shrink-0 text-primary/70" />
+                  <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
+                  <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
+                </div>
+                <div className="flex items-center gap-3 py-2.5">
+                  <Package className="h-4 w-4 shrink-0 text-primary/70" />
+                  <span className="text-sm text-muted-foreground flex-1">Subtotal</span>
+                  <span className="text-sm font-medium tabular-nums">R$ {previewData.subtotal.toFixed(2)}</span>
                 </div>
                 {tipoPedido === "DELIVERY" && (
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                      <Truck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">Taxa de entrega</p>
-                      <p className="text-sm font-semibold truncate">R$ {previewData.taxa_entrega.toFixed(2)}</p>
-                    </div>
+                  <div className="flex items-center gap-3 py-2.5">
+                    <Truck className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Taxa de entrega</span>
+                    <span className="text-sm font-medium tabular-nums">R$ {previewData.taxa_entrega.toFixed(2)}</span>
                   </div>
                 )}
                 {tipoPedido === "DELIVERY" && (typeof previewData.distancia_km === "number" || (previewData.distancia_km != null && previewData.distancia_km >= 0)) && (
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                      <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">Distância</p>
-                      <p className="text-sm font-semibold truncate">{Number(previewData.distancia_km).toFixed(1)} km</p>
-                    </div>
+                  <div className="flex items-center gap-3 py-2.5">
+                    <MapPin className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Distância</span>
+                    <span className="text-sm font-medium">{Number(previewData.distancia_km).toFixed(1)} km</span>
                   </div>
                 )}
                 {(previewData.taxa_servico ?? 0) > 0 && (
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                      <Percent className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">Taxa de serviço</p>
-                      <p className="text-sm font-semibold truncate">R$ {(previewData.taxa_servico ?? 0).toFixed(2)}</p>
-                    </div>
+                  <div className="flex items-center gap-3 py-2.5">
+                    <Percent className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Taxa de serviço</span>
+                    <span className="text-sm font-medium tabular-nums">R$ {(previewData.taxa_servico ?? 0).toFixed(2)}</span>
                   </div>
                 )}
                 {tipoPedido === "DELIVERY" && typeof previewData.tempo_entrega_minutos === "number" && previewData.tempo_entrega_minutos > 0 && (
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-900/30">
-                      <Clock className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">Previsão de entrega</p>
-                      <p className="text-sm font-semibold truncate">~{Math.round(previewData.tempo_entrega_minutos)} min</p>
-                    </div>
+                  <div className="flex items-center gap-3 py-2.5">
+                    <Clock className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Previsão de entrega</span>
+                    <span className="text-sm font-medium">~{Math.round(previewData.tempo_entrega_minutos)} min</span>
                   </div>
                 )}
                 {(previewData.desconto ?? 0) > 0 && (
-                  <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-                      <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-green-700 dark:text-green-400">Desconto</p>
-                      <p className="text-sm font-semibold text-green-700 dark:text-green-400 truncate">- R$ {(previewData.desconto ?? 0).toFixed(2)}</p>
-                    </div>
+                  <div className="flex items-center gap-3 py-2.5">
+                    <Tag className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                    <span className="text-sm text-muted-foreground flex-1">Desconto</span>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400 tabular-nums">- R$ {(previewData.desconto ?? 0).toFixed(2)}</span>
                   </div>
                 )}
                 {pagamento?.tipo === "DINHEIRO" && trocoPara != null && trocoPara > 0 && (
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
-                      <Receipt className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">Troco para</p>
-                      <p className="text-sm font-semibold truncate">R$ {trocoPara.toFixed(2)}</p>
-                    </div>
+                  <div className="flex items-center gap-3 py-2.5">
+                    <Receipt className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Troco para</span>
+                    <span className="text-sm font-medium tabular-nums">R$ {trocoPara.toFixed(2)}</span>
                   </div>
                 )}
-              </div>
-              <div className="mt-4 flex items-center justify-between rounded-xl border-2 border-primary/30 bg-primary/5 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/20">
-                    <CircleDollarSign className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-lg font-semibold">Total</span>
+                <div className="flex items-center gap-3 py-2.5">
+                  <FileText className="h-4 w-4 shrink-0 text-primary/70" />
+                  <span className="text-sm text-muted-foreground flex-1">Observação</span>
+                  <span className="text-sm font-medium text-muted-foreground truncate max-w-[55%] text-right" title={observacao?.trim() || undefined}>
+                    {observacao?.trim() || "Nenhuma observação"}
+                  </span>
                 </div>
-                <span className="text-2xl font-bold text-primary">R$ {previewData.valor_total.toFixed(2)}</span>
+              </div>
+              <div className="mt-4 pt-4 flex items-center justify-between border-t-2 border-primary/20">
+                <div className="flex items-center gap-3">
+                  <CircleDollarSign className="h-5 w-5 shrink-0 text-primary/70" />
+                  <span className="text-base font-semibold">Total</span>
+                </div>
+                <span className="text-xl font-bold text-primary tabular-nums">R$ {previewData.valor_total.toFixed(2)}</span>
               </div>
             </>
           ) : (
             <>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <span>Taxa de entrega</span>
-                <span>Será calculada</span>
-              </div>
-              <div className="pt-4 mt-4 border-t-2 border-primary/20">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total</span>
-                  <span className="text-2xl font-bold text-primary">
-                    R$ {total.toFixed(2)}
+              <div className="flex flex-col gap-0.5 divide-y divide-border/60">
+                {tipoPedido === "DELIVERY" && (
+                  <div className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <Truck className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Tipo</span>
+                    <span className="text-sm font-medium">Entrega</span>
+                  </div>
+                )}
+                {tipoPedido === "MESA" && mesaCodigo && (
+                  <div className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <Users className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Tipo</span>
+                    <span className="text-sm font-medium">Mesa {mesaCodigo}{numPessoas ? ` · ${numPessoas} ${numPessoas === 1 ? "pessoa" : "pessoas"}` : ""}</span>
+                  </div>
+                )}
+                {tipoPedido === "BALCAO" && (
+                  <div className="flex items-center gap-3 py-2.5 first:pt-0">
+                    <Store className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Tipo</span>
+                    <span className="text-sm font-medium">Retirada no balcão</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 py-2.5">
+                  <CreditCard className="h-4 w-4 shrink-0 text-primary/70" />
+                  <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
+                  <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
+                </div>
+                {tipoPedido === "DELIVERY" && (
+                  <div className="flex items-center gap-3 py-2.5">
+                    <Truck className="h-4 w-4 shrink-0 text-primary/70" />
+                    <span className="text-sm text-muted-foreground flex-1">Taxa de entrega</span>
+                    <span className="text-sm font-medium text-muted-foreground">Será calculada</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 py-2.5">
+                  <FileText className="h-4 w-4 shrink-0 text-primary/70" />
+                  <span className="text-sm text-muted-foreground flex-1">Observação</span>
+                  <span className="text-sm font-medium text-muted-foreground truncate max-w-[55%] text-right" title={observacao?.trim() || undefined}>
+                    {observacao?.trim() || "Nenhuma observação"}
                   </span>
                 </div>
+              </div>
+              <div className="mt-4 pt-4 flex items-center justify-between border-t-2 border-primary/20">
+                <div className="flex items-center gap-3">
+                  <CircleDollarSign className="h-5 w-5 shrink-0 text-primary/70" />
+                  <span className="text-base font-semibold">Total</span>
+                </div>
+                <span className="text-xl font-bold text-primary tabular-nums">R$ {total.toFixed(2)}</span>
               </div>
             </>
           )}
