@@ -4,12 +4,9 @@
 /* eslint-disable */
 /**
  * Schema de resposta para preview do checkout (sem criar pedido)
+ * Retorna apenas o valor_total calculado
  */
 export type PreviewCheckoutResponse = {
-    subtotal: number;
-    taxa_entrega: number;
-    taxa_servico: number;
     valor_total: number;
-    desconto: number;
 };
 

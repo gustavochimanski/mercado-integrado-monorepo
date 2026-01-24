@@ -7,23 +7,16 @@ import type { FinalizarPedidoRequest, TipoPedidoCheckout } from "@cardapio/types
 import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems";
 
 export interface PreviewCheckoutResult {
-  subtotal: number;
-  taxa_entrega: number;
-  taxa_servico: number;
   valor_total: number;
-  desconto: number;
-  distancia_km?: number;
-  empresa_id?: number;
-  tempo_entrega_minutos?: number;
 }
 
 /**
- * Hook para calcular preview do checkout (taxa de entrega, subtotal, etc.)
+ * Hook para calcular preview do checkout (valor total)
  * 
  * Usa a API unificada de Pedidos: POST /api/pedidos/client/checkout/preview
  * 
- * Calcula valores do pedido sem criar o pedido no banco de dados.
- * Retorna subtotal, taxas, desconto e total calculados.
+ * Calcula o valor total do pedido sem criar o pedido no banco de dados.
+ * Retorna apenas o valor_total calculado.
  * 
  * Autenticação: Requer X-Super-Token no header (token do cliente)
  * 

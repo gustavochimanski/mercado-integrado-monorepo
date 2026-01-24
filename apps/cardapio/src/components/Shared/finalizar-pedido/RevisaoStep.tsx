@@ -20,8 +20,6 @@ import {
   FileText,
   Package,
   ShoppingBag,
-  Clock,
-  Navigation,
   Users,
   Store,
   Minus,
@@ -91,14 +89,7 @@ interface Receita {
 }
 
 interface PreviewCheckoutData {
-  subtotal: number;
-  taxa_entrega: number;
-  taxa_servico: number;
   valor_total: number;
-  desconto: number;
-  distancia_km?: number;
-  empresa_id?: number;
-  tempo_entrega_minutos?: number;
 }
 
 interface RevisaoStepProps {
@@ -737,68 +728,12 @@ export default function RevisaoStep({
             </div>
           ) : previewData ? (
             <>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">R$ {previewData.subtotal.toFixed(2)}</span>
+              {pagamento?.tipo === "DINHEIRO" && trocoPara && trocoPara > 0 && (
+                <div className="flex justify-between items-center text-sm text-muted-foreground mb-3">
+                  <span>Troco para</span>
+                  <span>R$ {trocoPara.toFixed(2)}</span>
                 </div>
-                
-                {previewData.desconto > 0 && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Desconto</span>
-                    <span className="font-medium text-green-600 dark:text-green-400">
-                      - R$ {previewData.desconto.toFixed(2)}
-                    </span>
-                  </div>
-                )}
-                
-                {tipoPedido === "DELIVERY" && (
-                  <>
-                    <div className="flex justify-between items-center text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Navigation className="h-4 w-4" />
-                        <span>Taxa de entrega</span>
-                      </div>
-                      <span className="font-medium">R$ {previewData.taxa_entrega.toFixed(2)}</span>
-                    </div>
-                    
-                    {previewData.distancia_km !== undefined && previewData.distancia_km !== null && (
-                      <div className="flex justify-between items-center text-xs text-muted-foreground pl-6">
-                        <span>Distância</span>
-                        <span>{previewData.distancia_km.toFixed(2)} km</span>
-                      </div>
-                    )}
-                    
-                    {previewData.tempo_entrega_minutos !== undefined && previewData.tempo_entrega_minutos !== null && (
-                      <div className="flex justify-between items-center text-xs text-muted-foreground pl-6">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>Previsão</span>
-                        </div>
-                        <span>
-                          {previewData.tempo_entrega_minutos >= 60
-                            ? `${Math.floor(previewData.tempo_entrega_minutos / 60)}h ${previewData.tempo_entrega_minutos % 60}min`
-                            : `${Math.round(previewData.tempo_entrega_minutos)} min`}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-                
-                {previewData.taxa_servico > 0 && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Taxa de serviço</span>
-                    <span className="font-medium">R$ {previewData.taxa_servico.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                {pagamento?.tipo === "DINHEIRO" && trocoPara && trocoPara > 0 && (
-                  <div className="flex justify-between items-center text-sm text-muted-foreground">
-                    <span>Troco para</span>
-                    <span>R$ {trocoPara.toFixed(2)}</span>
-                  </div>
-                )}
-              </div>
+              )}
               
               <div className="pt-4 mt-4 border-t-2 border-primary/20">
                 <div className="flex justify-between items-center">

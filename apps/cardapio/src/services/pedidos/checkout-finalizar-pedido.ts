@@ -45,8 +45,8 @@ export function buildClientHeaders(includeJson: boolean = true): Record<string, 
  * 
  * Endpoint: POST /api/pedidos/client/checkout/preview
  * 
- * Calcula valores do pedido (subtotal, taxas, desconto, total) sem criar
- * o pedido no banco de dados.
+ * Calcula o valor total do pedido sem criar o pedido no banco de dados.
+ * Retorna apenas o valor_total calculado.
  * 
  * Autenticação: Requer X-Super-Token no header (token do cliente)
  */
@@ -80,16 +80,19 @@ export async function previewCheckoutCliente(
  * Endpoint: POST /api/pedidos/client/checkout
  * 
  * Cria o pedido completo no banco de dados com todos os dados fornecidos.
+ * Retorna apenas o valor_total do pedido criado.
  * 
  * Autenticação: Requer X-Super-Token no header (token do cliente)
- * 
- * Retorna o pedido criado (DELIVERY, MESA ou BALCAO conforme tipo_pedido)
  */
+export interface CheckoutTotalResponse {
+  valor_total: number;
+}
+
 export async function finalizarCheckoutCliente(
   payload: FinalizarPedidoRequest
-): Promise<PedidoResponse | PedidoMesaOut | PedidoBalcaoOut> {
+): Promise<CheckoutTotalResponse> {
   try {
-    const response = await axios.post<PedidoResponse | PedidoMesaOut | PedidoBalcaoOut>(
+    const response = await axios.post<CheckoutTotalResponse>(
       `${ensureBaseUrl()}${CLIENT_PEDIDOS_BASE_PATH}/checkout`,
       payload,
       { headers: buildClientHeaders() }
