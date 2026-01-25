@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import FooterComponent from "../components/Shared/Footer";
+import HeaderComponent from "../components/Shared/Header";
 import { ReactQueryProvider } from "../providers/ReactQueryClientProvider";
 import { Suspense } from "react";
 import { UserProvider } from "@cardapio/hooks/auth/userContext";
@@ -62,6 +63,9 @@ export default function RootLayout({
                       "--destructive-border": "#ef4444",
                     } as React.CSSProperties}
                   />
+                  <Suspense fallback={null}>
+                    <HeaderComponent />
+                  </Suspense>
                   <div className="flex-1">
                     {children}
                   </div>

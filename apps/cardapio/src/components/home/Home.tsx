@@ -11,7 +11,6 @@ import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveE
 import { getEmpresaId, setEmpresaId, setMesaInicial, getEmpresaData, setEmpresaData } from "@cardapio/stores/empresa/empresaStore";
 import { useMutateCliente} from "@cardapio/services/cliente";
 import { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import HeaderComponent from "@cardapio/components/Shared/Header";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
@@ -25,6 +24,8 @@ import { useQueryEmpresasDisponiveis, useBuscarEmpresa } from "@cardapio/service
 import { api } from "@cardapio/app/api/api";
 import type { EmpresaPublic } from "@cardapio/services/empresa/types";
 import { useQueryClient } from "@tanstack/react-query";
+import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
+import { useMemo } from "react";
 
 export default function HomePage() {
   // ✅ TODOS os hooks primeiro, sem returns no meio
@@ -356,8 +357,20 @@ export default function HomePage() {
     setReady(true);
   }, [empresa_id, empresasDisponiveis, podeFazerRequisicoes]);
 
-  const categorias = data?.categorias ?? [];
-  const vitrines = data?.vitrines ?? [];
+  const q = searchParams.get("q") ?? "";
+  const categorias = useMemo(
+    () => filterCategoriasBySearch(data?.categorias ?? [], q),
+    [data?.categorias, q]
+  );
+  const vitrinesRaw = data?.vitrines ?? [];
+  const vitrines = useMemo(
+    () => filterVitrinesBySearch(vitrinesRaw, q),
+    [vitrinesRaw, q]
+  );
+  const vitrinesHome = useMemo(
+    () => vitrines.filter((v) => v.is_home),
+    [vitrines]
+  );
   const bannersVerticais = data_banners?.filter((b) => b.tipo_banner === "V" && b.ativo) ?? [];
   const bannerVerticalPrincipal = bannersVerticais.length > 0 ? bannersVerticais[0] : null;
 
@@ -419,16 +432,13 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       <LoginWrapper />
-      <HeaderComponent />
 
       <main className="flex-1 pt-4 pb-20">
         <CategoryScrollSection categorias={categorias} empresaId={empresa_id} />
         <BannerVertical banner={bannerVerticalPrincipal} isAdmin={isAdmin} />
 
         <div className="space-y-6">
-          {vitrines
-            .filter((v) => v.is_home)
-            .map((v) => (
+          {vitrinesHome.map((v) => (
               <VitrineDestaques
                 key={v.id}
                 titulo={v.titulo}

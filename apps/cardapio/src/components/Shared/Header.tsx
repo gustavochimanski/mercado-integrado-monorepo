@@ -1,87 +1,109 @@
-// src/components/Header/HeaderComponent.tsx
-import { useEffect, useState } from "react";
-import { CircleArrowLeft,Search } from "lucide-react";
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { CircleArrowLeft, Search } from "lucide-react";
 import { getCliente, setEnderecoPadraoId } from "@cardapio/stores/client/ClientStore";
 import { EnderecoOut, useQueryEnderecos } from "@cardapio/services/enderecos/useQueryEndereco";
 import { Button } from "./ui/button";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "./ui/input";
+import { getEmpresaId, getEmpresaData } from "@cardapio/stores/empresa/empresaStore";
+import { LojaStatus } from "./LojaStatus";
 
 const HeaderComponent = () => {
   const [clienteData, setClienteData] = useState<{ tokenCliente?: string; enderecoPadraoId?: number } | null>(null);
   const [enderecoAtual, setEnderecoAtual] = useState<EnderecoOut | null>(null);
+  const [searchValue, setSearchValue] = useState("");
 
   const router = useRouter();
-  const pathname = usePathname(); // rota atual
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // Carrega dados do cliente apenas no cliente
+  const q = searchParams.get("q") ?? "";
+
+  const isHomeOrCategory = pathname === "/" || pathname.startsWith("/categoria");
+  const isFinalizarPedido = pathname === "/finalizar-pedido";
+
+  useEffect(() => {
+    setSearchValue(q);
+  }, [q]);
+
+  const handleSearchSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const term = searchValue.trim();
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (term) {
+        params.set("q", term);
+      } else {
+        params.delete("q");
+      }
+
+      if (isHomeOrCategory) {
+        router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ""}`);
+        return;
+      }
+
+      const empresaId = getEmpresaId();
+      const nextParams = new URLSearchParams();
+      if (term) nextParams.set("q", term);
+      if (empresaId) nextParams.set("empresa", String(empresaId));
+      router.push(nextParams.toString() ? `/?${nextParams.toString()}` : "/");
+    },
+    [searchValue, pathname, searchParams, isHomeOrCategory, router]
+  );
+
   useEffect(() => {
     const { tokenCliente, enderecoPadraoId } = getCliente();
     setClienteData({ tokenCliente, enderecoPadraoId });
   }, []);
 
-  // Query de endereços do cliente
   const { data: enderecos } = useQueryEnderecos({ enabled: !!clienteData?.tokenCliente });
 
   useEffect(() => {
-    if (!clienteData?.tokenCliente) return; // usuário não logado
-
+    if (!clienteData?.tokenCliente) return;
     if (!enderecos || enderecos.length === 0) {
-      setEnderecoAtual(null); // sem endereço cadastrado
+      setEnderecoAtual(null);
       return;
     }
-
-    // tenta pegar pelo id do endereço padrão
-    let endereco = enderecos.find(e => e.id === clienteData?.enderecoPadraoId);
-
-    // se não tiver, pega o que estiver marcado como padrao
-    if (!endereco) endereco = enderecos.find(e => e.padrao);
-
-    // se ainda não tiver, pega o primeiro disponível
+    let endereco = enderecos.find((e) => e.id === clienteData?.enderecoPadraoId);
+    if (!endereco) endereco = enderecos.find((e) => e.padrao);
     if (!endereco) endereco = enderecos[0];
-
     if (endereco) {
       setEnderecoAtual(endereco);
-      setEnderecoPadraoId(endereco.id); // atualiza store
+      setEnderecoPadraoId(endereco.id);
     }
   }, [enderecos, clienteData?.enderecoPadraoId, clienteData?.tokenCliente]);
 
-  // Texto do endereço
-  let textoEndereco = "";
-  if (!clienteData?.tokenCliente) {
-    textoEndereco = "Usuário não logado";
-  } else if (!enderecoAtual) {
-    textoEndereco = "Nenhum endereço cadastrado";
-  } else {
-    textoEndereco = `${enderecoAtual.logradouro}, ${enderecoAtual.numero ?? ""}`;
-  }
+  // Buscar dados da empresa para exibir status (apenas no cliente)
+  const [empresaData, setEmpresaData] = useState<ReturnType<typeof getEmpresaData>>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    setEmpresaData(getEmpresaData());
+  }, []);
+
+  if (isFinalizarPedido) return null;
 
   return (
-    <header className="w-full flex flex-row items-center sticky  top-0 z-50 bg-background rounded-b-lg p-1  gap-2">
-      {/* ENDEREÇO */}
-      {/* <p
-        onClick={() => window.alert("Aqui vai abrir um modal de endereços")}
-        className="font-semibold text-gray-500 text-sm flex items-center gap-1 cursor-pointer"
-      >
-        <MapPinCheck size={15} />
-        <u>{textoEndereco}</u>
-      </p> */}
-
-      {/* Só mostra se não estiver na "/" */}
+    <header className="w-full flex flex-row items-center sticky top-0 z-50 bg-background rounded-b-lg p-1 gap-2">
       {pathname !== "/" && (
-        <Button onClick={router.back} variant="link" className="mr-auto">
+        <Button onClick={() => router.back()} variant="link" className="mr-auto">
           <CircleArrowLeft /> Voltar
         </Button>
       )}
 
-      {/* BARRA DE BUSCA */}
       <div className={`relative flex-1 ${pathname === "/" ? "max-w-none" : "max-w-md"}`}>
-        <form className="relative">
+        <form className="relative" onSubmit={handleSearchSubmit}>
           <Input
             type="search"
             placeholder="Buscar produtos, categorias..."
             className="w-full pl-4 pr-12 py-2.5 rounded-full border-2 border-primary/20 bg-white/80 backdrop-blur-sm focus:border-primary focus:bg-white transition-all duration-200 placeholder:text-gray-400 text-sm"
             aria-label="Buscar"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
           <Button
             type="submit"
@@ -92,6 +114,13 @@ const HeaderComponent = () => {
           </Button>
         </form>
       </div>
+
+      {/* Status discreto da loja - apenas no cliente para evitar erro de hidratação */}
+      {isMounted && empresaData?.horarios_funcionamento && (
+        <div className="ml-auto">
+          <LojaStatus horarios={empresaData.horarios_funcionamento} />
+        </div>
+      )}
     </header>
   );
 };

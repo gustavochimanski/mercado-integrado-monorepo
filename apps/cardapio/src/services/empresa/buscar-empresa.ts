@@ -1,5 +1,6 @@
 // @cardapio/services/empresa/buscar-empresa.ts
 import { useQuery } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { api } from "@cardapio/app/api/api";
 import type { EmpresaPublic } from "./types";
 import { setEmpresaData } from "@cardapio/stores/empresa/empresaStore";
@@ -50,7 +51,10 @@ export function useBuscarEmpresa(options?: UseBuscarEmpresaOptions) {
     gcTime: 5 * 60 * 1000, // 5 minutos - manter cache por pouco tempo
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    retry: 3, // Tentar 3 vezes em caso de erro
+    retry: (failureCount, error) => {
+      if (isAxiosError(error) && error.response?.status === 404) return false;
+      return failureCount < 3;
+    },
   });
 }
 

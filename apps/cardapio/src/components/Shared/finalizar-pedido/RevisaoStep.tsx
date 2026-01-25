@@ -117,9 +117,16 @@ interface RevisaoStepProps {
     cidade?: string;
   };
   pagamento?: {
+    id?: number;
     nome?: string;
     tipo?: string;
   };
+  meiosPagamentoMultiplos?: Array<{
+    id: number;
+    valor: number;
+    nome: string;
+    tipo: string;
+  }>;
   trocoPara?: number | null;
   total: number;
   previewData?: PreviewCheckoutData | null;
@@ -146,6 +153,7 @@ export default function RevisaoStep({
   observacao,
   endereco,
   pagamento,
+  meiosPagamentoMultiplos = [],
   trocoPara,
   total,
   previewData,
@@ -723,7 +731,9 @@ export default function RevisaoStep({
                     <span className="text-sm font-medium text-teal-600 dark:text-teal-400 tabular-nums">- R$ {(previewData.desconto ?? 0).toFixed(2)}</span>
                   </div>
                 )}
-                {pagamento?.tipo === "DINHEIRO" && trocoPara != null && trocoPara > 0 && (
+                {((pagamento?.tipo === "DINHEIRO" && meiosPagamentoMultiplos.length === 0) || 
+                  meiosPagamentoMultiplos.some(m => m.tipo === "DINHEIRO")) && 
+                  trocoPara != null && trocoPara > 0 && (
                   <div className="flex items-center gap-3 py-2.5">
                     <Receipt className="h-4 w-4 shrink-0 text-primary/50" />
                     <span className="text-sm text-muted-foreground flex-1">Troco para</span>
@@ -770,11 +780,34 @@ export default function RevisaoStep({
                     <span className="text-sm font-medium">Retirada no balcão</span>
                   </div>
                 )}
-                <div className="flex items-center gap-3 py-2.5">
-                  <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
-                  <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
-                  <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
-                </div>
+                {meiosPagamentoMultiplos.length > 0 ? (
+                  <div className="py-2.5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
+                      <span className="text-sm text-muted-foreground flex-1">Meios de pagamento</span>
+                    </div>
+                    <div className="pl-7 space-y-1.5">
+                      {meiosPagamentoMultiplos.map((meio, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{meio.nome}</span>
+                          <span className="text-sm font-medium tabular-nums">R$ {meio.valor.toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="pt-1 border-t border-border/60 flex items-center justify-between">
+                        <span className="text-sm font-semibold">Total pagamentos</span>
+                        <span className="text-sm font-bold tabular-nums">
+                          R$ {meiosPagamentoMultiplos.reduce((acc, m) => acc + m.valor, 0).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 py-2.5">
+                    <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
+                    <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
+                    <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
+                  </div>
+                )}
                 {tipoPedido === "DELIVERY" && (
                   <div className="flex items-center gap-3 py-2.5">
                     <Truck className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />

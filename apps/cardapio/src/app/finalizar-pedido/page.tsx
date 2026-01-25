@@ -54,6 +54,7 @@ export default function FinalizarPedidoPage() {
   const [enderecoId, setEnderecoId] = useState<number | null>(null);
   const [meioPagamentoId, setPagamentoId] = useState<number | null>(null);
   const [trocoPara, setTrocoPara] = useState<number | null>(null);
+  const [meiosPagamentoMultiplos, setMeiosPagamentoMultiplos] = useState<Array<{ id: number; valor: number; nome: string; tipo: string }>>([]);
   const [mesaCodigo, setMesaCodigo] = useState<string | null>(null);
   const [numPessoas, setNumPessoas] = useState<number | null>(null);
   const [balcaoEmpresaId, setBalcaoEmpresaId] = useState<number | null>(null);
@@ -146,9 +147,18 @@ export default function FinalizarPedidoPage() {
   const [isFinalizando, setIsFinalizando] = useState(false);
 
   const { create, update, remove } = useMutateEndereco();
-  const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(!!cliente?.tokenCliente);
+  
+  // Verificar token de forma mais robusta - usar estado para garantir re-render quando token mudar
+  const [hasToken, setHasToken] = useState(false);
+  
+  useEffect(() => {
+    const tokenAtual = cliente?.tokenCliente ?? getTokenCliente();
+    setHasToken(!!(tokenAtual && tokenAtual.trim()));
+  }, [cliente?.tokenCliente]);
+  
+  const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(hasToken);
 
-  const { data: enderecosOut = [] } = useQueryEnderecos({ enabled: !!cliente?.tokenCliente });
+  const { data: enderecosOut = [] } = useQueryEnderecos({ enabled: hasToken });
 
   const {
     data: empresasDisponiveis = [],
@@ -246,10 +256,15 @@ useEffect(() => {
 }, [mesaPresetAplicada, tipoPedido]);
 
   // Busca preview do checkout quando estiver na aba de revisão
+  // Para múltiplos pagamentos, usar o primeiro meio para o preview (o backend ajusta)
+  const meioParaPreview = meiosPagamentoMultiplos.length > 0 
+    ? meiosPagamentoMultiplos[0].id 
+    : meioPagamentoId;
+  
   const { data: previewData, isLoading: isLoadingPreview, error: previewError } = usePreviewCheckout({
     tipoPedido,
     enderecoId,
-    meioPagamentoId,
+    meioPagamentoId: meioParaPreview,
     mesaCodigo,
     numPessoas,
     trocoPara,
@@ -450,14 +465,23 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         validationError = "Cliente não identificado. Faça login novamente.";
       } else if (!enderecoId && tipoPedido === "DELIVERY") {
         validationError = "Endereço não selecionado. Selecione um endereço de entrega.";
-      } else if (!meioPagamentoId && tipoPedido === "DELIVERY") {
+      } else if (!meioPagamentoId && meiosPagamentoMultiplos.length === 0 && tipoPedido === "DELIVERY") {
         validationError = "Forma de pagamento não selecionada. Escolha uma forma de pagamento.";
       } else {
         // Verificar se o meio de pagamento é dinheiro e se o troco está preenchido (apenas para DELIVERY)
         if (tipoPedido === "DELIVERY") {
-          const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
-          if (meioSelecionado?.tipo === "DINHEIRO" && (!trocoPara || trocoPara <= 0)) {
-            validationError = "Informe o valor do troco para pagamento em dinheiro.";
+          if (meiosPagamentoMultiplos.length === 0) {
+            // Modo único
+            const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
+            if (meioSelecionado?.tipo === "DINHEIRO" && (!trocoPara || trocoPara <= 0)) {
+              validationError = "Informe o valor do troco para pagamento em dinheiro.";
+            }
+          } else {
+            // Modo múltiplo - validar se há dinheiro sem troco
+            const temDinheiro = meiosPagamentoMultiplos.some(m => m.tipo === "DINHEIRO");
+            if (temDinheiro && (!trocoPara || trocoPara <= 0)) {
+              validationError = "Informe o valor do troco para pagamento em dinheiro.";
+            }
           }
         }
       }
@@ -523,8 +547,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           payload.troco_para = trocoPara ?? null;
           payload.mesa_codigo = null;
           
-          // Usar meios_pagamento ao invés de meio_pagamento_id na raiz
-          if (meioPagamentoId) {
+          // Usar meios_pagamento (múltiplos ou único)
+          if (meiosPagamentoMultiplos.length > 0) {
+            payload.meios_pagamento = meiosPagamentoMultiplos.map(m => ({
+              meio_pagamento_id: m.id,
+              valor: m.valor,
+            }));
+          } else if (meioPagamentoId) {
             payload.meios_pagamento = [
               {
                 meio_pagamento_id: meioPagamentoId,
@@ -553,8 +582,13 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           
           payload.troco_para = trocoPara ?? null;
           
-          // Usar meios_pagamento se houver meio de pagamento selecionado
-          if (meioPagamentoId) {
+          // Usar meios_pagamento (múltiplos ou único)
+          if (meiosPagamentoMultiplos.length > 0) {
+            payload.meios_pagamento = meiosPagamentoMultiplos.map(m => ({
+              meio_pagamento_id: m.id,
+              valor: m.valor,
+            }));
+          } else if (meioPagamentoId) {
             payload.meios_pagamento = [
               {
                 meio_pagamento_id: meioPagamentoId,
@@ -651,14 +685,17 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
           </Button>
         );
       case "pagamento":
+        const temPagamentoSelecionado = meioPagamentoId !== null || meiosPagamentoMultiplos.length > 0;
         const meioSelecionado = meiosPagamento.find(m => m.id === meioPagamentoId);
         const isDinheiro = meioSelecionado?.tipo === "DINHEIRO";
-        const trocoObrigatorioPreenchido = !isDinheiro || (isDinheiro && trocoPara !== null && trocoPara !== undefined && trocoPara > 0);
+        const temDinheiroMultiplo = meiosPagamentoMultiplos.some(m => m.tipo === "DINHEIRO");
+        const precisaTroco = (isDinheiro && !meiosPagamentoMultiplos.length) || temDinheiroMultiplo;
+        const trocoObrigatorioPreenchido = !precisaTroco || (precisaTroco && trocoPara !== null && trocoPara !== undefined && trocoPara > 0);
         return (
           <Button 
             className="w-full text-base sm:text-lg p-4 sm:p-6 bg-primary" 
             onClick={() => handleStepComplete("observacao")}
-            disabled={!meioPagamentoId || !trocoObrigatorioPreenchido || isTransitioning}
+            disabled={!temPagamentoSelecionado || !trocoObrigatorioPreenchido || isTransitioning}
           >
             <span className="text-sm sm:text-base">Continuar</span> <CircleArrowRight strokeWidth={3} className="ml-2" size={20} />
           </Button>
@@ -924,8 +961,26 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                         onSelect={(id: number) => {
                           setMeioPagamentoId(id);
                           setPagamentoId(id);
+                          // Limpar múltiplos quando selecionar único
+                          if (meiosPagamentoMultiplos.length > 0) {
+                            setMeiosPagamentoMultiplos([]);
+                          }
                         }}
                         onTrocoChange={(valor) => setTrocoPara(valor)}
+                        onMeiosMultiplosChange={(meios, trocoParaMultiplo) => {
+                          setMeiosPagamentoMultiplos(meios);
+                          // Limpar seleção única quando usar múltiplos
+                          if (meios.length > 0) {
+                            setPagamentoId(null);
+                            setMeioPagamentoId(null);
+                            // Atualizar troco para o valor retornado do modal
+                            setTrocoPara(trocoParaMultiplo ?? null);
+                          } else {
+                            setTrocoPara(null);
+                          }
+                        }}
+                        meiosMultiplos={meiosPagamentoMultiplos}
+                        valorTotal={previewData?.valor_total ?? totalPrice()}
                       />
                     );
                   },
@@ -952,6 +1007,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                       observacao={observacao}
                       endereco={tipoPedido === "DELIVERY" ? enderecos.find((e) => e.id === enderecoId) ?? undefined : undefined}
                       pagamento={meiosPagamento.find((m) => m.id === meioPagamentoId) ?? undefined}
+                      meiosPagamentoMultiplos={meiosPagamentoMultiplos}
                       trocoPara={trocoPara}
                       total={(previewData?.valor_total ?? totalPrice()) || 0}
                       previewData={previewData ?? undefined}

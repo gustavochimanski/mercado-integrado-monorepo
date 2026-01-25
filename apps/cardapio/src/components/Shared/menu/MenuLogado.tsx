@@ -8,8 +8,7 @@ import {
   User,
   MapPin,
   ClipboardList,
-  LogOut,
-  Gift
+  LogOut
 } from "lucide-react";
 import Link from "next/link";
 import { getCliente, clearCliente } from "@cardapio/stores/client/ClientStore";
@@ -100,28 +99,6 @@ export default function MenuLogado() {
                 <div>
                   <p className="font-medium">Meus pedidos</p>
                   <p className="text-sm text-muted-foreground">Histórico de pedidos</p>
-                </div>
-              </div>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* Outras opções */}
-        <h3 className="font-semibold text-lg">Mais opções</h3>
-
-        <Card>
-          <CardContent className="p-0">
-            <Link
-              href="/promocoes"
-              className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <Gift className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="font-medium">Promoções</p>
-                  <p className="text-sm text-muted-foreground">Ofertas especiais</p>
                 </div>
               </div>
             </Link>

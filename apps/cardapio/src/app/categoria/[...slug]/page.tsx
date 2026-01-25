@@ -1,13 +1,10 @@
 "use client";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
-import { Button } from "@cardapio/components/Shared/ui/button";
-import { CircleArrowLeft } from "lucide-react";
 import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
-import ProductsSection from "@cardapio/components/Shared/product/ProductsSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
@@ -16,13 +13,14 @@ import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem
 import { useCategoriaPorSlug } from "@cardapio/services/home";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
-import HeaderComponent from "@cardapio/components/Shared/Header";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
+import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const q = searchParams.get("q") ?? "";
 
   const empresa_id = getEmpresaId();
   const params = useParams<{ slug?: string | string[] }>();
@@ -73,27 +71,29 @@ export default function RouteCategoryPage() {
     };
   }, []);
 
-  // Mostrar todas as vitrines da categoria atual, independente de is_home
-  // Vitrines com is_home=true aparecem tanto na home quanto na categoria
-  const vitrinesFiltradas = useMemo(
-    () => data?.vitrines ?? [],
-    [data?.vitrines]
-  );
-
-  // Vitrines das subcategorias, excluindo is_home=true e duplicatas
-  const vitrineIdsJaExibidas = useMemo(
-    () => new Set(vitrinesFiltradas.map((v) => v.id)),
-    [vitrinesFiltradas]
-  );
-
-  const vitrinesFilhoFiltradas = useMemo(
+  const vitrinesRaw = data?.vitrines ?? [];
+  const vitrinesFilhoRaw = useMemo(
     () =>
       subcategorias && data?.vitrines_filho
         ? data.vitrines_filho.filter(
-            (vit) => !vitrineIdsJaExibidas.has(vit.id)
+            (vit) => !new Set(vitrinesRaw.map((v) => v.id)).has(vit.id)
           )
         : [],
-    [subcategorias, data?.vitrines_filho, vitrineIdsJaExibidas]
+    [subcategorias, data?.vitrines_filho, vitrinesRaw]
+  );
+
+  const vitrinesFiltradas = useMemo(
+    () => filterVitrinesBySearch(vitrinesRaw, q),
+    [vitrinesRaw, q]
+  );
+  const vitrinesFilhoFiltradas = useMemo(
+    () => filterVitrinesBySearch(vitrinesFilhoRaw, q),
+    [vitrinesFilhoRaw, q]
+  );
+
+  const subcategoriasFiltradas = useMemo(
+    () => filterCategoriasBySearch(subcategorias, q),
+    [subcategorias, q]
   );
 
   const vitrinesMeta = useMemo(
@@ -155,7 +155,6 @@ export default function RouteCategoryPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <LoginWrapper />
-      <HeaderComponent/>
 
       <main className="flex-1 px-2 pb-2">
         {vitrinesMeta.length > 0 && (
@@ -168,7 +167,7 @@ export default function RouteCategoryPage() {
         )}
 
         <CategoryScrollSection
-          categorias={subcategorias}
+          categorias={subcategoriasFiltradas}
           parentId={categoriaAtual.id}
           empresaId={empresa_id!}
         />

@@ -11,10 +11,16 @@ apiClienteAdmin.interceptors.request.use((config) => {
   // Tenta buscar do ClientStore primeiro, depois do cookie
   let superToken = getTokenCliente()
   
-  if (!superToken) {
-    const cookieToken = getCookie("super_token")
-    if (typeof cookieToken === "string" && cookieToken.trim()) {
-      superToken = cookieToken
+  // Se não encontrou no ClientStore, tenta buscar do cookie diretamente
+  if (!superToken || superToken.trim() === "") {
+    try {
+      const cookieToken = getCookie("super_token")
+      if (typeof cookieToken === "string" && cookieToken.trim()) {
+        superToken = cookieToken.trim()
+      }
+    } catch (error) {
+      // Ignora erros ao buscar cookie (pode acontecer em SSR)
+      console.warn("Erro ao buscar token do cookie:", error)
     }
   }
 
@@ -22,6 +28,11 @@ apiClienteAdmin.interceptors.request.use((config) => {
   if (superToken && superToken.trim()) {
     config.headers = config.headers ?? {}
     config.headers["x-super-token"] = superToken.trim()
+  } else {
+    // Log de debug em desenvolvimento para identificar quando o token não está sendo enviado
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[apiClienteAdmin] Token não encontrado para requisição:", config.url)
+    }
   }
 
   return config

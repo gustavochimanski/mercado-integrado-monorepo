@@ -57,7 +57,6 @@ function sortGroups(groups: Map<string, Pedido[]>) {
 }
 
 export default function RoutePedidos() {
-  const router = useRouter();
   const { data: pedidos = [], isLoading } = usePedidos();
   const [pedidoEdicao, setPedidoEdicao] = useState<Pedido | null>(null);
   const [modalEdicaoOpen, setModalEdicaoOpen] = useState(false);
@@ -76,20 +75,6 @@ export default function RoutePedidos() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header minimalista */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <Button 
-            onClick={() => router.push('/')} 
-            variant="ghost" 
-            className="gap-2 -ml-2"
-          >
-            <CircleArrowLeft className="h-4 w-4" />
-            <span>Voltar</span>
-          </Button>
-        </div>
-      </header>
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
