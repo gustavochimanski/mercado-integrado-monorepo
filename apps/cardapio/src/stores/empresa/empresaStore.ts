@@ -5,6 +5,12 @@ export function setEmpresaId(id: number) {
   const normalized = Number(id);
   if (!Number.isFinite(normalized) || normalized <= 0) return; // valor inválido
   empresaId = normalized;
+  
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return;
+  }
+  
   try {
     localStorage.setItem("empresaId", String(normalized));
   } catch (error) {
@@ -16,6 +22,11 @@ export function setEmpresaId(id: number) {
 
 export function getEmpresaId(): number {
   if (empresaId > 0) return empresaId;
+
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return 0;
+  }
 
   let stored: string | null = null;
   try {
@@ -36,6 +47,12 @@ export function getEmpresaId(): number {
 
 export function clearEmpresaId() {
   empresaId = 0;
+  
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return;
+  }
+  
   try {
     localStorage.removeItem("empresaId");
   } catch (error) {
@@ -50,6 +67,11 @@ export function setMesaInicial(codigo: string | null, numPessoas?: number | null
     codigo: codigo ?? null,
     numPessoas: typeof numPessoas === "number" && numPessoas > 0 ? Math.trunc(numPessoas) : null,
   };
+
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return;
+  }
 
   try {
     if (mesaInicial.codigo) {
@@ -94,6 +116,12 @@ export function getMesaInicial(): { codigo: string | null; numPessoas: number | 
 
 export function clearMesaInicial() {
   mesaInicial = { codigo: null, numPessoas: null };
+  
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return;
+  }
+  
   try {
     localStorage.removeItem("mesaInicialCodigo");
     localStorage.removeItem("mesaInicialNumPessoas");
@@ -108,6 +136,11 @@ export function clearMesaInicial() {
 const EMPRESA_STORAGE_KEY = "empresaData";
 
 export function setEmpresaData(empresa: any) {
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return;
+  }
+  
   try {
     localStorage.setItem(EMPRESA_STORAGE_KEY, JSON.stringify(empresa));
   } catch (error) {
@@ -118,6 +151,11 @@ export function setEmpresaData(empresa: any) {
 }
 
 export function getEmpresaData(): any | null {
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return null;
+  }
+  
   try {
     const stored = localStorage.getItem(EMPRESA_STORAGE_KEY);
     if (stored) {
@@ -132,6 +170,11 @@ export function getEmpresaData(): any | null {
 }
 
 export function clearEmpresaData() {
+  // Verificar se estamos no lado do cliente
+  if (typeof window === "undefined") {
+    return;
+  }
+  
   try {
     localStorage.removeItem(EMPRESA_STORAGE_KEY);
   } catch (error) {

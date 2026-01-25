@@ -7,8 +7,7 @@ import { EnderecoOut, useQueryEnderecos } from "@cardapio/services/enderecos/use
 import { Button } from "./ui/button";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "./ui/input";
-import { getEmpresaId, getEmpresaData } from "@cardapio/stores/empresa/empresaStore";
-import { LojaStatus } from "./LojaStatus";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 const HeaderComponent = () => {
   const [clienteData, setClienteData] = useState<{ tokenCliente?: string; enderecoPadraoId?: number } | null>(null);
@@ -76,15 +75,6 @@ const HeaderComponent = () => {
     }
   }, [enderecos, clienteData?.enderecoPadraoId, clienteData?.tokenCliente]);
 
-  // Buscar dados da empresa para exibir status (apenas no cliente)
-  const [empresaData, setEmpresaData] = useState<ReturnType<typeof getEmpresaData>>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-    setEmpresaData(getEmpresaData());
-  }, []);
-
   if (isFinalizarPedido) return null;
 
   // Verificar se há parâmetro redireciona_categoria na URL
@@ -117,13 +107,6 @@ const HeaderComponent = () => {
           </Button>
         </form>
       </div>
-
-      {/* Status discreto da loja - apenas no cliente para evitar erro de hidratação */}
-      {isMounted && empresaData?.horarios_funcionamento && (
-        <div className="ml-auto">
-          <LojaStatus horarios={empresaData.horarios_funcionamento} />
-        </div>
-      )}
     </header>
   );
 };
