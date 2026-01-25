@@ -87,9 +87,12 @@ const HeaderComponent = () => {
 
   if (isFinalizarPedido) return null;
 
+  // Verificar se há parâmetro redireciona_categoria na URL
+  const redirecionaCategoria = searchParams.get("redireciona_categoria") === "true";
+
   return (
     <header className="w-full flex flex-row items-center sticky top-0 z-50 bg-background rounded-b-lg p-1 gap-2">
-      {pathname !== "/" && (
+      {pathname !== "/" && !redirecionaCategoria && (
         <Button onClick={() => router.back()} variant="link" className="mr-auto">
           <CircleArrowLeft /> Voltar
         </Button>

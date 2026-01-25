@@ -3,6 +3,8 @@ import { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { ProductCard } from "./ProductCard";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
+import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
+import { toast } from "sonner";
 
 type Props = {
   produto: ProdutoEmpMini;
@@ -12,8 +14,14 @@ type Props = {
 
 export function AddableProductCard({ produto, quantity = 1, openSheet }: Props) {
   const add = useCart((s) => s.add);
+  const { estaAberta } = useLojaAberta();
 
   function handleAdd() {
+    if (!estaAberta) {
+      toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
+      return;
+    }
+    
     if (openSheet) return openSheet(produto);
     add(mapProdutoToCartItem(produto, quantity));
   }

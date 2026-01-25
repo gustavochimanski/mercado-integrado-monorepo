@@ -10,6 +10,8 @@ import { UserProvider } from "@cardapio/hooks/auth/userContext";
 import { Toaster } from "@cardapio/components/Shared/ui/sonner";
 import { CartGlobalClient } from "@cardapio/components/Shared/cart/CartGlobalClient";
 import { ThemeProvider } from "@cardapio/components/Shared/theme/ThemeProvider";
+import { LojaFechadaBannerGlobal } from "@cardapio/components/Shared/LojaFechadaBannerGlobal";
+import { LojaStatusHeaderGlobal } from "@cardapio/components/Shared/LojaStatusHeaderGlobal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,9 +66,15 @@ export default function RootLayout({
                     } as React.CSSProperties}
                   />
                   <Suspense fallback={null}>
+                    <LojaStatusHeaderGlobal />
+                  </Suspense>
+                  <Suspense fallback={null}>
                     <HeaderComponent />
                   </Suspense>
                   <div className="flex-1">
+                    <Suspense fallback={null}>
+                      <LojaFechadaBannerGlobal />
+                    </Suspense>
                     {children}
                   </div>
                   <FooterComponent />

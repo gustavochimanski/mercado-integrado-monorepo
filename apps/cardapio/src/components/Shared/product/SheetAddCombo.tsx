@@ -25,6 +25,8 @@ import { useCart } from "@cardapio/stores/cart/useCart";
 import type { CartItemComplemento } from "@cardapio/stores/cart/useCart";
 import { ComplementoSection } from "./ComplementoSection";
 import { toast } from "sonner";
+import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
+import { Lock } from "lucide-react";
 
 const isTruthyFlag = (v: unknown) =>
   v === true || v === 1 || v === "1" || v === "true" || v === "TRUE" || v === "S" || v === "s";
@@ -57,6 +59,7 @@ export function SheetAdicionarCombo({
   quickAddQuantity = 6,
 }: SheetAdicionarComboProps) {
   const { addCombo } = useCart();
+  const { estaAberta } = useLojaAberta();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
     register,
@@ -321,6 +324,12 @@ export function SheetAdicionarCombo({
   };
 
   function onSubmit(data: FormData) {
+    // Bloquear se loja estiver fechada
+    if (!estaAberta) {
+      toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
+      return;
+    }
+
     const observacao = data.observacao?.trim() || undefined;
     
     // Validar complementos obrigatórios
@@ -588,12 +597,32 @@ export function SheetAdicionarCombo({
             <div className="border-t border-border pt-4 pb-6 px-4">
               <Button 
                 type="submit" 
-                disabled={isLoadingComplementos}
-                className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 text-background disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoadingComplementos || !estaAberta}
+                className={`w-full h-14 text-base font-semibold shadow-lg transition-all ${
+                  estaAberta && !isLoadingComplementos
+                    ? "bg-primary hover:bg-primary/90 text-background hover:shadow-xl"
+                    : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
+                }`}
                 size="lg"
+                onClick={(e) => {
+                  if (!estaAberta) {
+                    e.preventDefault();
+                    toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
+                    return;
+                  }
+                }}
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}
+                {estaAberta ? (
+                  <>
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-5 w-5 mr-2" />
+                    Loja Fechada
+                  </>
+                )}
               </Button>
             </div>
             </div>

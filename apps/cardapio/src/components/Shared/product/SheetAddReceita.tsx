@@ -24,6 +24,8 @@ import { useCart } from "@cardapio/stores/cart/useCart";
 import type { CartItemComplemento } from "@cardapio/stores/cart/useCart";
 import { ComplementoSection } from "./ComplementoSection";
 import { toast } from "sonner";
+import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
+import { Lock } from "lucide-react";
 
 const isTruthyFlag = (v: unknown) =>
   v === true || v === 1 || v === "1" || v === "true" || v === "TRUE" || v === "S" || v === "s";
@@ -56,6 +58,7 @@ export function SheetAdicionarReceita({
   quickAddQuantity = 6,
 }: SheetAdicionarReceitaProps) {
   const { addReceita } = useCart();
+  const { estaAberta } = useLojaAberta();
   const {
     register,
     handleSubmit,
@@ -428,6 +431,12 @@ export function SheetAdicionarReceita({
   }, [complementoHighlightId]);
 
   function onSubmit(data: FormData) {
+    // Bloquear se loja estiver fechada
+    if (!estaAberta) {
+      toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
+      return;
+    }
+
     const observacao = data.observacao?.trim() || undefined;
     
     // Validar complementos obrigatórios
@@ -704,14 +713,21 @@ export function SheetAdicionarReceita({
             <div className="border-t border-border pt-4 pb-6 px-4">
               <Button 
                 type="button"
-                aria-disabled={!todosComplementosObrigatoriosSelecionados}
-                className={`w-full h-14 text-base font-semibold shadow-lg transition-all bg-primary text-background ${
-                  todosComplementosObrigatoriosSelecionados
-                    ? "hover:shadow-xl hover:bg-primary/90"
-                    : "opacity-50 cursor-not-allowed"
+                aria-disabled={!todosComplementosObrigatoriosSelecionados || !estaAberta}
+                disabled={!todosComplementosObrigatoriosSelecionados || !estaAberta}
+                className={`w-full h-14 text-base font-semibold shadow-lg transition-all ${
+                  todosComplementosObrigatoriosSelecionados && estaAberta
+                    ? "bg-primary text-background hover:shadow-xl hover:bg-primary/90"
+                    : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
                 }`}
                 size="lg"
                 onClick={(e) => {
+                  if (!estaAberta) {
+                    e.preventDefault();
+                    toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
+                    return;
+                  }
+
                   if (!todosComplementosObrigatoriosSelecionados) {
                     e.preventDefault();
                     const validacao = validarComplementos();
@@ -725,8 +741,17 @@ export function SheetAdicionarReceita({
                   handleSubmit(onSubmit)();
                 }}
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}
+                {estaAberta ? (
+                  <>
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    {`Adicionar ao Carrinho • R$ ${precoTotal.toFixed(2).replace(".", ",")}`}
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-5 w-5 mr-2" />
+                    Loja Fechada
+                  </>
+                )}
               </Button>
             </div>
             </div>

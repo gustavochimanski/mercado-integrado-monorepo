@@ -26,6 +26,7 @@ import type { EmpresaPublic } from "@cardapio/services/empresa/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
 import { useMemo } from "react";
+import { verificarLojaAberta } from "@cardapio/lib/empresa/verificarLojaAberta";
 
 export default function HomePage() {
   // ✅ TODOS os hooks primeiro, sem returns no meio
@@ -44,6 +45,7 @@ export default function HomePage() {
   const redirecionadoRef = useRef(false);
   const { isAdmin, refreshUser } = useUserContext();
   const { clear: clearCart, add } = useCart();
+  const [agora, setAgora] = useState<Date | null>(null);
   const { loginDireto } = useMutateCliente();
   const queryClient = useQueryClient();
 
@@ -114,31 +116,33 @@ export default function HomePage() {
     
     // ✅ PRESERVAR via=supervisor se existir na URL atual
     const viaSupervisor = searchParams.get("via");
-    let urlFinal = url;
+    const isExternalUrl = url.startsWith('http://') || url.startsWith('https://');
+    const urlObj = isExternalUrl 
+      ? new URL(url)
+      : new URL(url, window.location.origin);
     
-    if (viaSupervisor === "supervisor") {
-      // Verificar se a URL já tem parâmetros de query
-      const isExternalUrl = url.startsWith('http://') || url.startsWith('https://');
-      const urlObj = isExternalUrl 
-        ? new URL(url)
-        : new URL(url, window.location.origin);
-      
-      // Se já tiver via na URL de redirecionamento, não sobrescrever
-      if (!urlObj.searchParams.has("via")) {
-        urlObj.searchParams.set("via", "supervisor");
-      }
-      
-      // Reconstruir a URL final
-      if (isExternalUrl) {
-        urlFinal = urlObj.toString();
-      } else {
-        // Para rotas internas, usar apenas pathname + search
-        urlFinal = urlObj.pathname + (urlObj.search ? urlObj.search : '');
-      }
+    // ✅ Verificar se é redirecionamento para categoria e adicionar parâmetro
+    const isCategoriaRoute = urlObj.pathname.startsWith('/categoria');
+    if (isCategoriaRoute) {
+      urlObj.searchParams.set('redireciona_categoria', 'true');
+    }
+    
+    // Se já tiver via na URL de redirecionamento, não sobrescrever
+    if (viaSupervisor === "supervisor" && !urlObj.searchParams.has("via")) {
+      urlObj.searchParams.set("via", "supervisor");
+    }
+    
+    // Reconstruir a URL final
+    let urlFinal: string;
+    if (isExternalUrl) {
+      urlFinal = urlObj.toString();
+    } else {
+      // Para rotas internas, usar apenas pathname + search
+      urlFinal = urlObj.pathname + (urlObj.search ? urlObj.search : '');
     }
     
     // ✅ Log sempre (mesmo em produção) para debug
-    console.log('🔄 Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '');
+    console.log('🔄 Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '', isCategoriaRoute ? '(redirecionamento de categoria)' : '');
     
     // Usar window.location.replace para redirecionamento imediato sem adicionar ao histórico
     if (urlFinal.startsWith('http://') || urlFinal.startsWith('https://')) {
@@ -374,8 +378,27 @@ export default function HomePage() {
   const bannersVerticais = data_banners?.filter((b) => b.tipo_banner === "V" && b.ativo) ?? [];
   const bannerVerticalPrincipal = bannersVerticais.length > 0 ? bannersVerticais[0] : null;
 
+  // Verificar se loja está aberta
+  useEffect(() => {
+    setAgora(new Date());
+    const interval = setInterval(() => {
+      setAgora(new Date());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const lojaEstaAberta = useMemo(() => {
+    if (!agora || !empresaData?.horarios_funcionamento) return true; // Se não há horários, permite adicionar
+    return verificarLojaAberta(empresaData.horarios_funcionamento, undefined, agora);
+  }, [empresaData?.horarios_funcionamento, agora]);
+
   const handleAdd = useCallback(
     (produto: ProdutoEmpMini, quantity: number, observacao?: string, complementos?: import("@cardapio/stores/cart/useCart").CartItemComplemento[]) => {
+      // Bloquear adição se loja estiver fechada
+      if (!lojaEstaAberta) {
+        return;
+      }
+
       // Se houver complementos, usar diretamente; caso contrário, criar item sem complementos
       if (complementos && complementos.length > 0) {
         add({
@@ -395,7 +418,7 @@ export default function HomePage() {
       }
       setSheetOpen(false);
     },
-    [add]
+    [add, lojaEstaAberta]
   );
 
   // 🔽 AGORA o retorno é feito DENTRO do JSX

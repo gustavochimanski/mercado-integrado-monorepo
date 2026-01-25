@@ -15,12 +15,15 @@ import ProductsVitrineSection from "@cardapio/components/Shared/product/Products
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
+import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
+import { toast } from "sonner";
 
 export default function RouteCategoryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
+  const redirecionaCategoria = searchParams.get("redireciona_categoria") === "true";
 
   const empresa_id = getEmpresaId();
   const params = useParams<{ slug?: string | string[] }>();
@@ -112,8 +115,15 @@ export default function RouteCategoryPage() {
   }, []);
 
   const add = useCart((s) => s.add);
+  const { estaAberta } = useLojaAberta();
   const handleAdd = useCallback(
     (produto: ProdutoEmpMini, quantity: number, observacao?: string, complementos?: import("@cardapio/stores/cart/useCart").CartItemComplemento[]) => {
+      // Bloquear adição se loja estiver fechada
+      if (!estaAberta) {
+        toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
+        return;
+      }
+
       // Se houver complementos, usar diretamente; caso contrário, criar item sem complementos
       if (complementos && complementos.length > 0) {
         add({
@@ -133,7 +143,7 @@ export default function RouteCategoryPage() {
       }
       setSheetOpen(false);
     },
-    [add]
+    [add, estaAberta]
   );
 
   if (isDataLoading) {

@@ -1,0 +1,48 @@
+"use client";
+
+import { LojaStatusHeader } from "./LojaStatusHeader";
+import { useBuscarEmpresa } from "@cardapio/services/empresa";
+import { getEmpresaId, getEmpresaData } from "@cardapio/stores/empresa/empresaStore";
+import { useMemo } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+
+/**
+ * Componente wrapper que exibe o cabeçalho de status da loja globalmente.
+ * Aparece acima do campo de pesquisa (Header).
+ * 
+ * Exibe na home (/) e em páginas de categoria quando redireciona_categoria = true.
+ */
+export function LojaStatusHeaderGlobal() {
+  const empresaId = getEmpresaId();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const redirecionaCategoria = searchParams.get("redireciona_categoria") === "true";
+  
+  // Verificar se deve exibir o cabeçalho
+  const deveExibir = pathname === "/" || (pathname.startsWith("/categoria") && redirecionaCategoria);
+  
+  // Buscar dados da empresa
+  const { data: empresaData } = useBuscarEmpresa({
+    empresaId: empresaId ?? undefined,
+    enabled: !!empresaId && deveExibir,
+  });
+
+  // Fallback para dados do localStorage
+  const empresaDataLocal = useMemo(() => {
+    if (empresaData) return empresaData;
+    return getEmpresaData();
+  }, [empresaData]);
+
+  // Se não deve exibir ou não há empresa/horários, não exibir
+  if (!deveExibir || !empresaDataLocal?.horarios_funcionamento) {
+    return null;
+  }
+
+  return (
+    <LojaStatusHeader
+      horarios={empresaDataLocal.horarios_funcionamento}
+      nomeLoja={empresaDataLocal.nome}
+      logo={empresaDataLocal.logo}
+    />
+  );
+}

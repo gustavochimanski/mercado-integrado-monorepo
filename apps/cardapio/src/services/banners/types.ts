@@ -11,5 +11,6 @@ export interface Banner {
   imagem: string;
   created_at: string;
   updated_at: string;
+  redireciona_categoria?: boolean;
 }
 

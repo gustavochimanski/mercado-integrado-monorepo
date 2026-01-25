@@ -22,10 +22,25 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 export function BannerVertical({ banner, isAdmin = false }: { banner: Banner | null; isAdmin?: boolean }) {
   if (!banner) return null;
 
+  // Se redireciona_categoria for true, adicionar parâmetro na URL
+  const getHref = () => {
+    const baseHref = banner.href_destino ?? "/";
+    if (banner.redireciona_categoria) {
+      const url = new URL(baseHref, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+      url.searchParams.set('redireciona_categoria', 'true');
+      // Para rotas internas, retornar apenas pathname + search
+      if (!baseHref.startsWith('http://') && !baseHref.startsWith('https://')) {
+        return url.pathname + (url.search ? url.search : '');
+      }
+      return url.toString();
+    }
+    return baseHref;
+  };
+
   return (
     <div className={`overflow-x-auto flex flex-nowrap gap-2 my-6 ${isAdmin ? "" : "hide-scrollbar"}`}>
       <Link
-        href={banner.href_destino ?? "/"}
+        href={getHref()}
         className="flex-shrink-0 basis-1/3 aspect-[1/2] rounded-lg overflow-hidden shadow-md relative"
       >
         <Image
@@ -51,6 +66,21 @@ export function BannersHorizontal({ banners, isAdmin = false }: { banners: Banne
   // Agrupar horizontais de 3 em 3
   const horizontalGroups = chunkArray(bannersAtivos, 3);
 
+  // Função para obter href com parâmetro se redireciona_categoria for true
+  const getHref = (banner: Banner) => {
+    const baseHref = banner.href_destino ?? "/";
+    if (banner.redireciona_categoria) {
+      const url = new URL(baseHref, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+      url.searchParams.set('redireciona_categoria', 'true');
+      // Para rotas internas, retornar apenas pathname + search
+      if (!baseHref.startsWith('http://') && !baseHref.startsWith('https://')) {
+        return url.pathname + (url.search ? url.search : '');
+      }
+      return url.toString();
+    }
+    return baseHref;
+  };
+
   return (
     <div className="flex flex-col gap-4 my-6">
       {horizontalGroups.map((group, index) => (
@@ -58,7 +88,7 @@ export function BannersHorizontal({ banners, isAdmin = false }: { banners: Banne
           {group.map((banner) => (
             <Link
               key={banner.id}
-              href={banner.href_destino ?? "/"}
+              href={getHref(banner)}
               className="w-full aspect-[16/5] rounded-xl overflow-hidden shadow-lg relative"
             >
               <Image
@@ -94,45 +124,75 @@ export function BannersGrouped({ banners, isAdmin = false }: BannersGroupedProps
     <div className="flex flex-col gap-8 my-6">
 
       {/* ▶ Banner Vertical Único */}
-      {firstVertical && (
-        <div className={`overflow-x-auto flex flex-nowrap gap-2 ${isAdmin ? "" : "hide-scrollbar"}`}>
-          <Link
-            key={firstVertical.id}
-            href={firstVertical.href_destino ?? "/"}
-            className="flex-shrink-0 basis-1/3 aspect-[1/2] rounded-lg overflow-hidden shadow-md relative"
-          >
-            <Image
-              src={firstVertical.imagem}
-              alt={firstVertical.nome}
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="33vw"
-              priority
-            />
-          </Link>
-        </div>
-      )}
+      {firstVertical && (() => {
+        const getHref = () => {
+          const baseHref = firstVertical.href_destino ?? "/";
+          if (firstVertical.redireciona_categoria) {
+            const url = new URL(baseHref, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+            url.searchParams.set('redireciona_categoria', 'true');
+            if (!baseHref.startsWith('http://') && !baseHref.startsWith('https://')) {
+              return url.pathname + (url.search ? url.search : '');
+            }
+            return url.toString();
+          }
+          return baseHref;
+        };
 
-      {/* ▶ Grupos de 3 Banners Horizontais */}
-      {horizontalGroups.map((group, index) => (
-        <div key={index} className="flex flex-col gap-4">
-          {group.map((banner) => (
+        return (
+          <div className={`overflow-x-auto flex flex-nowrap gap-2 ${isAdmin ? "" : "hide-scrollbar"}`}>
             <Link
-              key={banner.id}
-              href={banner.href_destino ?? "/"}
-              className="w-full aspect-[16/5] rounded-xl overflow-hidden shadow-lg relative"
+              key={firstVertical.id}
+              href={getHref()}
+              className="flex-shrink-0 basis-1/3 aspect-[1/2] rounded-lg overflow-hidden shadow-md relative"
             >
               <Image
-                src={banner.imagem}
-                alt={banner.nome}
+                src={firstVertical.imagem}
+                alt={firstVertical.nome}
                 fill
                 style={{ objectFit: "cover" }}
-                sizes="100vw"
+                sizes="33vw"
+                priority
               />
             </Link>
-          ))}
-        </div>
-      ))}
+          </div>
+        );
+      })()}
+
+      {/* ▶ Grupos de 3 Banners Horizontais */}
+      {horizontalGroups.map((group, index) => {
+        const getHref = (banner: Banner) => {
+          const baseHref = banner.href_destino ?? "/";
+          if (banner.redireciona_categoria) {
+            const url = new URL(baseHref, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+            url.searchParams.set('redireciona_categoria', 'true');
+            if (!baseHref.startsWith('http://') && !baseHref.startsWith('https://')) {
+              return url.pathname + (url.search ? url.search : '');
+            }
+            return url.toString();
+          }
+          return baseHref;
+        };
+
+        return (
+          <div key={index} className="flex flex-col gap-4">
+            {group.map((banner) => (
+              <Link
+                key={banner.id}
+                href={getHref(banner)}
+                className="w-full aspect-[16/5] rounded-xl overflow-hidden shadow-lg relative"
+              >
+                <Image
+                  src={banner.imagem}
+                  alt={banner.nome}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="100vw"
+                />
+              </Link>
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
