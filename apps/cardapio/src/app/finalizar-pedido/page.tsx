@@ -972,7 +972,6 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                           // Limpar seleção única quando usar múltiplos
                           if (meios.length > 0) {
                             setPagamentoId(null);
-                            setMeioPagamentoId(null);
                             // Atualizar troco para o valor retornado do modal
                             setTrocoPara(trocoParaMultiplo ?? null);
                           } else {
