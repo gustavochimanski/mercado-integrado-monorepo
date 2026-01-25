@@ -13,17 +13,26 @@ import { usePathname, useSearchParams } from "next/navigation";
  * Exibe na home (/) e em páginas de categoria quando redireciona_categoria = true.
  */
 export function LojaStatusHeaderGlobal() {
-  const empresaId = getEmpresaId();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const redirecionaCategoria = searchParams.get("redireciona_categoria") === "true";
+
+  // ✅ Logo reage à troca de ?empresa=: usar URL como fonte de verdade (igual à Home)
+  const empresaParam = searchParams.get("empresa");
+  const empresaIdFromUrl = useMemo(() => {
+    const raw = (empresaParam ?? "").trim();
+    if (!raw || !/^\d+$/.test(raw)) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }, [empresaParam]);
+  const empresaId = empresaIdFromUrl ?? getEmpresaId();
   
   // Verificar se deve exibir o cabeçalho
   const deveExibir = pathname === "/" || (pathname.startsWith("/categoria") && redirecionaCategoria);
   
   // Buscar dados da empresa
   const { data: empresaData } = useBuscarEmpresa({
-    empresaId: empresaId ?? undefined,
+    empresaId: empresaId ? Number(empresaId) : undefined,
     enabled: !!empresaId && deveExibir,
   });
 

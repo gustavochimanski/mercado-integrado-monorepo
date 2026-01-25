@@ -1,15 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@cardapio/components/Shared/ui/card";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { UserPlus, LogIn } from "lucide-react";
 import ClienteIdentificacaoModal from "@cardapio/components/Shared/finalizar-pedido/ClienteIdentificacaoModal";
+import { useBuscarEmpresa } from "@cardapio/services/empresa";
+import { getEmpresaId, getEmpresaData } from "@cardapio/stores/empresa/empresaStore";
 
 export default function MenuNaoLogado() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(false); // true = login, false = cadastro
+  const empresaId = getEmpresaId();
+
+  // Buscar dados da empresa
+  const { data: empresaData } = useBuscarEmpresa({
+    empresaId: empresaId ?? undefined,
+    enabled: !!empresaId,
+  });
+
+  // Fallback para dados do localStorage
+  const empresaDataLocal = useMemo(() => {
+    if (empresaData) return empresaData;
+    return getEmpresaData();
+  }, [empresaData]);
+
+  // Normalizar URL do logo
+  const logoUrl = useMemo(() => {
+    if (empresaDataLocal?.logo) {
+      const logo = empresaDataLocal.logo;
+      return logo.startsWith('http://') || logo.startsWith('https://') 
+        ? logo 
+        : `https://${logo}`;
+    }
+    return "/logo.png"; // Fallback para logo padrão
+  }, [empresaDataLocal?.logo]);
 
   const handleLoginSuccess = () => {
     window.location.reload();
@@ -31,14 +57,24 @@ export default function MenuNaoLogado() {
       <Card className="mx-auto w-full max-w-md">
         <CardContent className="p-8 text-center">
           <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
-            <Image
-              src="/logo.png"
-              alt="Logo da empresa"
-              width={70}
-              height={70}
-              className="object-contain rounded-lg"
-              priority
-            />
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-white dark:bg-primary/10 border-2 border-primary/20 shadow-sm relative">
+              <Image
+                src={logoUrl}
+                alt={empresaDataLocal?.nome || "Logo da empresa"}
+                fill
+                sizes="96px"
+                className="object-cover"
+                priority
+                unoptimized={logoUrl.includes('mensuraapi.com.br')}
+                onError={(e) => {
+                  // Se a imagem falhar, usar logo padrão
+                  const target = e.target as HTMLImageElement;
+                  if (target.src !== window.location.origin + "/logo.png") {
+                    target.src = "/logo.png";
+                  }
+                }}
+              />
+            </div>
           </div>
           <h2 className="text-xl font-semibold mb-3">Olá! Bem-vindo</h2>
           <p className="text-muted-foreground mb-8">

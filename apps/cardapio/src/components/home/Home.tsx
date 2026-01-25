@@ -50,8 +50,19 @@ export default function HomePage() {
   const queryClient = useQueryClient();
 
   // empresa_id precisa ser reativo
-  const [empresa_id, setEmpresaIdState] = useState<number | null>(() => getEmpresaId());
-  
+  const [empresa_id_state, setEmpresaIdState] = useState<number | null>(() => getEmpresaId());
+
+  // ✅ Fonte de verdade: URL tem prioridade. Ao mudar ?empresa=1 → ?empresa=2, o id já reflete sem esperar state.
+  const empresaParam = searchParams.get("empresa");
+  const empresaIdFromUrl = useMemo(() => {
+    const raw = (empresaParam ?? "").trim();
+    if (!raw || !/^\d+$/.test(raw)) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }, [empresaParam]);
+
+  const empresa_id = empresaIdFromUrl ?? empresa_id_state;
+
   // Só fazer requisições se não estiver redirecionando
   const { data: empresasDisponiveis = [] } = useQueryEmpresasDisponiveis({
     enabled: podeFazerRequisicoes
@@ -79,14 +90,14 @@ export default function HomePage() {
   // ✅ CORREÇÃO: Garantir que ready seja setado quando empresa_id já existe na inicialização
   useEffect(() => {
     const currentId = getEmpresaId();
-    if (currentId && currentId !== empresa_id) {
+    if (currentId && currentId !== empresa_id_state) {
       setEmpresaIdState(currentId);
       setReady(true);
     } else if (currentId && currentId > 0) {
       // Se já temos uma empresa válida, setar ready imediatamente
       setReady(true);
     }
-  }, [empresa_id]);
+  }, [empresa_id_state]);
 
   // ✅ NOVO: Verificar na montagem inicial se já temos empresa do localStorage
   useEffect(() => {
@@ -176,7 +187,10 @@ export default function HomePage() {
   // Esta é a PRIMEIRA coisa que acontece - verifica redirecionamento antes de fazer outras requisições
   useEffect(() => {
     if (redirecionadoRef.current) return;
-    
+
+    // ✅ Ao mudar ?empresa= (ex.: 1→2), forçar re-verificação e loading até concluir
+    setVerificandoRedirect(true);
+
     const verificarRedirecionamento = async () => {
       try {
         // Primeiro, verificar parâmetro da URL diretamente (para primeira visita)
@@ -195,7 +209,7 @@ export default function HomePage() {
         
         // Se não tem na URL, verificar do estado ou localStorage
         if (!empresaIdParaVerificar) {
-          empresaIdParaVerificar = empresa_id || getEmpresaId();
+          empresaIdParaVerificar = empresa_id_state || getEmpresaId();
         }
         
         // ✅ CORREÇÃO: Se já temos empresa válida no localStorage e não há parâmetro na URL,
@@ -314,7 +328,7 @@ export default function HomePage() {
     };
     
     verificarRedirecionamento();
-  }, [empresa_id, searchParams, fazerRedirecionamento]);
+  }, [empresa_id_state, searchParams, fazerRedirecionamento]);
 
   useEffect(() => {
     if (!mesaIdParam) return;
@@ -468,7 +482,11 @@ export default function HomePage() {
                 produtos={v.produtos}
                 combos={v.combos}
                 receitas={v.receitas}
-                verMaisHref={v.href_categoria}
+                verMaisHref={
+                  typeof v.href_categoria === "string" && v.href_categoria.startsWith("/cardapio/categoria/")
+                    ? v.href_categoria.replace(/^\/cardapio/, "")
+                    : v.href_categoria
+                }
                 empresaId={empresa_id}
                 codCategoria={v.cod_categoria}
                 vitrineId={v.id}
