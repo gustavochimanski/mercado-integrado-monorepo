@@ -5,7 +5,7 @@ import type { HomeResponse } from "./types";
 
 /**
  * Hook para buscar dados da home
- * Endpoint: GET /api/cardapio/public/home/home
+ * Endpoint: GET /api/cardapio/public/home
  * 
  * @param empresa_id - ID da empresa
  * @param isHome - Se deve buscar apenas vitrines marcadas como home
@@ -22,7 +22,7 @@ export function useBuscarHome(empresa_id: number | null, isHome: boolean) {
     queryFn: async () => {
       const params: Record<string, any> = { empresa_id };
       if (typeof isHome === "boolean") params.is_home = isHome;
-      const { data } = await api.get<HomeResponse>("/api/cardapio/public/home/home", { params });
+      const { data } = await api.get<HomeResponse>("/api/cardapio/public/home", { params });
       return data;
     },
     staleTime: 5 * 60 * 1000,

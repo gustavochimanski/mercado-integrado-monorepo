@@ -93,7 +93,7 @@ export class PublicRotasPBlicasService {
     ): CancelablePromise<HomeResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cardapio/public/home/home',
+            url: '/api/cardapio/public/home',
             query: {
                 'empresa_id': empresaId,
                 'is_home': isHome,
@@ -118,7 +118,7 @@ export class PublicRotasPBlicasService {
     ): CancelablePromise<Array<VitrineComProdutosResponse>> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cardapio/public/home/home/vitrine-por-categoria',
+            url: '/api/cardapio/public/home/vitrine-por-categoria',
             query: {
                 'empresa_id': empresaId,
                 'cod_categoria': codCategoria,
@@ -142,7 +142,7 @@ export class PublicRotasPBlicasService {
     ): CancelablePromise<CategoryPageResponse> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/cardapio/public/home/home/categoria',
+            url: '/api/cardapio/public/home/categoria',
             query: {
                 'empresa_id': empresaId,
                 'slug': slug,

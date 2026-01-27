@@ -5,7 +5,7 @@ import type { CategoriaPorSlugResponse } from "./types";
 
 /**
  * Hook para buscar categoria por slug
- * Endpoint: GET /api/cardapio/public/home/home/categoria
+ * Endpoint: GET /api/cardapio/public/home/categoria
  * 
  * @param empresaId - ID da empresa
  * @param slug - Slug da categoria
@@ -19,7 +19,7 @@ export function useBuscarCategoriaPorSlug(empresaId?: number | null, slug?: stri
   return useQuery<CategoriaPorSlugResponse>({
     queryKey: ["categoria-por-slug", empresaId, slug],
     queryFn: async () => {
-      const { data } = await api.get<CategoriaPorSlugResponse>("/api/cardapio/public/home/home/categoria", {
+      const { data } = await api.get<CategoriaPorSlugResponse>("/api/cardapio/public/home/categoria", {
         params: { empresa_id: empresaId, slug },
       });
       return data;
