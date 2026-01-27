@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken } from "@cardapio/stores/token/tokenStore";
+import { clearToken, getToken } from "@cardapio/stores/token/tokenStore";
 import axios from "axios";
 
 // ✅ Use variável de ambiente
@@ -26,5 +26,21 @@ apiAdmin.interceptors.request.use((config) => {
   }
   return config;
 });
+
+apiAdmin.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    // Se token expirar/for inválido, derruba token local e deixa o app exibir login de novo
+    const status = error?.response?.status;
+    if (status === 401) {
+      try {
+        clearToken();
+      } catch {
+        // ignore
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default apiAdmin;

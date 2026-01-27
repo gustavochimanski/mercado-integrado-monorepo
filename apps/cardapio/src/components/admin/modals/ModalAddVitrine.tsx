@@ -16,7 +16,7 @@ import { useMutateVitrine } from "@cardapio/services/vitrine";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  codCategoria: number; // agora obrigatório
+  codCategoria?: number | null;
 }
 
 export function ModalVitrineCreateSimple({
@@ -34,7 +34,7 @@ export function ModalVitrineCreateSimple({
 
     create.mutate(
       {
-        cod_categoria: codCategoria,
+        ...(typeof codCategoria === "number" ? { cod_categoria: codCategoria } : {}),
         titulo: titulo.trim(),
       },
       {

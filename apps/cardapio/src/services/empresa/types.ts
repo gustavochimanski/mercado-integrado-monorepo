@@ -23,6 +23,7 @@ export interface EmpresaDisponivel {
   estado: string | null;
   distancia_km: number | null;
   tema: string | null;
+  landingpage_store?: boolean;
   redireciona_home: boolean;
   redireciona_home_para: string | null;
   /** Na lista sempre null; use empresa_id para obter horários. */
@@ -44,6 +45,7 @@ export interface EmpresaPublic {
   estado: string | null;
   distancia_km: number | null;
   tema: string | null;
+  landingpage_store?: boolean;
   redireciona_home: boolean;
   redireciona_home_para: string | null;
   horarios_funcionamento: HorarioDia[] | null;

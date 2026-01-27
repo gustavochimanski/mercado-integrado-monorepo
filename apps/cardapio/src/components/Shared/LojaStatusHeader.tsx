@@ -17,10 +17,9 @@ interface LojaStatusHeaderProps {
 
 /**
  * Cabeçalho que exibe o status da loja (aberta/fechada).
- * Aparece na home e em páginas de categoria quando redireciona_categoria = true.
+ * Aparece na home e na landing page da store (/landingpage-store).
  * 
- * NOTA: Quando redireciona_categoria = true, a página de categoria vira uma landing page
- * e funciona como a nova "home" do site. Por isso este cabeçalho também aparece lá.
+ * NOTA: A rota /landingpage-store funciona como uma landing page (tipo "home") para a store.
  */
 export function LojaStatusHeader({ horarios, nomeLoja, logo }: LojaStatusHeaderProps) {
   const { estaAberta, isLoading, horarios: horariosFromHook } = useLojaAberta();

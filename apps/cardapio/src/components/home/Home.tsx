@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 import { useHome } from "@cardapio/services/home";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { CartFab } from "@cardapio/components/Shared/cart/CartSuspense";
@@ -132,12 +131,6 @@ export default function HomePage() {
       ? new URL(url)
       : new URL(url, window.location.origin);
     
-    // ✅ Verificar se é redirecionamento para categoria e adicionar parâmetro
-    const isCategoriaRoute = urlObj.pathname.startsWith('/categoria');
-    if (isCategoriaRoute) {
-      urlObj.searchParams.set('redireciona_categoria', 'true');
-    }
-    
     // Se já tiver via na URL de redirecionamento, não sobrescrever
     if (viaSupervisor === "supervisor" && !urlObj.searchParams.has("via")) {
       urlObj.searchParams.set("via", "supervisor");
@@ -153,7 +146,7 @@ export default function HomePage() {
     }
     
     // ✅ Log sempre (mesmo em produção) para debug
-    console.log('🔄 Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '', isCategoriaRoute ? '(redirecionamento de categoria)' : '');
+    console.log('🔄 Redirecionando para:', urlFinal, 'com empresa:', idParaSalvar, viaSupervisor === "supervisor" ? '(preservando via=supervisor)' : '');
     
     // Usar window.location.replace para redirecionamento imediato sem adicionar ao histórico
     if (urlFinal.startsWith('http://') || urlFinal.startsWith('https://')) {
@@ -169,14 +162,26 @@ export default function HomePage() {
   useLayoutEffect(() => {
     if (redirecionadoRef.current || !podeFazerRequisicoes) return;
     
-    // Se empresaData carregou e tem redirecionamento, redirecionar (fallback)
-    if (empresaData?.redireciona_home && empresaData?.redireciona_home_para) {
+    if (!empresaData) return;
+
+    // Prioridade 1: landingpage_store → /landingpage-store
+    if (empresaData.landingpage_store) {
+      const url = `/landingpage-store?empresa=${empresaData.id}`;
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Redirecionamento landingpage_store (fallback):', url);
+      }
+      setEmpresaData(empresaData);
+      fazerRedirecionamento(url, empresaData, empresaData.id);
+      return;
+    }
+
+    // Prioridade 2: redireciona_home + redireciona_home_para
+    if (empresaData.redireciona_home && empresaData.redireciona_home_para) {
       const url = empresaData.redireciona_home_para.trim();
       if (url) {
         if (process.env.NODE_ENV !== 'production') {
           console.log('Redirecionamento encontrado em empresaData (fallback):', url);
         }
-        // Garantir que empresa está salva antes de redirecionar
         setEmpresaData(empresaData);
         fazerRedirecionamento(url, empresaData, empresaData.id);
       }
@@ -218,25 +223,29 @@ export default function HomePage() {
           const empresaSalva = getEmpresaData();
           // Se temos empresa salva e ela não redireciona, podemos habilitar requisições imediatamente
           if (empresaSalva && empresaSalva.id === empresaIdParaVerificar) {
-            console.log('🔍 Verificando redirecionamento - empresaSalva.redireciona_home:', empresaSalva.redireciona_home, 'url:', empresaSalva.redireciona_home_para);
-            if (!empresaSalva.redireciona_home || !empresaSalva.redireciona_home_para) {
-              // Não precisa redirecionar - habilitar requisições imediatamente
-              console.log('✅ Empresa encontrada no localStorage sem redirecionamento - habilitando requisições');
-              setPodeFazerRequisicoes(true);
-              setVerificandoRedirect(false);
+            console.log('🔍 Verificando redirecionamento - empresaSalva.landingpage_store:', empresaSalva.landingpage_store, 'redireciona_home:', empresaSalva.redireciona_home, 'url:', empresaSalva.redireciona_home_para);
+            if (empresaSalva.landingpage_store) {
+              const url = `/landingpage-store?empresa=${empresaIdParaVerificar}`;
+              console.log('🔄 Redirecionamento landingpage_store encontrado no localStorage:', url);
+              setEmpresaId(empresaIdParaVerificar);
+              fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
               return;
-            } else {
-              // Tem redirecionamento - executar
+            }
+            if (empresaSalva.redireciona_home && empresaSalva.redireciona_home_para) {
               const url = empresaSalva.redireciona_home_para?.trim();
               if (url) {
                 console.log('🔄 Redirecionamento encontrado no localStorage:', url);
                 setEmpresaId(empresaIdParaVerificar);
                 fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
                 return;
-              } else {
-                console.warn('⚠️ URL de redirecionamento vazia ou inválida');
               }
+              console.warn('⚠️ URL de redirecionamento vazia ou inválida');
             }
+            // Não precisa redirecionar - habilitar requisições imediatamente
+            console.log('✅ Empresa encontrada no localStorage sem redirecionamento - habilitando requisições');
+            setPodeFazerRequisicoes(true);
+            setVerificandoRedirect(false);
+            return;
           } else {
             console.log('⚠️ Empresa salva não encontrada ou ID não confere');
           }
@@ -246,16 +255,23 @@ export default function HomePage() {
           // Primeiro, verificar localStorage (mais rápido)
           // IMPORTANTE: Verificar se os dados do localStorage são da empresa correta
           const empresaSalva = getEmpresaData();
-          console.log('🔍 Verificando localStorage - empresaSalva:', empresaSalva ? `ID ${empresaSalva.id}, redireciona: ${empresaSalva.redireciona_home}, url: ${empresaSalva.redireciona_home_para}` : 'não encontrada');
-          // Só usar dados do localStorage se forem da empresa correta
-          if (empresaSalva?.id === empresaIdParaVerificar && empresaSalva?.redireciona_home && empresaSalva?.redireciona_home_para) {
-            const url = empresaSalva.redireciona_home_para.trim();
-            if (url) {
-              console.log('🔄 Redirecionamento encontrado no localStorage:', url);
-              // Garantir que empresaId está salvo antes de redirecionar
+          console.log('🔍 Verificando localStorage - empresaSalva:', empresaSalva ? `ID ${empresaSalva.id}, landingpage_store: ${empresaSalva.landingpage_store}, redireciona: ${empresaSalva.redireciona_home}, url: ${empresaSalva.redireciona_home_para}` : 'não encontrada');
+          if (empresaSalva?.id === empresaIdParaVerificar) {
+            if (empresaSalva.landingpage_store) {
+              const url = `/landingpage-store?empresa=${empresaIdParaVerificar}`;
+              console.log('🔄 Redirecionamento landingpage_store encontrado no localStorage:', url);
               setEmpresaId(empresaIdParaVerificar);
               fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
               return;
+            }
+            if (empresaSalva.redireciona_home && empresaSalva.redireciona_home_para) {
+              const url = empresaSalva.redireciona_home_para.trim();
+              if (url) {
+                console.log('🔄 Redirecionamento encontrado no localStorage:', url);
+                setEmpresaId(empresaIdParaVerificar);
+                fazerRedirecionamento(url, empresaSalva, empresaIdParaVerificar);
+                return;
+              }
             }
           }
           
@@ -270,19 +286,24 @@ export default function HomePage() {
           const empresa = Array.isArray(data) ? data[0] : data;
           
           if (empresa) {
-            console.log('🔍 Empresa encontrada na API - redireciona:', empresa.redireciona_home, 'url:', empresa.redireciona_home_para);
+            console.log('🔍 Empresa encontrada na API - landingpage_store:', empresa.landingpage_store, 'redireciona:', empresa.redireciona_home, 'url:', empresa.redireciona_home_para);
+            if (empresa.landingpage_store) {
+              const url = `/landingpage-store?empresa=${empresaIdParaVerificar}`;
+              console.log('🔄 Redirecionamento landingpage_store encontrado na API:', url);
+              setEmpresaData(empresa);
+              fazerRedirecionamento(url, empresa, empresaIdParaVerificar);
+              return;
+            }
             if (empresa.redireciona_home && empresa.redireciona_home_para) {
               const url = empresa.redireciona_home_para.trim();
               if (url) {
                 console.log('🔄 Redirecionamento encontrado na API:', url);
-                // Salvar empresa completa antes de redirecionar
                 setEmpresaData(empresa);
                 fazerRedirecionamento(url, empresa, empresaIdParaVerificar);
                 return;
               }
-            } else {
-              console.log('ℹ️ Empresa não tem redirecionamento ativado');
             }
+            console.log('ℹ️ Empresa não tem redirecionamento ativado');
           }
         } else {
           // Se não tem empresa_id, buscar lista e verificar primeira empresa
@@ -295,13 +316,21 @@ export default function HomePage() {
           if (Array.isArray(data) && data.length > 0) {
             // Verificar todas as empresas da lista
             for (const emp of data) {
+              if (emp.landingpage_store) {
+                const url = `/landingpage-store?empresa=${emp.id}`;
+                if (process.env.NODE_ENV !== 'production') {
+                  console.log('Redirecionamento landingpage_store encontrado na lista:', url);
+                }
+                setEmpresaData(emp);
+                fazerRedirecionamento(url, emp, emp.id);
+                return;
+              }
               if (emp.redireciona_home && emp.redireciona_home_para) {
                 const url = emp.redireciona_home_para.trim();
                 if (url) {
                   if (process.env.NODE_ENV !== 'production') {
                     console.log('Redirecionamento encontrado na lista:', url);
                   }
-                  // Salvar empresa completa antes de redirecionar
                   setEmpresaData(emp);
                   fazerRedirecionamento(url, emp, emp.id);
                   return;
@@ -444,7 +473,6 @@ export default function HomePage() {
   if (!ready)
     return (
       <>
-        <LoginWrapper />
         <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
           Carregando empresa...
         </div>
@@ -454,7 +482,6 @@ export default function HomePage() {
   if (!empresa_id)
     return (
       <>
-        <LoginWrapper />
         <div className="min-h-screen flex items-center justify-center text-center p-4">
           <p className="text-muted-foreground text-sm">
             Nenhuma empresa selecionada. Verifique a URL ou volte para o início.
@@ -468,8 +495,6 @@ export default function HomePage() {
   // ✅ Fluxo normal da home
   return (
     <div className="flex flex-col">
-      <LoginWrapper />
-
       <main className="flex-1 pt-4 pb-20">
         <CategoryScrollSection categorias={categorias} empresaId={empresa_id} />
         <BannerVertical banner={bannerVerticalPrincipal} isAdmin={isAdmin} />

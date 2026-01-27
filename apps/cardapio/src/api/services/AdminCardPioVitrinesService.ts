@@ -13,6 +13,7 @@ export class AdminCardPioVitrinesService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Search Vitrines
+     * @param empresaId
      * @param q Busca por título/slug
      * @param codCategoria Filtra por categoria vinculada
      * @param isHome Filtra por destaque da home
@@ -22,6 +23,7 @@ export class AdminCardPioVitrinesService {
      * @throws ApiError
      */
     public searchVitrinesApiCardapioAdminVitrinesSearchGet(
+        empresaId: number,
         q?: (string | null),
         codCategoria?: (number | null),
         isHome?: (boolean | null),
@@ -32,6 +34,7 @@ export class AdminCardPioVitrinesService {
             method: 'GET',
             url: '/api/cardapio/admin/vitrines/search',
             query: {
+                'empresa_id': empresaId,
                 'q': q,
                 'cod_categoria': codCategoria,
                 'is_home': isHome,
@@ -46,12 +49,14 @@ export class AdminCardPioVitrinesService {
     /**
      * Toggle Home Vitrine
      * @param vitrineId ID da vitrine
+     * @param empresaId
      * @param requestBody
      * @returns VitrineOut Successful Response
      * @throws ApiError
      */
     public toggleHomeVitrineApiCardapioAdminVitrinesVitrineIdHomePatch(
         vitrineId: number,
+        empresaId: number,
         requestBody: ToggleHomeRequest,
     ): CancelablePromise<VitrineOut> {
         return this.httpRequest.request({
@@ -59,6 +64,9 @@ export class AdminCardPioVitrinesService {
             url: '/api/cardapio/admin/vitrines/{vitrine_id}/home',
             path: {
                 'vitrine_id': vitrineId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -89,12 +97,14 @@ export class AdminCardPioVitrinesService {
     /**
      * Atualizar Vitrine
      * @param vitrineId ID da vitrine
+     * @param empresaId
      * @param requestBody
      * @returns VitrineOut Successful Response
      * @throws ApiError
      */
     public atualizarVitrineApiCardapioAdminVitrinesVitrineIdPut(
         vitrineId: number,
+        empresaId: number,
         requestBody: AtualizarVitrineRequest,
     ): CancelablePromise<VitrineOut> {
         return this.httpRequest.request({
@@ -102,6 +112,9 @@ export class AdminCardPioVitrinesService {
             url: '/api/cardapio/admin/vitrines/{vitrine_id}',
             path: {
                 'vitrine_id': vitrineId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -113,17 +126,22 @@ export class AdminCardPioVitrinesService {
     /**
      * Deletar Vitrine
      * @param vitrineId ID da vitrine
+     * @param empresaId
      * @returns void
      * @throws ApiError
      */
     public deletarVitrineApiCardapioAdminVitrinesVitrineIdDelete(
         vitrineId: number,
+        empresaId: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
             url: '/api/cardapio/admin/vitrines/{vitrine_id}',
             path: {
                 'vitrine_id': vitrineId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

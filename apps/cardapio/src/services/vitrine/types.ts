@@ -3,7 +3,7 @@
 // Tipos alinhados ao backend
 export type VitrineOut = {
   id: number;
-  cod_categoria: number; // se houver chance de null no back, mude para number | null
+  cod_categoria: number | null;
   titulo: string;
   slug: string;
   ordem: number;
@@ -11,13 +11,14 @@ export type VitrineOut = {
 };
 
 export type CreateVitrinePayload = {
-  cod_categoria: number;
+  empresa_id: number;
+  cod_categoria?: number | null;
   titulo: string;
   ordem?: number;
   is_home?: boolean;
 };
 
-export type CreateVitrineDTO = CreateVitrinePayload & { empresa_id?: number };
+export type CreateVitrineDTO = Omit<CreateVitrinePayload, "empresa_id"> & { empresa_id?: number };
 
 export type VitrineSearchItem = {
   id: number;

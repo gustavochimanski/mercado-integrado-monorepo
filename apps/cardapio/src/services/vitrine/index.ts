@@ -7,6 +7,7 @@ import { useDesvincularProduto } from "./desvincular-produto";
 import { useVincularCombo } from "./vincular-combo";
 import { useDesvincularCombo } from "./desvincular-combo";
 import { useMarcarHome } from "./marcar-home";
+import { useReordenarVitrines } from "./reordenar-vitrines";
 
 export * from "./types";
 export * from "./buscar-vitrines";
@@ -18,6 +19,7 @@ export * from "./desvincular-produto";
 export * from "./vincular-combo";
 export * from "./desvincular-combo";
 export * from "./marcar-home";
+export * from "./reordenar-vitrines";
 
 // Alias para manter compatibilidade
 export { useBuscarVitrines as useVitrinesSearch } from "./buscar-vitrines";
@@ -32,6 +34,7 @@ export function useMutateVitrine() {
   const vincularCombo = useVincularCombo();
   const desvincularCombo = useDesvincularCombo();
   const markHome = useMarcarHome();
+  const reordenar = useReordenarVitrines();
 
   return {
     create: criar,
@@ -42,6 +45,7 @@ export function useMutateVitrine() {
     vincularCombo: vincularCombo,
     desvincularCombo: desvincularCombo,
     markHome: markHome,
+    reorder: reordenar,
   };
 }
 

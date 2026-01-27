@@ -10,12 +10,11 @@ import { usePathname, useSearchParams } from "next/navigation";
  * Componente wrapper que exibe o cabeçalho de status da loja globalmente.
  * Aparece acima do campo de pesquisa (Header).
  * 
- * Exibe na home (/) e em páginas de categoria quando redireciona_categoria = true.
+ * Exibe na home (/) e na landing page da store (/landingpage-store).
  */
 export function LojaStatusHeaderGlobal() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const redirecionaCategoria = searchParams.get("redireciona_categoria") === "true";
 
   // ✅ Logo reage à troca de ?empresa=: usar URL como fonte de verdade (igual à Home)
   const empresaParam = searchParams.get("empresa");
@@ -28,7 +27,7 @@ export function LojaStatusHeaderGlobal() {
   const empresaId = empresaIdFromUrl ?? getEmpresaId();
   
   // Verificar se deve exibir o cabeçalho
-  const deveExibir = pathname === "/" || (pathname.startsWith("/categoria") && redirecionaCategoria);
+  const deveExibir = pathname === "/" || pathname.startsWith("/landingpage-store");
   
   // Buscar dados da empresa
   const { data: empresaData } = useBuscarEmpresa({

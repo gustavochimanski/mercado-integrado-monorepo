@@ -3,6 +3,7 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 /**
  * Hook para mover categoria para a esquerda
@@ -29,7 +30,12 @@ export function useMoverCategoriaEsquerda() {
   };
 
   return useMutation({
-    mutationFn: (id: number) => apiAdmin.post(`/api/cardapio/admin/categorias/${id}/move-left`),
+    mutationFn: (id: number) => {
+      const codEmpresa = getEmpresaId();
+      return apiAdmin.post(`/api/cardapio/admin/categorias/${id}/move-left`, undefined, {
+        params: { cod_empresa: codEmpresa },
+      });
+    },
     onSuccess: () => {
       toast.success("Categoria movida para a esquerda!");
       reloadPage();

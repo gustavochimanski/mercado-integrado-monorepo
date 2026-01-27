@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import type { CreateVitrineDTO, CreateVitrinePayload, VitrineOut } from "./types";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { useLandingpageTrue } from "./utils";
 
 /**
  * Hook para criar uma nova vitrine
@@ -17,6 +19,7 @@ import type { CreateVitrineDTO, CreateVitrinePayload, VitrineOut } from "./types
  */
 export function useCriarVitrine() {
   const qc = useQueryClient();
+  const landingpageTrue = useLandingpageTrue();
   
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
@@ -31,11 +34,14 @@ export function useCriarVitrine() {
   return useMutation({
     mutationFn: async (body: CreateVitrineDTO) => {
       const payload: CreateVitrinePayload = {
-        cod_categoria: body.cod_categoria,
+        empresa_id: body.empresa_id ?? getEmpresaId(),
+        ...(typeof body.cod_categoria === "number" ? { cod_categoria: body.cod_categoria } : {}),
         titulo: body.titulo,
         ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
       };
-      const { data } = await apiAdmin.post("/api/cardapio/admin/vitrines/", payload);
+      const { data } = await apiAdmin.post("/api/cardapio/admin/vitrines/", payload, {
+        params: landingpageTrue ? { landingpage_true: true } : undefined,
+      });
       return data as VitrineOut;
     },
     onSuccess: () => {

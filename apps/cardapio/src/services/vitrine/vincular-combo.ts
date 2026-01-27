@@ -3,6 +3,8 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { useLandingpageTrue } from "./utils";
 
 interface VincularComboParams {
   vitrineId: number;
@@ -21,6 +23,7 @@ interface VincularComboParams {
  */
 export function useVincularCombo() {
   const qc = useQueryClient();
+  const landingpageTrue = useLandingpageTrue();
   
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
@@ -34,9 +37,12 @@ export function useVincularCombo() {
 
   return useMutation({
     mutationFn: async (p: VincularComboParams) => {
-      await apiAdmin.post(`/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-combo`, {
-        combo_id: p.combo_id,
-      });
+      const empresaId = getEmpresaId();
+      await apiAdmin.post(
+        `/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-combo`,
+        { combo_id: p.combo_id },
+        { params: { empresa_id: empresaId, ...(landingpageTrue ? { landingpage_true: true } : {}) } }
+      );
     },
     onSuccess: () => {
       toast.success("Combo vinculado!");

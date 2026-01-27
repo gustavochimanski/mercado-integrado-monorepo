@@ -7,7 +7,7 @@ export type BannerParceiroIn = {
     parceiro_id: number;
     categoria_id?: (number | null);
     link_redirecionamento?: (string | null);
-    redireciona_categoria: boolean;
+    landingpage_store: boolean;
     ativo: boolean;
     tipo_banner: string;
     imagem?: (string | null);

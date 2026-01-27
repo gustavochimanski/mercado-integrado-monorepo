@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import type { VitrineOut } from "./types";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { useLandingpageTrue } from "./utils";
 
 interface MarcarHomeParams {
   id: number;
@@ -22,6 +24,7 @@ interface MarcarHomeParams {
  */
 export function useMarcarHome() {
   const qc = useQueryClient();
+  const landingpageTrue = useLandingpageTrue();
   
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
@@ -35,7 +38,12 @@ export function useMarcarHome() {
 
   return useMutation({
     mutationFn: async ({ id, is_home }: MarcarHomeParams) => {
-      const { data } = await apiAdmin.patch(`/api/cardapio/admin/vitrines/${id}/home`, { is_home });
+      const empresaId = getEmpresaId();
+      const { data } = await apiAdmin.patch(
+        `/api/cardapio/admin/vitrines/${id}/home`,
+        { is_home },
+        { params: { empresa_id: empresaId, ...(landingpageTrue ? { landingpage_true: true } : {}) } }
+      );
       return data as VitrineOut;
     },
     onSuccess: (v) => {

@@ -5,7 +5,7 @@ import { verificarLojaAberta } from "@cardapio/lib/empresa/verificarLojaAberta";
 import { obterProximoHorario, formatarProximoHorario } from "@cardapio/lib/empresa/obterProximoHorario";
 import { formatarHorarios } from "@cardapio/lib/empresa/formatarHorarios";
 import type { HorarioDia } from "@cardapio/services/empresa/types";
-import { Clock, AlertCircle, Calendar, Lock, Loader2 } from "lucide-react";
+import { Clock, AlertCircle, Calendar, Lock } from "lucide-react";
 import Image from "next/image";
 
 interface LojaFechadaBannerProps {
@@ -54,20 +54,10 @@ export function LojaFechadaBanner({ horarios, timezone, nomeLoja, logo }: LojaFe
     return null;
   }
 
-  // Mostrar suspense enquanto verifica
+  // Durante SSR ou antes da montagem, não renderizar nada para evitar hydration mismatch
+  // O componente só será renderizado após a montagem no cliente
   if (!isMounted || !agora) {
-    return (
-      <div className="mx-4 mb-6 rounded-lg border-2 border-amber-500/50 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 shadow-lg overflow-hidden">
-        <div className="p-5">
-          <div className="flex items-center gap-3">
-            <Loader2 className="h-5 w-5 text-amber-600 dark:text-amber-400 animate-spin" />
-            <p className="text-sm text-amber-700 dark:text-amber-300">
-              Verificando status da loja...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // Se está aberta, não exibir

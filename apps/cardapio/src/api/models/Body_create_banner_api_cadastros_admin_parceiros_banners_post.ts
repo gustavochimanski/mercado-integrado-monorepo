@@ -9,7 +9,7 @@ export type Body_create_banner_api_cadastros_admin_parceiros_banners_post = {
     parceiro_id: number;
     categoria_id?: (number | null);
     link_redirecionamento?: (string | null);
-    redireciona_categoria: boolean;
+    landingpage_store: boolean;
     imagem?: (Blob | null);
 };
 

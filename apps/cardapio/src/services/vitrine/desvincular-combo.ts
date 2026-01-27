@@ -3,6 +3,8 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { useLandingpageTrue } from "./utils";
 
 interface DesvincularComboParams {
   vitrineId: number;
@@ -21,6 +23,7 @@ interface DesvincularComboParams {
  */
 export function useDesvincularCombo() {
   const qc = useQueryClient();
+  const landingpageTrue = useLandingpageTrue();
   
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
@@ -34,8 +37,10 @@ export function useDesvincularCombo() {
 
   return useMutation({
     mutationFn: async (p: DesvincularComboParams) => {
+      const empresaId = getEmpresaId();
       await apiAdmin.delete(
-        `/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-combo/${p.combo_id}`
+        `/api/cardapio/admin/vitrines/${p.vitrineId}/vincular-combo/${p.combo_id}`,
+        { params: { empresa_id: empresaId, ...(landingpageTrue ? { landingpage_true: true } : {}) } }
       );
     },
     onSuccess: () => {

@@ -1,42 +1,55 @@
 "use client";
+
 import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import type { ProdutoEmpMini } from "@cardapio/types/Produtos";
 import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
-import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
-import { useCategoriaPorSlug } from "@cardapio/services/home";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
-import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
+import { filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
 import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
 import { toast } from "sonner";
+import { useLandingpageStore } from "@cardapio/services/home";
+import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
+import { useBanners } from "@cardapio/services/banners";
+import { BannerVertical, BannersHorizontal } from "@cardapio/components/Shared/parceiros/Banners";
+import { useUserContext } from "@cardapio/hooks/auth/userContext";
+// Garantir que apiAdmin carregue na rota: ready_for_token (login admin iframe) quando via=supervisor
+import "@cardapio/app/api/apiAdmin";
 
-export default function RouteCategoryPage() {
+export default function LandingpageStorePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
+  const { isAdmin } = useUserContext();
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
+  const isHome = searchParams.get("is_home") === "true";
 
-  const empresa_id = getEmpresaId();
-  const params = useParams<{ slug?: string | string[] }>();
-  const slugAtual = useMemo(() => {
-    const raw = Array.isArray(params.slug) ? params.slug.at(-1) : params.slug;
-    return (raw ?? "").trim().toLowerCase();
-  }, [params.slug]);
+  useReceiveEmpresaFromQuery();
+  const empresaParam = searchParams.get("empresa");
+  const empresaIdFromUrl = useMemo(() => {
+    const raw = (empresaParam ?? "").trim();
+    if (!raw || !/^\d+$/.test(raw)) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }, [empresaParam]);
+  const empresa_id = empresaIdFromUrl ?? getEmpresaId();
 
-  // ⬇️ usa o endpoint novo
-  const { data, isLoading, isPending } = useCategoriaPorSlug(empresa_id, slugAtual);
-  const categoriaAtual = data?.categoria ?? null;
-  const subcategorias = data?.subcategorias ?? [];
+  const { data, isLoading, isPending } = useLandingpageStore(empresa_id, isHome);
+  const vitrinesRaw = data?.vitrines ?? [];
+
+  const { data: data_banners } = useBanners(!!empresa_id);
+  const bannersVerticais = (data_banners ?? []).filter((b) => b.tipo_banner === "V" && b.ativo);
+  const bannerVerticalPrincipal = bannersVerticais.length > 0 ? bannersVerticais[0] : null;
 
   // Verificar se está carregando de forma consistente entre servidor e cliente
-  const isDataLoading = isLoading || isPending || (!data && !!empresa_id && !!slugAtual);
+  const isDataLoading = isLoading || isPending || (!data && !!empresa_id);
 
   // ScrollSpy
   const { activeId, register } = useScrollSpy<number>();
@@ -72,38 +85,15 @@ export default function RouteCategoryPage() {
     };
   }, []);
 
-  const vitrinesRaw = data?.vitrines ?? [];
-  const vitrinesFilhoRaw = useMemo(
-    () =>
-      subcategorias && data?.vitrines_filho
-        ? data.vitrines_filho.filter(
-            (vit) => !new Set(vitrinesRaw.map((v) => v.id)).has(vit.id)
-          )
-        : [],
-    [subcategorias, data?.vitrines_filho, vitrinesRaw]
-  );
-
-  const vitrinesFiltradas = useMemo(
-    () => filterVitrinesBySearch(vitrinesRaw, q),
-    [vitrinesRaw, q]
-  );
-  const vitrinesFilhoFiltradas = useMemo(
-    () => filterVitrinesBySearch(vitrinesFilhoRaw, q),
-    [vitrinesFilhoRaw, q]
-  );
-
-  const subcategoriasFiltradas = useMemo(
-    () => filterCategoriasBySearch(subcategorias, q),
-    [subcategorias, q]
-  );
+  const vitrinesFiltradas = useMemo(() => filterVitrinesBySearch(vitrinesRaw, q), [vitrinesRaw, q]);
 
   const vitrinesMeta = useMemo(
     () =>
-      [...vitrinesFiltradas, ...vitrinesFilhoFiltradas].map((v) => ({
+      vitrinesFiltradas.map((v) => ({
         id: v.id,
         titulo: v.titulo,
       })),
-    [vitrinesFiltradas, vitrinesFilhoFiltradas]
+    [vitrinesFiltradas]
   );
 
   // Sheet
@@ -115,7 +105,12 @@ export default function RouteCategoryPage() {
   const add = useCart((s) => s.add);
   const { estaAberta } = useLojaAberta();
   const handleAdd = useCallback(
-    (produto: ProdutoEmpMini, quantity: number, observacao?: string, complementos?: import("@cardapio/stores/cart/useCart").CartItemComplemento[]) => {
+    (
+      produto: ProdutoEmpMini,
+      quantity: number,
+      observacao?: string,
+      complementos?: import("@cardapio/stores/cart/useCart").CartItemComplemento[]
+    ) => {
       // Bloquear adição se loja estiver fechada
       if (!estaAberta) {
         toast.error("A loja está fechada no momento. Não é possível adicionar itens ao carrinho.");
@@ -152,10 +147,20 @@ export default function RouteCategoryPage() {
     );
   }
 
-  if (!categoriaAtual) {
+  if (!data || vitrinesRaw.length === 0) {
     return (
-      <div className="p-6 w-full h-screen flex items-center justify-center text-center text-muted-foreground">
-        Categoria não encontrada
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 px-2 pb-2">
+          <BannerVertical banner={bannerVerticalPrincipal} isAdmin={isAdmin} />
+          <BannersHorizontal banners={data_banners ?? []} isAdmin={isAdmin} />
+
+          <div className="p-6 w-full flex items-center justify-center text-center text-muted-foreground">
+            Nenhuma vitrine encontrada
+          </div>
+
+          {/* Mesmo sem vitrines, o admin precisa conseguir criar a primeira */}
+          <CardAddVitrine cod_categoria={null} is_home={false} className="mt-2" />
+        </main>
       </div>
     );
   }
@@ -164,22 +169,11 @@ export default function RouteCategoryPage() {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 px-2 pb-2">
         {vitrinesMeta.length > 0 && (
-          <HorizontalSpy
-            key={`spy-${categoriaAtual.id}-${vitrinesMeta.length}`}
-            items={vitrinesMeta}
-            activeId={scrollingToId ?? activeId}
-            onClickItem={scrollToSection}
-          />
+          <HorizontalSpy items={vitrinesMeta} activeId={scrollingToId ?? activeId} onClickItem={scrollToSection} />
         )}
 
-        <CategoryScrollSection
-          categorias={subcategoriasFiltradas}
-          parentId={categoriaAtual.id}
-          empresaId={empresa_id!}
-        />
+        <BannerVertical banner={bannerVerticalPrincipal} isAdmin={isAdmin} />
 
-        {/* Usar vitrines já carregadas ao invés de ProductsSection */}
-        {/* Mostrar todas as vitrines da categoria atual */}
         {vitrinesFiltradas.map((vitrine, index) => (
           <ProductsVitrineSection
             key={vitrine.id}
@@ -188,42 +182,21 @@ export default function RouteCategoryPage() {
             produtos={vitrine.produtos}
             combos={vitrine.combos}
             receitas={vitrine.receitas}
-            codCategoria={vitrine.cod_categoria}
+            codCategoria={null}
             empresaId={empresa_id!}
             onOpenSheet={openSheet}
             sectionRef={register(vitrine.id)}
-            hrefCategoria={vitrine.href_categoria ?? undefined}
             isHome={false}
             vitrineIsHome={vitrine.is_home}
             isHighlighted={highlightedVitrineId === vitrine.id}
-            isLast={vitrinesFilhoFiltradas.length === 0 && index === vitrinesFiltradas.length - 1}
+            isLast={index === vitrinesFiltradas.length - 1}
           />
         ))}
 
-        {/* Vitrines das subcategorias (apenas as primeiras de cada subcategoria) */}
-        {/* Evitar duplicatas já exibidas em vitrines acima */}
-        {vitrinesFilhoFiltradas.map((vit, index) => (
-          <ProductsVitrineSection
-            key={vit.id}
-            vitrineId={vit.id}
-            titulo={vit.titulo}
-            produtos={vit.produtos}
-            combos={vit.combos}
-            receitas={vit.receitas}
-            codCategoria={vit.cod_categoria}
-            empresaId={empresa_id!}
-            onOpenSheet={openSheet}
-            sectionRef={register(vit.id)}
-            hrefCategoria={vit.href_categoria ?? undefined}
-            isHome={false}
-            vitrineIsHome={vit.is_home}
-            isHighlighted={highlightedVitrineId === vit.id}
-            isLast={index === vitrinesFilhoFiltradas.length - 1}
-          />
-        ))}
+        <BannersHorizontal banners={data_banners ?? []} isAdmin={isAdmin} />
 
-
-        <CardAddVitrine cod_categoria={categoriaAtual.id} is_home={false} />
+        {/* Landing page store não tem vínculo com categoria */}
+        <CardAddVitrine cod_categoria={null} is_home={false} />
       </main>
 
       {produtoSelecionado && (
@@ -237,3 +210,4 @@ export default function RouteCategoryPage() {
     </div>
   );
 }
+

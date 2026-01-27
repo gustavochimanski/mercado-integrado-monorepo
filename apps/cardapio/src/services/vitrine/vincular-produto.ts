@@ -3,6 +3,7 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { useLandingpageTrue } from "./utils";
 
 interface VincularProdutoParams {
   vitrineId: number;
@@ -22,6 +23,7 @@ interface VincularProdutoParams {
  */
 export function useVincularProduto() {
   const qc = useQueryClient();
+  const landingpageTrue = useLandingpageTrue();
   
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
@@ -35,10 +37,16 @@ export function useVincularProduto() {
 
   return useMutation({
     mutationFn: async (p: VincularProdutoParams) => {
-      await apiAdmin.post(`/api/cardapio/admin/vitrines/${p.vitrineId}/vincular`, {
-        empresa_id: p.empresa_id,
-        cod_barras: p.cod_barras,
-      });
+      await apiAdmin.post(
+        `/api/cardapio/admin/vitrines/${p.vitrineId}/vincular`,
+        {
+          empresa_id: p.empresa_id,
+          cod_barras: p.cod_barras,
+        },
+        {
+          params: landingpageTrue ? { landingpage_true: true } : undefined,
+        }
+      );
     },
     onSuccess: () => {
       toast.success("Produto vinculado!");

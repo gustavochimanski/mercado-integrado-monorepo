@@ -5,6 +5,7 @@ import { getToken } from "@cardapio/stores/token/tokenStore";
 import { useModoSupervisor } from "@cardapio/lib/params/useModoSupervisor";
 import type { CategoriaSearchItem } from "./types";
 import { useDebounced } from "./utils";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 /**
  * Hook para buscar categorias com filtro
@@ -42,14 +43,15 @@ export function useBuscarCategorias(
   const hasTerm = qDeb.trim().length >= minLength;
   const isSupervisor = useModoSupervisor();
   const hasToken = !!getToken();
+  const codEmpresa = getEmpresaId();
   
   // ✅ No modo supervisor, só fazer requisição se tiver token
-  const canRun = enabled && (allowEmpty || hasTerm) && (!isSupervisor || hasToken);
+  const canRun = enabled && codEmpresa > 0 && (allowEmpty || hasTerm) && (!isSupervisor || hasToken);
 
   return useQuery<CategoriaSearchItem[]>({
-    queryKey: ["categorias_search", allowEmpty ? qDeb : hasTerm ? qDeb : "", limit, offset],
+    queryKey: ["categorias_search", codEmpresa, allowEmpty ? qDeb : hasTerm ? qDeb : "", limit, offset],
     queryFn: async () => {
-      const params: Record<string, any> = { limit, offset };
+      const params: Record<string, any> = { cod_empresa: codEmpresa, limit, offset };
       if (allowEmpty || hasTerm) params.q = qDeb.trim();
       const { data } = await apiAdmin.get<CategoriaSearchItem[]>(
         "/api/cardapio/admin/categorias/search",

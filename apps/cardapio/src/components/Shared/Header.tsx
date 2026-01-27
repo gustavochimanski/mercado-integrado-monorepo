@@ -20,7 +20,8 @@ const HeaderComponent = () => {
 
   const q = searchParams.get("q") ?? "";
 
-  const isHomeOrCategory = pathname === "/" || pathname.startsWith("/categoria");
+  const isHomeOrCategory =
+    pathname === "/" || pathname.startsWith("/categoria") || pathname.startsWith("/landingpage-store");
   const isFinalizarPedido = pathname === "/finalizar-pedido";
 
   useEffect(() => {
@@ -77,12 +78,9 @@ const HeaderComponent = () => {
 
   if (isFinalizarPedido) return null;
 
-  // Verificar se há parâmetro redireciona_categoria na URL
-  const redirecionaCategoria = searchParams.get("redireciona_categoria") === "true";
-
   return (
     <header className="w-full flex flex-row items-center sticky top-0 z-50 bg-background rounded-b-lg p-1 gap-2">
-      {pathname !== "/" && !redirecionaCategoria && (
+      {pathname !== "/" && !pathname.startsWith("/landingpage-store") && (
         <Button onClick={() => router.back()} variant="link" className="mr-auto">
           <CircleArrowLeft /> Voltar
         </Button>

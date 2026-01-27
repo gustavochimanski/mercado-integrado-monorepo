@@ -47,7 +47,7 @@ const CardAddVitrine = ({
         <ModalVitrineCreateSimple
           open={open}
           onOpenChange={setOpen}
-          codCategoria={cod_categoria!}
+          codCategoria={cod_categoria}
         />
       )}
     </>

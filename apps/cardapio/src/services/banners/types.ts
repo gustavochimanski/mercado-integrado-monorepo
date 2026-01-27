@@ -8,9 +8,9 @@ export interface Banner {
   tipo_banner: "V" | "H";
   ativo: boolean;
   href_destino: string | null;
+  landingpage_store: boolean;
   imagem: string;
   created_at: string;
   updated_at: string;
-  redireciona_categoria?: boolean;
 }
 

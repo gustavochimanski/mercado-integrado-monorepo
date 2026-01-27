@@ -43,6 +43,10 @@ export interface HomeResponse {
   vitrines: VitrineComProdutosResponse[];
 }
 
+export interface LandingPageStoreResponse {
+  vitrines: VitrineComProdutosResponse[];
+}
+
 export type CategoryPageResponse = {
   categoria: CategoriaMini;
   subcategorias: CategoriaMini[];

@@ -1,5 +1,5 @@
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
-import { Home, HomeIcon, Pencil, Plus, Settings, Trash2 } from "lucide-react";
+import { ArrowUpDown, Home, HomeIcon, Pencil, Plus, Settings, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,12 +9,14 @@ import {
 import { useState } from "react";
 import { ModalNovoProduto } from "../modals/ModalAddProduto";
 import { ModalEditVitrine } from "../modals/ModalEditVitrine";
+import { ModalReordenarVitrines } from "../modals/ModalReordenarVitrines";
 import { ConfirmDialog } from "@cardapio/components/Shared/ConfirmDialog";
 import { useMutateVitrine } from "@cardapio/services/vitrine";
+import { useLandingpageTrue } from "@cardapio/services/vitrine/utils";
 
 interface AdminVitrineOptionsProps {
   empresaId: number;
-  codCategoria: number;
+  codCategoria: number | null;
   vitrineId: number;
   isHome?: boolean;
   titulo?: string;
@@ -30,9 +32,11 @@ const AdminVitrineOptions = ({
   ordem,
 }: AdminVitrineOptionsProps) => {
   const { isAdmin } = useUserContext();
+  const isLandingpage = useLandingpageTrue();
 
   const [openModalAddProduto, setOpenModalAddProduto] = useState(false);
   const [openModalEditVitrine, setOpenModalEditVitrine] = useState(false);
+  const [openModalReorder, setOpenModalReorder] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
   const { remove, markHome } = useMutateVitrine();
@@ -61,25 +65,32 @@ const AdminVitrineOptions = ({
             Adicionar Produto
           </DropdownMenuItem>
 
-          <DropdownMenuItem onSelect={handleToggleHome}>
-            {isHome ? (
-              <>
-                <HomeIcon className="mr-2 h-4 w-4" />
-                Remover da Home
-              </>
-            ) : (
-              <>
-                <Home className="mr-2 h-4 w-4" />
-                Colocar na Home
-              </>
-            )}
-          </DropdownMenuItem>
+          {!isLandingpage && (
+            <DropdownMenuItem onSelect={handleToggleHome}>
+              {isHome ? (
+                <>
+                  <HomeIcon className="mr-2 h-4 w-4" />
+                  Remover da Home
+                </>
+              ) : (
+                <>
+                  <Home className="mr-2 h-4 w-4" />
+                  Colocar na Home
+                </>
+              )}
+            </DropdownMenuItem>
+          )}
 
           <DropdownMenuItem
             onSelect={() => setOpenModalEditVitrine(true)}
           >
             <Pencil className="mr-2 h-4 w-4" />
             Editar Seção
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onSelect={() => setOpenModalReorder(true)}>
+            <ArrowUpDown className="mr-2 h-4 w-4" />
+            Reordenar vitrines
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -105,8 +116,13 @@ const AdminVitrineOptions = ({
         vitrineId={vitrineId}
         tituloInicial={titulo}
         codCategoriaInicial={codCategoria}
-        ordemInicial={ordem}
         isHomeInicial={isHome}
+      />
+
+      <ModalReordenarVitrines
+        open={openModalReorder}
+        onOpenChange={setOpenModalReorder}
+        codCategoria={codCategoria}
       />
 
       <ConfirmDialog

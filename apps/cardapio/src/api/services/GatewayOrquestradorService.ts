@@ -1285,17 +1285,20 @@ export class GatewayOrquestradorService {
     }
     /**
      * Listar Categorias
+     * @param codEmpresa
      * @param parentId Quando informado, retorna apenas as categorias filhas do ID informado.
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public listarCategoriasApiCardapioAdminCategoriasGet(
+        codEmpresa: number,
         parentId?: (number | null),
     ): CancelablePromise<Array<CategoriaDeliveryOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cardapio/admin/categorias/',
             query: {
+                'cod_empresa': codEmpresa,
                 'parent_id': parentId,
             },
             errors: {
@@ -1324,6 +1327,7 @@ export class GatewayOrquestradorService {
     }
     /**
      * Buscar Categorias
+     * @param codEmpresa
      * @param q Termo de busca por descrição ou slug.
      * @param limit
      * @param offset
@@ -1331,6 +1335,7 @@ export class GatewayOrquestradorService {
      * @throws ApiError
      */
     public buscarCategoriasApiCardapioAdminCategoriasSearchGet(
+        codEmpresa: number,
         q?: (string | null),
         limit: number = 100,
         offset?: number,
@@ -1339,6 +1344,7 @@ export class GatewayOrquestradorService {
             method: 'GET',
             url: '/api/cardapio/admin/categorias/search',
             query: {
+                'cod_empresa': codEmpresa,
                 'q': q,
                 'limit': limit,
                 'offset': offset,
@@ -1351,17 +1357,22 @@ export class GatewayOrquestradorService {
     /**
      * Obter Categoria
      * @param categoriaId
+     * @param codEmpresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public obterCategoriaApiCardapioAdminCategoriasCategoriaIdGet(
         categoriaId: number,
+        codEmpresa: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cardapio/admin/categorias/{categoria_id}',
             path: {
                 'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
             },
             errors: {
                 422: `Validation Error`,
@@ -1401,7 +1412,7 @@ export class GatewayOrquestradorService {
      */
     public deletarCategoriaApiCardapioAdminCategoriasCategoriaIdDelete(
         categoriaId: number,
-        codEmpresa?: (number | null),
+        codEmpresa: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
@@ -1444,17 +1455,22 @@ export class GatewayOrquestradorService {
     /**
      * Mover Categoria Para Esquerda
      * @param categoriaId
+     * @param codEmpresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public moverCategoriaParaEsquerdaApiCardapioAdminCategoriasCategoriaIdMoveLeftPost(
         categoriaId: number,
+        codEmpresa: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cardapio/admin/categorias/{categoria_id}/move-left',
             path: {
                 'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
             },
             errors: {
                 422: `Validation Error`,
@@ -1464,17 +1480,22 @@ export class GatewayOrquestradorService {
     /**
      * Mover Categoria Para Direita
      * @param categoriaId
+     * @param codEmpresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public moverCategoriaParaDireitaApiCardapioAdminCategoriasCategoriaIdMoveRightPost(
         categoriaId: number,
+        codEmpresa: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cardapio/admin/categorias/{categoria_id}/move-right',
             path: {
                 'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
             },
             errors: {
                 422: `Validation Error`,
@@ -1483,6 +1504,7 @@ export class GatewayOrquestradorService {
     }
     /**
      * Search Vitrines
+     * @param empresaId
      * @param q Busca por título/slug
      * @param codCategoria Filtra por categoria vinculada
      * @param isHome Filtra por destaque da home
@@ -1492,6 +1514,7 @@ export class GatewayOrquestradorService {
      * @throws ApiError
      */
     public searchVitrinesApiCardapioAdminVitrinesSearchGet(
+        empresaId: number,
         q?: (string | null),
         codCategoria?: (number | null),
         isHome?: (boolean | null),
@@ -1502,6 +1525,7 @@ export class GatewayOrquestradorService {
             method: 'GET',
             url: '/api/cardapio/admin/vitrines/search',
             query: {
+                'empresa_id': empresaId,
                 'q': q,
                 'cod_categoria': codCategoria,
                 'is_home': isHome,
@@ -1516,12 +1540,14 @@ export class GatewayOrquestradorService {
     /**
      * Toggle Home Vitrine
      * @param vitrineId ID da vitrine
+     * @param empresaId
      * @param requestBody
      * @returns VitrineOut Successful Response
      * @throws ApiError
      */
     public toggleHomeVitrineApiCardapioAdminVitrinesVitrineIdHomePatch(
         vitrineId: number,
+        empresaId: number,
         requestBody: ToggleHomeRequest,
     ): CancelablePromise<VitrineOut> {
         return this.httpRequest.request({
@@ -1529,6 +1555,9 @@ export class GatewayOrquestradorService {
             url: '/api/cardapio/admin/vitrines/{vitrine_id}/home',
             path: {
                 'vitrine_id': vitrineId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -1559,12 +1588,14 @@ export class GatewayOrquestradorService {
     /**
      * Atualizar Vitrine
      * @param vitrineId ID da vitrine
+     * @param empresaId
      * @param requestBody
      * @returns VitrineOut Successful Response
      * @throws ApiError
      */
     public atualizarVitrineApiCardapioAdminVitrinesVitrineIdPut(
         vitrineId: number,
+        empresaId: number,
         requestBody: AtualizarVitrineRequest,
     ): CancelablePromise<VitrineOut> {
         return this.httpRequest.request({
@@ -1572,6 +1603,9 @@ export class GatewayOrquestradorService {
             url: '/api/cardapio/admin/vitrines/{vitrine_id}',
             path: {
                 'vitrine_id': vitrineId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -1583,17 +1617,22 @@ export class GatewayOrquestradorService {
     /**
      * Deletar Vitrine
      * @param vitrineId ID da vitrine
+     * @param empresaId
      * @returns void
      * @throws ApiError
      */
     public deletarVitrineApiCardapioAdminVitrinesVitrineIdDelete(
         vitrineId: number,
+        empresaId: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
             url: '/api/cardapio/admin/vitrines/{vitrine_id}',
             path: {
                 'vitrine_id': vitrineId,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,
@@ -5086,6 +5125,7 @@ export class GatewayOrquestradorService {
     /**
      * Search Categorias
      * @param xSuperToken
+     * @param empresaId ID da empresa (obrigatório)
      * @param q Termo de busca por descrição/slug
      * @param limit
      * @param offset
@@ -5094,6 +5134,7 @@ export class GatewayOrquestradorService {
      */
     public searchCategoriasApiCardapioClientCategoriasSearchGet(
         xSuperToken: string,
+        empresaId: number,
         q?: (string | null),
         limit: number = 30,
         offset?: number,
@@ -5105,6 +5146,7 @@ export class GatewayOrquestradorService {
                 'x-super-token': xSuperToken,
             },
             query: {
+                'empresa_id': empresaId,
                 'q': q,
                 'limit': limit,
                 'offset': offset,
@@ -5118,12 +5160,14 @@ export class GatewayOrquestradorService {
      * Get Categoria
      * @param catId
      * @param xSuperToken
+     * @param empresaId ID da empresa (obrigatório)
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public getCategoriaApiCardapioClientCategoriasCatIdGet(
         catId: number,
         xSuperToken: string,
+        empresaId: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
@@ -5133,6 +5177,9 @@ export class GatewayOrquestradorService {
             },
             headers: {
                 'x-super-token': xSuperToken,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

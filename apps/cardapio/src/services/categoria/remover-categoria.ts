@@ -3,6 +3,7 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 /**
  * Hook para remover uma categoria
@@ -29,7 +30,12 @@ export function useRemoverCategoria() {
   };
 
   return useMutation({
-    mutationFn: (id: number) => apiAdmin.delete(`/api/cardapio/admin/categorias/${id}`),
+    mutationFn: (id: number) => {
+      const codEmpresa = getEmpresaId();
+      return apiAdmin.delete(`/api/cardapio/admin/categorias/${id}`, {
+        params: { cod_empresa: codEmpresa },
+      });
+    },
     onSuccess: () => {
       toast.success("Categoria removida com sucesso!");
       reloadPage();

@@ -13,17 +13,20 @@ export class AdminCardapioCategoriasService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Listar Categorias
+     * @param codEmpresa
      * @param parentId Quando informado, retorna apenas as categorias filhas do ID informado.
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public listarCategoriasApiCardapioAdminCategoriasGet(
+        codEmpresa: number,
         parentId?: (number | null),
     ): CancelablePromise<Array<CategoriaDeliveryOut>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cardapio/admin/categorias/',
             query: {
+                'cod_empresa': codEmpresa,
                 'parent_id': parentId,
             },
             errors: {
@@ -52,6 +55,7 @@ export class AdminCardapioCategoriasService {
     }
     /**
      * Buscar Categorias
+     * @param codEmpresa
      * @param q Termo de busca por descrição ou slug.
      * @param limit
      * @param offset
@@ -59,6 +63,7 @@ export class AdminCardapioCategoriasService {
      * @throws ApiError
      */
     public buscarCategoriasApiCardapioAdminCategoriasSearchGet(
+        codEmpresa: number,
         q?: (string | null),
         limit: number = 100,
         offset?: number,
@@ -67,6 +72,7 @@ export class AdminCardapioCategoriasService {
             method: 'GET',
             url: '/api/cardapio/admin/categorias/search',
             query: {
+                'cod_empresa': codEmpresa,
                 'q': q,
                 'limit': limit,
                 'offset': offset,
@@ -79,17 +85,22 @@ export class AdminCardapioCategoriasService {
     /**
      * Obter Categoria
      * @param categoriaId
+     * @param codEmpresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public obterCategoriaApiCardapioAdminCategoriasCategoriaIdGet(
         categoriaId: number,
+        codEmpresa: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/cardapio/admin/categorias/{categoria_id}',
             path: {
                 'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
             },
             errors: {
                 422: `Validation Error`,
@@ -129,7 +140,7 @@ export class AdminCardapioCategoriasService {
      */
     public deletarCategoriaApiCardapioAdminCategoriasCategoriaIdDelete(
         categoriaId: number,
-        codEmpresa?: (number | null),
+        codEmpresa: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
@@ -172,17 +183,22 @@ export class AdminCardapioCategoriasService {
     /**
      * Mover Categoria Para Esquerda
      * @param categoriaId
+     * @param codEmpresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public moverCategoriaParaEsquerdaApiCardapioAdminCategoriasCategoriaIdMoveLeftPost(
         categoriaId: number,
+        codEmpresa: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cardapio/admin/categorias/{categoria_id}/move-left',
             path: {
                 'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
             },
             errors: {
                 422: `Validation Error`,
@@ -192,17 +208,22 @@ export class AdminCardapioCategoriasService {
     /**
      * Mover Categoria Para Direita
      * @param categoriaId
+     * @param codEmpresa
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public moverCategoriaParaDireitaApiCardapioAdminCategoriasCategoriaIdMoveRightPost(
         categoriaId: number,
+        codEmpresa: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/cardapio/admin/categorias/{categoria_id}/move-right',
             path: {
                 'categoria_id': categoriaId,
+            },
+            query: {
+                'cod_empresa': codEmpresa,
             },
             errors: {
                 422: `Validation Error`,

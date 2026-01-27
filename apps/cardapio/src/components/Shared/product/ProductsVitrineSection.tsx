@@ -104,7 +104,7 @@ export default function ProductsVitrineSection({
     >
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">{titulo}</h2>
-        {codCategoria !== null && (
+        {isAdmin && (
           <AdminSecaoSubCategOptions
             vitrineId={vitrineId}
             empresaId={empresaId}

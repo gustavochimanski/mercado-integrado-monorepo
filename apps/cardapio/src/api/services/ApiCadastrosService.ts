@@ -382,6 +382,7 @@ export class ApiCadastrosService {
     /**
      * Search Categorias
      * @param xSuperToken
+     * @param empresaId ID da empresa (obrigatório)
      * @param q Termo de busca por descrição/slug
      * @param limit
      * @param offset
@@ -390,6 +391,7 @@ export class ApiCadastrosService {
      */
     public searchCategoriasApiCardapioClientCategoriasSearchGet(
         xSuperToken: string,
+        empresaId: number,
         q?: (string | null),
         limit: number = 30,
         offset?: number,
@@ -401,6 +403,7 @@ export class ApiCadastrosService {
                 'x-super-token': xSuperToken,
             },
             query: {
+                'empresa_id': empresaId,
                 'q': q,
                 'limit': limit,
                 'offset': offset,
@@ -414,12 +417,14 @@ export class ApiCadastrosService {
      * Get Categoria
      * @param catId
      * @param xSuperToken
+     * @param empresaId ID da empresa (obrigatório)
      * @returns CategoriaDeliveryOut Successful Response
      * @throws ApiError
      */
     public getCategoriaApiCardapioClientCategoriasCatIdGet(
         catId: number,
         xSuperToken: string,
+        empresaId: number,
     ): CancelablePromise<CategoriaDeliveryOut> {
         return this.httpRequest.request({
             method: 'GET',
@@ -429,6 +434,9 @@ export class ApiCadastrosService {
             },
             headers: {
                 'x-super-token': xSuperToken,
+            },
+            query: {
+                'empresa_id': empresaId,
             },
             errors: {
                 422: `Validation Error`,

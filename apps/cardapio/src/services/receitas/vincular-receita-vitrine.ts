@@ -3,6 +3,8 @@ import apiAdmin from "@cardapio/app/api/apiAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
+import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { useLandingpageTrue } from "../vitrine/utils";
 
 interface VincularReceitaVitrineParams {
   vitrineId: number;
@@ -21,6 +23,7 @@ interface VincularReceitaVitrineParams {
  */
 export function useVincularReceitaVitrine() {
   const qc = useQueryClient();
+  const landingpageTrue = useLandingpageTrue();
 
   const invalidateAll = () => {
     qc.invalidateQueries({ queryKey: ["vitrines"], exact: false });
@@ -34,9 +37,12 @@ export function useVincularReceitaVitrine() {
 
   return useMutation({
     mutationFn: async (params: VincularReceitaVitrineParams) => {
-      await apiAdmin.post(`/api/cardapio/admin/vitrines/${params.vitrineId}/vincular-receita`, {
-        receita_id: params.receita_id,
-      });
+      const empresaId = getEmpresaId();
+      await apiAdmin.post(
+        `/api/cardapio/admin/vitrines/${params.vitrineId}/vincular-receita`,
+        { receita_id: params.receita_id },
+        { params: { empresa_id: empresaId, ...(landingpageTrue ? { landingpage_true: true } : {}) } }
+      );
     },
     onSuccess: () => {
       toast.success("Receita vinculada!");

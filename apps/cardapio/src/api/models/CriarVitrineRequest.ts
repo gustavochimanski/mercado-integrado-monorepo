@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CriarVitrineRequest = {
+    empresa_id: number;
     cod_categoria?: (number | null);
     titulo: string;
     ordem?: number;
