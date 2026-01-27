@@ -38,7 +38,7 @@ export default function SupervisorLoginModal() {
           "code" in err &&
           (err as { code?: string }).code === "ERR_NETWORK";
         const message = isConfigError
-          ? "Base da API não definida. Acesse pelo link do supervisor com o tenant na URL (ex: /seu-tenant?empresa=X&via=supervisor)."
+          ? "Base da API não definida. O link do supervisor deve incluir ?tenant=slug (ex: /?empresa=1&via=supervisor&tenant=xmanski)."
           : isNetworkError
             ? "Não foi possível conectar à API. Verifique sua conexão ou se acessou pelo link correto do supervisor."
             : "Credenciais inválidas. Tente novamente.";

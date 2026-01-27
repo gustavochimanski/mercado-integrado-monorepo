@@ -77,12 +77,25 @@ export async function middleware(request: NextRequest) {
 
     if (emp?.landingpage_store) {
       const via = request.nextUrl.searchParams.get("via");
+      const tenantFromQuery = request.nextUrl.searchParams.get("tenant")?.trim()?.toLowerCase();
       const target = new URL("/landingpage-store", request.url);
       target.searchParams.set("empresa", String(empresaId));
       if (via === "supervisor") {
         target.searchParams.set("via", "supervisor");
       }
-      return NextResponse.redirect(target);
+      if (tenantFromQuery && isValidTenantSlug(tenantFromQuery)) {
+        target.searchParams.set("tenant", tenantFromQuery);
+      }
+      const redirectRes = NextResponse.redirect(target);
+      // Supervisor envia / sem slug: seta cookie tenant da query no redirect para o client ter na landing
+      if (tenantFromQuery && isValidTenantSlug(tenantFromQuery)) {
+        redirectRes.cookies.set(TENANT_COOKIE_NAME, tenantFromQuery, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+      }
+      return redirectRes;
     }
   } catch {
     // Em caso de erro (rede, timeout, etc.), deixa a Home tratar no client

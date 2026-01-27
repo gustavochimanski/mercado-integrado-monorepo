@@ -58,7 +58,7 @@ export function getApiBaseUrlClient(): string {
 
   // 1) Fallback: cookie persistido pelo middleware (derivado de /{tenant}/...)
   const tenantRaw = getCookie(TENANT_COOKIE_NAME) as string | undefined
-  const tenant = tenantRaw ? normalizeTenantSlug(tenantRaw) : null
+  let tenant = tenantRaw ? normalizeTenantSlug(tenantRaw) : null
 
   const baseDomain = process.env.MENSURA_API_BASE_DOMAIN || 'mensuraapi.com.br'
 
@@ -66,8 +66,22 @@ export function getApiBaseUrlClient(): string {
     return `https://${tenant}.${baseDomain}`
   }
 
+  // 2) Supervisor envia / ou /landingpage-store sem slug: usa tenant da query (?tenant=slug)
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('via') === 'supervisor') {
+    const apiBaseFromQuery = urlParams.get('api_base_url')?.trim()
+    if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
+      return apiBaseFromQuery.replace(/\/$/, '')
+    }
+    const tenantFromQuery = urlParams.get('tenant')?.trim()
+    tenant = tenantFromQuery ? normalizeTenantSlug(tenantFromQuery) : null
+    if (tenant) {
+      return `https://${tenant}.${baseDomain}`
+    }
+  }
+
   // Se não tem nenhuma configuração, lança erro
   throw new Error(
-    'Base da API não definida: defina cookie tenant_slug (via rota /{slug}) ou cookie api_base_url.'
+    'Base da API não definida: defina cookie tenant_slug (via rota /{slug}), cookie api_base_url ou ?tenant=slug na URL.'
   )
 }
