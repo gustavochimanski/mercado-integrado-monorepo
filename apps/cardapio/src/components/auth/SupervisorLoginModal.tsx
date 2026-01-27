@@ -26,8 +26,22 @@ export default function SupervisorLoginModal() {
         setError("");
         await login(username, password);
         toast.success("Login realizado com sucesso!");
-      } catch {
-        const message = "Credenciais inválidas. Tente novamente.";
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const isConfigError =
+          msg.includes("Base da API não definida") ||
+          msg.includes("tenant_slug") ||
+          msg.includes("api_base_url");
+        const isNetworkError =
+          err &&
+          typeof err === "object" &&
+          "code" in err &&
+          (err as { code?: string }).code === "ERR_NETWORK";
+        const message = isConfigError
+          ? "Base da API não definida. Acesse pelo link do supervisor com o tenant na URL (ex: /seu-tenant?empresa=X&via=supervisor)."
+          : isNetworkError
+            ? "Não foi possível conectar à API. Verifique sua conexão ou se acessou pelo link correto do supervisor."
+            : "Credenciais inválidas. Tente novamente.";
         setError(message);
         toast.error(message);
       }
