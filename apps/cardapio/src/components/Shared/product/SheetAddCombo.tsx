@@ -409,8 +409,8 @@ export function SheetAdicionarCombo({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Conteúdo Scrollável */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto relative">
+          {/* Conteúdo Scrollável — overscroll-contain evita scroll propagar pro body */}
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain relative">
             {/* Imagem Hero no Topo */}
             <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
               {/* Seta indicando para rolar para baixo */}

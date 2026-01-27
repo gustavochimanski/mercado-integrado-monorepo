@@ -371,20 +371,6 @@ export function SheetAdicionarProduto({
     });
   }, [isOpen, produto?.cod_barras]);
 
-  const encontrarScrollParent = (el: HTMLElement | null): HTMLElement | null => {
-    if (!el) return null;
-    let current: HTMLElement | null = el.parentElement;
-    while (current) {
-      const style = window.getComputedStyle(current);
-      const overflowY = style.overflowY;
-      if (overflowY === "auto" || overflowY === "scroll") {
-        return current;
-      }
-      current = current.parentElement;
-    }
-    return null;
-  };
-
   // Verificar se todos os complementos obrigatórios estão selecionados
   const todosComplementosObrigatoriosSelecionados = useMemo(() => {
     // Se ainda está carregando complementos, não desabilitar o botão
@@ -424,31 +410,22 @@ export function SheetAdicionarProduto({
 
     setComplementoHighlightId(complementoNaoSelecionado.id);
 
-    // Esperar o layout estabilizar antes do scroll
+    const container = scrollContainerRef.current;
+    const element = complementoRefs.current[complementoNaoSelecionado.id];
+    if (!container || !element) return;
+
+    // Scroll apenas dentro do sheet; nunca usar scrollIntoView (rola a página e pisca o overlay)
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const element = complementoRefs.current[complementoNaoSelecionado.id];
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const scrollTop = container.scrollTop;
+      const elementTop = elementRect.top - containerRect.top + scrollTop;
+      const centerOffset = container.clientHeight / 2 - elementRect.height / 2;
+      const targetTop = Math.max(0, elementTop - centerOffset);
 
-        if (!element) return;
-
-        const container = scrollContainerRef.current || encontrarScrollParent(element);
-
-        if (container) {
-          const containerRect = container.getBoundingClientRect();
-          const elementRect = element.getBoundingClientRect();
-          const scrollTop = container.scrollTop;
-          const elementTop = elementRect.top - containerRect.top + scrollTop;
-          const centerOffset = container.clientHeight / 2 - elementRect.height / 2;
-          const targetTop = elementTop - centerOffset;
-
-          container.scrollTo({
-            top: targetTop,
-            behavior: "smooth",
-          });
-          return;
-        }
-
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      container.scrollTo({
+        top: targetTop,
+        behavior: "smooth",
       });
     });
   };
@@ -576,10 +553,10 @@ export function SheetAdicionarProduto({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Conteúdo Scrollável */}
+          {/* Conteúdo Scrollável — overscroll-contain evita scroll propagar pro body (evita rolar tela e piscar) */}
           <div 
             ref={scrollContainerRef}
-            className="flex-1 min-h-0 overflow-y-auto relative"
+            className="flex-1 min-h-0 overflow-y-auto overscroll-contain relative"
           >
             {/* Imagem Hero no Topo */}
             <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
@@ -796,12 +773,14 @@ export function SheetAdicionarProduto({
             <div className="border-t border-border pt-4 pb-6 px-4">
               <Button 
                 type="button"
-                aria-disabled={!todosComplementosObrigatoriosSelecionados || !estaAberta}
-                disabled={!todosComplementosObrigatoriosSelecionados || !estaAberta}
+                aria-disabled={!estaAberta}
+                disabled={!estaAberta}
                 className={`w-full h-14 text-base font-semibold shadow-lg transition-all ${
-                  todosComplementosObrigatoriosSelecionados && estaAberta
-                    ? "bg-primary text-background hover:shadow-xl hover:bg-primary/90"
-                    : "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
+                  !estaAberta
+                    ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
+                    : todosComplementosObrigatoriosSelecionados
+                      ? "bg-primary text-background hover:shadow-xl hover:bg-primary/90"
+                      : "border-2 border-primary bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
                 size="lg"
                 onClick={(e) => {
@@ -821,7 +800,6 @@ export function SheetAdicionarProduto({
                     return;
                   }
 
-                  // dispara o submit com validações do react-hook-form
                   handleSubmit(onSubmit)();
                 }}
               >
