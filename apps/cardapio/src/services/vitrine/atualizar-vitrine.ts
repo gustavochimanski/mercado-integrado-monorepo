@@ -39,6 +39,7 @@ export function useAtualizarVitrine() {
         ...(typeof body.titulo === "string" ? { titulo: body.titulo } : {}),
         ...(typeof body.ordem === "number" ? { ordem: body.ordem } : {}),
         ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
+        ...(landingpageTrue ? { landing: true } : {}),
       };
       const { data } = await apiAdmin.put(`/api/cardapio/admin/vitrines/${id}`, payload, {
         params: { empresa_id: empresaId, ...(landingpageTrue ? { landingpage_true: true } : {}) },

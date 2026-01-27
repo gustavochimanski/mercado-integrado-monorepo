@@ -1,13 +1,25 @@
 import { getCliente, clearCliente, getTokenCliente } from "@cardapio/stores/client/ClientStore"
 import axios from "axios"
 import { getCookie } from "cookies-next"
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client"
 
-export const apiClienteAdmin = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+export const apiClienteAdmin = axios.create()
+
+// ✅ Interceptor que atualiza baseURL dinamicamente antes de cada request
+apiClienteAdmin.interceptors.request.use((config) => {
+  if (!config.baseURL) {
+    config.baseURL = getApiBaseUrlClient()
+  }
+  return config
 })
 
-// Interceptor de request → adiciona o token
+// Interceptor de request → atualiza baseURL e adiciona o token
 apiClienteAdmin.interceptors.request.use((config) => {
+  // Atualiza baseURL dinamicamente
+  if (!config.baseURL) {
+    config.baseURL = getApiBaseUrlClient()
+  }
+  
   // Tenta buscar do ClientStore primeiro, depois do cookie
   let superToken = getTokenCliente()
   

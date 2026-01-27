@@ -2,13 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 import type { AdicionalResponse } from "@cardapio/api";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!BASE_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL não configurado");
-}
 
 /**
  * Hook para buscar adicionais de um produto (client-side)
@@ -40,8 +35,9 @@ export function useBuscarAdicionaisProdutoClient(
         throw new Error("Código de barras ou token do cliente não fornecido");
       }
 
+      const baseUrl = getApiBaseUrlClient();
       const response = await axios.get<AdicionalResponse[]>(
-        `${BASE_URL}/api/catalogo/client/adicionais/produto/${codBarras}`,
+        `${baseUrl}/api/catalogo/client/adicionais/produto/${codBarras}`,
         {
           headers: {
             "X-Super-Token": tokenCliente,
@@ -79,8 +75,9 @@ export async function buscarAdicionaisProduto(
     throw new Error("Token do cliente não encontrado. Cliente não autenticado.");
   }
 
+  const baseUrl = getApiBaseUrlClient();
   const response = await axios.get<AdicionalResponse[]>(
-    `${BASE_URL}/api/catalogo/client/adicionais/produto/${codBarras}`,
+    `${baseUrl}/api/catalogo/client/adicionais/produto/${codBarras}`,
     {
       headers: {
         "X-Super-Token": tokenCliente,

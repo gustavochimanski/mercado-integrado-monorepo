@@ -1,6 +1,7 @@
 // src/services/auth/authenticate.ts
 import axios from "axios";
 import { setToken } from "../../stores/token/tokenStore";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 
 export type LoginResponse = {
   token_type: string;
@@ -8,8 +9,14 @@ export type LoginResponse = {
   access_token: string;
 };
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+const api = axios.create();
+
+// ✅ Interceptor que atualiza baseURL dinamicamente antes de cada request
+api.interceptors.request.use((config) => {
+  if (!config.baseURL) {
+    config.baseURL = getApiBaseUrlClient();
+  }
+  return config;
 });
 
 export async function loginService(

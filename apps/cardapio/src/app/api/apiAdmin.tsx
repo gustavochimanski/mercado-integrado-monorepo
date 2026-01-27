@@ -2,11 +2,10 @@
 
 import { clearToken, getToken } from "@cardapio/stores/token/tokenStore";
 import axios from "axios";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 
-// ✅ Use variável de ambiente
-const apiAdmin = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-});
+// ✅ Cria instância axios sem baseURL fixa
+const apiAdmin = axios.create();
 
 // ✅ Solicitar token imediatamente se estiver no modo supervisor
 if (typeof window !== "undefined") {
@@ -19,7 +18,14 @@ if (typeof window !== "undefined") {
   }
 }
 
+// ✅ Interceptor que atualiza baseURL dinamicamente e adiciona token de autenticação
 apiAdmin.interceptors.request.use((config) => {
+  // Atualiza baseURL dinamicamente
+  if (!config.baseURL) {
+    config.baseURL = getApiBaseUrlClient();
+  }
+  
+  // Adiciona token de autenticação
   const token = getToken(); // ✅ vem da memória
   if (token && typeof token === "string") {
     config.headers.Authorization = `Bearer ${token}`;

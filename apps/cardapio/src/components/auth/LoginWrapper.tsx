@@ -13,7 +13,7 @@ export function LoginWrapper() {
   useEffect(() => setMounted(true), []);
 
   const isSupervisor = useModoSupervisor();
-  const { isLoading } = useUserContext();
+  const { isLoading, isAuthenticated } = useUserContext();
   const hasAdminToken = !!getToken();
 
   if (!mounted) return null;
@@ -21,6 +21,8 @@ export function LoginWrapper() {
   if (!isSupervisor || hasAdminToken) return null;
   // Se ainda está carregando o contexto, evita “piscar” caso o token esteja chegando via postMessage.
   if (isLoading) return null;
+  // Fonte da verdade reativa: após login, o contexto atualiza isAuthenticated e o modal deve sumir.
+  if (isAuthenticated) return null;
 
   return <LoginComponent />;
 }

@@ -15,10 +15,17 @@ import { getToken, setToken, clearToken } from "../../stores/token/tokenStore";
 import { loginService, logoutService } from "./authenticate";
 import { useReceiveTokenFromParent } from "../../stores/token/UseReceiveTokenFromParent";
 import { useModoSupervisor } from "../../lib/params/useModoSupervisor";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 
-// Instância axios com baseURL configurada
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+// Instância axios sem baseURL fixa
+const api = axios.create();
+
+// ✅ Interceptor que atualiza baseURL dinamicamente antes de cada request
+api.interceptors.request.use((config) => {
+  if (!config.baseURL) {
+    config.baseURL = getApiBaseUrlClient();
+  }
+  return config;
 });
 
 export interface User {

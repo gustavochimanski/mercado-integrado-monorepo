@@ -2,13 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 import type { AdicionalResponse } from "@cardapio/api";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!BASE_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL não configurado");
-}
 
 /**
  * Hook para buscar adicionais de uma receita (client-side)
@@ -43,8 +38,9 @@ export function useBuscarAdicionaisReceitaClient(
         throw new Error("ID da receita ou token do cliente não fornecido");
       }
 
+      const baseUrl = getApiBaseUrlClient();
       const response = await axios.get<AdicionalResponse[]>(
-        `${BASE_URL}/api/catalogo/client/adicionais/receita/${receitaId}`,
+        `${baseUrl}/api/catalogo/client/adicionais/receita/${receitaId}`,
         {
           headers: {
             "X-Super-Token": tokenCliente,
@@ -82,8 +78,9 @@ export async function buscarAdicionaisReceita(
     throw new Error("Token do cliente não encontrado. Cliente não autenticado.");
   }
 
+  const baseUrl = getApiBaseUrlClient();
   const response = await axios.get<AdicionalResponse[]>(
-    `${BASE_URL}/api/catalogo/client/adicionais/receita/${receitaId}`,
+    `${baseUrl}/api/catalogo/client/adicionais/receita/${receitaId}`,
     {
       headers: {
         "X-Super-Token": tokenCliente,

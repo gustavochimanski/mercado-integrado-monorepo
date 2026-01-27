@@ -1,13 +1,8 @@
 // @cardapio/services/complementos/buscar-complementos-unificado-client.ts
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 import type { ComplementoResponse, TipoProdutoEnum, TipoPedidoEnum } from "@cardapio/types/complementos";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!BASE_URL) {
-  throw new Error("NEXT_PUBLIC_API_URL não configurado");
-}
 
 function normalizeComplementosPayload(payload: unknown): ComplementoResponse[] {
   if (Array.isArray(payload)) return payload as ComplementoResponse[];
@@ -32,8 +27,9 @@ async function fetchComplementosUnificadoOrFallback(params: {
 
   // 1) Tentativa: endpoint unificado (params conforme esperado)
   try {
+    const baseUrl = getApiBaseUrlClient();
     const response = await axios.get(
-      `${BASE_URL}/api/catalogo/public/complementos`,
+      `${baseUrl}/api/catalogo/public/complementos`,
       {
         params: {
           tipo: params.tipo,
@@ -50,8 +46,9 @@ async function fetchComplementosUnificadoOrFallback(params: {
     // 2) Tentativa: alguns backends usam nomes alternativos de parâmetro
     if (status === 400 || status === 404 || status === 405 || status === 422) {
       try {
+        const baseUrl = getApiBaseUrlClient();
         const response = await axios.get(
-          `${BASE_URL}/api/catalogo/public/complementos`,
+          `${baseUrl}/api/catalogo/public/complementos`,
           {
             params: {
               tipo_produto: params.tipo,
@@ -75,8 +72,9 @@ async function fetchComplementosUnificadoOrFallback(params: {
           ? `/api/catalogo/public/complementos/combo/${encodeURIComponent(identificadorStr)}`
           : `/api/catalogo/public/complementos/receita/${encodeURIComponent(identificadorStr)}`;
 
+    const baseUrl = getApiBaseUrlClient();
     const legacyResponse = await axios.get(
-      `${BASE_URL}${legacyPath}`,
+      `${baseUrl}${legacyPath}`,
       {
         params: {
           // se o backend ignorar, ok; se aceitar, melhor ainda

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
+import { getApiBaseUrlClient } from "@cardapio/lib/api/getApiBaseUrl.client";
 import type { FinalizarPedidoRequest } from "@cardapio/types/pedido";
 import type { PreviewCheckoutResponse } from "../../api/models/PreviewCheckoutResponse";
 import type { PedidoResponse } from "../../api/models/PedidoResponse";
@@ -13,11 +14,7 @@ import type { AtualizarStatusGatewayRequest } from "@cardapio/types/pedido";
 const CLIENT_PEDIDOS_BASE_PATH = "/api/pedidos/client";
 
 export function ensureBaseUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!baseUrl) {
-    throw new Error("URL da API não configurada.");
-  }
-  return baseUrl;
+  return getApiBaseUrlClient();
 }
 
 export function ensureClientToken(): string {

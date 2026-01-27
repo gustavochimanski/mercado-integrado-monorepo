@@ -35,12 +35,13 @@ export function useCriarVitrine() {
     mutationFn: async (body: CreateVitrineDTO) => {
       const payload: CreateVitrinePayload = {
         empresa_id: body.empresa_id ?? getEmpresaId(),
-        ...(typeof body.cod_categoria === "number" ? { cod_categoria: body.cod_categoria } : {}),
+        // Quando landingpage_true=true, não enviar cod_categoria (backend cria em vitrines_landingpage_store)
+        ...(!landingpageTrue && typeof body.cod_categoria === "number" ? { cod_categoria: body.cod_categoria } : {}),
         titulo: body.titulo,
         ...(typeof body.is_home === "boolean" ? { is_home: body.is_home } : {}),
       };
       const { data } = await apiAdmin.post("/api/cardapio/admin/vitrines/", payload, {
-        params: landingpageTrue ? { landingpage_true: true } : undefined,
+        params: { landingpage_true: landingpageTrue },
       });
       return data as VitrineOut;
     },

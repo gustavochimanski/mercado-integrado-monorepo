@@ -16,6 +16,7 @@ export type CreateVitrinePayload = {
   titulo: string;
   ordem?: number;
   is_home?: boolean;
+  landing?: boolean;
 };
 
 export type CreateVitrineDTO = Omit<CreateVitrinePayload, "empresa_id"> & { empresa_id?: number };
