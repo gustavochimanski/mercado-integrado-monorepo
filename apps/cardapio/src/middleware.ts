@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const segments = pathname.split("/").filter(Boolean);
 
-  // /teste2 ou /outro-tenant → setar tenant_slug e reescrever para / (preservando query)
+  // /teste2 ou /outro-tenant → setar tenant_slug (e api_base_url se vier na query) e reescrever para / (preservando query)
   if (segments.length === 1 && !KNOWN_FIRST_SEGMENTS.includes(segments[0])) {
     const tenant = segments[0].trim().toLowerCase();
     if (isValidTenantSlug(tenant)) {
@@ -39,6 +39,15 @@ export async function middleware(request: NextRequest) {
         maxAge: 60 * 60 * 24 * 365,
         sameSite: "lax",
       });
+      // Em dev, /xmanski?empresa=1&api_base_url=http://172.20.0.1:41154 → seta cookie para o client usar essa base
+      const apiBaseFromQuery = request.nextUrl.searchParams.get("api_base_url")?.trim();
+      if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
+        res.cookies.set("api_base_url", apiBaseFromQuery.replace(/\/$/, ""), {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+      }
       return res;
     }
   }

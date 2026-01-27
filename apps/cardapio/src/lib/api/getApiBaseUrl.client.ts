@@ -50,13 +50,23 @@ export function getApiBaseUrlClient(): string {
   }
   
   // Usuário deslogado OU logado sem cookies de login: detecta da rota atual ou override
-  // 0) Prioridade máxima: override explícito via cookie (sincronizado do localStorage)
+  // 0) Em localhost: NEXT_PUBLIC_API_BASE_URL aponta pro backend local (ex.: 172.20.0.1:41154)
+  //    assim /xmanski?empresa=1 não manda chamadas para https://xmanski.mensuraapi.com.br
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  const devBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim()
+  if (isLocalhost && devBase && /^https?:\/\//.test(devBase)) {
+    return devBase.replace(/\/$/, '')
+  }
+
+  // 1) Prioridade máxima: override explícito via cookie (sincronizado do localStorage ou query em /:slug)
   const apiBaseUrlCookie = getCookie('api_base_url') as string | undefined
   if (apiBaseUrlCookie) {
     return apiBaseUrlCookie.replace(/\/$/, '')
   }
 
-  // 1) Fallback: cookie persistido pelo middleware (derivado de /{tenant}/...)
+  // 2) Fallback: cookie persistido pelo middleware (derivado de /{tenant}/...)
   const tenantRaw = getCookie(TENANT_COOKIE_NAME) as string | undefined
   let tenant = tenantRaw ? normalizeTenantSlug(tenantRaw) : null
 
@@ -66,7 +76,7 @@ export function getApiBaseUrlClient(): string {
     return `https://${tenant}.${baseDomain}`
   }
 
-  // 2) Supervisor envia / ou /landingpage-store sem slug: usa tenant da query (?tenant=slug)
+  // 3) Supervisor envia / ou /landingpage-store sem slug: usa tenant da query (?tenant=slug)
   const urlParams = new URLSearchParams(window.location.search)
   if (urlParams.get('via') === 'supervisor') {
     const apiBaseFromQuery = urlParams.get('api_base_url')?.trim()
