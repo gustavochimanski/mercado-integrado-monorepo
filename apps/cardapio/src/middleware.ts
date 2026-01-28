@@ -19,6 +19,12 @@ function isValidTenantSlug(s: string): boolean {
   return /^[a-z0-9-]+$/.test(s.trim().toLowerCase());
 }
 
+function normalizeTenantSlug(value: string | null | undefined): string | null {
+  const slug = (value ?? "").trim().toLowerCase();
+  if (!slug) return null;
+  return isValidTenantSlug(slug) ? slug : null;
+}
+
 /**
  * 1) /teste2?empresa=3 → seta cookie tenant_slug=teste2 e reescreve para /?empresa=3
  * 2) /?empresa=X → redirect para landingpage-store se empresa.landingpage_store === true
@@ -26,6 +32,20 @@ function isValidTenantSlug(s: string): boolean {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const segments = pathname.split("/").filter(Boolean);
+
+  // ✅ Nunca "perder" tenant ao acessar "/":
+  // Se já existe tenant_slug no cookie e o usuário acessar "/" sem um tenant explícito válido na query,
+  // redireciona para "/{tenant}" preservando a query string.
+  // Isso evita qualquer fluxo que trate "/" como "tenant vazio" e acabe sobrescrevendo o estado.
+  if (pathname === "/") {
+    const tenantFromQuery = normalizeTenantSlug(request.nextUrl.searchParams.get("tenant"));
+    const tenantFromCookie = normalizeTenantSlug(request.cookies.get(TENANT_COOKIE_NAME)?.value);
+    if (!tenantFromQuery && tenantFromCookie) {
+      const target = new URL(`/${tenantFromCookie}`, request.url);
+      request.nextUrl.searchParams.forEach((v, k) => target.searchParams.set(k, v));
+      return NextResponse.redirect(target);
+    }
+  }
 
   // /teste2 ou /outro-tenant → setar tenant_slug (e api_base_url se vier na query) e reescrever para / (preservando query)
   if (segments.length === 1 && !KNOWN_FIRST_SEGMENTS.includes(segments[0])) {

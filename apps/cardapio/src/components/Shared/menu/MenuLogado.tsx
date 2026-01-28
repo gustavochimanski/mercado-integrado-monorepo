@@ -14,6 +14,15 @@ import Link from "next/link";
 import { getCliente, clearCliente } from "@cardapio/stores/client/ClientStore";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { getCookie } from "cookies-next";
+
+const TENANT_COOKIE_NAME = "tenant_slug";
+
+function normalizeTenantSlug(value: unknown): string | null {
+  const slug = (typeof value === "string" ? value : "").trim().toLowerCase();
+  if (!slug) return null;
+  return /^[a-z0-9-]+$/.test(slug) ? slug : null;
+}
 
 export default function MenuLogado() {
   const cliente = getCliente();
@@ -22,7 +31,8 @@ export default function MenuLogado() {
   const handleLogout = () => {
     clearCliente();
     toast.success("Logout realizado com sucesso!");
-    router.push("/");
+    const tenantFromCookie = normalizeTenantSlug(getCookie(TENANT_COOKIE_NAME));
+    router.push(tenantFromCookie ? `/${tenantFromCookie}` : "/");
     // Força reload para limpar todos os estados
     setTimeout(() => window.location.reload(), 500);
   };
