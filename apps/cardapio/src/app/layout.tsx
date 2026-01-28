@@ -14,6 +14,7 @@ import { LojaFechadaBannerGlobal } from "@cardapio/components/Shared/LojaFechada
 import { LojaStatusHeaderGlobal } from "@cardapio/components/Shared/LojaStatusHeaderGlobal";
 import { LoginWrapper } from "@cardapio/components/auth/LoginWrapper";
 import { ApiAdminBootstrap } from "@cardapio/app/api/ApiAdminBootstrap";
+import { TenantCookiePersist } from "@cardapio/components/tenant/TenantCookiePersist";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
               <div className="min-h-screen bg-gray-50 flex justify-center">
                 <div className="w-full max-w-md bg-white min-h-screen shadow-xl relative flex flex-col">
                   <ApiAdminBootstrap />
+                  <TenantCookiePersist />
                   <LoginWrapper />
                   <Toaster
                     position="top-right"

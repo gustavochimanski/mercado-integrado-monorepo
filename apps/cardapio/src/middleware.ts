@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { getApiBaseUrlFromRequest } from "@cardapio/lib/api/getApiBaseUrl.middleware";
 
 const TENANT_COOKIE_NAME = "tenant_slug";
+const API_BASE_URL_COOKIE_NAME = "api_base_url";
+
+// "Para sempre" na prática: prazo bem longo (10 anos).
+// Observação: alguns navegadores/políticas podem impor limites menores,
+// mas isso garante que NÃO seja cookie de sessão (que some ao fechar o browser).
+const PERSISTENT_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365 * 10; // 10 anos
+function persistentCookieExpires() {
+  return new Date(Date.now() + PERSISTENT_COOKIE_MAX_AGE_SECONDS * 1000);
+}
+
+function persistentCookieOptions() {
+  return {
+    path: "/",
+    maxAge: PERSISTENT_COOKIE_MAX_AGE_SECONDS,
+    expires: persistentCookieExpires(),
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+  };
+}
 
 /** Rotas que não são tenant (primeiro segmento do path) */
 const KNOWN_FIRST_SEGMENTS = [
@@ -54,19 +73,15 @@ export async function middleware(request: NextRequest) {
       const rewriteUrl = new URL("/", request.url);
       request.nextUrl.searchParams.forEach((v, k) => rewriteUrl.searchParams.set(k, v));
       const res = NextResponse.rewrite(rewriteUrl);
-      res.cookies.set(TENANT_COOKIE_NAME, tenant, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365,
-        sameSite: "lax",
-      });
+      res.cookies.set(TENANT_COOKIE_NAME, tenant, persistentCookieOptions());
       // Em dev, /xmanski?empresa=1&api_base_url=http://172.20.0.1:41154 → seta cookie para o client usar essa base
       const apiBaseFromQuery = request.nextUrl.searchParams.get("api_base_url")?.trim();
       if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
-        res.cookies.set("api_base_url", apiBaseFromQuery.replace(/\/$/, ""), {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 365,
-          sameSite: "lax",
-        });
+        res.cookies.set(
+          API_BASE_URL_COOKIE_NAME,
+          apiBaseFromQuery.replace(/\/$/, ""),
+          persistentCookieOptions()
+        );
       }
       return res;
     }
@@ -118,11 +133,7 @@ export async function middleware(request: NextRequest) {
       const redirectRes = NextResponse.redirect(target);
       // Supervisor envia / sem slug: seta cookie tenant da query no redirect para o client ter na landing
       if (tenantFromQuery && isValidTenantSlug(tenantFromQuery)) {
-        redirectRes.cookies.set(TENANT_COOKIE_NAME, tenantFromQuery, {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 365,
-          sameSite: "lax",
-        });
+        redirectRes.cookies.set(TENANT_COOKIE_NAME, tenantFromQuery, persistentCookieOptions());
       }
       return redirectRes;
     }
