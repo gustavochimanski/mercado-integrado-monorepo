@@ -20,6 +20,8 @@ import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveE
 import { useBanners } from "@cardapio/services/banners";
 import { BannerVertical, BannersHorizontal } from "@cardapio/components/Shared/parceiros/Banners";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { useMutateCliente } from "@cardapio/services/cliente";
+import { useAutoLoginFromClientNumber } from "@cardapio/lib/params/useAutoLoginFromClientNumber";
 // Garantir que apiAdmin carregue na rota: ready_for_token (login admin iframe) quando via=supervisor
 import "@cardapio/app/api/apiAdmin";
 
@@ -27,9 +29,13 @@ export default function LandingpageStorePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoEmpMini | null>(null);
   const { isAdmin } = useUserContext();
+  const { loginDireto } = useMutateCliente();
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
   const isHome = searchParams.get("is_home") === "true";
+
+  // ✅ Auto-login via `?client_number=...`
+  useAutoLoginFromClientNumber(loginDireto);
 
   useReceiveEmpresaFromQuery();
   const empresaParam = searchParams.get("empresa");

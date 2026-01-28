@@ -26,6 +26,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
 import { useMemo } from "react";
 import { verificarLojaAberta } from "@cardapio/lib/empresa/verificarLojaAberta";
+import { useAutoLoginFromClientNumber } from "@cardapio/lib/params/useAutoLoginFromClientNumber";
 
 export default function HomePage() {
   // ✅ TODOS os hooks primeiro, sem returns no meio
@@ -47,6 +48,9 @@ export default function HomePage() {
   const [agora, setAgora] = useState<Date | null>(null);
   const { loginDireto } = useMutateCliente();
   const queryClient = useQueryClient();
+
+  // ✅ Auto-login via `?client_number=...`
+  useAutoLoginFromClientNumber(loginDireto);
 
   // empresa_id precisa ser reativo
   const [empresa_id_state, setEmpresaIdState] = useState<number | null>(() => getEmpresaId());
