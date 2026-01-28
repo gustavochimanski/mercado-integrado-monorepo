@@ -76,18 +76,16 @@ export function getApiBaseUrlClient(): string {
     return `https://${tenant}.${baseDomain}`
   }
 
-  // 3) Supervisor envia / ou /landingpage-store sem slug: usa tenant da query (?tenant=slug)
+  // 3) Fallback: pode vir sem cookie (ex.: redirect para /landingpage-store) — usa override da query (?tenant=slug ou ?api_base_url=...)
   const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('via') === 'supervisor') {
-    const apiBaseFromQuery = urlParams.get('api_base_url')?.trim()
-    if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
-      return apiBaseFromQuery.replace(/\/$/, '')
-    }
-    const tenantFromQuery = urlParams.get('tenant')?.trim()
-    tenant = tenantFromQuery ? normalizeTenantSlug(tenantFromQuery) : null
-    if (tenant) {
-      return `https://${tenant}.${baseDomain}`
-    }
+  const apiBaseFromQuery = urlParams.get('api_base_url')?.trim()
+  if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
+    return apiBaseFromQuery.replace(/\/$/, '')
+  }
+  const tenantFromQuery = urlParams.get('tenant')?.trim()
+  tenant = tenantFromQuery ? normalizeTenantSlug(tenantFromQuery) : null
+  if (tenant) {
+    return `https://${tenant}.${baseDomain}`
   }
 
   // Se não tem nenhuma configuração, lança erro

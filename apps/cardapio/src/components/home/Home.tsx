@@ -130,14 +130,45 @@ export default function HomePage() {
     
     // ✅ PRESERVAR via=supervisor se existir na URL atual
     const viaSupervisor = searchParams.get("via");
+    // ✅ PRESERVAR tenant (quando a URL original era /{tenant}?empresa=...)
+    const tenantFromQuery = (searchParams.get("tenant") ?? "").trim().toLowerCase();
     const isExternalUrl = url.startsWith('http://') || url.startsWith('https://');
     const urlObj = isExternalUrl 
       ? new URL(url)
       : new URL(url, window.location.origin);
+
+    const isValidTenantSlug = (s: string) => /^[a-z0-9-]+$/.test(s);
+    const KNOWN_FIRST_SEGMENTS = new Set([
+      "api",
+      "categoria",
+      "landingpage-store",
+      "finalizar-pedido",
+      "menu",
+      "pedidos",
+      "_next",
+      "favicon.ico",
+    ]);
     
     // Se já tiver via na URL de redirecionamento, não sobrescrever
     if (viaSupervisor === "supervisor" && !urlObj.searchParams.has("via")) {
       urlObj.searchParams.set("via", "supervisor");
+    }
+
+    // Se já tiver tenant na URL de redirecionamento, não sobrescrever
+    if (!urlObj.searchParams.has("tenant")) {
+      // 1) Se veio na query, usa
+      if (tenantFromQuery && isValidTenantSlug(tenantFromQuery)) {
+        urlObj.searchParams.set("tenant", tenantFromQuery);
+      } else {
+        // 2) Se a URL atual é /{tenant}, extrai do pathname
+        const segs = window.location.pathname.split("/").filter(Boolean);
+        if (segs.length === 1) {
+          const maybeTenant = segs[0].trim().toLowerCase();
+          if (maybeTenant && !KNOWN_FIRST_SEGMENTS.has(maybeTenant) && isValidTenantSlug(maybeTenant)) {
+            urlObj.searchParams.set("tenant", maybeTenant);
+          }
+        }
+      }
     }
     
     // Reconstruir a URL final
