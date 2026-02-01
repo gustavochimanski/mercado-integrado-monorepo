@@ -46,10 +46,10 @@ export function TenantCookiePersist() {
     // 1) Prioridade: query param ?tenant=slug (ex.: links de supervisor)
     const tenantFromQuery = normalizeTenantSlug(searchParams.get("tenant"));
 
-    // 2) Fallback: URL /{tenant} (mesma regra do middleware: 1 segmento e não conhecido)
+    // 2) Fallback: URL /{tenant}/... (mesma regra do middleware: primeiro segmento e não conhecido)
     const segments = (pathname ?? "").split("/").filter(Boolean);
     const maybeFromPath =
-      segments.length === 1 && !KNOWN_FIRST_SEGMENTS.has(segments[0])
+      segments.length >= 1 && !KNOWN_FIRST_SEGMENTS.has(segments[0])
         ? normalizeTenantSlug(segments[0])
         : null;
 

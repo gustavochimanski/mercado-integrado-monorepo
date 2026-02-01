@@ -10,6 +10,17 @@ function normalizeTenantSlug(value: string) {
   return slug
 }
 
+const KNOWN_FIRST_SEGMENTS = new Set([
+  'api',
+  'categoria',
+  'landingpage-store',
+  'finalizar-pedido',
+  'menu',
+  'pedidos',
+  '_next',
+  'favicon.ico',
+])
+
 /**
  * Versão client-side que lê cookies do browser
  */
@@ -76,7 +87,18 @@ export function getApiBaseUrlClient(): string {
     return `https://${tenant}.${baseDomain}`
   }
 
-  // 3) Fallback: pode vir sem cookie (ex.: redirect para /landingpage-store) — usa override da query (?tenant=slug ou ?api_base_url=...)
+  // 3) Fallback: pode vir sem cookie (ex.: primeira navegação /{tenant}/... antes de persistir)
+  //    tenta inferir do pathname
+  const pathSegments = window.location.pathname.split('/').filter(Boolean)
+  const fromPath =
+    pathSegments.length >= 1 && !KNOWN_FIRST_SEGMENTS.has(pathSegments[0])
+      ? normalizeTenantSlug(pathSegments[0])
+      : null
+  if (fromPath) {
+    return `https://${fromPath}.${baseDomain}`
+  }
+
+  // 4) Fallback: pode vir sem cookie (ex.: redirect para /landingpage-store) — usa override da query (?tenant=slug ou ?api_base_url=...)
   const urlParams = new URLSearchParams(window.location.search)
   const apiBaseFromQuery = urlParams.get('api_base_url')?.trim()
   if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {

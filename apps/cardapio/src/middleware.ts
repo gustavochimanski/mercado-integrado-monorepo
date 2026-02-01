@@ -51,13 +51,35 @@ function normalizeTenantSlug(value: string | null | undefined): string | null {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const segments = pathname.split("/").filter(Boolean);
+  const tenantFromQuery = normalizeTenantSlug(request.nextUrl.searchParams.get("tenant"));
+  const apiBaseFromQuery = request.nextUrl.searchParams.get("api_base_url")?.trim();
+
+  function applyQueryCookies(res: NextResponse) {
+    // Se veio tenant na query (ex.: supervisor), persistir imediatamente no server
+    if (tenantFromQuery) {
+      const tenantFromCookie = normalizeTenantSlug(request.cookies.get(TENANT_COOKIE_NAME)?.value);
+      if (tenantFromCookie !== tenantFromQuery) {
+        res.cookies.set(TENANT_COOKIE_NAME, tenantFromQuery, persistentCookieOptions());
+      }
+    }
+
+    // Em dev/override: também persistir api_base_url quando vier na query
+    if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
+      res.cookies.set(
+        API_BASE_URL_COOKIE_NAME,
+        apiBaseFromQuery.replace(/\/$/, ""),
+        persistentCookieOptions()
+      );
+    }
+
+    return res;
+  }
 
   // ✅ Nunca "perder" tenant ao acessar "/":
   // Se já existe tenant_slug no cookie e o usuário acessar "/" sem um tenant explícito válido na query,
   // redireciona para "/{tenant}" preservando a query string.
   // Isso evita qualquer fluxo que trate "/" como "tenant vazio" e acabe sobrescrevendo o estado.
   if (pathname === "/") {
-    const tenantFromQuery = normalizeTenantSlug(request.nextUrl.searchParams.get("tenant"));
     const tenantFromCookie = normalizeTenantSlug(request.cookies.get(TENANT_COOKIE_NAME)?.value);
     if (!tenantFromQuery && tenantFromCookie) {
       const target = new URL(`/${tenantFromCookie}`, request.url);
@@ -66,16 +88,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /teste2 ou /outro-tenant → setar tenant_slug (e api_base_url se vier na query) e reescrever para / (preservando query)
-  if (segments.length === 1 && !KNOWN_FIRST_SEGMENTS.includes(segments[0])) {
+  // /{tenant}/... → setar tenant_slug e reescrever removendo o prefixo do tenant (preservando query)
+  // Ex.:
+  // - /teste2              -> rewrite /
+  // - /teste2/categoria/12  -> rewrite /categoria/12
+  if (segments.length >= 1 && !KNOWN_FIRST_SEGMENTS.includes(segments[0])) {
     const tenant = segments[0].trim().toLowerCase();
     if (isValidTenantSlug(tenant)) {
-      const rewriteUrl = new URL("/", request.url);
+      const restPath = `/${segments.slice(1).join("/")}`.replace(/\/$/, "");
+      const rewriteUrl = new URL(restPath === "/" ? "/" : restPath || "/", request.url);
       request.nextUrl.searchParams.forEach((v, k) => rewriteUrl.searchParams.set(k, v));
       const res = NextResponse.rewrite(rewriteUrl);
       res.cookies.set(TENANT_COOKIE_NAME, tenant, persistentCookieOptions());
-      // Em dev, /xmanski?empresa=1&api_base_url=http://172.20.0.1:41154 → seta cookie para o client usar essa base
-      const apiBaseFromQuery = request.nextUrl.searchParams.get("api_base_url")?.trim();
+      // api_base_url pode vir na query (dev / override)
       if (apiBaseFromQuery && /^https?:\/\//.test(apiBaseFromQuery)) {
         res.cookies.set(
           API_BASE_URL_COOKIE_NAME,
@@ -88,17 +113,17 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname !== "/") {
-    return NextResponse.next();
+    return applyQueryCookies(NextResponse.next());
   }
 
   const empresaParam = request.nextUrl.searchParams.get("empresa")?.trim();
   if (!empresaParam || !/^\d+$/.test(empresaParam)) {
-    return NextResponse.next();
+    return applyQueryCookies(NextResponse.next());
   }
 
   const empresaId = parseInt(empresaParam, 10);
   if (!Number.isFinite(empresaId) || empresaId <= 0) {
-    return NextResponse.next();
+    return applyQueryCookies(NextResponse.next());
   }
 
   try {
@@ -113,7 +138,7 @@ export async function middleware(request: NextRequest) {
     clearTimeout(timeout);
 
     if (!res.ok) {
-      return NextResponse.next();
+      return applyQueryCookies(NextResponse.next());
     }
 
     const data = await res.json();
@@ -141,10 +166,11 @@ export async function middleware(request: NextRequest) {
     // Em caso de erro (rede, timeout, etc.), deixa a Home tratar no client
   }
 
-  return NextResponse.next();
+  return applyQueryCookies(NextResponse.next());
 }
 
 export const config = {
-  // / e /:tenant (ex.: /teste2); rotas conhecidas são filtradas no corpo do middleware
-  matcher: ["/", "/:tenant"],
+  // Rodar em praticamente todas as rotas (inclui deep links /{tenant}/...).
+  // Exclui apenas assets internos do Next e favicon.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
