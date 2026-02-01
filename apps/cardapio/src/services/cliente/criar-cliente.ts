@@ -6,6 +6,15 @@ import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 import { setCliente } from "@cardapio/stores/client/ClientStore";
 import type { ClienteCreate, ClienteOut } from "./types";
 
+export function isClienteJaCadastradoError(error: unknown) {
+  const status = (error as any)?.response?.status;
+  if (status === 409) return true;
+
+  const msg = extractErrorMessage(error, "").toLowerCase();
+  // tolerante a variações de mensagem do backend
+  return /j[aá]\s*cadastrad|already\s*exist|already\s*registered|duplic|exists/.test(msg);
+}
+
 /**
  * Hook para criar um novo cliente
  * Endpoint: POST /api/cadastros/client/clientes/
@@ -38,6 +47,8 @@ export function useCriarCliente() {
       toast.success("Cliente criado com sucesso!");
     },
     onError: (error) => {
+      // Se já existe, o fluxo de UI pode fazer fallback de login automaticamente
+      if (isClienteJaCadastradoError(error)) return;
       toast.error(extractErrorMessage(error));
     },
   });

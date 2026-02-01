@@ -69,7 +69,7 @@ export default function RootLayout({
                       "--destructive-bg": "#ffffff",
                       "--destructive-text": "#ef4444",
                       "--destructive-border": "#ef4444",
-                    } as React.CSSProperties}
+                    } as any}
                   />
                   <Suspense fallback={null}>
                     <LojaStatusHeaderGlobal />

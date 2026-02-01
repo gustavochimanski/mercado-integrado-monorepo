@@ -21,30 +21,32 @@ export default function SupervisorLoginModal() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    startTransition(async () => {
-      try {
-        setError("");
-        await login(username, password);
-        toast.success("Login realizado com sucesso!");
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        const isConfigError =
-          msg.includes("Base da API não definida") ||
-          msg.includes("tenant_slug") ||
-          msg.includes("api_base_url");
-        const isNetworkError =
-          err &&
-          typeof err === "object" &&
-          "code" in err &&
-          (err as { code?: string }).code === "ERR_NETWORK";
-        const message = isConfigError
-          ? "Base da API não definida. O link do supervisor deve incluir ?tenant=slug (ex: /?empresa=1&via=supervisor&tenant=xmanski)."
-          : isNetworkError
-            ? "Não foi possível conectar à API. Verifique sua conexão ou se acessou pelo link correto do supervisor."
-            : "Credenciais inválidas. Tente novamente.";
-        setError(message);
-        toast.error(message);
-      }
+    startTransition(() => {
+      void (async () => {
+        try {
+          setError("");
+          await login(username, password);
+          toast.success("Login realizado com sucesso!");
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          const isConfigError =
+            msg.includes("Base da API não definida") ||
+            msg.includes("tenant_slug") ||
+            msg.includes("api_base_url");
+          const isNetworkError =
+            err &&
+            typeof err === "object" &&
+            "code" in err &&
+            (err as { code?: string }).code === "ERR_NETWORK";
+          const message = isConfigError
+            ? "Base da API não definida. O link do supervisor deve incluir ?tenant=slug (ex: /?empresa=1&via=supervisor&tenant=xmanski)."
+            : isNetworkError
+              ? "Não foi possível conectar à API. Verifique sua conexão ou se acessou pelo link correto do supervisor."
+              : "Credenciais inválidas. Tente novamente.";
+          setError(message);
+          toast.error(message);
+        }
+      })();
     });
   }
 

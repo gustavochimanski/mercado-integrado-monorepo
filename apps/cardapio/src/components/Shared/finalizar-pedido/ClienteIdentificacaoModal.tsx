@@ -5,8 +5,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { useMutateCliente } from "@cardapio/services/cliente";
+import { isClienteJaCadastradoError, useMutateCliente } from "@cardapio/services/cliente";
 import { useUserContext } from "@cardapio/hooks/auth/userContext";
+import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
 
 interface Props {
   open: boolean;
@@ -34,6 +35,19 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
     }
   }, [open, forceLoginMode]);
 
+  const concluirLoginComSucesso = async () => {
+    try {
+      // Atualiza o contexto do usuário para verificar se é admin
+      await refreshUser();
+      // Pequeno delay para garantir que o estado foi atualizado
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (error) {
+      console.warn("Erro ao atualizar contexto do usuário:", error);
+    }
+    onConfirm?.();
+    onClose();
+  };
+
   const handleConfirmar = () => {
     const telefoneLimpo = telefone.replace(/\D/g, "");
     setErro("");
@@ -45,18 +59,7 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
     if (jaTenhoCadastro) {
       // Login direto apenas com telefone
       loginDireto.mutate({ telefone: telefoneLimpo }, {
-        onSuccess: async () => {
-          try {
-            // Atualiza o contexto do usuário para verificar se é admin
-            await refreshUser();
-            // Pequeno delay para garantir que o estado foi atualizado
-            await new Promise(resolve => setTimeout(resolve, 100));
-          } catch (error) {
-            console.warn("Erro ao atualizar contexto do usuário:", error);
-          }
-          onConfirm?.();
-          onClose();
-        },
+        onSuccess: concluirLoginComSucesso,
         onError: () => setErro("Erro ao fazer login. Verifique se o telefone está correto."),
       });
     } else {
@@ -64,19 +67,19 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
         return setErro("Digite um nome válido.");
       }
       create.mutate({ nome, telefone: telefoneLimpo }, {
-        onSuccess: async () => {
-          try {
-            // Atualiza o contexto do usuário para verificar se é admin
-            await refreshUser();
-            // Pequeno delay para garantir que o estado foi atualizado
-            await new Promise(resolve => setTimeout(resolve, 100));
-          } catch (error) {
-            console.warn("Erro ao atualizar contexto do usuário:", error);
+        onSuccess: concluirLoginComSucesso,
+        onError: (error) => {
+          // Se o cliente já existir, faz login automaticamente com o telefone informado
+          if (isClienteJaCadastradoError(error)) {
+            loginDireto.mutate({ telefone: telefoneLimpo }, {
+              onSuccess: concluirLoginComSucesso,
+              onError: () => setErro("Esse telefone já tem cadastro, mas não foi possível fazer login. Tente novamente."),
+            });
+            return;
           }
-          onConfirm?.();
-          onClose();
+
+          setErro(extractErrorMessage(error, "Erro ao criar cliente. Tente novamente."));
         },
-        onError: () => setErro("Erro ao criar cliente. Tente novamente."),
       });
     }
   };
