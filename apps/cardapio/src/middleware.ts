@@ -25,12 +25,16 @@ function persistentCookieOptions() {
 /** Rotas que não são tenant (primeiro segmento do path) */
 const KNOWN_FIRST_SEGMENTS = [
   "api",
+  "login",
   "categoria",
+  "perfil",
+  "enderecos",
   "landingpage-store",
   "finalizar-pedido",
   "menu",
   "pedidos",
   "_next",
+  "_not-found",
   "favicon.ico",
 ];
 

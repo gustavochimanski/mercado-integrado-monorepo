@@ -35,6 +35,14 @@ export async function loginService(
 
 export function logoutService(redirectToLogin = true) {
   if (redirectToLogin) {
-    window.location.href = "/login";
+    // Importante: NÃO “zerar” tenant/empresa no logout.
+    // Manter a URL atual e dar reload garante que:
+    // - o tenant do path/query continua valendo
+    // - a empresa (localStorage) não some
+    try {
+      window.location.reload();
+    } catch {
+      window.location.href = "/";
+    }
   }
 }

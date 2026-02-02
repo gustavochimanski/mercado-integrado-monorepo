@@ -29,12 +29,16 @@ function cookieOptions() {
 /** Mantém em sync com `src/middleware.ts` */
 const KNOWN_FIRST_SEGMENTS = new Set([
   "api",
+  "login",
   "categoria",
+  "perfil",
+  "enderecos",
   "landingpage-store",
   "finalizar-pedido",
   "menu",
   "pedidos",
   "_next",
+  "_not-found",
   "favicon.ico",
 ]);
 
