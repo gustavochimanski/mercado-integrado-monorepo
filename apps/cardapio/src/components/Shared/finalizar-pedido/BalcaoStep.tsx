@@ -1,22 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Store, Clock, CheckCircle2, AlertCircle, ShoppingBag, Building2 } from "lucide-react";
+import { useMemo } from "react";
+import { Store, Clock, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
 import { Card, CardContent } from "@cardapio/components/Shared/ui/card";
-import { Input } from "@cardapio/components/Shared/ui/input";
-import { Label } from "@cardapio/components/Shared/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@cardapio/components/Shared/ui/select";
 import { cn } from "@cardapio/lib/utils";
 
 interface BalcaoStepProps {
-  mesaCodigo: string | null;
-  onMesaCodigoChange: (mesaCodigo: string | null) => void;
   empresas: {
     id: number;
     nome: string;
@@ -34,71 +23,14 @@ interface BalcaoStepProps {
 type EmpresaListaItem = BalcaoStepProps["empresas"][number];
 
 export default function BalcaoStep({
-  mesaCodigo,
-  onMesaCodigoChange,
   empresas,
   empresaSelecionadaId,
   onEmpresaSelecionadaChange,
   isLoadingEmpresas = false,
   carregamentoFalhou = false,
 }: BalcaoStepProps) {
-  const [codigoLocal, setCodigoLocal] = useState<string>(mesaCodigo ?? "");
-
-  useEffect(() => {
-    if ((mesaCodigo ?? "") !== codigoLocal) {
-      setCodigoLocal(mesaCodigo ?? "");
-    }
-  }, [mesaCodigo]);
-
-  const handleChange = (value: string) => {
-    const apenasNumeros = value.replace(/\D/g, "");
-    setCodigoLocal(apenasNumeros);
-
-    if (apenasNumeros) {
-      onMesaCodigoChange(apenasNumeros);
-    } else {
-      onMesaCodigoChange(null);
-    }
-  };
-
-  const opcoesEmpresas = useMemo<Array<EmpresaListaItem & { label: string; value: string }>>(
-    () =>
-      empresas.map((empresa: EmpresaListaItem) => ({
-        ...empresa,
-        label: empresa.nome,
-        value: String(empresa.id),
-      })),
-    [empresas]
-  );
-
-  const descricaoEmpresaSelecionada = useMemo(() => {
-    if (!empresaSelecionadaId) {
-      return "Selecione a loja onde você está realizando a retirada.";
-    }
-
-    const empresa = empresas.find((item: EmpresaListaItem) => item.id === empresaSelecionadaId);
-    if (!empresa) {
-      return "Selecione a loja onde você está realizando a retirada.";
-    }
-
-    const distanciaInfo =
-      typeof empresa.distancia_km === "number"
-        ? `${empresa.distancia_km.toFixed(1)} km`
-        : null;
-
-    const localizacao = [empresa.bairro, empresa.cidade, empresa.estado]
-      .filter(Boolean)
-      .join(" • ");
-
-    const descricao = [distanciaInfo, localizacao].filter(Boolean).join(" • ");
-    return descricao || "Loja selecionada para retirada.";
-  }, [empresaSelecionadaId, empresas]);
-
-  const formatDescricaoEmpresa = (empresaId: number) => {
-    const empresa = empresas.find((item: EmpresaListaItem) => item.id === empresaId);
-    if (!empresa) {
-      return null;
-    }
+  const formatDescricaoEmpresa = (empresa: EmpresaListaItem) => {
+    if (!empresa) return null;
 
     const distanciaInfo =
       typeof empresa.distancia_km === "number"
@@ -112,19 +44,16 @@ export default function BalcaoStep({
     return [distanciaInfo, localizacao].filter(Boolean).join(" • ");
   };
 
-  const handleEmpresaChange = (value: string) => {
-    if (value === "empty") {
-      onEmpresaSelecionadaChange(null);
-      return;
-    }
-
-    const parsed = Number(value);
-    if (Number.isNaN(parsed)) {
-      onEmpresaSelecionadaChange(null);
-    } else {
-      onEmpresaSelecionadaChange(parsed);
-    }
-  };
+  const empresasOrdenadas = useMemo(() => {
+    // Priorizar por distância quando disponível, senão mantém ordem original
+    const hasAnyDistance = empresas.some((e) => typeof e.distancia_km === "number");
+    if (!hasAnyDistance) return empresas;
+    return [...empresas].sort((a, b) => {
+      const da = typeof a.distancia_km === "number" ? a.distancia_km : Number.POSITIVE_INFINITY;
+      const db = typeof b.distancia_km === "number" ? b.distancia_km : Number.POSITIVE_INFINITY;
+      return da - db;
+    });
+  }, [empresas]);
 
   const nenhumaEmpresaDisponivel = !isLoadingEmpresas && empresas.length === 0;
 
@@ -147,10 +76,6 @@ export default function BalcaoStep({
             <div className="w-full max-w-md">
               <h3 className="font-semibold text-lg mb-4">Como funciona?</h3>
               <ul className="text-sm text-muted-foreground space-y-3 text-left">
-                <li className="flex items-start gap-3">
-                  <ShoppingBag className="text-primary mt-0.5 flex-shrink-0" size={18} />
-                  <span>Você faz o pedido e escolhe a forma de pagamento</span>
-                </li>
                 <li className="flex items-start gap-3">
                   <Clock className="text-primary mt-0.5 flex-shrink-0" size={18} />
                   <span>O tempo de preparo será informado após a confirmação do pedido</span>
@@ -176,7 +101,7 @@ export default function BalcaoStep({
               <Building2 className="text-primary" size={24} />
             </div>
             <div>
-              <p className="text-base font-medium">Onde você está?</p>
+              <p className="text-base font-medium">Seleciona a sua loja</p>
               <p className="text-sm text-muted-foreground">
                 Escolha a unidade em que você realizará a retirada do pedido.
               </p>
@@ -184,47 +109,13 @@ export default function BalcaoStep({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Unidade</Label>
-
-            <Select
-              onValueChange={handleEmpresaChange}
-              value={
-                empresaSelecionadaId ? String(empresaSelecionadaId) : "empty"
-              }
-              disabled={isLoadingEmpresas || carregamentoFalhou || nenhumaEmpresaDisponivel}
-            >
-              <SelectTrigger className={cn("w-full justify-between", !empresaSelecionadaId && "text-muted-foreground")}>
-                <SelectValue placeholder={
-                  isLoadingEmpresas
-                    ? "Carregando unidades..."
-                    : carregamentoFalhou
-                      ? "Não foi possível carregar as unidades"
-                      : nenhumaEmpresaDisponivel
-                        ? "Nenhuma unidade disponível no momento"
-                        : "Selecione a unidade para retirada"
-                } />
-              </SelectTrigger>
-              <SelectContent className="w-[var(--radix-select-trigger-width)] max-h-72">
-                {empresas.length > 0 && (
-                  <SelectItem value="empty">
-                    <span className="text-sm text-muted-foreground">Limpar seleção</span>
-                  </SelectItem>
-                )}
-                {opcoesEmpresas.map((empresa) => (
-                  <SelectItem key={empresa.value} value={empresa.value}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{empresa.label}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDescricaoEmpresa(Number(empresa.value)) || "Endereço indisponível"}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {!isLoadingEmpresas && empresaSelecionadaId && (
-              <p className="text-xs text-muted-foreground">{descricaoEmpresaSelecionada}</p>
+            {isLoadingEmpresas && (
+              <div className="space-y-2">
+                <div className="h-12 rounded-xl bg-muted animate-pulse" />
+                <div className="h-12 rounded-xl bg-muted animate-pulse" />
+                <div className="h-12 rounded-xl bg-muted animate-pulse" />
+                <p className="text-xs text-muted-foreground">Carregando unidades...</p>
+              </div>
             )}
 
             {carregamentoFalhou && (
@@ -237,6 +128,53 @@ export default function BalcaoStep({
               <p className="text-xs text-muted-foreground">
                 No momento não há unidades disponíveis para retirada. Volte mais tarde ou escolha outro tipo de atendimento.
               </p>
+            )}
+
+            {!isLoadingEmpresas && !carregamentoFalhou && !nenhumaEmpresaDisponivel && (
+              <div className="grid gap-3">
+                {empresasOrdenadas.map((empresa) => {
+                  const isSelected = empresaSelecionadaId === empresa.id;
+                  const descricao = formatDescricaoEmpresa(empresa) || "Endereço indisponível";
+
+                  return (
+                    <button
+                      key={empresa.id}
+                      type="button"
+                      onClick={() => onEmpresaSelecionadaChange(empresa.id)}
+                      className={cn(
+                        "w-full text-left rounded-xl border p-4 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                        isSelected
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                          : "border-muted-foreground/20 hover:border-primary/40"
+                      )}
+                      aria-pressed={isSelected}
+                      aria-label={`Selecionar ${empresa.nome} como loja de retirada`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{empresa.nome}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{descricao}</p>
+                        </div>
+                        {isSelected && (
+                          <CheckCircle2 className="text-primary shrink-0 mt-0.5" size={20} />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {!isLoadingEmpresas && !!empresaSelecionadaId && (
+              <button
+                type="button"
+                onClick={() => onEmpresaSelecionadaChange(null)}
+                className={cn(
+                  "text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                )}
+              >
+                Limpar seleção
+              </button>
             )}
           </div>
         </CardContent>
@@ -255,29 +193,6 @@ export default function BalcaoStep({
           </div>
         </CardContent>
       </Card>
-
-      <div className="bg-muted/30 rounded-xl p-4 text-center">
-        <p className="text-sm text-muted-foreground font-medium">
-          Continue para escolher a forma de pagamento
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="codigo-balcao" className="text-base font-medium">
-          Código ou número de referência (opcional)
-        </Label>
-        <Input
-          id="codigo-balcao"
-          type="text"
-          inputMode="numeric"
-          placeholder="Informe se desejar vincular a uma mesa"
-          value={codigoLocal}
-          onChange={(e) => handleChange(e.target.value)}
-        />
-        <p className="text-xs text-muted-foreground">
-          Use este campo se o estabelecimento utilizar códigos para retirada.
-        </p>
-      </div>
     </div>
   );
 }

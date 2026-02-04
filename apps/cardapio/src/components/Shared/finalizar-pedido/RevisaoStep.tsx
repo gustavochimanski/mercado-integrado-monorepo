@@ -335,9 +335,17 @@ export default function RevisaoStep({
                               {complemento.adicionais.map((adicional, adicIdx) => (
                                 <p key={adicIdx} className="text-xs text-muted-foreground pl-2">
                                   + {adicional.adicional_nome || `Adicional #${adicional.adicional_id}`}
-                                  {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                  {(() => {
+                                    const qtdTotal = (adicional.quantidade || 0) * item.quantity;
+                                    return qtdTotal > 1 ? ` (${qtdTotal}x)` : "";
+                                  })()}
                                   {adicional.adicional_preco && adicional.adicional_preco > 0 && (
-                                    <span> - R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2)}</span>
+                                    <span>
+                                      {(() => {
+                                        const qtdTotal = (adicional.quantidade || 0) * item.quantity;
+                                        return ` - R$ ${(adicional.adicional_preco * qtdTotal).toFixed(2)}`;
+                                      })()}
+                                    </span>
                                   )}
                                 </p>
                               ))}
@@ -455,9 +463,17 @@ export default function RevisaoStep({
                               {complemento.adicionais.map((adicional, adicIdx) => (
                                 <p key={adicIdx} className="text-xs text-muted-foreground pl-2">
                                   + {adicional.adicional_nome || `Adicional #${adicional.adicional_id}`}
-                                  {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                  {(() => {
+                                    const qtdTotal = (adicional.quantidade || 0) * combo.quantidade;
+                                    return qtdTotal > 1 ? ` (${qtdTotal}x)` : "";
+                                  })()}
                                   {adicional.adicional_preco && adicional.adicional_preco > 0 && (
-                                    <span> - R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2)}</span>
+                                    <span>
+                                      {(() => {
+                                        const qtdTotal = (adicional.quantidade || 0) * combo.quantidade;
+                                        return ` - R$ ${(adicional.adicional_preco * qtdTotal).toFixed(2)}`;
+                                      })()}
+                                    </span>
                                   )}
                                 </p>
                               ))}
@@ -563,9 +579,17 @@ export default function RevisaoStep({
                               {complemento.adicionais.map((adicional, adicIdx) => (
                                 <p key={adicIdx} className="text-xs text-muted-foreground pl-2">
                                   + {adicional.adicional_nome || `Adicional #${adicional.adicional_id}`}
-                                  {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                  {(() => {
+                                    const qtdTotal = (adicional.quantidade || 0) * receita.quantidade;
+                                    return qtdTotal > 1 ? ` (${qtdTotal}x)` : "";
+                                  })()}
                                   {adicional.adicional_preco && adicional.adicional_preco > 0 && (
-                                    <span> - R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2)}</span>
+                                    <span>
+                                      {(() => {
+                                        const qtdTotal = (adicional.quantidade || 0) * receita.quantidade;
+                                        return ` - R$ ${(adicional.adicional_preco * qtdTotal).toFixed(2)}`;
+                                      })()}
+                                    </span>
                                   )}
                                 </p>
                               ))}
@@ -686,11 +710,13 @@ export default function RevisaoStep({
                     <span className="text-sm font-medium">Retirada no balcão</span>
                   </div>
                 )}
-                <div className="flex items-center gap-3 py-2.5">
-                  <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
-                  <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
-                  <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
-                </div>
+                {tipoPedido === "DELIVERY" && (
+                  <div className="flex items-center gap-3 py-2.5">
+                    <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
+                    <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
+                    <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 py-2.5">
                   <Package className="h-4 w-4 shrink-0 text-primary/50" />
                   <span className="text-sm text-muted-foreground flex-1">Subtotal</span>
@@ -731,9 +757,11 @@ export default function RevisaoStep({
                     <span className="text-sm font-medium text-teal-600 dark:text-teal-400 tabular-nums">- R$ {(previewData.desconto ?? 0).toFixed(2)}</span>
                   </div>
                 )}
-                {((pagamento?.tipo === "DINHEIRO" && meiosPagamentoMultiplos.length === 0) || 
-                  meiosPagamentoMultiplos.some(m => m.tipo === "DINHEIRO")) && 
-                  trocoPara != null && trocoPara > 0 && (
+                {tipoPedido === "DELIVERY" &&
+                  (((pagamento?.tipo === "DINHEIRO" && meiosPagamentoMultiplos.length === 0) ||
+                    meiosPagamentoMultiplos.some((m) => m.tipo === "DINHEIRO")) &&
+                    trocoPara != null &&
+                    trocoPara > 0) && (
                   <div className="flex items-center gap-3 py-2.5">
                     <Receipt className="h-4 w-4 shrink-0 text-primary/50" />
                     <span className="text-sm text-muted-foreground flex-1">Troco para</span>
@@ -780,33 +808,37 @@ export default function RevisaoStep({
                     <span className="text-sm font-medium">Retirada no balcão</span>
                   </div>
                 )}
-                {meiosPagamentoMultiplos.length > 0 ? (
-                  <div className="py-2.5">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
-                      <span className="text-sm text-muted-foreground flex-1">Meios de pagamento</span>
-                    </div>
-                    <div className="pl-7 space-y-1.5">
-                      {meiosPagamentoMultiplos.map((meio, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{meio.nome}</span>
-                          <span className="text-sm font-medium tabular-nums">R$ {meio.valor.toFixed(2)}</span>
+                {tipoPedido === "DELIVERY" && (
+                  <>
+                    {meiosPagamentoMultiplos.length > 0 ? (
+                      <div className="py-2.5">
+                        <div className="flex items-center gap-3 mb-2">
+                          <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
+                          <span className="text-sm text-muted-foreground flex-1">Meios de pagamento</span>
                         </div>
-                      ))}
-                      <div className="pt-1 border-t border-border/60 flex items-center justify-between">
-                        <span className="text-sm font-semibold">Total pagamentos</span>
-                        <span className="text-sm font-bold tabular-nums">
-                          R$ {meiosPagamentoMultiplos.reduce((acc, m) => acc + m.valor, 0).toFixed(2)}
-                        </span>
+                        <div className="pl-7 space-y-1.5">
+                          {meiosPagamentoMultiplos.map((meio, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <span className="text-sm font-medium">{meio.nome}</span>
+                              <span className="text-sm font-medium tabular-nums">R$ {meio.valor.toFixed(2)}</span>
+                            </div>
+                          ))}
+                          <div className="pt-1 border-t border-border/60 flex items-center justify-between">
+                            <span className="text-sm font-semibold">Total pagamentos</span>
+                            <span className="text-sm font-bold tabular-nums">
+                              R$ {meiosPagamentoMultiplos.reduce((acc, m) => acc + m.valor, 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 py-2.5">
-                    <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
-                    <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
-                    <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
-                  </div>
+                    ) : (
+                      <div className="flex items-center gap-3 py-2.5">
+                        <CreditCard className="h-4 w-4 shrink-0 text-primary/50" />
+                        <span className="text-sm text-muted-foreground flex-1">Meio de pagamento</span>
+                        <span className="text-sm font-medium truncate max-w-[50%]">{pagamento?.nome || "—"}</span>
+                      </div>
+                    )}
+                  </>
                 )}
                 {tipoPedido === "DELIVERY" && (
                   <div className="flex items-center gap-3 py-2.5">

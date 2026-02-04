@@ -288,6 +288,50 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
   padrao: e.padrao ?? false,
 }));
 
+  // Auto-seleções (apenas uma vez por montagem) para evitar "vir vazio"
+  // - Pagamento: sempre pré-seleciona o PRIMEIRO meio disponível
+  // - Endereço: usa o padrão se existir; se não houver padrão, usa o primeiro
+  const pagamentoAutoSelecionadoRef = useRef(false);
+  const enderecoAutoSelecionadoRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasToken) return;
+    if (isEditingMode) return;
+    if (tipoPedido !== "DELIVERY") return;
+    if (pagamentoAutoSelecionadoRef.current) return;
+    if (meiosPagamentoMultiplos.length > 0) return;
+    if (!meiosPagamento || meiosPagamento.length === 0) return;
+
+    const primeiro = meiosPagamento[0];
+    if (!primeiro?.id) return;
+
+    pagamentoAutoSelecionadoRef.current = true;
+    setMeioPagamentoId(primeiro.id);
+    setPagamentoId(primeiro.id);
+  }, [hasToken, isEditingMode, tipoPedido, meiosPagamento, meiosPagamentoMultiplos.length]);
+
+  useEffect(() => {
+    if (!hasToken) return;
+    if (isEditingMode) return;
+    if (tipoPedido !== "DELIVERY") return;
+    if (enderecoAutoSelecionadoRef.current) return;
+    if (!enderecos || enderecos.length === 0) return;
+
+    // Prioridade: endereço principal (padrao) > selecionado existente válido > primeiro da lista
+    const padraoId = enderecos.find((e) => e.padrao)?.id ?? null;
+    const enderecoAtualExiste =
+      enderecoId !== null && enderecos.some((e) => e.id === enderecoId);
+
+    const idParaSelecionar =
+      padraoId ??
+      (enderecoAtualExiste ? enderecoId : null) ??
+      enderecos[0].id;
+
+    enderecoAutoSelecionadoRef.current = true;
+    setEnderecoPadraoId(idParaSelecionar);
+    setEnderecoId(idParaSelecionar);
+  }, [hasToken, isEditingMode, tipoPedido, enderecos, enderecoId]);
+
   // Verificar identificação do cliente apenas uma vez ao montar ou quando necessário
   useEffect(() => {
     const clienteAtual = getCliente();
@@ -881,12 +925,6 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                   label: "Balcão",
                   Component: () => (
                     <BalcaoStep
-                      mesaCodigo={mesaCodigo}
-                      onMesaCodigoChange={(codigo) => {
-                        setMesaCodigo(codigo ?? null);
-                        const parsed = ensurePositiveInteger(codigo ? Number(codigo) : null);
-                        setMesaId(parsed);
-                      }}
                       empresas={empresasDisponiveis}
                       empresaSelecionadaId={balcaoEmpresaId}
                       onEmpresaSelecionadaChange={setBalcaoEmpresaId}

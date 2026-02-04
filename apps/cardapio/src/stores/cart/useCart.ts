@@ -371,9 +371,40 @@ export const useCart = create<CartState>()(
       clear: () => set({ items: [], combos: [], receitas: [], observacao: "", editingPedidoId: null }),
 
       totalItems: () => {
-        const itemsTotal = get().items.reduce((total: any, item: { quantity: any; }) => total + item.quantity, 0);
-        const combosTotal = get().combos.reduce((total: any, combo: { quantidade: any; }) => total + combo.quantidade, 0);
-        const receitasTotal = get().receitas.reduce((total: any, receita: { quantidade: any; }) => total + receita.quantidade, 0);
+        // Total "real" de itens: soma quantidades base + complementos (escala pela quantidade)
+        const itemsTotal = get().items.reduce((total: number, item: CartItem) => {
+          const qtdBase = item.quantity;
+          const qtdComplementos =
+            (item.complementos || []).reduce((sum, comp) => {
+              const porUnidade = comp.adicionais.reduce((s, a) => s + (a.quantidade || 0), 0);
+              return sum + porUnidade;
+            }, 0) * item.quantity;
+          const qtdAdicionaisLegado = (item.adicionais || []).length * item.quantity;
+          return total + qtdBase + qtdComplementos + qtdAdicionaisLegado;
+        }, 0);
+
+        const combosTotal = get().combos.reduce((total: number, combo: CartCombo) => {
+          const qtdBase = combo.quantidade;
+          const qtdComplementos =
+            (combo.complementos || []).reduce((sum, comp) => {
+              const porUnidade = comp.adicionais.reduce((s, a) => s + (a.quantidade || 0), 0);
+              return sum + porUnidade;
+            }, 0) * combo.quantidade;
+          const qtdAdicionaisLegado = (combo.adicionais || []).length * combo.quantidade;
+          return total + qtdBase + qtdComplementos + qtdAdicionaisLegado;
+        }, 0);
+
+        const receitasTotal = get().receitas.reduce((total: number, receita: CartReceita) => {
+          const qtdBase = receita.quantidade;
+          const qtdComplementos =
+            (receita.complementos || []).reduce((sum, comp) => {
+              const porUnidade = comp.adicionais.reduce((s, a) => s + (a.quantidade || 0), 0);
+              return sum + porUnidade;
+            }, 0) * receita.quantidade;
+          const qtdAdicionaisLegado = (receita.adicionais || []).length * receita.quantidade;
+          return total + qtdBase + qtdComplementos + qtdAdicionaisLegado;
+        }, 0);
+
         return itemsTotal + combosTotal + receitasTotal;
       },
 

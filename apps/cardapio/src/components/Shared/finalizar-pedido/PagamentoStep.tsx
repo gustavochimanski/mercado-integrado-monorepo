@@ -52,9 +52,22 @@ export default function PagamentoStep({
   const meioSelecionado = meios.find(m => m.id === selected);
   const mostrarCampoTroco = meioSelecionado?.tipo === "DINHEIRO" && !usandoMultiplosPagamentos;
 
+  const parseDecimalPtBr = (raw: string): number | null => {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+
+    let cleaned = trimmed.replace(/[^\d,.\-]/g, "");
+    if (cleaned.includes(",")) {
+      cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+    }
+
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+  };
+
   const handleTrocoChange = (value: string) => {
     setTrocoPara(value);
-    const valorNumerico = value ? parseFloat(value) : null;
+    const valorNumerico = value ? parseDecimalPtBr(value) : null;
     onTrocoChange?.(valorNumerico);
   };
 
@@ -179,12 +192,19 @@ export default function PagamentoStep({
                 <span className="text-muted-foreground">R$</span>
                 <Input
                   id="troco-para"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="Ex: 50.00"
                   value={trocoPara}
                   onChange={(e) => handleTrocoChange(e.target.value)}
+                  onBlur={() => {
+                    const parsed = parseDecimalPtBr(trocoPara);
+                    if (parsed !== null) {
+                      // mantém visual consistente sem travar digitação durante o onChange
+                      setTrocoPara(parsed.toFixed(2));
+                      onTrocoChange?.(parsed);
+                    }
+                  }}
                   className="flex-1"
                   required
                 />

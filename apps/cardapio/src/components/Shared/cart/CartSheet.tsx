@@ -73,10 +73,16 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                             {complemento.adicionais.map((adicional, idx) => (
                               <p key={idx} className="text-xs text-muted-foreground pl-2">
                                 • {adicional.adicional_nome || `Adicional ${adicional.adicional_id}`}
-                                {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                {(() => {
+                                  const qtdTotal = (adicional.quantidade || 0) * i.quantity;
+                                  return qtdTotal > 1 ? ` (${qtdTotal}x)` : "";
+                                })()}
                                 {adicional.adicional_preco && adicional.adicional_preco > 0 && (
                                   <span className="ml-1">
-                                    R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2).replace(".", ",")}
+                                    {(() => {
+                                      const qtdTotal = (adicional.quantidade || 0) * i.quantity;
+                                      return `R$ ${(adicional.adicional_preco * qtdTotal).toFixed(2).replace(".", ",")}`;
+                                    })()}
                                   </span>
                                 )}
                               </p>
@@ -176,10 +182,16 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                             {complemento.adicionais.map((adicional, idx) => (
                               <p key={idx} className="text-xs text-muted-foreground pl-2">
                                 • {adicional.adicional_nome || `Adicional ${adicional.adicional_id}`}
-                                {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                {(() => {
+                                  const qtdTotal = (adicional.quantidade || 0) * c.quantidade;
+                                  return qtdTotal > 1 ? ` (${qtdTotal}x)` : "";
+                                })()}
                                 {adicional.adicional_preco && adicional.adicional_preco > 0 && (
                                   <span className="ml-1">
-                                    R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2).replace(".", ",")}
+                                    {(() => {
+                                      const qtdTotal = (adicional.quantidade || 0) * c.quantidade;
+                                      return `R$ ${(adicional.adicional_preco * qtdTotal).toFixed(2).replace(".", ",")}`;
+                                    })()}
                                   </span>
                                 )}
                               </p>
@@ -279,10 +291,16 @@ export function CartSheet({ open, onClose }: { open: boolean; onClose: () => voi
                             {complemento.adicionais.map((adicional, idx) => (
                               <p key={idx} className="text-xs text-muted-foreground pl-2">
                                 • {adicional.adicional_nome || `Adicional ${adicional.adicional_id}`}
-                                {adicional.quantidade > 1 && ` (${adicional.quantidade}x)`}
+                                {(() => {
+                                  const qtdTotal = (adicional.quantidade || 0) * r.quantidade;
+                                  return qtdTotal > 1 ? ` (${qtdTotal}x)` : "";
+                                })()}
                                 {adicional.adicional_preco && adicional.adicional_preco > 0 && (
                                   <span className="ml-1">
-                                    R$ {(adicional.adicional_preco * adicional.quantidade).toFixed(2).replace(".", ",")}
+                                    {(() => {
+                                      const qtdTotal = (adicional.quantidade || 0) * r.quantidade;
+                                      return `R$ ${(adicional.adicional_preco * qtdTotal).toFixed(2).replace(".", ",")}`;
+                                    })()}
                                   </span>
                                 )}
                               </p>

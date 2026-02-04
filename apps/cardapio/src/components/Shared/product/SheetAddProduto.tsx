@@ -11,6 +11,14 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -82,7 +90,16 @@ export function SheetAdicionarProduto({
 
   const { add } = useCart();
   const quantity = watch("quantity");
+  const observacaoRegister = register("observacao");
   const { estaAberta } = useLojaAberta();
+  const [observacaoModalOpen, setObservacaoModalOpen] = useState(false);
+  const [observacaoDraft, setObservacaoDraft] = useState("");
+  const observacaoAtual = watch("observacao") ?? "";
+
+  const openObservacaoModal = () => {
+    setObservacaoDraft(observacaoAtual);
+    setObservacaoModalOpen(true);
+  };
   
   // Buscar complementos do produto usando o endpoint unificado
   const { data: complementosDaAPI = [], isLoading: isLoadingComplementos, error: errorComplementos } = useComplementosUnificado(
@@ -284,7 +301,7 @@ export function SheetAdicionarProduto({
   };
 
   // Calcular preço total incluindo complementos (considerando quantidades)
-  const precoComplementos = useMemo(() => {
+  const precoComplementosPorUnidade = useMemo(() => {
     let total = 0;
     Object.entries(selecoesComplementos).forEach(([complementoId, adicionaisSelecionados]) => {
       const complemento = complementos.find(c => c.id === Number(complementoId));
@@ -300,7 +317,8 @@ export function SheetAdicionarProduto({
     return total;
   }, [selecoesComplementos, complementos]);
 
-  const precoTotal = (produto.preco_venda + precoComplementos) * quantity;
+  const precoComplementosTotal = precoComplementosPorUnidade * quantity;
+  const precoTotal = (produto.preco_venda * quantity) + precoComplementosTotal;
 
   function increment() {
     if (quantity < 99) setValue("quantity", quantity + 1);
@@ -543,11 +561,13 @@ export function SheetAdicionarProduto({
         className="h-[85vh] w-full max-w-full rounded-t-3xl rounded-b-none p-0 bg-background overflow-hidden"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full min-h-0 relative">
+          {/* Mantém o campo registrado no form (valor vem do modal) */}
+          <input type="hidden" {...observacaoRegister} />
           {/* Botão de fechar customizado */}
           <button
             type="button"
             onClick={() => handleOpenChange(false)}
-            className="absolute top-4 right-4 z-[60] rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm p-2 text-white transition-colors"
+            className="absolute top-4 right-4 z-60 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm p-2 text-white transition-colors"
             aria-label="Fechar"
           >
             <X className="w-5 h-5" />
@@ -560,10 +580,6 @@ export function SheetAdicionarProduto({
           >
             {/* Imagem Hero no Topo */}
             <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden bg-muted">
-              {/* Seta indicando para rolar para baixo */}
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-                <ChevronDown className="h-6 w-6 text-white/90 drop-shadow-lg animate-bounce-down" />
-              </div>
               <ImageZoomDialog
                 src={imagem}
                 alt={descricao}
@@ -580,7 +596,14 @@ export function SheetAdicionarProduto({
               </div>
             </div>
 
-            <div className="px-4 pt-4">
+            {/* Seta indicando para rolar para baixo (abaixo da imagem) */}
+            <div className="flex justify-center pointer-events-none">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/60 backdrop-blur-sm shadow-sm  animate-bounce">
+                <ChevronDown className="h-6 w-6 text-white/90 drop-shadow-lg " />
+              </div>
+            </div>
+
+            <div className="px-4 -mt-8">
             <SheetHeader className="mb-6">
               <SheetTitle className="text-2xl font-bold leading-tight text-left mb-2">
                 {descricao}
@@ -591,13 +614,18 @@ export function SheetAdicionarProduto({
                   <span className="text-2xl font-bold text-primary">
                     R$ {produto.preco_venda.toFixed(2).replace(".", ",")}
                   </span>
-                  {precoComplementos > 0 && (
+                  {precoComplementosPorUnidade > 0 && (
                     <span className="text-xs text-muted-foreground mt-1">
-                      + R$ {precoComplementos.toFixed(2).replace(".", ",")} em complementos
+                      + R$ {precoComplementosTotal.toFixed(2).replace(".", ",")} em complementos
+                      {quantity > 1 && (
+                        <span className="ml-1">
+                          (R$ {precoComplementosPorUnidade.toFixed(2).replace(".", ",")} / un.)
+                        </span>
+                      )}
                     </span>
                   )}
                 </div>
-                {(quantity > 1 || precoComplementos > 0) && (
+                {(quantity > 1 || precoComplementosPorUnidade > 0) && (
                   <div className="flex flex-col items-end">
                     <span className="text-sm text-muted-foreground">Total</span>
                     <span className="text-xl font-semibold text-foreground">
@@ -693,7 +721,7 @@ export function SheetAdicionarProduto({
                     </span>
                     {Object.keys(selecoesComplementos).length > 0 && (
                       <span className="text-xs text-muted-foreground">
-                        + R$ {precoComplementos.toFixed(2).replace(".", ",")}
+                        + R$ {precoComplementosTotal.toFixed(2).replace(".", ",")}
                       </span>
                     )}
                   </div>
@@ -709,6 +737,7 @@ export function SheetAdicionarProduto({
                         complemento={complemento}
                         selecoes={selecoesComplementos[complemento.id] || {}}
                         getQuantidade={(adicionalId) => getQuantidadeAdicional(complemento.id, adicionalId)}
+                        quantidadeItem={quantity}
                         onToggle={(adicionalId) => toggleAdicional(complemento.id, adicionalId, complemento.permite_multipla_escolha, complemento.quantitativo)}
                         onIncrement={(adicionalId) => incrementarAdicional(complemento.id, adicionalId, complemento.quantitativo)}
                         onDecrement={(adicionalId) => decrementarAdicional(complemento.id, adicionalId)}
@@ -751,14 +780,16 @@ export function SheetAdicionarProduto({
                   Opcional
                 </span>
               </div>
-              <Textarea
-                id="observacao"
-                placeholder="Ex: sem cebola, ponto médio, embalagem separada, sem tomate..."
-                {...register("observacao")}
-                maxLength={200}
-                className="min-h-[100px] resize-none border-2 focus-visible:ring-2 focus-visible:ring-primary"
-                rows={4}
-              />
+              <button
+                type="button"
+                onClick={openObservacaoModal}
+                className="w-full min-h-[100px] rounded-xl border-2 bg-background px-3 py-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Editar observações"
+              >
+                <span className={observacaoAtual ? "text-sm whitespace-pre-wrap" : "text-sm text-muted-foreground"}>
+                  {observacaoAtual || "Toque para adicionar observações (ex: sem cebola, ponto médio, embalagem separada...)"} 
+                </span>
+              </button>
               <div className="flex justify-end">
                 <span className="text-xs text-muted-foreground">
                   {watch("observacao")?.length || 0}/200 caracteres
@@ -768,6 +799,48 @@ export function SheetAdicionarProduto({
                 <p className="text-destructive text-sm font-medium">{errors.observacao.message}</p>
               )}
             </div>
+
+            <Dialog open={observacaoModalOpen} onOpenChange={setObservacaoModalOpen}>
+              <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Observações</DialogTitle>
+                  <DialogDescription>
+                    Escreva aqui os detalhes do seu pedido (máx. 200 caracteres).
+                  </DialogDescription>
+                </DialogHeader>
+
+                <Textarea
+                  id="observacao-modal"
+                  autoFocus
+                  value={observacaoDraft}
+                  onChange={(e) => setObservacaoDraft(e.target.value)}
+                  maxLength={200}
+                  rows={6}
+                  className="min-h-[160px] resize-none border-2 focus-visible:ring-2 focus-visible:ring-primary"
+                  placeholder="Ex: sem cebola, ponto médio, embalagem separada, sem tomate..."
+                />
+                <div className="flex justify-end">
+                  <span className="text-xs text-muted-foreground">
+                    {observacaoDraft.length}/200 caracteres
+                  </span>
+                </div>
+
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setObservacaoModalOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setValue("observacao", observacaoDraft, { shouldDirty: true, shouldValidate: true });
+                      setObservacaoModalOpen(false);
+                    }}
+                  >
+                    Salvar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {/* Botão de Adicionar ao Carrinho - Dentro do scroll */}
             <div className="border-t border-border pt-4 pb-6 px-4">

@@ -12,6 +12,11 @@ interface ComplementoSectionProps {
   complemento: ComplementoResponse; // Complemento com valores da vinculação (obrigatorio, quantitativo, minimo_itens, maximo_itens, ordem)
   selecoes: Record<number, number>;
   getQuantidade: (adicionalId: number) => number;
+  /**
+   * Quantidade atual do item (produto/combo/receita).
+   * Usado apenas para exibir os totais (ex.: 1 por unidade × 2 unidades = 2x).
+   */
+  quantidadeItem?: number;
   onToggle: (adicionalId: number) => void;
   onIncrement: (adicionalId: number) => void;
   onDecrement: (adicionalId: number) => void;
@@ -29,16 +34,19 @@ export function ComplementoSection({
   complemento,
   selecoes,
   getQuantidade,
+  quantidadeItem = 1,
   onToggle,
   onIncrement,
   onDecrement,
   highlight = false,
 }: ComplementoSectionProps) {
-  const totalSelecionado = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
+  const totalSelecionadoPorUnidade = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
+  const totalSelecionado = totalSelecionadoPorUnidade * Math.max(1, quantidadeItem);
   // minimo_itens e maximo_itens vêm da vinculação
-  const atingiuMinimo = complemento.minimo_itens ? totalSelecionado >= complemento.minimo_itens : true;
-  const atingiuMaximo = complemento.maximo_itens ? totalSelecionado >= complemento.maximo_itens : false;
-  const faltaItens = complemento.minimo_itens ? complemento.minimo_itens - totalSelecionado : 0;
+  // Regras de mínimo/máximo são por UNIDADE do item (a seleção é aplicada igualmente a cada unidade).
+  const atingiuMinimo = complemento.minimo_itens ? totalSelecionadoPorUnidade >= complemento.minimo_itens : true;
+  const atingiuMaximo = complemento.maximo_itens ? totalSelecionadoPorUnidade >= complemento.maximo_itens : false;
+  const faltaItens = complemento.minimo_itens ? complemento.minimo_itens - totalSelecionadoPorUnidade : 0;
 
   return (
     <div 
@@ -81,7 +89,7 @@ export function ComplementoSection({
         <div className="flex items-center gap-3 text-xs flex-wrap">
           {complemento.minimo_itens && complemento.minimo_itens > 0 && (
             <div className={`flex items-center gap-1 ${atingiuMinimo ? 'text-green-600' : 'text-orange-600'}`}>
-              <span className="font-semibold">Mínimo:</span>
+              <span className="font-semibold">Mínimo (por unidade):</span>
               <span>{complemento.minimo_itens}</span>
               {!atingiuMinimo && (
                 <span className="text-orange-600 font-semibold">
@@ -92,16 +100,20 @@ export function ComplementoSection({
           )}
           {complemento.maximo_itens && complemento.maximo_itens > 0 && (
             <div className={`flex items-center gap-1 ${atingiuMaximo ? 'text-red-600' : 'text-muted-foreground'}`}>
-              <span className="font-semibold">Máximo:</span>
+              <span className="font-semibold">Máximo (por unidade):</span>
               <span>{complemento.maximo_itens}</span>
               {atingiuMaximo && (
                 <span className="text-red-600 font-semibold ml-1">(limite atingido)</span>
               )}
             </div>
           )}
-          {totalSelecionado > 0 && (
+          {totalSelecionadoPorUnidade > 0 && (
             <div className="ml-auto text-muted-foreground">
-              <span className="font-semibold">Selecionado:</span> {totalSelecionado}
+              <span className="font-semibold">Selecionado (por unidade):</span>{" "}
+              {totalSelecionadoPorUnidade}
+              {quantidadeItem > 1 && (
+                <span className="ml-1 text-muted-foreground/70">(total: {totalSelecionado})</span>
+              )}
             </div>
           )}
         </div>
@@ -115,6 +127,7 @@ export function ComplementoSection({
               key={adicional.id}
               adicional={adicional}
               quantidade={getQuantidade(adicional.id)}
+              quantidadeItem={quantidadeItem}
               permiteMultipla={complemento.permite_multipla_escolha}
               quantitativo={complemento.quantitativo}
               atingiuMaximo={atingiuMaximo}
@@ -132,6 +145,7 @@ export function ComplementoSection({
 interface AdicionalItemProps {
   adicional: AdicionalComplemento;
   quantidade: number;
+  quantidadeItem: number;
   permiteMultipla: boolean;
   quantitativo: boolean;
   atingiuMaximo: boolean;
@@ -143,6 +157,7 @@ interface AdicionalItemProps {
 function AdicionalItem({
   adicional,
   quantidade,
+  quantidadeItem,
   permiteMultipla,
   quantitativo,
   atingiuMaximo,
@@ -153,6 +168,11 @@ function AdicionalItem({
   const isSelected = quantidade > 0;
   const podeIncrementar = !atingiuMaximo || quantidade === 0;
   const [imageError, setImageError] = useState(false);
+  const multiplicador = Math.max(1, quantidadeItem);
+  const quantidadePorUnidade = quantidade;
+  const quantidadeTotal = quantidadePorUnidade * multiplicador;
+  const precoPorUnidadeSelecionado = adicional.preco * quantidadePorUnidade;
+  const precoTotalSelecionado = adicional.preco * quantidadeTotal;
 
   return (
     <div
@@ -167,7 +187,7 @@ function AdicionalItem({
     >
       {/* Imagem do adicional (se disponível) */}
       {adicional.imagem && !imageError ? (
-        <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-muted mb-1.5">
+        <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted mb-1.5">
           <Image
             src={adicional.imagem}
             alt={adicional.nome}
@@ -214,7 +234,7 @@ function AdicionalItem({
               <Minus className="h-3 w-3" />
             </Button>
             <span className="text-xs font-bold w-5 text-center text-foreground">
-              {quantidade}
+              {quantidadePorUnidade}
             </span>
             <Button
               type="button"
@@ -267,7 +287,7 @@ function AdicionalItem({
               <Minus className="h-3 w-3" />
             </Button>
             <span className="text-xs font-bold w-5 text-center text-foreground">
-              {quantidade}
+              {quantidadePorUnidade}
             </span>
             <Button
               type="button"
@@ -295,16 +315,27 @@ function AdicionalItem({
               {quantidade > 0 && quantitativo ? (
                 <div className="flex flex-col items-center">
                   <span className="text-xs font-bold text-primary">
-                    R$ {(adicional.preco * quantidade).toFixed(2).replace(".", ",")}
+                    R$ {(multiplicador > 1 ? precoTotalSelecionado : precoPorUnidadeSelecionado)
+                      .toFixed(2)
+                      .replace(".", ",")}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {quantidade}x R$ {adicional.preco.toFixed(2).replace(".", ",")}
+                    {quantidadePorUnidade}x R$ {adicional.preco.toFixed(2).replace(".", ",")} por unidade
+                    {multiplicador > 1 && <span className="ml-1">(total: {quantidadeTotal}x)</span>}
                   </span>
                 </div>
               ) : (
-                <span className="text-xs font-semibold text-primary">
-                  + R$ {adicional.preco.toFixed(2).replace(".", ",")}
-                </span>
+                <div className="flex flex-col items-center">
+                  <span className="text-xs font-semibold text-primary">
+                    + R$ {adicional.preco.toFixed(2).replace(".", ",")}
+                    {multiplicador > 1 && <span className="text-muted-foreground"> / un.</span>}
+                  </span>
+                  {multiplicador > 1 && quantidadePorUnidade > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      Total: + R$ {precoTotalSelecionado.toFixed(2).replace(".", ",")}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           ) : (

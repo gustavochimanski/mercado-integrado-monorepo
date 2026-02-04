@@ -72,13 +72,15 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
   const [open, setOpen] = useState(false);
   const [searchAddress, setSearchAddress] = useState("");
   const [showSearchOnly, setShowSearchOnly] = useState(false); // Controla se mostra apenas pesquisa ou formulário
+  const [searchEnderecoKey, setSearchEnderecoKey] = useState(0); // força reset do SearchEndereco quando preciso
+  const [showFullForm, setShowFullForm] = useState(false); // evita "poluição" no confirmar endereço
   useEffect(() => setSelected(enderecoId ?? null), [enderecoId]);
 
   const startEdit = (e: Endereco) => {
     setEditingId(e.id);
     setNovo({
       logradouro: e.logradouro || "",
-      numero: e.numero ,
+      numero: e.numero || "",
       bairro: e.bairro || "",
       cidade: e.cidade || "",
       estado: e.estado || "",
@@ -93,6 +95,8 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     });
     setSearchAddress("");
     setShowSearchOnly(false); // Ao editar, mostra formulário direto
+    setSearchEnderecoKey((k) => k + 1);
+    setShowFullForm(true);
     setOpen(true);
   };
 
@@ -115,6 +119,8 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     });
     setSearchAddress("");
     setShowSearchOnly(true); // Ao adicionar novo, mostra apenas pesquisa
+    setSearchEnderecoKey((k) => k + 1);
+    setShowFullForm(false);
     setOpen(true);
   };
 
@@ -141,6 +147,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     setSearchAddress(selectedAddress.endereco_formatado || "");
     // Ocultar pesquisa e mostrar formulário
     setShowSearchOnly(false);
+    setShowFullForm(false);
   };
 
   const handleSearchChange = (value: string) => {
@@ -203,6 +210,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
     setSearchAddress("");
     setValidationErrors({});
     setShowSearchOnly(false);
+    setShowFullForm(false);
     setOpen(false);
   };
 
@@ -290,9 +298,15 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
           // Resetar estado quando fechar
           setShowSearchOnly(editingId === null);
           setSearchAddress("");
+          setSearchEnderecoKey((k) => k + 1);
+          setShowFullForm(editingId !== null);
         }
       }}>
-        <DialogContent className="!max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className={`max-w-lg! overflow-y-auto ${
+            showSearchOnly ? "top-[5%]! translate-y-0! max-h-[95vh]" : "max-h-[90vh]"
+          }`}
+        >
           <DialogHeader>
             <DialogTitle className="text-lg">
               {editingId !== null 
@@ -311,7 +325,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Busca de Endereço - Mostrar apenas quando showSearchOnly for true OU quando estiver editando */}
+            {/* Busca de Endereço - aparece apenas enquanto estiver pesquisando (ou editando) */}
             {(showSearchOnly || editingId !== null) && (
               <div className="space-y-2">
                 <Label className="text-sm font-semibold flex items-center gap-2">
@@ -320,45 +334,115 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
                   <span className="text-xs font-normal text-muted-foreground">(Rua ou CEP)</span>
                 </Label>
                 <SearchEndereco
+                  key={searchEnderecoKey}
                   value={searchAddress}
                   onValueChange={handleSearchChange}
                   onAddressSelect={handleSelectAddress}
                   placeholder="Ex: Rua das Flores ou 01310-100"
                 />
-                {(validationErrors.logradouro || validationErrors.numero || validationErrors.bairro || validationErrors.cidade || validationErrors.estado) && (
-                  <div className="space-y-1">
-                    {validationErrors.logradouro && (
-                      <p className="text-red-500 text-xs flex items-center gap-1">
-                        <span>⚠️</span> {validationErrors.logradouro}
-                      </p>
-                    )}
-                    {validationErrors.numero && (
-                      <p className="text-red-500 text-xs flex items-center gap-1">
-                        <span>⚠️</span> {validationErrors.numero}
-                      </p>
-                    )}
-                    {validationErrors.bairro && (
-                      <p className="text-red-500 text-xs flex items-center gap-1">
-                        <span>⚠️</span> {validationErrors.bairro}
-                      </p>
-                    )}
-                    {validationErrors.cidade && (
-                      <p className="text-red-500 text-xs flex items-center gap-1">
-                        <span>⚠️</span> {validationErrors.cidade}
-                      </p>
-                    )}
-                    {validationErrors.estado && (
-                      <p className="text-red-500 text-xs flex items-center gap-1">
-                        <span>⚠️</span> {validationErrors.estado}
-                      </p>
-                    )}
-                  </div>
+              </div>
+            )}
+
+            {(validationErrors.logradouro || validationErrors.numero || validationErrors.bairro || validationErrors.cidade || validationErrors.estado) && (
+              <div className="space-y-1">
+                {validationErrors.logradouro && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <span>⚠️</span> {validationErrors.logradouro}
+                  </p>
+                )}
+                {validationErrors.numero && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <span>⚠️</span> {validationErrors.numero}
+                  </p>
+                )}
+                {validationErrors.bairro && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <span>⚠️</span> {validationErrors.bairro}
+                  </p>
+                )}
+                {validationErrors.cidade && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <span>⚠️</span> {validationErrors.cidade}
+                  </p>
+                )}
+                {validationErrors.estado && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <span>⚠️</span> {validationErrors.estado}
+                  </p>
                 )}
               </div>
             )}
 
-            {/* Campos Essenciais - Mostrar quando não estiver apenas pesquisando OU quando estiver editando */}
-            {(!showSearchOnly || editingId !== null) && (
+            {/* Campos - modo "confirmar" fica enxuto para não poluir */}
+            {editingId === null && !showSearchOnly && !showFullForm && (
+              <div className="space-y-3 border-t pt-4">
+                <Label className="text-sm font-semibold">Confirmar dados</Label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-1 space-y-1">
+                    <Label htmlFor="endereco_numero" className="text-sm font-semibold text-amber-600">
+                      Número <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="endereco_numero"
+                      value={novo.numero || ""}
+                      onChange={(e) => setNovo({ ...novo, numero: e.target.value })}
+                      className={`h-10 text-sm border-2 font-medium ${
+                        validationErrors.numero 
+                          ? "border-red-300 focus:border-red-500" 
+                          : "border-amber-200 focus:border-amber-400"
+                      }`}
+                      autoComplete="off"
+                      placeholder="Ex: 123"
+                      required
+                    />
+                    {validationErrors.numero && (
+                      <p className="text-red-500 text-xs">{validationErrors.numero}</p>
+                    )}
+                  </div>
+                  <div className="sm:col-span-2 space-y-1">
+                    <Label htmlFor="endereco_complemento" className="text-sm text-muted-foreground">
+                      Complemento <span className="text-xs">(opcional)</span>
+                    </Label>
+                    <Input
+                      id="endereco_complemento"
+                      value={novo.complemento || ""}
+                      onChange={(e) => setNovo({ ...novo, complemento: e.target.value })}
+                      className="h-10 text-sm"
+                      autoComplete="address-line2"
+                      placeholder="Ex: Apto 101, Bloco B, etc."
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="endereco_ponto_ref" className="text-sm text-muted-foreground">
+                    Ponto de referência <span className="text-xs">(opcional)</span>
+                  </Label>
+                  <Input
+                    id="endereco_ponto_ref"
+                    value={novo.ponto_referencia || ""}
+                    onChange={(e) => setNovo({ ...novo, ponto_referencia: e.target.value })}
+                    className="h-10 text-sm"
+                    autoComplete="off"
+                    placeholder="Ex: Próximo à padaria"
+                  />
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFullForm(true)}
+                  className="w-full text-xs"
+                >
+                  Mostrar mais campos
+                </Button>
+              </div>
+            )}
+
+            {/* Campos completos - edição OU quando usuário pedir mais campos */}
+            {(editingId !== null || (!showSearchOnly && showFullForm)) && (
               <div className="space-y-3 border-t pt-4">
               <Label className="text-sm font-semibold">Informações do Endereço</Label>
               
@@ -586,6 +670,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
                   size="sm"
                   onClick={() => {
                     setShowSearchOnly(true);
+                    setShowFullForm(false);
                     setNovo({ 
                       logradouro: "", 
                       numero: "", 
@@ -603,6 +688,7 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
                     });
                     setSearchAddress("");
                     setValidationErrors({});
+                    setSearchEnderecoKey((k) => k + 1);
                   }}
                   className="w-full text-xs"
                 >
@@ -618,7 +704,13 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
               <Button 
                 onClick={handleSave} 
                 className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-                disabled={!novo.logradouro || !novo.numero || !novo.cidade || !novo.estado}
+                disabled={
+                  !novo.numero ||
+                  !novo.logradouro ||
+                  !novo.bairro ||
+                  !novo.cidade ||
+                  !(novo.codigo_estado || novo.estado)
+                }
               >
                 {editingId !== null ? "Salvar Alterações" : "Confirmar e Cadastrar"}
               </Button>
@@ -628,7 +720,9 @@ export default function EnderecoStep({ enderecos, enderecoId, onSelect, onAdd, o
               onClick={() => {
                 setOpen(false);
                 setShowSearchOnly(editingId === null);
+                setShowFullForm(editingId !== null);
                 setSearchAddress("");
+                setSearchEnderecoKey((k) => k + 1);
               }} 
               className="w-full sm:w-auto"
             >

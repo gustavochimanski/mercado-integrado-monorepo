@@ -5,6 +5,45 @@ export type OrigemPedido = "WEB" | "APP" | "PDV";
 export type PagamentoMetodo = "DINHEIRO" | "CARTAO" | "PIX";
 export type PagamentoGateway = "PIX_INTERNO" | "PAGSEGURO" | "STRIPE";
 
+// ================= Pagamentos (novo fluxo: múltiplas transações) =================
+export type PagamentoMetodoTransacao =
+  | "PIX"
+  | "PIX_ONLINE"
+  | "CREDITO"
+  | "DEBITO"
+  | "DINHEIRO"
+  | "ONLINE"
+  | "OUTRO";
+
+export type PagamentoGatewayTransacao =
+  | "MERCADOPAGO"
+  | "PAGSEGURO"
+  | "STRIPE"
+  | "PIX_INTERNO"
+  | "MOCK"
+  | "OUTRO";
+
+export type PagamentoStatusTransacao =
+  | "PENDENTE"
+  | "AUTORIZADO"
+  | "PAGO"
+  | "RECUSADO"
+  | "CANCELADO"
+  | "ESTORNADO";
+
+export interface TransacaoPagamento {
+  id: number; // transacao_id
+  pedido_id: number;
+  meio_pagamento_id?: number | null;
+  metodo: PagamentoMetodoTransacao;
+  gateway: PagamentoGatewayTransacao;
+  valor: number;
+  status: PagamentoStatusTransacao;
+  provider_transaction_id?: string | null;
+  qr_code?: string | null;
+  qr_code_base64?: string | null;
+}
+
 // ================= Item do pedido =================
 export interface ItemPedido {
   id: number;
@@ -86,6 +125,15 @@ export interface Pedido {
   data_atualizacao: string; // ISO string
   itens: ItemPedido[];
   meio_pagamento_nome: string;
+  /**
+   * Fonte da verdade para múltiplos pagamentos.
+   * Pode vir vazia/undefined dependendo do endpoint/tipo de pedido.
+   */
+  transacoes?: TransacaoPagamento[] | null;
+  /**
+   * Campo legado (singular). Não usar para múltiplos pagamentos.
+   */
+  transacao?: TransacaoPagamento | null;
   cliente_nome: string;
   tipo_pedido?: TipoPedidoGateway;
   numero_pedido?: string;
@@ -184,7 +232,14 @@ export interface ConfirmarPagamentoRequest {
 
 // ================= Gateway Orquestrador =================
 export interface MeioPagamentoParcialRequest {
-  meio_pagamento_id: number;
+  /**
+   * Preferencial (novo).
+   */
+  id?: number;
+  /**
+   * Legado (compatibilidade).
+   */
+  meio_pagamento_id?: number;
   valor: number;
 }
 

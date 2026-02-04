@@ -43,11 +43,35 @@ export default function ModalCombinarPagamentos({
 }: ModalCombinarPagamentosProps) {
   const [meiosSelecionados, setMeiosSelecionados] = useState<MeioPagamentoSelecionado[]>(meiosIniciais);
   const [trocoPara, setTrocoPara] = useState<Record<number, string>>({});
+  const [valorTexto, setValorTexto] = useState<Record<number, string>>({});
+
+  const parseDecimalPtBr = (raw: string): number | null => {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+
+    // Mantém apenas dígitos e separadores comuns.
+    let cleaned = trimmed.replace(/[^\d,.\-]/g, "");
+
+    // Se tiver vírgula, assume vírgula como separador decimal e remove pontos (milhar).
+    if (cleaned.includes(",")) {
+      cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+    }
+
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const formatMoney2 = (n: number) => n.toFixed(2);
 
   useEffect(() => {
     if (open) {
       setMeiosSelecionados(meiosIniciais.length > 0 ? meiosIniciais : []);
       setTrocoPara({});
+      setValorTexto(
+        Object.fromEntries(
+          (meiosIniciais.length > 0 ? meiosIniciais : []).map((m) => [m.id, formatMoney2(m.valor)])
+        )
+      );
     }
   }, [open, meiosIniciais]);
 
@@ -70,6 +94,11 @@ export default function ModalCombinarPagamentos({
         tipo: meio.tipo,
       },
     ]);
+
+    setValorTexto((prev) => ({
+      ...prev,
+      [meio.id]: formatMoney2(novoValor),
+    }));
   };
 
   const removerMeio = (index: number) => {
@@ -82,6 +111,14 @@ export default function ModalCombinarPagamentos({
       const novosTrocos = { ...trocoPara };
       delete novosTrocos[meioRemovido.id];
       setTrocoPara(novosTrocos);
+    }
+
+    if (meioRemovido) {
+      setValorTexto((prev) => {
+        const next = { ...prev };
+        delete next[meioRemovido.id];
+        return next;
+      });
     }
   };
 
@@ -127,7 +164,7 @@ export default function ModalCombinarPagamentos({
     const meiosDinheiro = meiosSelecionados.filter(m => m.tipo === "DINHEIRO");
     if (meiosDinheiro.length > 0) {
       meiosDinheiro.forEach(meio => {
-        const trocoValor = parseFloat(trocoPara[meio.id] || "0");
+        const trocoValor = parseDecimalPtBr(trocoPara[meio.id] || "") ?? 0;
         if (!isNaN(trocoValor) && trocoValor > 0) {
           if (maiorTroco === undefined || trocoValor > maiorTroco) {
             maiorTroco = trocoValor;
@@ -220,14 +257,29 @@ export default function ModalCombinarPagamentos({
                         <span className="text-muted-foreground">R$</span>
                         <Input
                           id={`valor-${index}`}
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={valorTotal}
-                          value={meio.valor.toFixed(2)}
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="0,00"
+                          value={valorTexto[meio.id] ?? formatMoney2(meio.valor)}
                           onChange={(e) => {
-                            const novoValor = parseFloat(e.target.value) || 0;
-                            atualizarValor(index, novoValor);
+                            const raw = e.target.value;
+                            setValorTexto((prev) => ({ ...prev, [meio.id]: raw }));
+                            const parsed = parseDecimalPtBr(raw);
+                            if (parsed !== null) {
+                              atualizarValor(index, parsed);
+                            } else if (raw.trim() === "") {
+                              atualizarValor(index, 0);
+                            }
+                          }}
+                          onBlur={() => {
+                            const parsed = parseDecimalPtBr(valorTexto[meio.id] ?? "");
+                            setValorTexto((prev) => ({
+                              ...prev,
+                              [meio.id]: formatMoney2(parsed ?? meio.valor ?? 0),
+                            }));
+                            if (parsed !== null) {
+                              atualizarValor(index, parsed);
+                            }
                           }}
                           className="flex-1"
                         />
@@ -243,12 +295,17 @@ export default function ModalCombinarPagamentos({
                           <span className="text-muted-foreground">R$</span>
                           <Input
                             id={`troco-${index}`}
-                            type="number"
-                            step="0.01"
-                            min={meio.valor}
+                            type="text"
+                            inputMode="decimal"
                             placeholder={`Ex: ${(meio.valor + 10).toFixed(2)}`}
                             value={trocoValor}
                             onChange={(e) => atualizarTrocoPara(meio.id, e.target.value)}
+                            onBlur={() => {
+                              const parsed = parseDecimalPtBr(trocoPara[meio.id] || "");
+                              if (parsed !== null) {
+                                atualizarTrocoPara(meio.id, formatMoney2(parsed));
+                              }
+                            }}
                             className="flex-1"
                           />
                         </div>
