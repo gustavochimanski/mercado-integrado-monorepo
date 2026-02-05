@@ -109,17 +109,32 @@ export default function FinalizarPedidoPage() {
 
   // Lê parâmetro ?mesa=X da URL e pré-seleciona
   useEffect(() => {
-    const mesaParam = searchParams.get("mesa");
-    if (mesaParam) {
-      const mesaIdFromUrl = parseInt(mesaParam, 10);
-      if (!isNaN(mesaIdFromUrl) && mesaIdFromUrl > 0) {
-        if (ensureClienteIdentificado()) {
-          setTipoPedido("MESA"); // Define automaticamente como pedido de mesa
-          setCurrentTab("mesa"); // Vai direto para a aba de mesa
-          setMesaCodigo(mesaParam);
-        }
-      }
+    const mesaParam = searchParams.get("mesa") ?? searchParams.get("mesa_id");
+    const mesaPessoasParam =
+      searchParams.get("mesa_pessoas") ?? searchParams.get("mesa_num_pessoas");
+
+    if (!mesaParam) return;
+
+    const mesaIdFromUrl = parseInt(mesaParam, 10);
+    if (isNaN(mesaIdFromUrl) || mesaIdFromUrl <= 0) return;
+
+    if (!ensureClienteIdentificado()) return;
+
+    setTipoPedido("MESA"); // Define automaticamente como pedido de mesa
+    setMesaCodigo(mesaParam);
+    setMesaId(mesaIdFromUrl);
+
+    const parsedPessoas = mesaPessoasParam ? Number(mesaPessoasParam) : null;
+    const pessoas =
+      parsedPessoas && Number.isFinite(parsedPessoas) && parsedPessoas > 0
+        ? Math.trunc(parsedPessoas)
+        : null;
+    if (pessoas) {
+      setNumPessoas(pessoas);
     }
+
+    // ✅ Se a mesa já veio pronta, pula "Tipo" e "Mesa" e segue o fluxo
+    setCurrentTab("observacao");
   }, [searchParams, ensureClienteIdentificado]);
 
   useEffect(() => {
@@ -237,8 +252,14 @@ useEffect(() => {
     return;
   }
 
+  // Se o usuário já escolheu outro tipo manualmente, não sobrescrever
   if (tipoPedido && tipoPedido !== "MESA") {
     setMesaPresetAplicada(true);
+    return;
+  }
+
+  // Se ainda não está identificado, abre modal e tenta de novo quando token aparecer
+  if (!ensureClienteIdentificado()) {
     return;
   }
 
@@ -251,9 +272,11 @@ useEffect(() => {
   if (pessoas && Number.isFinite(pessoas) && pessoas > 0) {
     setNumPessoas(Math.trunc(pessoas));
   }
-  setCurrentTab("mesa");
+
+  // ✅ Mesa já veio definida: pula "Tipo" e "Mesa" e segue o fluxo
+  setCurrentTab("observacao");
   setMesaPresetAplicada(true);
-}, [mesaPresetAplicada, tipoPedido]);
+}, [mesaPresetAplicada, tipoPedido, ensureClienteIdentificado, hasToken]);
 
   // Busca preview do checkout quando estiver na aba de revisão
   // Para múltiplos pagamentos, usar o primeiro meio para o preview (o backend ajusta)
@@ -826,7 +849,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
 
       {/* MODAL DE CONFIRMAÇÃO DE ENDEREÇO */}
       <Dialog open={confirmEnderecoOpen} onOpenChange={setConfirmEnderecoOpen}>
-        <DialogContent className="!max-w-md">
+        <DialogContent className="max-w-md!">
           <DialogHeader>
             <DialogTitle>Confirmar Endereço</DialogTitle>
             <strong className="text-primary">Você realmente está aqui?</strong>
@@ -1112,7 +1135,7 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             e.stopPropagation();
             router.push("/");
           }}
-          className="fixed bottom-28 sm:bottom-32 right-4 sm:right-6 z-[60] rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg bg-primary hover:bg-primary/90 flex items-center justify-center transition-all active:scale-95"
+          className="fixed bottom-28 sm:bottom-32 right-4 sm:right-6 z-60 rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-lg bg-primary hover:bg-primary/90 flex items-center justify-center transition-all active:scale-95"
           size="icon"
           aria-label="Voltar para home"
         >

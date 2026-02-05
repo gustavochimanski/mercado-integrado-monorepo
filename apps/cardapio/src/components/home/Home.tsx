@@ -170,6 +170,24 @@ export default function HomePage() {
         }
       }
     }
+
+    // ✅ PRESERVAR mesa_id / mesa_pessoas (quando veio por QRCode/URL)
+    const mesaIdFromQuery = searchParams.get("mesa_id");
+    const mesaPessoasFromQuery =
+      searchParams.get("mesa_pessoas") ?? searchParams.get("mesa_num_pessoas");
+
+    if (mesaIdFromQuery && !urlObj.searchParams.has("mesa_id")) {
+      urlObj.searchParams.set("mesa_id", mesaIdFromQuery);
+    }
+
+    // Preferir padronizar como mesa_pessoas, mas não sobrescrever se destino já tem.
+    if (mesaPessoasFromQuery) {
+      const hasPessoas =
+        urlObj.searchParams.has("mesa_pessoas") || urlObj.searchParams.has("mesa_num_pessoas");
+      if (!hasPessoas) {
+        urlObj.searchParams.set("mesa_pessoas", mesaPessoasFromQuery);
+      }
+    }
     
     // Reconstruir a URL final
     let urlFinal: string;

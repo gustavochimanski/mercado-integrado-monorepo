@@ -7,7 +7,7 @@ import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
 import { useCart } from "@cardapio/stores/cart/useCart";
-import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { getEmpresaId, setMesaInicial } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
@@ -33,6 +33,9 @@ export default function LandingpageStorePage() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
   const isHome = searchParams.get("is_home") === "true";
+  const mesaIdParam = searchParams.get("mesa_id");
+  const mesaPessoasParam =
+    searchParams.get("mesa_pessoas") ?? searchParams.get("mesa_num_pessoas");
 
   // ✅ Auto-login via `?client_number=...`
   useAutoLoginFromClientNumber(loginDireto);
@@ -46,6 +49,21 @@ export default function LandingpageStorePage() {
     return Number.isFinite(n) && n > 0 ? n : null;
   }, [empresaParam]);
   const empresa_id = empresaIdFromUrl ?? getEmpresaId();
+
+  // ✅ Se vier mesa na URL, persistir no store/localStorage (mesmo comportamento da Home)
+  useEffect(() => {
+    if (!mesaIdParam) return;
+    const codigo = mesaIdParam.trim();
+    if (!codigo) return;
+
+    const parsedPessoas = mesaPessoasParam ? Number(mesaPessoasParam) : null;
+    const numPessoas =
+      parsedPessoas && Number.isFinite(parsedPessoas) && parsedPessoas > 0
+        ? Math.trunc(parsedPessoas)
+        : null;
+
+    setMesaInicial(codigo, numPessoas);
+  }, [mesaIdParam, mesaPessoasParam]);
 
   const { data, isLoading, isPending } = useLandingpageStore(empresa_id, isHome);
   const vitrinesRaw = data?.vitrines ?? [];
