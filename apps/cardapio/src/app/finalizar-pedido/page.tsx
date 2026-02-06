@@ -27,12 +27,13 @@ import PagamentoStep from "@cardapio/components/Shared/finalizar-pedido/Pagament
 import RevisaoStep from "@cardapio/components/Shared/finalizar-pedido/RevisaoStep";
 import ObservacaoStep from "@cardapio/components/Shared/finalizar-pedido/ObservacaoStep";
 import PedidoConfirmOverlay from "@cardapio/components/Shared/finalizar-pedido/PedidoConfirmOverlay";
-import { getEmpresaId, setEmpresaId, getMesaInicial, clearMesaInicial } from "@cardapio/stores/empresa/empresaStore";
+import { getEmpresaId, getEmpresaData, setEmpresaData, setEmpresaId, getMesaInicial, clearMesaInicial } from "@cardapio/stores/empresa/empresaStore";
 import { toast } from "sonner";
 import { useQueryEmpresasDisponiveis, EmpresaDisponivel } from "@cardapio/services/empresa";
 import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
 import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems";
 import { useCartHydrated } from "@cardapio/components/Shared/cart/useHydrated";
+import { api } from "@cardapio/app/api/api";
 
 const STEP_ORDER = ["tipo", "mesa", "balcao", "endereco", "pagamento", "observacao", "revisao"] as const;
 type CheckoutTab = (typeof STEP_ORDER)[number];
@@ -160,6 +161,9 @@ export default function FinalizarPedidoPage() {
   const [overlayStatus, setOverlayStatus] = useState<"idle" | "loading" | "sucesso" | "erro">("idle");
   const [overlayMessage, setOverlayMessage] = useState("");
   const [isFinalizando, setIsFinalizando] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [lojaWhatsappDigits, setLojaWhatsappDigits] = useState<string | null>(null);
+  const [lojaNome, setLojaNome] = useState<string | null>(null);
 
   const { create, update, remove } = useMutateEndereco();
   
@@ -170,6 +174,98 @@ export default function FinalizarPedidoPage() {
     const tokenAtual = cliente?.tokenCliente ?? getTokenCliente();
     setHasToken(!!(tokenAtual && tokenAtual.trim()));
   }, [cliente?.tokenCliente]);
+
+  const extractPhoneDigits = useCallback((raw?: unknown): string | null => {
+    if (typeof raw !== "string" && typeof raw !== "number") return null;
+    const digits = String(raw).replace(/\D/g, "");
+    if (!digits) return null;
+    // Regra bem permissiva: pelo menos DDD + número (10 dígitos)
+    return digits.length >= 10 ? digits : null;
+  }, []);
+
+  const resolveLojaWhatsappDigits = useCallback((empresa: any | null | undefined): string | null => {
+    if (!empresa) return null;
+    return (
+      extractPhoneDigits(empresa.whatsapp) ||
+      extractPhoneDigits(empresa.telefone_whatsapp) ||
+      extractPhoneDigits(empresa.telefoneWhatsapp) ||
+      extractPhoneDigits(empresa.celular) ||
+      extractPhoneDigits(empresa.telefone) ||
+      extractPhoneDigits(empresa.phone) ||
+      null
+    );
+  }, [extractPhoneDigits]);
+
+  const empresaIdForContato = (() => {
+    const raw = (searchParams.get("empresa") ?? "").trim();
+    if (raw && /^\d+$/.test(raw)) {
+      const parsed = parseInt(raw, 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+    const stored = getEmpresaId();
+    return stored > 0 ? stored : null;
+  })();
+
+  // Pré-carregar dados da loja para o botão do WhatsApp funcionar sem popup-block
+  useEffect(() => {
+    if (!empresaIdForContato) return;
+
+    // 1) Tenta do localStorage
+    const cached = getEmpresaData();
+    if (cached?.id === empresaIdForContato) {
+      setLojaNome(typeof cached?.nome === "string" ? cached.nome : null);
+      const digits = resolveLojaWhatsappDigits(cached);
+      if (digits) {
+        setLojaWhatsappDigits(digits);
+        return;
+      }
+    }
+
+    // 2) Busca na API pública
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await api.get<any>("/api/empresas/public/emp/lista", {
+          params: { empresa_id: empresaIdForContato },
+        });
+        if (cancelled) return;
+
+        const empresa = Array.isArray(data) ? data[0] : data;
+        if (!empresa) return;
+
+        setEmpresaData(empresa);
+        setLojaNome(typeof empresa?.nome === "string" ? empresa.nome : null);
+        const digits = resolveLojaWhatsappDigits(empresa);
+        if (digits) setLojaWhatsappDigits(digits);
+      } catch {
+        // silêncio: WhatsApp é opcional; botão trata ausência
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [empresaIdForContato, resolveLojaWhatsappDigits]);
+
+  const goToPedidos = useCallback(() => {
+    setSuccessModalOpen(false);
+    router.push("/pedidos");
+  }, [router]);
+
+  const handleAbrirWhatsappLoja = useCallback(() => {
+    const texto = "olá gostaria de receber atualizações do meu pedido por aqui.";
+
+    if (!lojaWhatsappDigits) {
+      toast.error("Não encontramos o WhatsApp da loja para este cardápio.");
+      goToPedidos();
+      return;
+    }
+
+    const normalized = lojaWhatsappDigits.startsWith("55") ? lojaWhatsappDigits : `55${lojaWhatsappDigits}`;
+    const url = `https://wa.me/${normalized}?text=${encodeURIComponent(texto)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    goToPedidos();
+  }, [goToPedidos, lojaWhatsappDigits]);
   
   const { data: meiosPagamento = [], isLoading: isLoadingPagamento, error: errorPagamento } = useMeiosPagamento(hasToken);
 
@@ -506,10 +602,10 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             clearMesaInicial();
             // Após atualizar pedido editado, desativa modo edição
             setTimeout(() => {
-              setOverlayStatus("sucesso");
               stopEditingPedido(); // Limpa o modo edição
               queryClient.invalidateQueries({ queryKey: ["pedidos"] });
-              setTimeout(() => router.push("/pedidos"), 3000);
+              setOverlayStatus("idle");
+              setSuccessModalOpen(true);
             }, 1500);
           },
           onError: (error: any) => {
@@ -671,10 +767,9 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         clearCart();
         queryClient.invalidateQueries({ queryKey: ["pedidos"] });
 
-        setOverlayMessage("Pedido enviado com sucesso!");
         setTimeout(() => {
-          setOverlayStatus("sucesso");
-          setTimeout(() => router.push("/pedidos"), 3000);
+          setOverlayStatus("idle");
+          setSuccessModalOpen(true);
           setIsFinalizando(false);
         }, 1500);
       } catch (error: any) {
@@ -828,9 +923,6 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                 <span className="text-lg font-medium">Enviando pedido...</span>
               </motion.div>
             )}
-            {overlayStatus === "sucesso" && 
-              <PedidoConfirmOverlay show={true} type="success" />
-            }
 
             {overlayStatus === "erro" && (
               <PedidoConfirmOverlay 
@@ -884,6 +976,48 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             </Button>
             <Button variant="outline" onClick={() => setConfirmEnderecoOpen(false)} className="w-full sm:w-auto">
               Não, trocar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL PÓS-CHECKOUT (ANTES DE IR PARA /pedidos) */}
+      <Dialog
+        open={successModalOpen}
+        onOpenChange={(open) => {
+          setSuccessModalOpen(open);
+          // Fechar = seguir para pedidos (equivalente ao "não")
+          if (!open) router.push("/pedidos");
+        }}
+      >
+        <DialogContent className="max-w-md!">
+          <DialogHeader>
+            <DialogTitle>Tudo certo!</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Seu pedido foi enviado com sucesso e já está sendo preparado.
+            </p>
+          </DialogHeader>
+
+          <div className="mt-2 space-y-2">
+            <strong className="text-primary">Quer receber notificações pelo WhatsApp?</strong>
+            <p className="text-sm text-muted-foreground">
+              Se você escolher “Sim”, vamos abrir o WhatsApp{lojaNome ? ` da ${lojaNome}` : " da loja"} com uma mensagem pronta.
+            </p>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={goToPedidos}
+              className="w-full sm:w-auto"
+            >
+              Não, ir para meus pedidos
+            </Button>
+            <Button
+              onClick={handleAbrirWhatsappLoja}
+              className="w-full sm:w-auto"
+            >
+              Sim, receber pelo WhatsApp
             </Button>
           </DialogFooter>
         </DialogContent>

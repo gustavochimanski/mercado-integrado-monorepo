@@ -1,6 +1,4 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { X, XCircle } from "lucide-react";
 
@@ -17,17 +15,6 @@ export default function PedidoConfirmOverlay({
   message,
   onClose 
 }: PedidoConfirmOverlayProps) {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (show && type === "success") {
-      const timer = setTimeout(() => {
-        router.push("/pedidos"); // redireciona depois de 2.5s
-      }, 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [show, type, router]);
-
   const handleClose = () => {
     if (onClose) {
       onClose();
