@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "..", ".."),
 
   images: {
+    // Desativa o otimizador do next/image (útil quando o deploy/edge do Vercel trava no optimizer).
+    // As imagens serão servidas "como estão", sem transformação.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
