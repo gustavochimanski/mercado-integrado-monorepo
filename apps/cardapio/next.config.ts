@@ -15,8 +15,17 @@ const nextConfig: NextConfig = {
   images: {
     // Desativa o otimizador do next/image (útil quando o deploy/edge do Vercel trava no optimizer).
     // As imagens serão servidas "como estão", sem transformação.
-    unoptimized: true,
+    // Habilita o otimizador do Next/Vercel (/_next/image).
+    // Se precisar desabilitar por limites do plano, ajuste para `true`.
+    unoptimized: false,
     remotePatterns: [
+      // Permite qualquer subdomínio do domínio mensuraapi (ex.: gustavo.mensuraapi.com.br)
+      {
+        protocol: "https",
+        hostname: "**.mensuraapi.com.br",
+        pathname: "/**",
+      },
+      // Mantém domínios específicos
       {
         protocol: "https",
         hostname: `${cliente}.mensuraapi.com.br`,
