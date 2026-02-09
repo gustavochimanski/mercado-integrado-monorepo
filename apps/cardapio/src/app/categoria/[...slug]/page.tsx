@@ -11,6 +11,7 @@ import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
 import { mapProdutoToCartItem } from "@cardapio/stores/cart/mapProdutoToCartItem";
 import { useCategoriaPorSlug } from "@cardapio/services/home";
+import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveEmpresaFromQuery";
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
 import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
@@ -23,7 +24,29 @@ export default function RouteCategoryPage() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
 
-  const empresa_id = getEmpresaId();
+  // Tornar empresa_id reativo: usar estado e atualizar quando receber empresa via query/localStorage
+  const [empresa_id_state, setEmpresaIdState] = useState<number | null>(() => {
+    const id = getEmpresaId();
+    return id && id > 0 ? id : null;
+  });
+
+  // Atualizar quando o hook global detectar mudança via query (ex.: ?empresa=)
+  useReceiveEmpresaFromQuery(() => {
+    const newId = getEmpresaId();
+    if (newId && newId !== empresa_id_state) {
+      setEmpresaIdState(newId);
+    }
+  });
+
+  // Garantir estado inicial caso o localStorage seja populado após montagem
+  useEffect(() => {
+    const current = getEmpresaId();
+    if (current && current > 0 && current !== empresa_id_state) {
+      setEmpresaIdState(current);
+    }
+  }, []);
+
+  const empresa_id = empresa_id_state;
   const params = useParams<{ slug?: string | string[] }>();
   const slugAtual = useMemo(() => {
     const raw = Array.isArray(params.slug) ? params.slug.at(-1) : params.slug;
