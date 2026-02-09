@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
-import { clearEmpresaData, clearEmpresaId } from "@cardapio/stores/empresa/empresaStore";
+import { clearEmpresaData, clearEmpresaId, setEmpresaId, setEmpresaData } from "@cardapio/stores/empresa/empresaStore";
+import { api } from "@cardapio/app/api/api";
 
 const TENANT_COOKIE_NAME = "tenant_slug";
 const API_BASE_URL_COOKIE_NAME = "api_base_url";
@@ -129,6 +130,67 @@ export function TenantCookiePersist() {
       }
     }
   }, [pathname, searchParams]);
+
+  // Fallback para preview/supervisor: se veio ?via=supervisor&empresa=ID e ainda não temos tenant,
+  // buscar empresa na API e persistir tenant + empresaId/empresaData na sessão/localStorage.
+  useEffect(() => {
+    try {
+      const via = (searchParams.get("via") ?? "").trim();
+      const empresaParam = (searchParams.get("empresa") ?? "").trim();
+      const currentTenant = normalizeTenantSlug(getCookie(TENANT_COOKIE_NAME));
+      if (via !== "supervisor" || !empresaParam || currentTenant) return;
+
+      if (!/^\d+$/.test(empresaParam)) return;
+      const empresaIdNum = parseInt(empresaParam, 10);
+
+      let cancelled = false;
+      (async () => {
+        try {
+          const { data } = await api.get("/api/empresas/public/emp/lista", {
+            params: { empresa_id: empresaIdNum },
+          });
+          if (cancelled) return;
+
+          const empresa = Array.isArray(data) ? data[0] : data;
+          if (!empresa) return;
+
+          // Tenta extrair slug/tenant de campos possíveis
+          const maybeTenant =
+            normalizeTenantSlug(empresa.tenant_slug) ??
+            normalizeTenantSlug(empresa.slug) ??
+            normalizeTenantSlug(empresa.subdominio);
+
+          if (maybeTenant) {
+            setCookie(TENANT_COOKIE_NAME, maybeTenant, cookieOptions());
+          }
+
+          // Persistir empresa na sessão/localStorage para uso posterior
+          try {
+            if (empresaIdNum && Number.isFinite(empresaIdNum) && empresaIdNum > 0) {
+              setEmpresaId(empresaIdNum);
+            }
+            setEmpresaData(empresa);
+          } catch (e) {
+            if (process.env.NODE_ENV !== "production") {
+              console.warn("Erro ao persistir empresa na sessão (fallback):", e);
+            }
+          }
+        } catch (e) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("Erro ao buscar empresa para persistir tenant (fallback):", e);
+          }
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Erro no efeito de fallback tenant (supervisor):", e);
+      }
+    }
+  }, [searchParams]);
 
   return null;
 }
