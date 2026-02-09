@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     // As imagens serão servidas "como estão", sem transformação.
     // Habilita o otimizador do Next/Vercel (/_next/image).
     // Se precisar desabilitar por limites do plano, ajuste para `true`.
-    unoptimized: false,
+    unoptimized: true,
     remotePatterns: [
       // Permite qualquer subdomínio do domínio mensuraapi (ex.: gustavo.mensuraapi.com.br)
       {
