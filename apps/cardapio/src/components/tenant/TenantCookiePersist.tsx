@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { getCookie, setCookie } from "cookies-next";
+import { getCookie, setCookie, deleteCookie } from "cookies-next";
+import { clearEmpresaData, clearEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 
 const TENANT_COOKIE_NAME = "tenant_slug";
 const API_BASE_URL_COOKIE_NAME = "api_base_url";
@@ -62,7 +63,22 @@ export function TenantCookiePersist() {
 
     const current = normalizeTenantSlug(getCookie(TENANT_COOKIE_NAME));
     if (current !== nextTenant) {
+      // Quando o tenant muda, persistir o novo tenant e limpar configurações relacionadas
       setCookie(TENANT_COOKIE_NAME, nextTenant, cookieOptions());
+
+      try {
+        // Limpar dados da empresa previamente selecionada (localStorage)
+        clearEmpresaData();
+        clearEmpresaId();
+      } catch (e) {
+        // não propagar erros
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("Erro ao limpar dados da empresa após mudança de tenant:", e);
+        }
+      }
+
+      // Remover api_base_url salvo anteriormente (evita usar base URL de outro tenant)
+      deleteCookie(API_BASE_URL_COOKIE_NAME, { path: "/" });
     }
 
     // Extra: se veio api_base_url na query, persistir também
