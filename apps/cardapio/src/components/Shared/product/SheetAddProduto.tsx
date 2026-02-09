@@ -118,11 +118,21 @@ export function SheetAdicionarProduto({
     
     return complementosDaAPI
       .map((comp: ComplementoResponse) => {
-        const adicionaisAtivos = (comp.adicionais || []).filter((ad: AdicionalComplementoResponse) => isTruthyFlag((ad as any).ativo));
+        // Normalizar flags que podem vir como '1'/'0'/'true'/'false' da API
+        const adicionaisAtivos = (comp.adicionais || []).filter((ad: AdicionalComplementoResponse) =>
+          isTruthyFlag((ad as any).ativo)
+        );
+
         return {
           ...comp,
-          adicionais: adicionaisAtivos
-        };
+          // Garantir booleanos corretos
+          obrigatorio: isTruthyFlag((comp as any).obrigatorio),
+          quantitativo: isTruthyFlag((comp as any).quantitativo),
+          permite_multipla_escolha: isTruthyFlag((comp as any).permite_multipla_escolha),
+          minimo_itens: comp.minimo_itens ? Number(comp.minimo_itens) : comp.minimo_itens,
+          maximo_itens: comp.maximo_itens ? Number(comp.maximo_itens) : comp.maximo_itens,
+          adicionais: adicionaisAtivos,
+        } as ComplementoResponse;
       })
       .filter((comp: ComplementoResponse) => isTruthyFlag((comp as any).ativo) && comp.adicionais.length > 0);
   }, [complementosDaAPI]);

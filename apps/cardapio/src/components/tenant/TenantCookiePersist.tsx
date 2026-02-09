@@ -47,6 +47,45 @@ export function TenantCookiePersist() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Attempt to persist tenant synchronously on first render to cover preview/SSR cases
+  // where effects may run after other code that already tries to call the API.
+  // This makes the cookie available immediately for any client-side calls that run
+  // during the same render cycle (best-effort).
+  if (typeof window !== "undefined") {
+    try {
+      const tenantFromQuerySync = normalizeTenantSlug(new URLSearchParams(window.location.search).get("tenant"));
+      const segmentsSync = window.location.pathname.split("/").filter(Boolean);
+      const maybeFromPathSync =
+        segmentsSync.length >= 1 && !KNOWN_FIRST_SEGMENTS.has(segmentsSync[0])
+          ? normalizeTenantSlug(segmentsSync[0])
+          : null;
+
+      const nextTenantSync = tenantFromQuerySync ?? maybeFromPathSync;
+      if (nextTenantSync) {
+        const currentSync = normalizeTenantSlug(getCookie(TENANT_COOKIE_NAME));
+        if (currentSync !== nextTenantSync) {
+          // Persist cookie immediately
+          setCookie(TENANT_COOKIE_NAME, nextTenantSync, cookieOptions());
+          // Clear stale empresa data if tenant changed
+          try {
+            clearEmpresaData();
+            clearEmpresaId();
+          } catch (e) {
+            if (process.env.NODE_ENV !== "production") {
+              console.warn("Erro ao limpar dados da empresa (sync):", e);
+            }
+          }
+          // Remove any saved api_base_url to avoid cross-tenant leakage
+          deleteCookie(API_BASE_URL_COOKIE_NAME, { path: "/" });
+        }
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Erro ao aplicar tenant sync:", e);
+      }
+    }
+  }
+
   useEffect(() => {
     // 1) Prioridade: query param ?tenant=slug (ex.: links de supervisor)
     const tenantFromQuery = normalizeTenantSlug(searchParams.get("tenant"));
