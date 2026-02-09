@@ -31,7 +31,19 @@ export default function RouteCategoryPage() {
   }, [params.slug]);
 
   // ⬇️ usa o endpoint novo
-  const { data, isLoading, isPending } = useCategoriaPorSlug(empresa_id, slugAtual);
+  const categoriaQuery = useCategoriaPorSlug(empresa_id, slugAtual);
+  const { data, isLoading, isPending } = categoriaQuery;
+  // Caso a empresa ainda não estivesse disponível no primeiro render, forçar refetch
+  // quando `empresa_id` ou `slugAtual` ficarem disponíveis/alterarem.
+  useEffect(() => {
+    if (!empresa_id || !slugAtual) return;
+    // Se ainda não tem dados, ou quer garantir atualidade, refetch
+    if (!data) {
+      categoriaQuery.refetch().catch(() => {
+        /* ignore fetch errors here — UI já trata caso de ausência de dados */
+      });
+    }
+  }, [empresa_id, slugAtual]);
   const categoriaAtual = data?.categoria ?? null;
   const subcategorias = data?.subcategorias ?? [];
 
