@@ -412,6 +412,37 @@ export default function HomePage() {
     verificarRedirecionamento();
   }, [empresa_id_state, searchParams, fazerRedirecionamento]);
 
+  // Fallback rápido para previews/supervisor: se após curto tempo ainda estivermos
+  // verificando redirect, permitir requisições no cliente usando ?empresa=ID
+  useEffect(() => {
+    if (!verificandoRedirect) return;
+
+    const via = (searchParams.get("via") ?? "").trim();
+    const empresaParamLocal = (searchParams.get("empresa") ?? "").trim();
+    if (via !== "supervisor" || !empresaParamLocal) return;
+
+    const timer = setTimeout(() => {
+      try {
+        // Habilitar requisições mesmo sem cookie/tenant (melhora UX em preview)
+        const raw = empresaParamLocal;
+        if (/^\d+$/.test(raw)) {
+          const parsed = parseInt(raw, 10);
+          if (Number.isFinite(parsed) && parsed > 0) {
+            // Persistir empresa no estado/localStorage para uso imediato
+            setEmpresaId(parsed);
+            setEmpresaIdState(parsed);
+            setReady(true);
+          }
+        }
+      } finally {
+        setPodeFazerRequisicoes(true);
+        setVerificandoRedirect(false);
+      }
+    }, 1500); // 1.5s de espera antes de cair para client-side
+
+    return () => clearTimeout(timer);
+  }, [searchParams, verificandoRedirect, setEmpresaIdState]);
+
   useEffect(() => {
     if (!mesaIdParam) return;
     const codigo = mesaIdParam.trim();
