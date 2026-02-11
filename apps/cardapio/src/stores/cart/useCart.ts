@@ -49,6 +49,14 @@ export interface CartCombo {
   observacao?: string;
   complementos?: CartItemComplemento[]; // NOVO: Complementos agrupados
   adicionais?: CartItemAdicional[]; // LEGADO: Mantido para compatibilidade (deprecated)
+  // NOVO: Seções do combo (opcional). Estrutura usada ao persistir seleção por seção
+  secoes?: Array<{
+    secao_id: number;
+    itens: Array<{
+      id: number; // id do item na seção (pode ser adicional_id / produto id / receita id dependendo do backend)
+      quantidade: number;
+    }>;
+  }>;
 }
 
 export interface CartReceita {

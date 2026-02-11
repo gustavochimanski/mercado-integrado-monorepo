@@ -5,6 +5,7 @@ import { getCliente, getTokenCliente } from "@cardapio/stores/client/ClientStore
 import { previewCheckoutCliente } from "@cardapio/services/pedidos/checkout-finalizar-pedido";
 import type { FinalizarPedidoRequest, TipoPedidoCheckout } from "@cardapio/types/pedido";
 import { mapCartToPedidoItems } from "@cardapio/stores/cart/mapCartToPedidoItems";
+import { validarSelecoesCombo, SectionDefinition } from "../../utils/validacoesCombos";
 
 export interface PreviewCheckoutResult {
   subtotal: number;
@@ -113,7 +114,41 @@ export function usePreviewCheckout({
 
       try {
         // Converter itens do carrinho para formato aninhado em produtos
-        const { produtos } = 
+        // Antes de gerar o payload, validar seleções de combos (quando presentes)
+        if (combos && combos.length > 0) {
+          for (const combo of combos) {
+            // Seções selecionadas pelo usuário (opcional)
+            const selecionadas = (combo as any).secoes as any[] | undefined;
+
+            // Tentar extrair definições simples das próprias seções do combo, quando disponíveis.
+            // Muitas vezes o objeto do combo pode incluir metadados (obrigatorio/minimo_itens/etc).
+            const defs: SectionDefinition[] | undefined = Array.isArray(selecionadas)
+              ? selecionadas.map(s => ({
+                  id: Number(s.secao_id),
+                  obrigatorio: s.obrigatorio ?? s.obrigatorio === true,
+                  quantitativo: s.quantitativo ?? s.quantitativo === true,
+                  minimo_itens: typeof s.minimo_itens !== "undefined" ? s.minimo_itens : undefined,
+                  maximo_itens: typeof s.maximo_itens !== "undefined" ? s.maximo_itens : undefined,
+                  itens: Array.isArray(s.itens_definicao) ? s.itens_definicao.map((it: any) => ({
+                    id: Number(it.id),
+                    permite_quantidade: typeof it.permite_quantidade !== "undefined" ? it.permite_quantidade : undefined,
+                    quantidade_min: typeof it.quantidade_min !== "undefined" ? it.quantidade_min : undefined,
+                    quantidade_max: typeof it.quantidade_max !== "undefined" ? it.quantidade_max : undefined,
+                  })) : undefined,
+                }))
+              : undefined;
+
+            const { valido, erro } = validarSelecoesCombo(combo.combo_id, selecionadas, defs);
+            if (!valido) {
+              const errorWithDetail = new Error(erro || "Erro de validação de combo");
+              (errorWithDetail as any).response = { status: 400, data: { detail: erro } };
+              (errorWithDetail as any).status = 400;
+              throw errorWithDetail;
+            }
+          }
+        }
+
+        const { produtos } =
           mapCartToPedidoItems(items, combos || [], receitas || []);
 
         const payload: FinalizarPedidoRequest = {

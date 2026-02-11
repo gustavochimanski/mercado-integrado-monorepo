@@ -1,29 +1,18 @@
-// src/token/tokenStore.ts
+// src/stores/token/tokenStore.ts
+import { setWithExpiry, getWithExpiry, removeWithExpiry } from "../../utils/storageWithExpiry";
+
 const TOKEN_KEY = "userToken";
-
-function loadFromStorage(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-function saveToStorage(token: string) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-function removeFromStorage() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(TOKEN_KEY);
-}
+const MS_30_DAYS = 30 * 24 * 60 * 60 * 1000;
 
 export function setToken(newToken: string) {
-  saveToStorage(newToken);
+  if (!newToken) return;
+  setWithExpiry(TOKEN_KEY, newToken, MS_30_DAYS);
 }
 
 export function getToken(): string | null {
-  return loadFromStorage();
+  return getWithExpiry<string>(TOKEN_KEY);
 }
 
 export function clearToken() {
-  removeFromStorage();
+  removeWithExpiry(TOKEN_KEY);
 }

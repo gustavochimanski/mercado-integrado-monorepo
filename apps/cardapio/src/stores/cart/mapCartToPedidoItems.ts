@@ -1,6 +1,7 @@
 // src/stores/cart/mapCartToPedidoItems.ts
 import type { CartItem, CartCombo, CartReceita } from "./useCart";
 import type { ItemPedidoRequest, ComboPedidoRequest, ReceitaPedidoRequest, ProdutosPedidoRequest, ItemComplementoRequest } from "@cardapio/types/pedido";
+import type { CartComboSection } from "../../utils/validacoesCombos";
 
 /**
  * Interface para o resultado do mapeamento com estrutura aninhada em produtos
@@ -77,6 +78,19 @@ export function mapCartToPedidoItems(
     else if (combo.adicionais && combo.adicionais.length > 0) {
       // Migrar adicionais antigos para um complemento genérico (se necessário)
       // Por enquanto, ignoramos adicionais antigos se não houver complementos
+    }
+    // NOVO: Converter seções (se presentes) para o formato do backend
+    if ((combo as any).secoes && Array.isArray((combo as any).secoes) && (combo as any).secoes.length > 0) {
+      // espera-se que combo.secoes seja Array<{ secao_id: number, itens: Array<{ id: number, quantidade: number }> }>
+      const secoes: Array<{ secao_id: number; itens: Array<{ id: number; quantidade: number }> }> = (combo as any).secoes.map((s: CartComboSection) => ({
+        secao_id: s.secao_id,
+        itens: (s.itens || []).map(it => ({
+          id: it.id,
+          quantidade: it.quantidade,
+        })),
+      }));
+
+      (comboRequest as any).secoes = secoes;
     }
 
     return comboRequest;

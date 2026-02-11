@@ -1,5 +1,6 @@
 // ClientStore.ts
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
+import { setWithExpiry, getWithExpiry, removeWithExpiry } from "../../utils/storageWithExpiry";
 
 export interface ClienteStore {
   id?: number;               // id do cliente (quando vem da API)
@@ -17,24 +18,16 @@ const SUPER_TOKEN_COOKIE_KEY = "super_token";
 
 let clienteCache: ClienteStore = {}; // cache em memória
 const STORAGE_KEY = "clienteStore";
+const MS_30_DAYS = 30 * 24 * 60 * 60 * 1000;
 
 // 🔎 Carrega do localStorage ao iniciar
 function loadFromStorage(): ClienteStore {
   if (Object.keys(clienteCache).length > 0) return clienteCache;
 
-  // Verificar se está no cliente antes de acessar localStorage
-  if (typeof window === 'undefined') {
-    return {};
-  }
-
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = getWithExpiry<ClienteStore>(STORAGE_KEY);
   if (stored) {
-    try {
-      clienteCache = JSON.parse(stored) as ClienteStore;
-      return clienteCache;
-    } catch {
-      return {};
-    }
+    clienteCache = { ...stored };
+    return clienteCache;
   }
 
   return {};
@@ -42,13 +35,7 @@ function loadFromStorage(): ClienteStore {
 
 function saveToStorage(data: ClienteStore) {
   clienteCache = { ...data };
-  
-  // Verificar se está no cliente antes de acessar localStorage
-  if (typeof window === 'undefined') {
-    return;
-  }
-  
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(clienteCache));
+  setWithExpiry(STORAGE_KEY, clienteCache, MS_30_DAYS);
 }
 
 // --- API do Store ---
@@ -78,7 +65,7 @@ export function setCliente(partial: Partial<ClienteStore>) {
   if (partial.tokenCliente) {
     setCookie(SUPER_TOKEN_COOKIE_KEY, partial.tokenCliente, {
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      maxAge: 60 * 60 * 24 * 30, // 30 dias
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
     });
@@ -88,10 +75,7 @@ export function setCliente(partial: Partial<ClienteStore>) {
 export function clearCliente() {
   clienteCache = {};
   
-  // Verificar se está no cliente antes de acessar localStorage
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(STORAGE_KEY);
-  }
+  removeWithExpiry(STORAGE_KEY);
   
   deleteCookie(SUPER_TOKEN_COOKIE_KEY, { path: "/" });
 }
