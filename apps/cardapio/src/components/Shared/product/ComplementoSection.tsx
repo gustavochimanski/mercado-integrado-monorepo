@@ -40,6 +40,8 @@ export function ComplementoSection({
   onDecrement,
   highlight = false,
 }: ComplementoSectionProps) {
+  // data attribute para permitir scrollIntoView do parent
+  const dataAttr = { 'data-complemento-id': complemento.id };
   const totalSelecionadoPorUnidade = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
   const totalSelecionado = totalSelecionadoPorUnidade * Math.max(1, quantidadeItem);
   // minimo_itens e maximo_itens vêm da vinculação
@@ -55,6 +57,7 @@ export function ComplementoSection({
           ? "border-primary/60 shadow-md shadow-primary/20" 
           : ""
       }`}
+      {...dataAttr}
       style={highlight ? {
         animation: 'flash 0.4s ease-in-out 5'
       } : undefined}

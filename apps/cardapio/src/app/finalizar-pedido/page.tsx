@@ -604,8 +604,8 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
             setTimeout(() => {
               stopEditingPedido(); // Limpa o modo edição
               queryClient.invalidateQueries({ queryKey: ["pedidos"] });
-              setOverlayStatus("idle");
-              setSuccessModalOpen(true);
+              // Mostrar animação de sucesso antes do modal
+              setOverlayStatus("sucesso");
             }, 1500);
           },
           onError: (error: any) => {
@@ -768,8 +768,8 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
         queryClient.invalidateQueries({ queryKey: ["pedidos"] });
 
         setTimeout(() => {
-          setOverlayStatus("idle");
-          setSuccessModalOpen(true);
+          // Mostrar animação de sucesso antes do modal
+          setOverlayStatus("sucesso");
           setIsFinalizando(false);
         }, 1500);
       } catch (error: any) {
@@ -930,6 +930,18 @@ const enderecos: Endereco[] = enderecosOut.map((e) => ({
                 type="error" 
                 message={overlayMessage}
                 onClose={() => setOverlayStatus("idle")}
+              />
+            )}
+            {overlayStatus === "sucesso" && (
+              <PedidoConfirmOverlay
+                show={true}
+                type="success"
+                message={overlayMessage}
+                // Quando a animação terminar, fechar overlay e abrir modal de sucesso
+                onClose={() => {
+                  setOverlayStatus("idle");
+                  setSuccessModalOpen(true);
+                }}
               />
             )}
           </motion.div>

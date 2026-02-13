@@ -35,6 +35,7 @@ import { ComplementoSection } from "./ComplementoSection";
 import { toast } from "sonner";
 import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
 import { Lock } from "lucide-react";
+import { validarSelecoesCombo, CartComboSection, SectionDefinition } from "../../../utils/validacoesCombos";
 
 const isTruthyFlag = (v: unknown) =>
   v === true || v === 1 || v === "1" || v === "true" || v === "TRUE" || v === "S" || v === "s";
@@ -53,7 +54,7 @@ type FormData = z.infer<typeof schema>;
 
 interface SheetAdicionarComboProps {
   combo: ComboMiniDTO;
-  onAdd?: (combo: ComboMiniDTO, quantity: number, observacao?: string, complementos?: CartItemComplemento[]) => void;
+  onAdd?: (combo: ComboMiniDTO, quantity: number, observacao?: string, complementos?: CartItemComplemento[], secoes?: CartComboSection[]) => void;
   isOpen: boolean;
   onClose: () => void;
   quickAddQuantity?: number;
@@ -132,6 +133,7 @@ export function SheetAdicionarCombo({
 
   // Estado para complementos selecionados: mapeia complemento_id -> adicional_id -> quantidade
   const [selecoesComplementos, setSelecoesComplementos] = useState<Record<number, Record<number, number>>>({});
+  const [highlightedSections, setHighlightedSections] = useState<number[]>([]);
 
   // Sempre voltar pro topo ao abrir (evita reabrir já em "Complementos")
   useEffect(() => {
@@ -186,6 +188,8 @@ export function SheetAdicionarCombo({
         },
       };
     });
+    // remover highlight desta seção ao interagir
+    setHighlightedSections(prev => prev.filter(id => id !== complementoId));
   };
 
   // Decrementar quantidade de um adicional em um complemento
@@ -219,6 +223,8 @@ export function SheetAdicionarCombo({
         },
       };
     });
+    // remover highlight desta seção ao interagir
+    setHighlightedSections(prev => prev.filter(id => id !== complementoId));
   };
 
   // Toggle adicional (para complementos que não permitem múltipla escolha)
@@ -258,6 +264,8 @@ export function SheetAdicionarCombo({
         
         return novo;
       });
+      // remover highlight desta seção ao interagir
+      setHighlightedSections(prev => prev.filter(id => id !== complementoId));
     } else {
       // Se permite múltipla escolha, pode incrementar
       incrementarAdicional(complementoId, adicionalId, quantitativo);
@@ -304,40 +312,35 @@ export function SheetAdicionarCombo({
 
   // Validar se complementos obrigatórios foram selecionados
   // IMPORTANTE: TODOS os valores de configuração (obrigatorio, quantitativo, minimo_itens, maximo_itens) vêm da vinculação
-  const validarComplementos = (): { valido: boolean; erro?: string } => {
+  const validarComplementos = (): { valido: boolean; erro?: string; invalidIds?: number[] } => {
+    const invalidIds: number[] = [];
+
     for (const complemento of complementos) {
-      if (isComplementoObrigatorio(complemento)) {
-        const selecoes = selecoesComplementos[complemento.id];
-        if (!selecoes || Object.keys(selecoes).length === 0) {
-          return {
-            valido: false,
-            erro: `É obrigatório selecionar ao menos um item em "${complemento.nome}"`,
-          };
-        }
+      const selecoes = selecoesComplementos[complemento.id] || {};
+      const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
 
-        // Validar quantidade mínima (vem da vinculação)
-        if (complemento.minimo_itens && complemento.minimo_itens > 0) {
-          const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
-          if (totalItens < complemento.minimo_itens) {
-            return {
-              valido: false,
-              erro: `É necessário selecionar pelo menos ${complemento.minimo_itens} item(s) em "${complemento.nome}"`,
-            };
-          }
-        }
+      if (isComplementoObrigatorio(complemento) && totalItens === 0) {
+        invalidIds.push(complemento.id);
+        continue;
+      }
 
-        // Validar quantidade máxima (vem da vinculação)
-        if (complemento.maximo_itens && complemento.maximo_itens > 0) {
-          const totalItens = Object.values(selecoes).reduce((sum, qtd) => sum + qtd, 0);
-          if (totalItens > complemento.maximo_itens) {
-            return {
-              valido: false,
-              erro: `É possível selecionar no máximo ${complemento.maximo_itens} item(s) em "${complemento.nome}"`,
-            };
-          }
-        }
+      if (complemento.minimo_itens && complemento.minimo_itens > 0 && totalItens < complemento.minimo_itens) {
+        invalidIds.push(complemento.id);
+        continue;
+      }
+
+      if (complemento.maximo_itens && complemento.maximo_itens > 0 && totalItens > complemento.maximo_itens) {
+        invalidIds.push(complemento.id);
+        continue;
       }
     }
+
+    if (invalidIds.length > 0) {
+      const first = complementos.find(c => c.id === invalidIds[0]);
+      const erroMsg = first ? `Verifique a seção "${first.nome}"` : "Seleções inválidas nos complementos";
+      return { valido: false, erro: erroMsg, invalidIds };
+    }
+
     return { valido: true };
   };
 
@@ -350,12 +353,24 @@ export function SheetAdicionarCombo({
 
     const observacao = data.observacao?.trim() || undefined;
     
-    // Validar complementos obrigatórios
+    // Validar complementos obrigatórios (com destaque das seções inválidas)
     const validacao = validarComplementos();
     if (!validacao.valido) {
+      // marcar seções inválidas
+      setHighlightedSections(validacao.invalidIds || []);
+      // scroll para a primeira seção inválida (dentro do container)
+      const firstId = validacao.invalidIds && validacao.invalidIds[0];
+      if (firstId && scrollContainerRef.current) {
+        const el = scrollContainerRef.current.querySelector(`[data-complemento-id="${firstId}"]`) as HTMLElement | null;
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
       toast.error(validacao.erro || "Erro de validação");
-      // Scroll para o topo para mostrar o erro
-      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     
@@ -386,9 +401,36 @@ export function SheetAdicionarCombo({
         });
       }
     });
+    // Construir estrutura de seções (uso interno/persistência) a partir das seleções
+    const secoesSelecionadas: CartComboSection[] = complementosSelecionados.map(c => ({
+      secao_id: c.complemento_id,
+      itens: c.adicionais.map(a => ({ id: a.adicional_id, quantidade: a.quantidade })),
+    }));
 
+    // Construir definições simples das seções para validação detalhada (quando necessário)
+    const defs: SectionDefinition[] = complementos.map(comp => ({
+      id: comp.id,
+      obrigatorio: comp.obrigatorio === true,
+      quantitativo: comp.quantitativo === true,
+      minimo_itens: typeof comp.minimo_itens !== "undefined" ? comp.minimo_itens ?? undefined : undefined,
+      maximo_itens: typeof comp.maximo_itens !== "undefined" ? comp.maximo_itens ?? undefined : undefined,
+      itens: comp.adicionais ? comp.adicionais.map(a => ({
+        id: a.id,
+        permite_quantidade: comp.quantitativo === true,
+        quantidade_min: 1,
+        quantidade_max: comp.maximo_itens ?? undefined,
+      })) : undefined,
+    }));
+
+    // Validar via função genérica (cobre regras por item e por seção)
+    const validacaoGlobal = validarSelecoesCombo(combo.id, secoesSelecionadas, defs);
+    if (!validacaoGlobal.valido) {
+      toast.error(validacaoGlobal.erro || "Erro de validação do combo");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     if (onAdd) {
-      onAdd(combo, data.quantity, observacao, complementosSelecionados.length > 0 ? complementosSelecionados : undefined);
+      onAdd(combo, data.quantity, observacao, complementosSelecionados.length > 0 ? complementosSelecionados : undefined, secoesSelecionadas.length > 0 ? secoesSelecionadas : undefined);
     } else {
       // Adicionar diretamente ao carrinho
       addCombo({
@@ -398,6 +440,7 @@ export function SheetAdicionarCombo({
         preco: combo.preco_total,
         observacao,
         complementos: complementosSelecionados.length > 0 ? complementosSelecionados : undefined,
+        secoes: secoesSelecionadas.length > 0 ? secoesSelecionadas : undefined,
       });
     }
 
@@ -581,6 +624,7 @@ export function SheetAdicionarCombo({
                     onToggle={(adicionalId) => toggleAdicional(complemento.id, adicionalId, complemento.permite_multipla_escolha, complemento.quantitativo)}
                     onIncrement={(adicionalId) => incrementarAdicional(complemento.id, adicionalId, complemento.quantitativo)}
                     onDecrement={(adicionalId) => decrementarAdicional(complemento.id, adicionalId)}
+                    highlight={highlightedSections.includes(complemento.id)}
                   />
                 ))}
               </div>

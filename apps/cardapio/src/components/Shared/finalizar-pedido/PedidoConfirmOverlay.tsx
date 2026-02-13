@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 import { Button } from "@cardapio/components/Shared/ui/button";
 import { X, XCircle } from "lucide-react";
 
@@ -22,6 +23,21 @@ export default function PedidoConfirmOverlay({
       // Se for erro e não tiver onClose, não faz nada (deixa o usuário fechar manualmente)
     }
   };
+
+  // Se for sucesso, auto-fechar após animação completar
+  useEffect(() => {
+    if (!show) return;
+    if (type !== "success") return;
+    // Durations baseadas nas animações definidas acima:
+    // círculo: delay 0.8 + duration 0.6 = 1.4
+    // check: delay 1.2 + duration 0.8 = 2.0
+    // texto: delay 1.5 + duration 0.5 = 2.0
+    // Dar um pequeno buffer e fechar após ~2200ms
+    const timer = setTimeout(() => {
+      handleClose();
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, [show, type]);
 
   return (
     <AnimatePresence>
