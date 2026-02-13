@@ -32,7 +32,8 @@ export default function HomePage() {
   // ✅ TODOS os hooks primeiro, sem returns no meio
   const router = useRouter();
   const searchParams = useSearchParams();
-  const mesaIdParam = searchParams.get("mesa_id");
+  // Aceitar múltiplas variantes de parâmetro de mesa (mesa_id, mesa, mesa_codigo)
+  const mesaIdParam = searchParams.get("mesa_id") ?? searchParams.get("mesa") ?? searchParams.get("mesa_codigo");
   const mesaPessoasParam =
     searchParams.get("mesa_pessoas") ?? searchParams.get("mesa_num_pessoas");
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -171,13 +172,22 @@ export default function HomePage() {
       }
     }
 
-    // ✅ PRESERVAR mesa_id / mesa_pessoas (quando veio por QRCode/URL)
+    // ✅ PRESERVAR mesa (aceitar mesa_id / mesa / mesa_codigo) e mesa_pessoas (quando veio por QRCode/URL)
     const mesaIdFromQuery = searchParams.get("mesa_id");
+    const mesaFromQuery = searchParams.get("mesa");
+    const mesaCodigoFromQuery = searchParams.get("mesa_codigo");
     const mesaPessoasFromQuery =
       searchParams.get("mesa_pessoas") ?? searchParams.get("mesa_num_pessoas");
 
-    if (mesaIdFromQuery && !urlObj.searchParams.has("mesa_id")) {
-      urlObj.searchParams.set("mesa_id", mesaIdFromQuery);
+    // Prioridade: mesa_id > mesa > mesa_codigo
+    const mesaToPreserve = mesaIdFromQuery ?? mesaFromQuery ?? mesaCodigoFromQuery;
+    if (mesaToPreserve && !urlObj.searchParams.has("mesa_id")) {
+      urlObj.searchParams.set("mesa_id", mesaToPreserve);
+    }
+
+    // Também preservar o parâmetro original mesa_codigo se existir (não sobrescrever)
+    if (mesaCodigoFromQuery && !urlObj.searchParams.has("mesa_codigo")) {
+      urlObj.searchParams.set("mesa_codigo", mesaCodigoFromQuery);
     }
 
     // Preferir padronizar como mesa_pessoas, mas não sobrescrever se destino já tem.

@@ -110,7 +110,7 @@ export default function FinalizarPedidoPage() {
 
   // Lê parâmetro ?mesa=X da URL e pré-seleciona
   useEffect(() => {
-    const mesaParam = searchParams.get("mesa") ?? searchParams.get("mesa_id");
+    const mesaParam = searchParams.get("mesa") ?? searchParams.get("mesa_id") ?? searchParams.get("mesa_codigo");
     const mesaPessoasParam =
       searchParams.get("mesa_pessoas") ?? searchParams.get("mesa_num_pessoas");
 
