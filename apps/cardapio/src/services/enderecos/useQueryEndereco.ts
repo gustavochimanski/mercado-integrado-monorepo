@@ -1,5 +1,6 @@
 // src/services/useQueryEndereco.ts
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin"
+import { getTokenCliente } from "@cardapio/stores/client/ClientStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage"
@@ -77,7 +78,10 @@ export function useQueryEnderecos(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["enderecos"],
     queryFn: async () => {
-      const { data } = await apiClienteAdmin.get("/api/cadastros/client/enderecos")
+      const token = getTokenCliente() || ""
+      const { data } = await apiClienteAdmin.get("/api/cadastros/client/enderecos", {
+        headers: token ? { "x-super-token": token } : undefined,
+      })
       return data as EnderecoOut[]
     },
     enabled: options?.enabled !== false,
@@ -105,7 +109,10 @@ export function useMutateEndereco() {
         cliente_id: resolvedClienteId,
       }
 
-      const { data } = await apiClienteAdmin.post("/api/cadastros/client/enderecos", payload)
+      const token = getTokenCliente() || ""
+      const { data } = await apiClienteAdmin.post("/api/cadastros/client/enderecos", payload, {
+        headers: token ? { "x-super-token": token } : undefined,
+      })
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -133,7 +140,10 @@ export function useMutateEndereco() {
         cliente_id: resolvedClienteId,
       }
 
-      const { data } = await apiClienteAdmin.put(`/api/cadastros/client/enderecos/${id}`, payload)
+      const token = getTokenCliente() || ""
+      const { data } = await apiClienteAdmin.put(`/api/cadastros/client/enderecos/${id}`, payload, {
+        headers: token ? { "x-super-token": token } : undefined,
+      })
       return data as EnderecoOut
     },
     onSuccess: () => {
@@ -148,7 +158,10 @@ export function useMutateEndereco() {
 
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await apiClienteAdmin.delete(`/api/cadastros/client/enderecos/${id}`)
+      const token = getTokenCliente() || ""
+      await apiClienteAdmin.delete(`/api/cadastros/client/enderecos/${id}`, {
+        headers: token ? { "x-super-token": token } : undefined,
+      })
     },
     onSuccess: () => {
       toast.success("Endereço removido com sucesso!")

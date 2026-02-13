@@ -5,6 +5,7 @@ import type { Pedido } from "@cardapio/types/pedido";
 import type { EditarPedidoRequest } from "../../api/models/EditarPedidoRequest";
 import type { ItemPedidoEditar as ItemPedidoEditarPayload } from "../../api/models/ItemPedidoEditar";
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
+import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
 import {
   editarPedidoCliente,
   atualizarItemPedidoCliente,
@@ -197,7 +198,12 @@ export function useMutatePedido() {
 
   const confirmarPagamento = useMutation({
     mutationFn: ({ id, dadosPagamento }: { id: number; dadosPagamento: ConfirmarPagamentoRequest }) =>
-      apiClienteAdmin.post(`/api/delivery/client/pagamentos/${id}/confirmar`, dadosPagamento),
+      (async () => {
+        const token = getTokenCliente() || "";
+        return apiClienteAdmin.post(`/api/delivery/client/pagamentos/${id}/confirmar`, dadosPagamento, {
+          headers: token ? { "x-super-token": token } : undefined,
+        });
+      })(),
     onSuccess: () => {
       toast.success("Pagamento confirmado com sucesso!");
       invalidate();

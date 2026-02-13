@@ -4,12 +4,15 @@ import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
-import { setCliente } from "@cardapio/stores/client/ClientStore";
+import { setCliente, getTokenCliente } from "@cardapio/stores/client/ClientStore";
 import type { NovoDispositivoRequest, NovoDispositivoResponse, ClienteOut } from "./types";
 
 async function sincronizarClienteAtual() {
   try {
-    const { data } = await apiClienteAdmin.get<ClienteOut>("/api/cadastros/client/clientes/me");
+    const token = getTokenCliente() || "";
+    const { data } = await apiClienteAdmin.get<ClienteOut>("/api/cadastros/client/clientes/me", {
+      headers: token ? { "x-super-token": token } : undefined,
+    });
     if (data) {
       setCliente({
         id: data.id,

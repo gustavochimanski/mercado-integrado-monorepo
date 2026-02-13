@@ -1,5 +1,6 @@
 // @cardapio/services/enderecos/buscar-endereco-client.ts
 import { apiClienteAdmin } from "@cardapio/app/api/apiClienteAdmin";
+import { getTokenCliente } from "@cardapio/stores/client/ClientStore";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@cardapio/lib/extractErrorMessage";
@@ -44,8 +45,10 @@ export function useBuscarEnderecoClient() {
           max_results: validMaxResults.toString(),
         });
         
+        const token = getTokenCliente() || "";
         const { data } = await apiClienteAdmin.get<EnderecoSearchResult[]>(
-          `/api/localizacao/client/buscar-endereco?${queryParams.toString()}`
+          `/api/localizacao/client/buscar-endereco?${queryParams.toString()}`,
+          { headers: token ? { "x-super-token": token } : undefined }
         );
         
         // A API retorna um array de EnderecoSearchResult diretamente
