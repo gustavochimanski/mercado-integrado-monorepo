@@ -208,11 +208,11 @@ function AdicionalItem({
 
       {/* Nome do adicional */}
       <div className="w-full text-center mb-1.5">
-        <Label className={`text-xs font-medium block ${!permiteMultipla ? "cursor-pointer" : ""} line-clamp-2`}>
+        <Label className={`text-xs font-medium block ${!permiteMultipla ? "cursor-pointer" : ""} whitespace-normal break-words`}>
           {adicional.nome}
         </Label>
         {adicional.descricao && (
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+          <p className="text-xs text-muted-foreground mt-0.5 whitespace-normal break-words">
             {adicional.descricao}
           </p>
         )}
