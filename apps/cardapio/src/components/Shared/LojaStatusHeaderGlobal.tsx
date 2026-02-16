@@ -27,7 +27,20 @@ export function LojaStatusHeaderGlobal() {
   const empresaId = empresaIdFromUrl ?? getEmpresaId();
   
   // Verificar se deve exibir o cabeçalho
-  const deveExibir = pathname === "/" || pathname.startsWith("/landingpage-store");
+  // Exibir também quando a rota for /{tenant} (um único segmento que não é rota conhecida)
+  const KNOWN_FIRST_SEGMENTS = new Set([
+    "api",
+    "categoria",
+    "landingpage-store",
+    "finalizar-pedido",
+    "menu",
+    "pedidos",
+    "_next",
+    "favicon.ico",
+  ]);
+  const segs = pathname.split("/").filter(Boolean);
+  const isTenantRoot = segs.length === 1 && !KNOWN_FIRST_SEGMENTS.has(segs[0]);
+  const deveExibir = pathname === "/" || pathname.startsWith("/landingpage-store") || isTenantRoot;
   
   // Buscar dados da empresa
   const { data: empresaData } = useBuscarEmpresa({

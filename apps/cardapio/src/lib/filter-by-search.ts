@@ -6,9 +6,18 @@ import type {
   ReceitaMiniDTO,
 } from "@cardapio/services/home";
 
+function normalizeString(s: string): string {
+  // Remover acentuação e normalizar para comparação case-insensitive
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
 function matchesTerm(text: string | null | undefined, term: string): boolean {
   if (!text || !term) return false;
-  return text.trim().toLowerCase().includes(term.trim().toLowerCase());
+  return normalizeString(text).includes(normalizeString(term));
 }
 
 export function filterCategoriasBySearch(
