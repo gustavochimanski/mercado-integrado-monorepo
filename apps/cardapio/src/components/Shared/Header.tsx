@@ -21,7 +21,7 @@ const HeaderComponent = () => {
   const q = searchParams.get("q") ?? "";
 
   const isHomeOrCategory =
-    pathname === "/" || pathname.startsWith("/categoria") || pathname.startsWith("/landingpage-store");
+    pathname === "/" || pathname.startsWith("/categoria");
   const isFinalizarPedido = pathname === "/finalizar-pedido";
 
   useEffect(() => {
