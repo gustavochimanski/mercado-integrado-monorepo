@@ -6,6 +6,9 @@ import { useScrollSpy } from "@cardapio/hooks/useScrollSpy";
 import LoadingSpinner from "@cardapio/components/Shared/ui/loader";
 import CategoryScrollSection from "@cardapio/components/Shared/category/categoryScrollSection";
 import { SheetAdicionarProduto } from "@cardapio/components/Shared/product/SheetAddProduto";
+import { ProductCard } from "@cardapio/components/Shared/product/ProductCard";
+import { ReceitaCard } from "@cardapio/components/Shared/product/ReceitaCard";
+import { ComboCard } from "@cardapio/components/Shared/product/ComboCard";
 import { useCart } from "@cardapio/stores/cart/useCart";
 import { getEmpresaId } from "@cardapio/stores/empresa/empresaStore";
 import CardAddVitrine from "@cardapio/components/admin/card/CardAddVitrine";
@@ -15,6 +18,8 @@ import { useReceiveEmpresaFromQuery } from "@cardapio/stores/empresa/useReceiveE
 import ProductsVitrineSection from "@cardapio/components/Shared/product/ProductsVitrineSection";
 import { HorizontalSpy } from "@cardapio/components/Shared/scrollspy/HorizontalScrollSpy";
 import { filterCategoriasBySearch, filterVitrinesBySearch } from "@cardapio/lib/filter-by-search";
+import { api } from "@cardapio/app/api/api";
+import type { ReceitaMiniDTO, ComboMiniDTO } from "@cardapio/services/home/types";
 import { useLojaAberta } from "@cardapio/hooks/useLojaAberta";
 import { toast } from "sonner";
 
@@ -126,6 +131,151 @@ export default function RouteCategoryPage() {
     () => filterVitrinesBySearch(vitrinesFilhoRaw, q),
     [vitrinesFilhoRaw, q]
   );
+ 
+  const [searchResults, setSearchResults] = React.useState<{
+    produtos: ProdutoEmpMini[];
+    receitas: ReceitaMiniDTO[];
+    combos: ComboMiniDTO[];
+    total?: number;
+    quantidade_produtos?: number;
+  } | null>(null);
+  const [searchLoading, setSearchLoading] = React.useState(false);
+  const [searchError, setSearchError] = React.useState<string | null>(null);
+ 
+  // Quando há termo de busca (q), chamar o endpoint público de busca e renderizar resultados
+  React.useEffect(() => {
+    const termo = (q ?? "").trim();
+    if (!termo || !empresa_id) {
+      setSearchResults(null);
+      setSearchError(null);
+      setSearchLoading(false);
+      return;
+    }
+
+    let mounted = true;
+    const doSearch = async () => {
+      try {
+        setSearchLoading(true);
+        setSearchError(null);
+        const params = {
+          empresa_id: empresa_id,
+          termo,
+          apenas_disponiveis: true,
+          apenas_ativos: true,
+          limit: 50,
+          page: 1,
+        };
+
+        const { data: resp } = await api.get("/api/catalogo/public/busca/global", { params });
+
+        if (!mounted) return;
+
+        const produtosApi = Array.isArray(resp?.produtos) ? resp.produtos : [];
+        const produtos: ProdutoEmpMini[] = produtosApi.map((p: any) => {
+          const descricao = p.nome ?? p.descricao ?? "";
+          const imagem = p.imagem ?? null;
+          const preco_venda = Number(p.preco_venda ?? p.preco ?? 0) || 0;
+          return {
+            empresa_id: p.empresa_id ?? p.empresa ?? empresa_id,
+            cod_barras: String(p.cod_barras ?? p.id ?? ""),
+            preco_venda,
+            produto: {
+              id: undefined,
+              descricao,
+              imagem,
+              cod_categoria: null,
+            },
+            subcategoria_id: undefined,
+          };
+        });
+
+        const receitasApi = Array.isArray(resp?.receitas) ? resp.receitas : [];
+        const receitas: ReceitaMiniDTO[] = receitasApi.map((r: any) => ({
+          id: Number(r.id ?? r.receita_id ?? 0) || 0,
+          empresa_id: r.empresa_id ?? empresa_id,
+          nome: r.nome ?? r.descricao ?? "",
+          descricao: r.descricao ?? "",
+          preco_venda: Number(r.preco_venda ?? r.preco ?? 0) || 0,
+          imagem: r.imagem ?? null,
+          vitrine_id: null,
+          disponivel: Boolean(r.disponivel ?? true),
+          ativo: Boolean(r.ativo ?? true),
+        }));
+
+        const combosApi = Array.isArray(resp?.combos) ? resp.combos : [];
+        const combos: ComboMiniDTO[] = combosApi.map((c: any) => ({
+          id: Number(c.id ?? c.combo_id ?? 0) || 0,
+          empresa_id: c.empresa_id ?? empresa_id,
+          titulo: c.titulo ?? c.nome ?? "",
+          descricao: c.descricao ?? "",
+          preco_total: Number(c.preco_total ?? c.preco ?? 0) || 0,
+          imagem: c.imagem ?? null,
+          ativo: Boolean(c.ativo ?? true),
+          vitrine_id: null,
+        }));
+
+        setSearchResults({
+          produtos,
+          receitas,
+          combos,
+          total: resp?.total,
+          quantidade_produtos: resp?.quantidade_produtos,
+        });
+      } catch (err: any) {
+        console.error("Erro na busca pública (categoria):", err);
+        if (!mounted) return;
+        setSearchError("Erro ao buscar resultados");
+        setSearchResults(null);
+      } finally {
+        if (!mounted) return;
+        setSearchLoading(false);
+      }
+    };
+
+    doSearch().catch((err) => {
+      console.error("Erro inesperado na busca pública (categoria):", err);
+      const status = err?.response?.status;
+      if (status === 404) {
+        setSearchResults({ produtos: [], receitas: [], combos: [], total: 0, quantidade_produtos: 0 });
+        setSearchError(null);
+      } else {
+        setSearchError("Erro ao buscar resultados");
+        setSearchResults(null);
+      }
+      setSearchLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [q, empresa_id]);
+ 
+  const buildHrefCategoria = useCallback(
+    (rawHref?: string | null | undefined) => {
+      if (!rawHref || typeof rawHref !== "string") return undefined;
+      // remover prefixo /cardapio se presente
+      const href = rawHref.startsWith("/cardapio") ? rawHref.replace(/^\/cardapio/, "") : rawHref;
+      // se não for rota de categoria, retornar como veio
+      if (!href.startsWith("/categoria")) return href;
+      const parts = href.split("/").filter(Boolean); // ["categoria", "maybeParent", "child"]
+      const afterCategoria = parts.slice(1); // ["maybeParent", "child"]
+      if (afterCategoria.length === 0) return "/categoria";
+      // se já tem mais de um segmento, último é o slug desejado
+      const childSlug = afterCategoria[afterCategoria.length - 1];
+      // se estamos em uma categoria pai (slugAtual) e diferente do childSlug,
+      // construir /categoria/{slugAtual}/{childSlug}
+      if (slugAtual) {
+        // se href já contém o slugAtual como primeiro segmento depois de /categoria, manter href
+        if (afterCategoria[0] === slugAtual) {
+          return `/categoria/${afterCategoria.join("/")}`;
+        }
+        return `/categoria/${slugAtual}/${childSlug}`;
+      }
+      // fallback: retornar href original (sem /cardapio)
+      return `/categoria/${afterCategoria.join("/")}`;
+    },
+    [slugAtual]
+  );
 
   const subcategoriasFiltradas = useMemo(
     () => filterCategoriasBySearch(subcategorias, q),
@@ -213,49 +363,102 @@ export default function RouteCategoryPage() {
           empresaId={empresa_id!}
         />
 
-        {/* Usar vitrines já carregadas ao invés de ProductsSection */}
-        {/* Mostrar todas as vitrines da categoria atual */}
-        {vitrinesFiltradas.map((vitrine, index) => (
-          <ProductsVitrineSection
-            key={vitrine.id}
-            vitrineId={vitrine.id}
-            titulo={vitrine.titulo}
-            produtos={vitrine.produtos}
-            combos={vitrine.combos}
-            receitas={vitrine.receitas}
-            codCategoria={vitrine.cod_categoria}
-            empresaId={empresa_id!}
-            onOpenSheet={openSheet}
-            sectionRef={register(vitrine.id)}
-            hrefCategoria={vitrine.href_categoria ?? undefined}
-            isHome={false}
-            vitrineIsHome={vitrine.is_home}
-            isHighlighted={highlightedVitrineId === vitrine.id}
-            isLast={vitrinesFilhoFiltradas.length === 0 && index === vitrinesFiltradas.length - 1}
-          />
-        ))}
+        {/* Se existe termo de busca, mostrar resultados da busca global (mesma lógica da Home) */}
+        {q.trim() ? (
+          <div>
+            <div className="mb-2 px-2">
+              <h2 className="text-sm font-semibold">Resultados para: "{q}"</h2>
+            </div>
 
-        {/* Vitrines das subcategorias (apenas as primeiras de cada subcategoria) */}
-        {/* Evitar duplicatas já exibidas em vitrines acima */}
-        {vitrinesFilhoFiltradas.map((vit, index) => (
-          <ProductsVitrineSection
-            key={vit.id}
-            vitrineId={vit.id}
-            titulo={vit.titulo}
-            produtos={vit.produtos}
-            combos={vit.combos}
-            receitas={vit.receitas}
-            codCategoria={vit.cod_categoria}
-            empresaId={empresa_id!}
-            onOpenSheet={openSheet}
-            sectionRef={register(vit.id)}
-            hrefCategoria={vit.href_categoria ?? undefined}
-            isHome={false}
-            vitrineIsHome={vit.is_home}
-            isHighlighted={highlightedVitrineId === vit.id}
-            isLast={index === vitrinesFilhoFiltradas.length - 1}
-          />
-        ))}
+            {searchLoading && <p className="px-2 text-sm text-muted-foreground">Buscando...</p>}
+            {searchError && <p className="px-2 text-sm text-destructive">{searchError}</p>}
+
+            {searchResults?.produtos && searchResults.produtos.length > 0 && (
+              <section className="px-2">
+                <h3 className="text-xs font-medium mb-2">Produtos</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {searchResults.produtos.map((p) => (
+                    <div key={p.cod_barras} className="flex justify-center">
+                      <ProductCard produto={p} onOpenSheet={() => { setProdutoSelecionado(p); setSheetOpen(true); }} empresa_id={empresa_id!} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {searchResults?.receitas && searchResults.receitas.length > 0 && (
+              <section className="px-2 mt-4">
+                <h3 className="text-xs font-medium mb-2">Receitas</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {searchResults.receitas.map((r) => (
+                    <div key={r.id} className="flex justify-center">
+                      <ReceitaCard receita={r} onSelectReceita={(rv) => { /* TODO: abrir sheet de receita */ }} empresa_id={empresa_id!} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {searchResults?.combos && searchResults.combos.length > 0 && (
+              <section className="px-2 mt-4">
+                <h3 className="text-xs font-medium mb-2">Combos</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {searchResults.combos.map((c) => (
+                    <div key={c.id} className="flex justify-center">
+                      <ComboCard combo={c} onSelectCombo={(cv) => { /* TODO: abrir sheet de combo */ }} empresa_id={empresa_id!} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Mostrar todas as vitrines da categoria atual */}
+            {vitrinesFiltradas.map((vitrine, index) => (
+              <ProductsVitrineSection
+                key={vitrine.id}
+                vitrineId={vitrine.id}
+                titulo={vitrine.titulo}
+                produtos={vitrine.produtos}
+                combos={vitrine.combos}
+                receitas={vitrine.receitas}
+                codCategoria={vitrine.cod_categoria}
+                empresaId={empresa_id!}
+                onOpenSheet={openSheet}
+                sectionRef={register(vitrine.id)}
+                hrefCategoria={buildHrefCategoria(vitrine.href_categoria)}
+                hideVerTudo={true}
+                isHome={false}
+                vitrineIsHome={vitrine.is_home}
+                isHighlighted={highlightedVitrineId === vitrine.id}
+                isLast={vitrinesFilhoFiltradas.length === 0 && index === vitrinesFiltradas.length - 1}
+              />
+            ))}
+
+            {/* Vitrines das subcategorias (apenas as primeiras de cada subcategoria) */}
+            {/* Evitar duplicatas já exibidas em vitrines acima */}
+            {vitrinesFilhoFiltradas.map((vit, index) => (
+              <ProductsVitrineSection
+                key={vit.id}
+                vitrineId={vit.id}
+                titulo={vit.titulo}
+                produtos={vit.produtos}
+                combos={vit.combos}
+                receitas={vit.receitas}
+                codCategoria={vit.cod_categoria}
+                empresaId={empresa_id!}
+                onOpenSheet={openSheet}
+                sectionRef={register(vit.id)}
+                hrefCategoria={buildHrefCategoria(vit.href_categoria)}
+                isHome={false}
+                vitrineIsHome={vit.is_home}
+                isHighlighted={highlightedVitrineId === vit.id}
+                isLast={index === vitrinesFilhoFiltradas.length - 1}
+              />
+            ))}
+          </>
+        )}
 
 
         <CardAddVitrine cod_categoria={categoriaAtual.id} is_home={false} />
