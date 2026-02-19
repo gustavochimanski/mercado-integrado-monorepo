@@ -28,8 +28,13 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
 
   // Reset estado quando modal abrir com modo forçado
   useEffect(() => {
-    if (open && forceLoginMode !== undefined) {
-      setJaTenhoCadastro(forceLoginMode);
+    if (open) {
+      // Ajustar passo inicial conforme `forceLoginMode` quando o modal abre
+      if (forceLoginMode !== undefined) {
+        setStep(forceLoginMode === false ? "askName" : "phone");
+      } else {
+        setStep("phone");
+      }
       setNome("");
       setTelefone("");
       setErro("");
