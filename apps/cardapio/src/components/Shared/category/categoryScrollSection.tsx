@@ -11,7 +11,7 @@ interface Props {
   parentId?: number | null;
   empresaId: number;
 }
-
+// 
 export default function CategoryScrollSection({
   categorias,
   parentId = null,

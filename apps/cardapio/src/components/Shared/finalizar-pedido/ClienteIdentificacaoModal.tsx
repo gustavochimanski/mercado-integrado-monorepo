@@ -20,7 +20,8 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [erro, setErro] = useState("");
-  const [jaTenhoCadastro, setJaTenhoCadastro] = useState(forceLoginMode ?? false);
+  // 'phone' = somente telefone (primeiro passo). 'askName' = pede nome para criar cadastro.
+  const [step, setStep] = useState<"phone" | "askName">(forceLoginMode === false ? "askName" : "phone");
 
   const { create, loginDireto } = useMutateCliente();
   const { refreshUser } = useUserContext();
@@ -48,6 +49,13 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
     onClose();
   };
 
+  function isClienteNaoEncontradoError(error: unknown) {
+    const status = (error as any)?.response?.status;
+    if (status === 404) return true;
+    const msg = extractErrorMessage(error, "").toLowerCase();
+    return /não encontr|not found|não existe|not cadastrad|no existe/.test(msg);
+  }
+
   const handleConfirmar = () => {
     const telefoneLimpo = telefone.replace(/\D/g, "");
     setErro("");
@@ -56,32 +64,52 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
       return setErro("Digite um telefone válido (com DDD).");
     }
 
-    if (jaTenhoCadastro) {
-      // Login direto apenas com telefone
-      loginDireto.mutate({ telefone: telefoneLimpo }, {
-        onSuccess: concluirLoginComSucesso,
-        onError: () => setErro("Erro ao fazer login. Verifique se o telefone está correto."),
-      });
-    } else {
-      if (!nome || nome.trim().length < 2) {
-        return setErro("Digite um nome válido.");
-      }
-      create.mutate({ nome, telefone: telefoneLimpo }, {
+    if (step === "phone") {
+      // Tenta login direto apenas com telefone
+      loginDireto.mutate(
+        { telefone: telefoneLimpo },
+        {
+          onSuccess: concluirLoginComSucesso,
+          onError: (error) => {
+            // Se for "cliente não encontrado" e não estamos forçando login, avançamos para pedir nome
+            if (!forceLoginMode && isClienteNaoEncontradoError(error)) {
+              setStep("askName");
+              setErro("");
+              return;
+            }
+            setErro("Erro ao fazer login. Verifique se o telefone está correto.");
+          },
+        }
+      );
+      return;
+    }
+
+    // step === "askName" => cria cliente
+    if (!nome || nome.trim().length < 2) {
+      return setErro("Digite um nome válido.");
+    }
+    create.mutate(
+      { nome, telefone: telefoneLimpo },
+      {
         onSuccess: concluirLoginComSucesso,
         onError: (error) => {
           // Se o cliente já existir, faz login automaticamente com o telefone informado
           if (isClienteJaCadastradoError(error)) {
-            loginDireto.mutate({ telefone: telefoneLimpo }, {
-              onSuccess: concluirLoginComSucesso,
-              onError: () => setErro("Esse telefone já tem cadastro, mas não foi possível fazer login. Tente novamente."),
-            });
+            loginDireto.mutate(
+              { telefone: telefoneLimpo },
+              {
+                onSuccess: concluirLoginComSucesso,
+                onError: () =>
+                  setErro("Esse telefone já tem cadastro, mas não foi possível fazer login. Tente novamente."),
+              }
+            );
             return;
           }
 
           setErro(extractErrorMessage(error, "Erro ao criar cliente. Tente novamente."));
         },
-      });
-    }
+      }
+    );
   };
 
   return (
@@ -89,20 +117,15 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
       <DialogContent className="max-w-sm sm:max-w-xs mx-auto">
         <DialogHeader>
           <DialogTitle>
-            {jaTenhoCadastro ? "Autenticação" : "Identifique-se"}
+            {step === "phone" ? "Autenticação" : "Identifique-se"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {!jaTenhoCadastro && (
+          {step === "askName" && (
             <div>
               <Label htmlFor="nome">Nome</Label>
-              <Input
-                id="nome"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                placeholder="Ex: João Silva"
-              />
+              <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: João Silva" />
             </div>
           )}
 
@@ -119,16 +142,15 @@ export default function ClienteIdentificacaoModal({ open, onClose, onConfirm, fo
 
           {erro && <p className="text-sm text-red-500">{erro}</p>}
 
-          {forceLoginMode === undefined && (
+          {step === "askName" && forceLoginMode !== true && (
             <p
               className="text-sm text-blue-500 cursor-pointer hover:underline"
               onClick={() => {
-                setJaTenhoCadastro(!jaTenhoCadastro);
+                setStep("phone");
                 setErro("");
-                setNome("");
               }}
             >
-              {jaTenhoCadastro ? "Criar novo cadastro" : "Já tenho cadastro"}
+              Voltar
             </p>
           )}
         </div>
