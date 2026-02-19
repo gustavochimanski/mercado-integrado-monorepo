@@ -24,6 +24,7 @@ interface Props {
   onSelectReceita?: (receita: ReceitaMiniDTO) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
   hrefCategoria?: string;
+  hideVerTudo?: boolean;
   isHome?: boolean;         // se está renderizando em contexto de home
   vitrineIsHome?: boolean;  // estado real vindo do backend/categoria
   isHighlighted?: boolean;  // se a vitrine deve ter destaque visual (background)
@@ -43,6 +44,7 @@ export default function ProductsVitrineSection({
   onSelectReceita,
   sectionRef,
   hrefCategoria,
+  hideVerTudo = false,
   isHome,
   vitrineIsHome,
   isHighlighted = false,
@@ -171,7 +173,7 @@ export default function ProductsVitrineSection({
               </div>
             ))}
 
-            {isHome && hrefCategoria && (
+            {isHome && hrefCategoria && !hideVerTudo && (
               <div className="shrink-0 w-[140px] h-[200px] mr-2">
                 <CardVerMais href={hrefCategoria} />
               </div>
